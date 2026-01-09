@@ -1,4 +1,5 @@
-﻿import React, { useEffect, useMemo, useRef, useState } from "react";
+﻿
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -9,6 +10,8 @@ import {
   StyleSheet,
   NativeModules,
   Platform,
+  BackHandler,
+  Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -22,18 +25,360 @@ const STORAGE_KEYS = {
 };
 
 const DEFAULT_SPORTS = [
-  { id: "pushups", name: "Liegestütze", type: "reps", hidden: false },
-  { id: "pullups", name: "Klimmzüge", type: "reps", hidden: false },
-  { id: "pushups_alt", name: "Pushups", type: "reps", hidden: false },
-  { id: "jogging", name: "Joggen", type: "time", hidden: false },
+  {
+    id: "pushups",
+    name: "Liegestütze",
+    type: "reps",
+    hidden: false,
+    icon: "💪",
+    screenSecondsPerUnit: 60,
+  },
+  {
+    id: "pullups",
+    name: "Klimmzüge",
+    type: "reps",
+    hidden: false,
+    icon: "🏋️",
+    screenSecondsPerUnit: 90,
+  },
+  {
+    id: "pushups_alt",
+    name: "Situps",
+    type: "reps",
+    hidden: false,
+    icon: "🧘",
+    screenSecondsPerUnit: 45,
+  },
+  {
+    id: "jogging",
+    name: "Joggen",
+    type: "time",
+    hidden: false,
+    icon: "🏃",
+    screenSecondsPerUnit: 1.2,
+  },
 ];
 
 const DEFAULT_SETTINGS = {
   controlledApps: [],
+  language: "de",
 };
 
-const REPS_TO_MINUTES = 1;
 const WEEKDAY_LABELS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+const DEFAULT_ICON = "⭐";
+const PRESET_KEYS = {
+  pushups: "pushups",
+  pullups: "pullups",
+  pushups_alt: "situps",
+  jogging: "jogging",
+};
+
+const COLORS = {
+  ink: "#100f0c",
+  amber: "#f4b545",
+  ember: "#e55c4f",
+  olive: "#7fb069",
+  background: "#100f0c",
+  surface: "rgba(244, 226, 194, 0.12)",
+  card: "rgba(244, 226, 194, 0.08)",
+  cardAlt: "rgba(244, 226, 194, 0.18)",
+  cardDark: "rgba(24, 22, 18, 0.9)",
+  sportCard: "rgba(24, 22, 18, 0.9)",
+  text: "#f4e2c2",
+  muted: "rgba(244, 226, 194, 0.68)",
+  accent: "#f4b545",
+  accentDark: "rgba(244, 181, 69, 0.85)",
+  success: "rgba(127, 176, 105, 0.9)",
+  warning: "rgba(244, 181, 69, 0.9)",
+  danger: "rgba(229, 92, 79, 0.9)",
+  white: "#fff7ea",
+};
+
+const STRINGS = {
+  de: {
+    "app.title": "Sport für Screen Time",
+    "menu.sports": "Deine Sportarten",
+    "menu.apps": "Apps",
+    "menu.settings": "Screen Controller",
+    "menu.stats": "Statistik",
+    "menu.language": "Sprache",
+    "label.today": "Heute",
+    "label.week": "Woche",
+    "label.weekScreenTime": "Bildschirmzeit Woche",
+    "label.screenTime": "Bildschirmzeit",
+    "label.remaining": "Übrig",
+    "label.runningSession": "Laufende Session",
+    "label.availableToday": "Heute verfügbar",
+    "label.used": "Verbraucht",
+    "label.permissions": "Berechtigungen",
+    "label.apps": "Apps auswählen",
+    "label.noApps": "Keine Apps geladen. Tippe auf \"Apps laden\".",
+    "label.accessibilityMissing": "Zugriffshilfe fehlt",
+    "label.accessibilityActive": "Zugriffshilfe aktiv",
+    "label.permissionNeeded": "Zugriffshilfe nötig",
+    "label.hiddenShow": "Versteckte Sportarten anzeigen",
+    "label.hiddenHide": "Versteckte Sportarten verbergen",
+    "label.screenRateReps": "Screen Time pro Wiederholung (Minuten)",
+    "label.screenRateTime": "Screen Time pro Sport-Minute (Minuten)",
+    "label.weekOverview": "Tagesübersicht",
+    "label.weekTotal": "Diese Woche",
+    "label.noSports": "Keine aktiven Sportarten. Füge neue hinzu.",
+    "label.todayScreenTime": "Bildschirmzeit",
+    "label.widget": "Widget auf Startbildschirm",
+    "label.iconChoose": "Icon wählen",
+    "label.iconPlaceholder": "Ein Icon",
+    "label.addSport": "Neue Sportart",
+    "label.reps": "Wiederholungen",
+    "label.repsShort": "Wdh.",
+    "label.timeUnit": "Zeit",
+    "label.timeBased": "Zeitbasiert",
+    "label.activateNow": "Jetzt aktivieren",
+    "label.loadApps": "Apps laden",
+    "label.androidOnly": "App-Auswahl ist nur auf Android verfügbar.",
+    "label.accessibilityHint":
+      "Aktiviere die Zugriffshilfe, damit Social Apps gesperrt werden können.",
+    "label.settingsHint":
+      "Aktiviere die Zugriffshilfe, damit die App Social Apps blockieren kann, wenn die Zeit aufgebraucht ist.",
+    "label.tapAnywhere": "Tippe irgendwo",
+    "label.back": "Zurück",
+    "label.start": "Start",
+    "label.stop": "Stop",
+    "label.track": "Tracken",
+    "label.hide": "Ausblenden",
+    "label.show": "Einblenden",
+    "label.delete": "Löschen",
+    "label.add": "Hinzufügen",
+    "label.active": "Aktiv",
+    "label.off": "Aus",
+    "label.confirmTitle": "Sicher?",
+    "label.confirmDelete": "Sicher, dass du löschen willst?",
+    "label.confirmHide": "Sicher, dass du ausblenden willst?",
+    "label.confirmShow": "Sicher, dass du einblenden willst?",
+    "label.confirm": "Ja",
+    "label.cancel": "Abbrechen",
+    "placeholder.sportName": "Name (z.B. Situps)",
+    "language.de": "Deutsch",
+    "language.en": "Englisch",
+    "language.es": "Spanisch",
+    "language.fr": "Französisch",
+    "sport.pushups": "Liegestütze",
+    "sport.pullups": "Klimmzüge",
+    "sport.situps": "Situps",
+    "sport.jogging": "Joggen",
+  },
+  en: {
+    "app.title": "Sport for Screen Time",
+    "menu.sports": "Your sports",
+    "menu.apps": "Apps",
+    "menu.settings": "Screen Controller",
+    "menu.stats": "Stats",
+    "menu.language": "Language",
+    "label.today": "Today",
+    "label.week": "Week",
+    "label.weekScreenTime": "Screen Time Week",
+    "label.screenTime": "Screen Time",
+    "label.remaining": "Remaining",
+    "label.runningSession": "Running session",
+    "label.availableToday": "Available today",
+    "label.used": "Used",
+    "label.permissions": "Permissions",
+    "label.apps": "Choose apps",
+    "label.noApps": "No apps loaded. Tap \"Load apps\".",
+    "label.accessibilityMissing": "Accessibility missing",
+    "label.accessibilityActive": "Accessibility active",
+    "label.permissionNeeded": "Accessibility required",
+    "label.hiddenShow": "Show hidden sports",
+    "label.hiddenHide": "Hide hidden sports",
+    "label.screenRateReps": "Screen Time per rep (minutes)",
+    "label.screenRateTime": "Screen Time per sport minute (minutes)",
+    "label.weekOverview": "Daily overview",
+    "label.weekTotal": "This week",
+    "label.noSports": "No active sports. Add new ones.",
+    "label.todayScreenTime": "Screen Time",
+    "label.widget": "Widget on home screen",
+    "label.iconChoose": "Choose icon",
+    "label.iconPlaceholder": "One icon",
+    "label.addSport": "New sport",
+    "label.reps": "Repetitions",
+    "label.repsShort": "reps",
+    "label.timeUnit": "Time",
+    "label.timeBased": "Time-based",
+    "label.activateNow": "Enable now",
+    "label.loadApps": "Load apps",
+    "label.androidOnly": "App selection is Android-only.",
+    "label.accessibilityHint": "Enable accessibility to block social apps.",
+    "label.settingsHint":
+      "Enable accessibility so the app can block social apps when time is up.",
+    "label.tapAnywhere": "Tap anywhere",
+    "label.back": "Back",
+    "label.start": "Start",
+    "label.stop": "Stop",
+    "label.track": "Track",
+    "label.hide": "Hide",
+    "label.show": "Show",
+    "label.delete": "Delete",
+    "label.add": "Add",
+    "label.active": "On",
+    "label.off": "Off",
+    "label.confirmTitle": "Are you sure?",
+    "label.confirmDelete": "Are you sure you want to delete?",
+    "label.confirmHide": "Are you sure you want to hide it?",
+    "label.confirmShow": "Are you sure you want to show it?",
+    "label.confirm": "Yes",
+    "label.cancel": "Cancel",
+    "placeholder.sportName": "Name (e.g. Situps)",
+    "language.de": "German",
+    "language.en": "English",
+    "language.es": "Spanish",
+    "language.fr": "French",
+    "sport.pushups": "Push-ups",
+    "sport.pullups": "Pull-ups",
+    "sport.situps": "Situps",
+    "sport.jogging": "Jogging",
+  },
+  es: {
+    "app.title": "Deporte por tiempo de pantalla",
+    "menu.sports": "Tus deportes",
+    "menu.apps": "Apps",
+    "menu.settings": "Control de pantalla",
+    "menu.stats": "Estadísticas",
+    "menu.language": "Idioma",
+    "label.today": "Hoy",
+    "label.week": "Semana",
+    "label.weekScreenTime": "Tiempo de pantalla semanal",
+    "label.screenTime": "Tiempo de pantalla",
+    "label.remaining": "Restante",
+    "label.runningSession": "Sesión activa",
+    "label.availableToday": "Disponible hoy",
+    "label.used": "Usado",
+    "label.permissions": "Permisos",
+    "label.apps": "Elegir apps",
+    "label.noApps": "No hay apps cargadas. Toca \"Cargar apps\".",
+    "label.accessibilityMissing": "Accesibilidad desactivada",
+    "label.accessibilityActive": "Accesibilidad activa",
+    "label.permissionNeeded": "Accesibilidad requerida",
+    "label.hiddenShow": "Mostrar deportes ocultos",
+    "label.hiddenHide": "Ocultar deportes ocultos",
+    "label.screenRateReps": "Tiempo de pantalla por repetición (minutos)",
+    "label.screenRateTime": "Tiempo de pantalla por minuto de deporte (minutos)",
+    "label.weekOverview": "Resumen diario",
+    "label.weekTotal": "Esta semana",
+    "label.noSports": "No hay deportes activos. Añade nuevos.",
+    "label.todayScreenTime": "Tiempo de pantalla",
+    "label.widget": "Widget en inicio",
+    "label.iconChoose": "Elegir icono",
+    "label.iconPlaceholder": "Un icono",
+    "label.addSport": "Nuevo deporte",
+    "label.reps": "Repeticiones",
+    "label.repsShort": "rep.",
+    "label.timeUnit": "Tiempo",
+    "label.timeBased": "Por tiempo",
+    "label.activateNow": "Activar ahora",
+    "label.loadApps": "Cargar apps",
+    "label.androidOnly": "La selección de apps es solo para Android.",
+    "label.accessibilityHint":
+      "Activa la accesibilidad para bloquear apps sociales.",
+    "label.settingsHint":
+      "Activa la accesibilidad para que la app bloquee redes sociales cuando se acabe el tiempo.",
+    "label.tapAnywhere": "Toca en cualquier lugar",
+    "label.back": "Atrás",
+    "label.start": "Iniciar",
+    "label.stop": "Parar",
+    "label.track": "Registrar",
+    "label.hide": "Ocultar",
+    "label.show": "Mostrar",
+    "label.delete": "Eliminar",
+    "label.add": "Añadir",
+    "label.active": "Activado",
+    "label.off": "Desactivado",
+    "label.confirmTitle": "¿Seguro?",
+    "label.confirmDelete": "¿Seguro que quieres eliminar?",
+    "label.confirmHide": "¿Seguro que quieres ocultar?",
+    "label.confirmShow": "¿Seguro que quieres mostrar?",
+    "label.confirm": "Sí",
+    "label.cancel": "Cancelar",
+    "placeholder.sportName": "Nombre (p. ej. Situps)",
+    "language.de": "Alemán",
+    "language.en": "Inglés",
+    "language.es": "Español",
+    "language.fr": "Francés",
+    "sport.pushups": "Flexiones",
+    "sport.pullups": "Dominadas",
+    "sport.situps": "Abdominales",
+    "sport.jogging": "Trote",
+  },
+  fr: {
+    "app.title": "Sport pour le temps d’écran",
+    "menu.sports": "Tes sports",
+    "menu.apps": "Apps",
+    "menu.settings": "Contrôle écran",
+    "menu.stats": "Statistiques",
+    "menu.language": "Langue",
+    "label.today": "Aujourd'hui",
+    "label.week": "Semaine",
+    "label.weekScreenTime": "Temps d’écran hebdo",
+    "label.screenTime": "Temps d’écran",
+    "label.remaining": "Restant",
+    "label.runningSession": "Session en cours",
+    "label.availableToday": "Disponible aujourd'hui",
+    "label.used": "Utilisé",
+    "label.permissions": "Autorisations",
+    "label.apps": "Choisir les apps",
+    "label.noApps": "Aucune app chargée. Touchez \"Charger les apps\".",
+    "label.accessibilityMissing": "Accessibilité inactive",
+    "label.accessibilityActive": "Accessibilité active",
+    "label.permissionNeeded": "Accessibilité requise",
+    "label.hiddenShow": "Afficher les sports cachés",
+    "label.hiddenHide": "Masquer les sports cachés",
+    "label.screenRateReps": "Temps d’écran par répétition (minutes)",
+    "label.screenRateTime": "Temps d’écran par minute de sport (minutes)",
+    "label.weekOverview": "Aperçu quotidien",
+    "label.weekTotal": "Cette semaine",
+    "label.noSports": "Aucun sport actif. Ajoutez-en.",
+    "label.todayScreenTime": "Temps d’écran",
+    "label.widget": "Widget sur l’accueil",
+    "label.iconChoose": "Choisir une icône",
+    "label.iconPlaceholder": "Une icône",
+    "label.addSport": "Nouveau sport",
+    "label.reps": "Répétitions",
+    "label.repsShort": "rép.",
+    "label.timeUnit": "Temps",
+    "label.timeBased": "Basé sur le temps",
+    "label.activateNow": "Activer",
+    "label.loadApps": "Charger les apps",
+    "label.androidOnly": "La sélection des apps est uniquement sur Android.",
+    "label.accessibilityHint":
+      "Activez l’accessibilité pour bloquer les apps sociales.",
+    "label.settingsHint":
+      "Activez l’accessibilité pour que l’app bloque les apps sociales quand le temps est écoulé.",
+    "label.tapAnywhere": "Touchez n’importe où",
+    "label.back": "Retour",
+    "label.start": "Démarrer",
+    "label.stop": "Arrêter",
+    "label.track": "Suivre",
+    "label.hide": "Masquer",
+    "label.show": "Afficher",
+    "label.delete": "Supprimer",
+    "label.add": "Ajouter",
+    "label.active": "Activé",
+    "label.off": "Désactivé",
+    "label.confirmTitle": "Confirmer",
+    "label.confirmDelete": "Confirmer la suppression ?",
+    "label.confirmHide": "Confirmer le masquage ?",
+    "label.confirmShow": "Confirmer l’affichage ?",
+    "label.confirm": "Oui",
+    "label.cancel": "Annuler",
+    "placeholder.sportName": "Nom (ex. Situps)",
+    "language.de": "Allemand",
+    "language.en": "Anglais",
+    "language.es": "Espagnol",
+    "language.fr": "Français",
+    "sport.pushups": "Pompes",
+    "sport.pullups": "Tractions",
+    "sport.situps": "Abdos",
+    "sport.jogging": "Jogging",
+  },
+};
 
 const todayKey = () => new Date().toISOString().slice(0, 10);
 
@@ -93,11 +438,96 @@ const getWeeklyStats = (stats, sportId) => {
   }));
 };
 
-const formatSportValue = (sportType, dayStats) => {
+const formatSportValue = (sportType, dayStats, repsLabel = "Wdh.") => {
   if (sportType === "reps") {
-    return `${dayStats.reps} Wdh.`;
+    return `${dayStats.reps} ${repsLabel}`;
   }
   return formatSeconds(dayStats.seconds || 0);
+};
+
+const formatScreenTime = (seconds) => {
+  return formatSeconds(Math.round(seconds || 0));
+};
+
+const parseRateMinutes = (value, fallback) => {
+  const parsed = Number.parseFloat(String(value).replace(",", "."));
+  if (Number.isNaN(parsed) || parsed <= 0) {
+    return fallback;
+  }
+  return parsed;
+};
+
+const getDefaultRateMinutes = (sportType) => {
+  if (sportType === "reps") {
+    return 1;
+  }
+  return 1;
+};
+
+const screenSecondsForStats = (sport, dayStats) => {
+  const rate = sport.screenSecondsPerUnit ?? 0;
+  if (sport.type === "reps") {
+    return dayStats.reps * rate;
+  }
+  return (dayStats.seconds || 0) * rate;
+};
+
+const weeklyScreenSeconds = (stats, sport) => {
+  const weekEntries = getWeeklyStats(stats, sport.id);
+  return weekEntries.reduce(
+    (sum, entry) => sum + screenSecondsForStats(sport, entry.dayStats),
+    0
+  );
+};
+
+const normalizeIcon = (value) => {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return "";
+  }
+  return Array.from(trimmed)[0];
+};
+
+const defaultIconForSport = (sport) => {
+  if (sport.id === "pushups") return "💪";
+  if (sport.id === "pullups") return "🏋️";
+  if (sport.id === "pushups_alt") return "🧘";
+  if (sport.id === "jogging") return "🏃";
+  return DEFAULT_ICON;
+};
+
+const defaultScreenSecondsPerUnit = (sport) => {
+  if (sport.id === "pushups") return 60;
+  if (sport.id === "pullups") return 90;
+  if (sport.id === "pushups_alt") return 45;
+  if (sport.id === "jogging") return 1.2;
+  if (sport.type === "reps") return 60;
+  return 1;
+};
+
+const normalizeSports = (sportList) => {
+  let changed = false;
+  const normalized = sportList.map((sport) => {
+    const presetKey = PRESET_KEYS[sport.id];
+    let name = sport.name;
+    if (sport.id === "pushups_alt" && sport.name === "Pushups") {
+      name = "Situps";
+      changed = true;
+    }
+    const next = {
+      ...sport,
+      name,
+      presetKey,
+      icon: sport.icon || defaultIconForSport(sport),
+      screenSecondsPerUnit:
+        sport.screenSecondsPerUnit ?? defaultScreenSecondsPerUnit(sport),
+    };
+    if (!sport.icon || sport.screenSecondsPerUnit == null || presetKey) {
+      changed = true;
+    }
+    return next;
+  });
+  return { normalized, changed };
 };
 
 const computeWeeklyTotal = (stats, sport) => {
@@ -140,25 +570,24 @@ const computeAllowanceSeconds = (stats, sports) => {
   sports.forEach((sport) => {
     const sportStats = stats[sport.id] || {};
     const dayStats = sportStats[day] || { reps: 0, seconds: 0 };
-    if (sport.type === "reps") {
-      totalSeconds += dayStats.reps * REPS_TO_MINUTES * 60;
-    } else {
-      totalSeconds += dayStats.seconds || 0;
-    }
+    totalSeconds += screenSecondsForStats(sport, dayStats);
   });
   return Math.max(0, Math.floor(totalSeconds));
 };
-
 export default function App() {
   const [sports, setSports] = useState([]);
   const [stats, setStats] = useState({});
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+  const [language, setLanguage] = useState(DEFAULT_SETTINGS.language);
   const [selectedSportId, setSelectedSportId] = useState(null);
   const [statsSportId, setStatsSportId] = useState(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [showHidden, setShowHidden] = useState(false);
   const [newName, setNewName] = useState("");
   const [newType, setNewType] = useState("reps");
+  const [newIcon, setNewIcon] = useState("");
+  const [newRateMinutes, setNewRateMinutes] = useState("1");
+  const [showIconInput, setShowIconInput] = useState(false);
   const [installedApps, setInstalledApps] = useState([]);
   const [usageState, setUsageState] = useState({
     allowanceSeconds: 0,
@@ -167,10 +596,43 @@ export default function App() {
   });
   const [needsAccessibility, setNeedsAccessibility] = useState(false);
   const [permissionsPrompted, setPermissionsPrompted] = useState(false);
+  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
 
   const [sessionSeconds, setSessionSeconds] = useState(0);
   const [running, setRunning] = useState(false);
   const intervalRef = useRef(null);
+
+  const t = (key) => {
+    const dict = STRINGS[language] || STRINGS.de;
+    return dict[key] ?? STRINGS.de[key] ?? key;
+  };
+  const repsShort = t("label.repsShort");
+
+  const getSportLabel = (sport) => {
+    if (sport.presetKey) {
+      return t(`sport.${sport.presetKey}`);
+    }
+    return sport.name;
+  };
+
+  const confirmAction = (message, onConfirm) => {
+    Alert.alert(
+      t("label.confirmTitle"),
+      message,
+      [
+        { text: t("label.cancel"), style: "cancel" },
+        { text: t("label.confirm"), onPress: onConfirm },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  const setAppLanguage = async (nextLanguage) => {
+    const nextSettings = { ...settings, language: nextLanguage };
+    await saveSettings(nextSettings);
+    setLanguage(nextLanguage);
+    setShowLanguageMenu(false);
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -180,9 +642,21 @@ export default function App() {
       const statsRaw = await AsyncStorage.getItem(STORAGE_KEYS.stats);
       const settingsRaw = await AsyncStorage.getItem(STORAGE_KEYS.settings);
       const permissionsRaw = await AsyncStorage.getItem(STORAGE_KEYS.permissions);
-      setSports(sportsRaw ? JSON.parse(sportsRaw) : []);
+      const parsedSports = sportsRaw ? JSON.parse(sportsRaw) : [];
+      const { normalized, changed } = normalizeSports(parsedSports);
+      setSports(normalized);
+      if (changed) {
+        await AsyncStorage.setItem(
+          STORAGE_KEYS.sports,
+          JSON.stringify(normalized)
+        );
+      }
       setStats(statsRaw ? JSON.parse(statsRaw) : {});
-      setSettings(settingsRaw ? JSON.parse(settingsRaw) : DEFAULT_SETTINGS);
+      const parsedSettings = settingsRaw
+        ? { ...DEFAULT_SETTINGS, ...JSON.parse(settingsRaw) }
+        : DEFAULT_SETTINGS;
+      setSettings(parsedSettings);
+      setLanguage(parsedSettings.language || DEFAULT_SETTINGS.language);
       setPermissionsPrompted(permissionsRaw === "true");
     };
     load();
@@ -247,16 +721,28 @@ export default function App() {
     if (!trimmed) {
       return;
     }
+    const icon = normalizeIcon(newIcon) || DEFAULT_ICON;
+    const rateMinutes = parseRateMinutes(
+      newRateMinutes,
+      getDefaultRateMinutes(newType)
+    );
+    const screenSecondsPerUnit =
+      newType === "reps" ? rateMinutes * 60 : rateMinutes;
     const newSport = {
       id: generateId(),
       name: trimmed,
       type: newType,
       hidden: false,
+      icon,
+      screenSecondsPerUnit,
       createdAt: Date.now(),
     };
     await saveSports([newSport, ...sports]);
     setNewName("");
     setNewType("reps");
+    setNewIcon("");
+    setNewRateMinutes(String(getDefaultRateMinutes("reps")));
+    setShowIconInput(false);
   };
 
   const handleHideSport = async (sportId, hidden) => {
@@ -272,6 +758,32 @@ export default function App() {
     if (selectedSportId === sportId) {
       setSelectedSportId(null);
     }
+  };
+
+  const moveSport = async (sportId, direction) => {
+    const currentIndex = sports.findIndex((sport) => sport.id === sportId);
+    if (currentIndex === -1 || direction === 0) {
+      return;
+    }
+    const isHidden = sports[currentIndex].hidden;
+    const step = direction > 0 ? 1 : -1;
+    let targetIndex = currentIndex + step;
+    while (
+      targetIndex >= 0 &&
+      targetIndex < sports.length &&
+      sports[targetIndex].hidden !== isHidden
+    ) {
+      targetIndex += step;
+    }
+    if (targetIndex < 0 || targetIndex >= sports.length) {
+      return;
+    }
+    const nextSports = [...sports];
+    [nextSports[currentIndex], nextSports[targetIndex]] = [
+      nextSports[targetIndex],
+      nextSports[currentIndex],
+    ];
+    await saveSports(nextSports);
   };
 
   const checkAccessibility = async () => {
@@ -325,6 +837,29 @@ export default function App() {
     }
   }, [selectedSportId]);
 
+  useEffect(() => {
+    const handler = () => {
+      if (statsSportId) {
+        setStatsSportId(null);
+        return true;
+      }
+      if (selectedSportId) {
+        setSelectedSportId(null);
+        return true;
+      }
+      if (isSettingsOpen) {
+        setIsSettingsOpen(false);
+        return true;
+      }
+      return false;
+    };
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      handler
+    );
+    return () => subscription.remove();
+  }, [statsSportId, selectedSportId, isSettingsOpen]);
+
   const loadInstalledApps = async () => {
     if (!InstaControl?.getInstalledApps) {
       return;
@@ -376,6 +911,28 @@ export default function App() {
   const showPermissionPrompt =
     Platform.OS === "android" && !permissionsPrompted && needsAccessibility;
 
+  useEffect(() => {
+    if (Platform.OS !== "android") {
+      return;
+    }
+    if (!InstaControl?.setWidgetSportData || !InstaControl?.updateWidgets) {
+      return;
+    }
+    sports.forEach((sport) => {
+      const dayStats = getTodayStat(stats, sport.id);
+      const screenSeconds = screenSecondsForStats(sport, dayStats);
+      const label = getSportLabel(sport);
+      InstaControl.setWidgetSportData(
+        sport.id,
+        label,
+        formatSportValue(sport.type, dayStats, repsShort),
+        formatScreenTime(screenSeconds),
+        t("label.screenTime"),
+        sport.icon || DEFAULT_ICON
+      );
+    });
+    InstaControl.updateWidgets();
+  }, [sports, stats, language]);
   if (statsSport) {
     const weekEntries = getWeeklyStats(stats, statsSport.id);
     const weeklyTotal =
@@ -393,26 +950,29 @@ export default function App() {
               style={styles.backButton}
               onPress={() => setStatsSportId(null)}
             >
-              <Text style={styles.backText}>Zurück</Text>
+              <Text style={styles.backText}>{t("label.back")}</Text>
             </Pressable>
-            <Text style={styles.headerTitle}>Statistik</Text>
+            <Text style={styles.headerTitle}>{t("menu.stats")}</Text>
           </View>
           <View style={styles.infoCard}>
-            <Text style={styles.sectionTitle}>{statsSport.name}</Text>
-            <Text style={styles.cardMeta}>Diese Woche</Text>
+            <Text style={styles.sectionTitle}>{getSportLabel(statsSport)}</Text>
+            <Text style={styles.cardMeta}>{t("label.weekTotal")}</Text>
             <Text style={styles.cardValue}>
               {statsSport.type === "reps"
-                ? `${weeklyTotal} Wdh.`
+                ? `${weeklyTotal} ${repsShort}`
                 : formatSeconds(weeklyTotal)}
+            </Text>
+            <Text style={styles.cardMeta}>
+              {t("label.screenTime")}: {formatScreenTime(weeklyScreenSeconds(stats, statsSport))}
             </Text>
           </View>
           <View style={styles.infoCard}>
-            <Text style={styles.sectionTitle}>Tagesübersicht</Text>
+            <Text style={styles.sectionTitle}>{t("label.weekOverview")}</Text>
             {weekEntries.map((entry) => (
               <View key={entry.key} style={styles.statRow}>
                 <Text style={styles.statLabel}>{entry.label}</Text>
                 <Text style={styles.statValue}>
-                  {formatSportValue(statsSport.type, entry.dayStats)}
+                  {formatSportValue(statsSport.type, entry.dayStats, repsShort)}
                 </Text>
               </View>
             ))}
@@ -432,24 +992,61 @@ export default function App() {
             style={styles.backButton}
             onPress={() => setSelectedSportId(null)}
           >
-            <Text style={styles.backText}>Zurück</Text>
+            <Text style={styles.backText}>{t("label.back")}</Text>
           </Pressable>
-          <Text style={styles.headerTitle}>{selectedSport.name}</Text>
+          <View style={styles.headerTitleRow}>
+            <Text style={styles.headerIcon}>{selectedSport.icon || DEFAULT_ICON}</Text>
+            <Text style={styles.headerTitle}>{getSportLabel(selectedSport)}</Text>
+          </View>
         </View>
         <Pressable
           style={styles.statsCard}
           onPress={() => setStatsSportId(selectedSport.id)}
         >
-          <Text style={styles.statsTitle}>Heute</Text>
-          <Text style={styles.statsValue}>
-            {formatSportValue(selectedSport.type, todayStats)}
-          </Text>
-          <Text style={styles.statsMeta}>
-            Woche:{" "}
-            {selectedSport.type === "reps"
-              ? `${weeklyTotal} Wdh.`
-              : formatSeconds(weeklyTotal)}
-          </Text>
+          <View style={styles.counterRow}>
+            <View style={styles.counterBlock}>
+              <Text style={styles.counterLabel}>{t("label.today")}</Text>
+              <Text style={styles.counterValueSmall}>
+                {selectedSport.type === "reps"
+                  ? `${todayStats.reps}`
+                  : formatSeconds(todayStats.seconds || 0)}
+              </Text>
+              <Text style={styles.counterUnit}>
+                {selectedSport.type === "reps" ? repsShort : t("label.timeUnit")}
+              </Text>
+            </View>
+            <View style={styles.counterBlock}>
+              <Text style={styles.counterLabel}>{t("label.week")}</Text>
+              <Text style={styles.counterValueSmall}>
+                {selectedSport.type === "reps"
+                  ? `${weeklyTotal}`
+                  : formatSeconds(weeklyTotal)}
+              </Text>
+              <Text style={styles.counterUnit}>
+                {selectedSport.type === "reps" ? repsShort : t("label.timeUnit")}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.screenRow}>
+            <View style={styles.screenBlock}>
+              <Text style={styles.screenLabel}>{t("label.screenTime")}</Text>
+              <Text style={styles.screenValue}>
+                {formatScreenTime(screenSecondsForStats(selectedSport, todayStats))}
+              </Text>
+            </View>
+            <View style={styles.screenBlock}>
+              <Text style={styles.screenLabel}>{t("label.remaining")}</Text>
+              <Text style={styles.screenValue}>
+                {formatScreenTime(
+                  Math.max(
+                    0,
+                    screenSecondsForStats(selectedSport, todayStats) -
+                      usageState.usedSeconds
+                  )
+                )}
+              </Text>
+            </View>
+          </View>
         </Pressable>
         {isReps ? (
           <Pressable
@@ -463,28 +1060,28 @@ export default function App() {
           >
             <Text style={styles.counterValue}>{todayStats.reps}</Text>
             <Text style={styles.plusSign}>+</Text>
-            <Text style={styles.helperText}>Tippe irgendwo</Text>
+            <Text style={styles.helperText}>{t("label.tapAnywhere")}</Text>
           </Pressable>
         ) : (
           <View style={styles.trackingArea}>
             <Text style={styles.counterValue}>
               {formatSeconds(todayStats.seconds + sessionSeconds)}
             </Text>
-            <Text style={styles.helperText}>Heute</Text>
+            <Text style={styles.helperText}>{t("label.today")}</Text>
             <View style={styles.timerRow}>
               {!running ? (
                 <Pressable style={styles.primaryButton} onPress={handleStart}>
-                  <Text style={styles.primaryButtonText}>Start</Text>
+                  <Text style={styles.primaryButtonText}>{t("label.start")}</Text>
                 </Pressable>
               ) : (
                 <Pressable style={styles.dangerButton} onPress={handleStop}>
-                  <Text style={styles.primaryButtonText}>Stop</Text>
+                  <Text style={styles.primaryButtonText}>{t("label.stop")}</Text>
                 </Pressable>
               )}
             </View>
             {running ? (
               <Text style={styles.helperText}>
-                Laufende Session: {formatSeconds(sessionSeconds)}
+                {t("label.runningSession")}: {formatSeconds(sessionSeconds)}
               </Text>
             ) : null}
           </View>
@@ -502,55 +1099,50 @@ export default function App() {
               style={styles.backButton}
               onPress={() => setIsSettingsOpen(false)}
             >
-              <Text style={styles.backText}>Zurück</Text>
+              <Text style={styles.backText}>{t("label.back")}</Text>
             </Pressable>
-            <Text style={styles.headerTitle}>Screen Controller</Text>
+            <Text style={styles.headerTitle}>{t("menu.settings")}</Text>
           </View>
           <View style={styles.infoCard}>
-            <Text style={styles.cardTitle}>Heute verfügbar</Text>
+            <Text style={styles.cardTitle}>{t("label.availableToday")}</Text>
             <Text style={styles.cardValue}>
               {Math.floor(allowanceSeconds / 60)} min
             </Text>
             <Text style={styles.cardMeta}>
-              Verbraucht: {Math.floor(usageState.usedSeconds / 60)} min
+              {t("label.used")}: {Math.floor(usageState.usedSeconds / 60)} min
             </Text>
           </View>
           <View style={styles.infoCard}>
-            <Text style={styles.sectionTitle}>Berechtigungen</Text>
-            <Text style={styles.helperText}>
-              Aktiviere die Zugriffshilfe, damit die App Social Apps blockieren
-              kann, wenn die Zeit aufgebraucht ist.
-            </Text>
+            <Text style={styles.sectionTitle}>{t("label.permissions")}</Text>
+            <Text style={styles.helperText}>{t("label.settingsHint")}</Text>
             <Pressable
               style={styles.primaryButton}
               onPress={openAccessibilitySettings}
             >
-              <Text style={styles.primaryButtonText}>Zugriffshilfe öffnen</Text>
+              <Text style={styles.primaryButtonText}>
+                {t("label.permissionNeeded")}
+              </Text>
             </Pressable>
             {needsAccessibility ? (
-              <Text style={styles.warningText}>Zugriffshilfe fehlt</Text>
+              <Text style={styles.warningText}>{t("label.accessibilityMissing")}</Text>
             ) : (
-              <Text style={styles.successText}>Zugriffshilfe aktiv</Text>
+              <Text style={styles.successText}>{t("label.accessibilityActive")}</Text>
             )}
           </View>
           <View style={styles.infoCard}>
-            <Text style={styles.sectionTitle}>Apps auswählen</Text>
+            <Text style={styles.sectionTitle}>{t("label.apps")}</Text>
             {Platform.OS !== "android" ? (
-              <Text style={styles.helperText}>
-                App-Auswahl ist nur auf Android verfügbar.
-              </Text>
+              <Text style={styles.helperText}>{t("label.androidOnly")}</Text>
             ) : (
               <View>
                 <Pressable
                   style={styles.secondaryButton}
                   onPress={loadInstalledApps}
                 >
-                  <Text style={styles.secondaryButtonText}>Apps laden</Text>
+                  <Text style={styles.secondaryButtonText}>{t("label.loadApps")}</Text>
                 </Pressable>
                 {installedApps.length === 0 ? (
-                  <Text style={styles.helperText}>
-                    Keine Apps geladen. Tippe auf "Apps laden".
-                  </Text>
+                  <Text style={styles.helperText}>{t("label.noApps")}</Text>
                 ) : null}
                 {installedApps.map((app) => {
                   const enabled = settings.controlledApps.includes(
@@ -573,7 +1165,7 @@ export default function App() {
                           enabled && styles.appToggleActive,
                         ]}
                       >
-                        {enabled ? "Aktiv" : "Aus"}
+                        {enabled ? t("label.active") : t("label.off")}
                       </Text>
                     </Pressable>
                   );
@@ -585,14 +1177,13 @@ export default function App() {
       </SafeAreaView>
     );
   }
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.headerRow}>
           <View>
-            <Text style={styles.title}>Sport for Screen Time</Text>
-            <Text style={styles.subtitle}>Deine Sportarten</Text>
+            <Text style={styles.title}>{t("app.title")}</Text>
+            <Text style={styles.subtitle}>{t("menu.sports")}</Text>
           </View>
           <Pressable
             style={styles.iconButton}
@@ -602,86 +1193,181 @@ export default function App() {
               refreshUsageState();
             }}
           >
-            <Text style={styles.iconButtonText}>Apps</Text>
+            <Text style={styles.iconButtonText}>{t("menu.apps")}</Text>
           </Pressable>
         </View>
         {showPermissionPrompt ? (
           <View style={styles.permissionCard}>
-            <Text style={styles.sectionTitle}>Zugriffshilfe nötig</Text>
-            <Text style={styles.helperText}>
-              Aktiviere die Zugriffshilfe, damit Social Apps gesperrt werden
-              können.
-            </Text>
+            <Text style={styles.sectionTitle}>{t("label.permissionNeeded")}</Text>
+            <Text style={styles.helperText}>{t("label.accessibilityHint")}</Text>
             <Pressable
               style={styles.primaryButton}
               onPress={openAccessibilitySettings}
             >
-              <Text style={styles.primaryButtonText}>Jetzt aktivieren</Text>
+              <Text style={styles.primaryButtonText}>{t("label.activateNow")}</Text>
             </Pressable>
           </View>
         ) : null}
         {activeSports.length === 0 ? (
-          <Text style={styles.helperText}>
-            Keine aktiven Sportarten. Füge neue hinzu.
-          </Text>
+          <Text style={styles.helperText}>{t("label.noSports")}</Text>
         ) : null}
-        {activeSports.map((sport) => {
-          const daily = getTodayStat(stats, sport.id);
-          const weeklyTotal = computeWeeklyTotal(stats, sport);
-          return (
-            <View key={sport.id} style={styles.sportCard}>
-              <View style={styles.sportInfo}>
-                <Text style={styles.sportName}>{sport.name}</Text>
-                <Text style={styles.sportMeta}>
-                  {sport.type === "reps"
-                    ? "Wiederholungen"
-                    : "Zeitbasiert"}
-                </Text>
-              </View>
-              <Pressable
-                style={styles.statsInlineCard}
-                onPress={() => setStatsSportId(sport.id)}
-              >
-                <Text style={styles.statsInlineText}>
-                  Heute: {formatSportValue(sport.type, daily)}
-                </Text>
-                <Text style={styles.statsInlineText}>
-                  Woche:{" "}
-                  {sport.type === "reps"
-                    ? `${weeklyTotal} Wdh.`
-                    : formatSeconds(weeklyTotal)}
-                </Text>
-              </Pressable>
-              <View style={styles.cardActions}>
+        <View style={styles.sportsGrid}>
+          {activeSports.map((sport) => {
+            const daily = getTodayStat(stats, sport.id);
+            const weeklyTotal = computeWeeklyTotal(stats, sport);
+            const sportLabel = getSportLabel(sport);
+            return (
+              <View key={sport.id} style={styles.sportCard}>
+                <View style={styles.cardActionsTop}>
+                  <Pressable
+                    style={styles.iconAction}
+                    onPress={() =>
+                      confirmAction(t("label.confirmHide"), () =>
+                        handleHideSport(sport.id, true)
+                      )
+                    }
+                  >
+                    <Text style={styles.iconActionText}>👁</Text>
+                  </Pressable>
+                  <Pressable
+                    style={styles.iconAction}
+                    onPress={() =>
+                      confirmAction(t("label.confirmDelete"), () =>
+                        handleDeleteSport(sport.id)
+                      )
+                    }
+                  >
+                    <Text style={styles.iconActionText}>✕</Text>
+                  </Pressable>
+                  <Pressable
+                    style={styles.iconAction}
+                    onPress={() => moveSport(sport.id, -1)}
+                  >
+                    <Text style={styles.iconActionText}>↑</Text>
+                  </Pressable>
+                  <Pressable
+                    style={styles.iconAction}
+                    onPress={() => moveSport(sport.id, 1)}
+                  >
+                    <Text style={styles.iconActionText}>↓</Text>
+                  </Pressable>
+                </View>
+                <View style={styles.sportInfo}>
+                  <View style={styles.sportTitleRow}>
+                    <Text style={styles.sportIcon}>{sport.icon || DEFAULT_ICON}</Text>
+                  <Text style={styles.sportName} numberOfLines={1}>
+                    {sportLabel}
+                  </Text>
+                  </View>
+                </View>
                 <Pressable
-                  style={styles.primaryButton}
+                  style={[styles.primaryButton, styles.trackButtonTop]}
                   onPress={() => setSelectedSportId(sport.id)}
                 >
-                  <Text style={styles.primaryButtonText}>Tracken</Text>
+                  <Text style={styles.primaryButtonText}>{t("label.track")}</Text>
                 </Pressable>
                 <Pressable
-                  style={styles.secondaryButton}
-                  onPress={() => handleHideSport(sport.id, true)}
+                  style={styles.statsInlineCard}
+                  onPress={() => setStatsSportId(sport.id)}
                 >
-                  <Text style={styles.secondaryButtonText}>Ausblenden</Text>
+                  <View style={styles.counterRow}>
+                    <View style={styles.counterBlock}>
+                      <Text style={styles.counterLabel}>{t("label.today")}</Text>
+                      <Text style={styles.counterValueSmall}>
+                        {sport.type === "reps"
+                          ? `${daily.reps}`
+                          : formatSeconds(daily.seconds || 0)}
+                      </Text>
+                      <Text style={styles.counterUnit}>
+                        {sport.type === "reps" ? repsShort : t("label.timeUnit")}
+                      </Text>
+                    </View>
+                    <View style={styles.counterBlock}>
+                      <Text style={styles.counterLabel}>{t("label.week")}</Text>
+                      <Text style={styles.counterValueSmall}>
+                        {sport.type === "reps"
+                          ? `${weeklyTotal}`
+                          : formatSeconds(weeklyTotal)}
+                      </Text>
+                      <Text style={styles.counterUnit}>
+                        {sport.type === "reps" ? repsShort : t("label.timeUnit")}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.screenRow}>
+                    <View style={styles.screenBlock}>
+                      <Text style={styles.screenLabel}>{t("label.screenTime")}</Text>
+                      <Text style={styles.screenValue}>
+                        {formatScreenTime(screenSecondsForStats(sport, daily))}
+                      </Text>
+                    </View>
+                    <View style={styles.screenBlock}>
+                      <Text style={styles.screenLabel}>{t("label.remaining")}</Text>
+                      <Text style={styles.screenValue}>
+                        {formatScreenTime(
+                          Math.max(
+                            0,
+                            screenSecondsForStats(sport, daily) -
+                              usageState.usedSeconds
+                          )
+                        )}
+                      </Text>
+                    </View>
+                  </View>
                 </Pressable>
+                <View style={styles.cardActions}>
                 <Pressable
-                  style={styles.dangerButton}
-                  onPress={() => handleDeleteSport(sport.id)}
+                  style={[styles.secondaryButton, styles.fullWidthButton]}
+                  onPress={() =>
+                    InstaControl?.requestPinWidget?.(sport.id, sportLabel)
+                  }
                 >
-                  <Text style={styles.primaryButtonText}>Löschen</Text>
-                </Pressable>
+                    <Text style={styles.secondaryButtonText}>
+                      {t("label.widget")}
+                    </Text>
+                  </Pressable>
+                </View>
               </View>
-            </View>
-          );
-        })}
+            );
+          })}
+        </View>
         <View style={styles.addCard}>
-          <Text style={styles.addTitle}>Neue Sportart</Text>
+          <Text style={styles.addTitle}>{t("label.addSport")}</Text>
           <TextInput
             style={styles.input}
             value={newName}
             onChangeText={setNewName}
-            placeholder="Name (z.B. Situps)"
+            placeholder={t("placeholder.sportName")}
+            placeholderTextColor="#7a7a7a"
+          />
+          <View style={styles.iconRow}>
+            <Pressable
+              style={styles.secondaryButton}
+              onPress={() => setShowIconInput((prev) => !prev)}
+            >
+              <Text style={styles.secondaryButtonText}>{t("label.iconChoose")}</Text>
+            </Pressable>
+            <Text style={styles.iconPreview}>{newIcon || DEFAULT_ICON}</Text>
+          </View>
+          {showIconInput ? (
+            <TextInput
+              style={styles.input}
+              value={newIcon}
+              onChangeText={(text) => setNewIcon(normalizeIcon(text))}
+              placeholder={t("label.iconPlaceholder")}
+              placeholderTextColor="#7a7a7a"
+              maxLength={2}
+            />
+          ) : null}
+          <Text style={styles.rateLabel}>
+            {newType === "reps" ? t("label.screenRateReps") : t("label.screenRateTime")}
+          </Text>
+          <TextInput
+            style={styles.input}
+            value={newRateMinutes}
+            onChangeText={setNewRateMinutes}
+            placeholder="1"
+            keyboardType="decimal-pad"
             placeholderTextColor="#7a7a7a"
           />
           <View style={styles.typeRow}>
@@ -690,7 +1376,10 @@ export default function App() {
                 styles.typeButton,
                 newType === "reps" && styles.typeButtonActive,
               ]}
-              onPress={() => setNewType("reps")}
+              onPress={() => {
+                setNewType("reps");
+                setNewRateMinutes(String(getDefaultRateMinutes("reps")));
+              }}
             >
               <Text
                 style={[
@@ -698,7 +1387,7 @@ export default function App() {
                   newType === "reps" && styles.typeButtonTextActive,
                 ]}
               >
-                Wiederholungen
+                {t("label.reps")}
               </Text>
             </Pressable>
             <Pressable
@@ -706,7 +1395,10 @@ export default function App() {
                 styles.typeButton,
                 newType === "time" && styles.typeButtonActive,
               ]}
-              onPress={() => setNewType("time")}
+              onPress={() => {
+                setNewType("time");
+                setNewRateMinutes(String(getDefaultRateMinutes("time")));
+              }}
             >
               <Text
                 style={[
@@ -714,12 +1406,12 @@ export default function App() {
                   newType === "time" && styles.typeButtonTextActive,
                 ]}
               >
-                Zeitbasiert
+                {t("label.timeBased")}
               </Text>
             </Pressable>
           </View>
           <Pressable style={styles.primaryButton} onPress={handleAddSport}>
-            <Text style={styles.primaryButtonText}>Hinzufügen</Text>
+            <Text style={styles.primaryButtonText}>{t("label.add")}</Text>
           </Pressable>
         </View>
         <View style={styles.hiddenSection}>
@@ -728,55 +1420,111 @@ export default function App() {
             onPress={() => setShowHidden((s) => !s)}
           >
             <Text style={styles.hiddenToggleText}>
-              {showHidden
-                ? "Versteckte Sportarten verbergen"
-                : "Versteckte Sportarten anzeigen"}{" "}
-              ({hiddenSports.length})
+              {showHidden ? t("label.hiddenHide") : t("label.hiddenShow")} ({hiddenSports.length})
             </Text>
           </Pressable>
           {showHidden
             ? hiddenSports.map((sport) => (
                 <View key={sport.id} style={styles.hiddenCard}>
                   <View style={styles.sportInfo}>
-                    <Text style={styles.sportName}>{sport.name}</Text>
+                    <View style={styles.sportTitleRow}>
+                      <Text style={styles.sportIcon}>{sport.icon || DEFAULT_ICON}</Text>
+                      <Text style={styles.sportName} numberOfLines={1}>
+                        {getSportLabel(sport)}
+                      </Text>
+                    </View>
                     <Text style={styles.sportMeta}>
-                      {sport.type === "reps"
-                        ? "Wiederholungen"
-                        : "Zeitbasiert"}
+                      {sport.type === "reps" ? t("label.reps") : t("label.timeBased")}
                     </Text>
                   </View>
                   <Pressable
                     style={styles.statsInlineCard}
                     onPress={() => setStatsSportId(sport.id)}
                   >
-                    <Text style={styles.statsInlineText}>
-                      Heute:{" "}
-                      {formatSportValue(
-                        sport.type,
-                        getTodayStat(stats, sport.id)
-                      )}
-                    </Text>
-                    <Text style={styles.statsInlineText}>
-                      Woche:{" "}
-                      {sport.type === "reps"
-                        ? `${computeWeeklyTotal(stats, sport)} Wdh.`
-                        : formatSeconds(computeWeeklyTotal(stats, sport))}
-                    </Text>
+                    <View style={styles.counterRow}>
+                      <View style={styles.counterBlock}>
+                        <Text style={styles.counterLabel}>{t("label.today")}</Text>
+                        <Text style={styles.counterValueSmall}>
+                          {sport.type === "reps"
+                            ? `${getTodayStat(stats, sport.id).reps}`
+                            : formatSeconds(getTodayStat(stats, sport.id).seconds || 0)}
+                        </Text>
+                        <Text style={styles.counterUnit}>
+                          {sport.type === "reps" ? repsShort : t("label.timeUnit")}
+                        </Text>
+                      </View>
+                      <View style={styles.counterBlock}>
+                        <Text style={styles.counterLabel}>{t("label.week")}</Text>
+                        <Text style={styles.counterValueSmall}>
+                          {sport.type === "reps"
+                            ? `${computeWeeklyTotal(stats, sport)}`
+                            : formatSeconds(computeWeeklyTotal(stats, sport))}
+                        </Text>
+                        <Text style={styles.counterUnit}>
+                          {sport.type === "reps" ? repsShort : t("label.timeUnit")}
+                        </Text>
+                      </View>
+                    </View>
+                    <View style={styles.screenRow}>
+                      <View style={styles.screenBlock}>
+                        <Text style={styles.screenLabel}>{t("label.screenTime")}</Text>
+                        <Text style={styles.screenValue}>
+                          {formatScreenTime(
+                            screenSecondsForStats(
+                              sport,
+                              getTodayStat(stats, sport.id)
+                            )
+                          )}
+                        </Text>
+                      </View>
+                      <View style={styles.screenBlock}>
+                        <Text style={styles.screenLabel}>{t("label.remaining")}</Text>
+                        <Text style={styles.screenValue}>
+                          {formatScreenTime(
+                            Math.max(
+                              0,
+                              screenSecondsForStats(
+                                sport,
+                                getTodayStat(stats, sport.id)
+                              ) - usageState.usedSeconds
+                            )
+                          )}
+                        </Text>
+                      </View>
+                    </View>
                   </Pressable>
                   <View style={styles.cardActions}>
                     <Pressable
                       style={styles.secondaryButton}
-                      onPress={() => handleHideSport(sport.id, false)}
+                      onPress={() =>
+                        confirmAction(t("label.confirmShow"), () =>
+                          handleHideSport(sport.id, false)
+                        )
+                      }
                     >
                       <Text style={styles.secondaryButtonText}>
-                        Einblenden
+                        {t("label.show")}
+                      </Text>
+                    </Pressable>
+                    <Pressable
+                      style={styles.secondaryButton}
+                      onPress={() =>
+                        InstaControl?.requestPinWidget?.(sport.id, getSportLabel(sport))
+                      }
+                    >
+                      <Text style={styles.secondaryButtonText}>
+                        {t("label.widget")}
                       </Text>
                     </Pressable>
                     <Pressable
                       style={styles.dangerButton}
-                      onPress={() => handleDeleteSport(sport.id)}
+                      onPress={() =>
+                        confirmAction(t("label.confirmDelete"), () =>
+                          handleDeleteSport(sport.id)
+                        )
+                      }
                     >
-                      <Text style={styles.primaryButtonText}>Löschen</Text>
+                      <Text style={styles.primaryButtonText}>{t("label.delete")}</Text>
                     </Pressable>
                   </View>
                 </View>
@@ -784,34 +1532,60 @@ export default function App() {
             : null}
         </View>
       </ScrollView>
+      <View style={styles.languageWrap}>
+        {showLanguageMenu ? (
+          <View style={styles.languageMenu}>
+            <Text style={styles.languageTitle}>{t("menu.language")}</Text>
+            {[
+              "de",
+              "en",
+              "es",
+              "fr",
+            ].map((code) => (
+              <Pressable
+                key={code}
+                style={styles.languageOption}
+                onPress={() => setAppLanguage(code)}
+              >
+                <Text style={styles.languageOptionText}>{t(`language.${code}`)}</Text>
+              </Pressable>
+            ))}
+          </View>
+        ) : null}
+        <Pressable
+          style={styles.languageButton}
+          onPress={() => setShowLanguageMenu((prev) => !prev)}
+        >
+          <Text style={styles.languageButtonText}>{t(`language.${language}`)}</Text>
+        </Pressable>
+      </View>
     </SafeAreaView>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0f1114",
+    backgroundColor: COLORS.background,
   },
   scrollContent: {
-    padding: 20,
-    paddingTop: 32,
-    paddingBottom: 40,
+    padding: 16,
+    paddingTop: 28,
+    paddingBottom: 32,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "700",
-    color: "#f5f5f5",
+    color: COLORS.text,
   },
   subtitle: {
     fontSize: 16,
-    color: "#b7b7b7",
+    color: COLORS.muted,
     marginTop: 6,
   },
   header: {
-    paddingHorizontal: 20,
-    paddingTop: 28,
-    paddingBottom: 12,
+    paddingHorizontal: 16,
+    paddingTop: 24,
+    paddingBottom: 10,
     flexDirection: "row",
     alignItems: "center",
   },
@@ -821,164 +1595,285 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 16,
   },
+  sportsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    gap: 12,
+  },
   backButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    backgroundColor: "#1f232a",
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+    backgroundColor: COLORS.cardAlt,
     marginRight: 12,
   },
   backText: {
-    color: "#f5f5f5",
+    color: COLORS.text,
     fontWeight: "600",
   },
-  headerTitle: {
+  headerTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  headerIcon: {
     fontSize: 20,
-    color: "#f5f5f5",
+    marginRight: 8,
+  },
+  headerTitle: {
+    fontSize: 18,
+    color: COLORS.text,
     fontWeight: "700",
   },
   iconButton: {
-    backgroundColor: "#1f232a",
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 12,
+    backgroundColor: COLORS.cardAlt,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 8,
   },
   iconButtonText: {
-    color: "#f5f5f5",
+    color: COLORS.text,
     fontWeight: "600",
   },
   trackingArea: {
     flex: 1,
-    margin: 20,
-    borderRadius: 24,
-    backgroundColor: "#151922",
+    margin: 16,
+    borderRadius: 16,
+    backgroundColor: COLORS.card,
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
   },
   counterValue: {
     fontSize: 56,
-    color: "#ffffff",
+    color: COLORS.text,
     fontWeight: "700",
   },
   plusSign: {
     fontSize: 72,
-    color: "#4ade80",
+    color: COLORS.accent,
     marginTop: 12,
   },
   helperText: {
     marginTop: 12,
-    color: "#9aa0a6",
+    color: COLORS.muted,
   },
   timerRow: {
     flexDirection: "row",
     marginTop: 24,
   },
   sportCard: {
-    backgroundColor: "#151922",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
+    backgroundColor: COLORS.sportCard,
+    borderRadius: 8,
+    padding: 10,
+    paddingTop: 30,
+    marginBottom: 10,
+    width: "48%",
+    position: "relative",
+    borderWidth: 1,
+    borderColor: "rgba(244, 181, 69, 0.35)",
   },
   hiddenCard: {
-    backgroundColor: "#14171d",
-    borderRadius: 16,
-    padding: 16,
-    marginTop: 10,
+    backgroundColor: COLORS.cardAlt,
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 8,
   },
   sportInfo: {
     marginBottom: 12,
   },
   sportName: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: "700",
-    color: "#f5f5f5",
+    color: COLORS.text,
+  },
+  sportTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  sportIcon: {
+    fontSize: 18,
   },
   sportMeta: {
     marginTop: 4,
-    color: "#8b8b8b",
+    color: COLORS.muted,
   },
   statsInlineCard: {
-    backgroundColor: "#1f232a",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
+    backgroundColor: COLORS.surface,
+    borderRadius: 6,
+    padding: 8,
+    marginBottom: 8,
   },
-  statsInlineText: {
-    color: "#e5e7eb",
-    fontWeight: "600",
-    marginBottom: 4,
+  counterRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 8,
+  },
+  counterBlock: {
+    flex: 1,
+    backgroundColor: COLORS.white,
+    borderRadius: 6,
+    paddingVertical: 6,
+    alignItems: "center",
+  },
+  counterLabel: {
+    color: "#1f1b16",
+    fontSize: 10,
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+  },
+  counterValueSmall: {
+    color: "#14110c",
+    fontSize: 18,
+    fontWeight: "700",
+    marginTop: 2,
+  },
+  counterUnit: {
+    color: "#3a332a",
+    fontSize: 10,
+    marginTop: 2,
+  },
+  screenRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  screenBlock: {
+    flex: 1,
+    backgroundColor: COLORS.white,
+    borderRadius: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 6,
+    alignItems: "center",
+  },
+  screenLabel: {
+    color: "#1f1b16",
+    fontSize: 10,
+  },
+  screenValue: {
+    color: "#14110c",
+    fontSize: 12,
+    fontWeight: "700",
+    marginTop: 2,
+  },
+  rateLabel: {
+    color: COLORS.muted,
+    marginBottom: 6,
   },
   statsCard: {
-    marginHorizontal: 20,
-    marginTop: 8,
-    backgroundColor: "#1f232a",
-    borderRadius: 16,
-    padding: 16,
+    marginHorizontal: 16,
+    marginTop: 6,
+    backgroundColor: COLORS.surface,
+    borderRadius: 8,
+    padding: 10,
   },
   statsTitle: {
-    color: "#9aa0a6",
+    color: COLORS.muted,
     marginBottom: 6,
   },
   statsValue: {
-    color: "#ffffff",
+    color: COLORS.text,
     fontSize: 22,
     fontWeight: "700",
   },
   statsMeta: {
     marginTop: 6,
-    color: "#9aa0a6",
+    color: COLORS.muted,
   },
   cardActions: {
-    flexDirection: "row",
+    flexDirection: "column",
     flexWrap: "wrap",
-    gap: 8,
+    gap: 6,
+    alignItems: "stretch",
+  },
+  cardActionsTop: {
+    position: "absolute",
+    right: 6,
+    top: 6,
+    flexDirection: "row",
+    gap: 4,
+    zIndex: 1,
+  },
+  iconAction: {
+    backgroundColor: COLORS.cardAlt,
+    borderRadius: 4,
+    paddingHorizontal: 4,
+    paddingVertical: 3,
+    minWidth: 22,
+    alignItems: "center",
+  },
+  iconActionText: {
+    color: COLORS.text,
+    fontSize: 11,
+    fontWeight: "700",
   },
   primaryButton: {
-    backgroundColor: "#2563eb",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 10,
+    backgroundColor: COLORS.ember,
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  trackButtonTop: {
+    alignSelf: "stretch",
+    width: "100%",
+    marginBottom: 8,
+  },
+  fullWidthButton: {
+    alignSelf: "stretch",
+    width: "100%",
   },
   primaryButtonText: {
-    color: "#ffffff",
+    color: COLORS.white,
     fontWeight: "600",
+    fontSize: 11,
   },
   secondaryButton: {
-    backgroundColor: "#2b2f36",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 10,
+    backgroundColor: COLORS.cardAlt,
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    borderRadius: 5,
+    alignItems: "center",
   },
   secondaryButtonText: {
-    color: "#e5e7eb",
+    color: COLORS.text,
     fontWeight: "600",
+    fontSize: 11,
   },
   dangerButton: {
-    backgroundColor: "#ef4444",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 10,
+    backgroundColor: COLORS.danger,
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    borderRadius: 5,
   },
   addCard: {
-    backgroundColor: "#11151c",
-    borderRadius: 16,
-    padding: 16,
-    marginTop: 20,
+    backgroundColor: COLORS.cardAlt,
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 16,
   },
   addTitle: {
     fontSize: 16,
-    color: "#f5f5f5",
+    color: COLORS.text,
     marginBottom: 12,
     fontWeight: "600",
   },
   input: {
-    backgroundColor: "#1f232a",
-    borderRadius: 10,
+    backgroundColor: COLORS.surface,
+    borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    color: "#f5f5f5",
-    marginBottom: 12,
+    color: COLORS.text,
+    marginBottom: 10,
+  },
+  iconRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  iconPreview: {
+    fontSize: 20,
   },
   typeRow: {
     flexDirection: "row",
@@ -987,112 +1882,155 @@ const styles = StyleSheet.create({
   },
   typeButton: {
     flex: 1,
-    backgroundColor: "#1f232a",
+    backgroundColor: COLORS.surface,
     paddingVertical: 10,
     borderRadius: 10,
     alignItems: "center",
   },
   typeButtonActive: {
-    backgroundColor: "#2563eb",
+    backgroundColor: COLORS.accent,
   },
   typeButtonText: {
-    color: "#cbd5f5",
+    color: COLORS.text,
     fontWeight: "600",
   },
   typeButtonTextActive: {
-    color: "#ffffff",
+    color: COLORS.white,
   },
   hiddenSection: {
-    marginTop: 24,
+    marginTop: 20,
   },
   hiddenToggle: {
     paddingVertical: 10,
   },
   hiddenToggleText: {
-    color: "#9aa0a6",
+    color: COLORS.muted,
     fontWeight: "600",
   },
   permissionCard: {
-    backgroundColor: "#151922",
-    borderRadius: 16,
+    backgroundColor: COLORS.card,
+    borderRadius: 10,
     padding: 16,
     marginBottom: 16,
   },
   infoCard: {
-    backgroundColor: "#151922",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: COLORS.card,
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 12,
   },
   cardTitle: {
-    color: "#9aa0a6",
+    color: COLORS.muted,
     marginBottom: 8,
   },
   cardValue: {
     fontSize: 28,
-    color: "#ffffff",
+    color: COLORS.text,
     fontWeight: "700",
   },
   cardMeta: {
     marginTop: 6,
-    color: "#9aa0a6",
+    color: COLORS.muted,
   },
   sectionTitle: {
     fontSize: 16,
-    color: "#f5f5f5",
+    color: COLORS.text,
     marginBottom: 8,
     fontWeight: "600",
   },
   warningText: {
     marginTop: 10,
-    color: "#f59e0b",
+    color: COLORS.warning,
     fontWeight: "600",
   },
   successText: {
     marginTop: 10,
-    color: "#22c55e",
+    color: COLORS.success,
     fontWeight: "600",
   },
   appRow: {
-    backgroundColor: "#1f232a",
+    backgroundColor: COLORS.surface,
     borderRadius: 12,
     padding: 12,
     marginTop: 10,
   },
   appRowActive: {
     borderWidth: 1,
-    borderColor: "#2563eb",
+    borderColor: COLORS.accentDark,
   },
   appLabel: {
-    color: "#f5f5f5",
+    color: COLORS.text,
     fontWeight: "600",
   },
   appPackage: {
-    color: "#9aa0a6",
+    color: COLORS.muted,
     marginTop: 4,
     fontSize: 12,
   },
   appToggle: {
     marginTop: 8,
-    color: "#9aa0a6",
+    color: COLORS.muted,
     fontWeight: "600",
   },
   appToggleActive: {
-    color: "#22c55e",
+    color: COLORS.success,
   },
   statRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: "#1f232a",
+    borderBottomColor: COLORS.cardAlt,
   },
   statLabel: {
-    color: "#9aa0a6",
+    color: COLORS.muted,
     fontWeight: "600",
   },
   statValue: {
-    color: "#ffffff",
+    color: COLORS.text,
+    fontWeight: "600",
+  },
+  languageWrap: {
+    position: "absolute",
+    right: 16,
+    bottom: 16,
+    alignItems: "flex-end",
+  },
+  languageButton: {
+    backgroundColor: COLORS.cardAlt,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  languageButtonText: {
+    color: COLORS.text,
+    fontWeight: "700",
+  },
+  languageMenu: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 12,
+    padding: 10,
+    marginBottom: 8,
+    minWidth: 160,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  languageTitle: {
+    color: COLORS.muted,
+    marginBottom: 6,
+    fontWeight: "600",
+  },
+  languageOption: {
+    paddingVertical: 8,
+  },
+  languageOptionText: {
+    color: COLORS.text,
     fontWeight: "600",
   },
 });

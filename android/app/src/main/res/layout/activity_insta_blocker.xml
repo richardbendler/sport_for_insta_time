@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
-  android:background="#0f1114"
+  android:background="#100f0c"
   android:gravity="center"
   android:orientation="vertical"
   android:padding="24dp">
@@ -12,7 +12,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:text="Zeit ist aufgebraucht"
-    android:textColor="#ffffff"
+    android:textColor="#f4e2c2"
     android:textSize="22sp"
     android:textStyle="bold" />
 
@@ -22,7 +22,7 @@
     android:layout_height="wrap_content"
     android:layout_marginTop="8dp"
     android:text="Mach Sport, um weitere Minuten zu verdienen."
-    android:textColor="#9aa0a6"
+    android:textColor="#cbb48f"
     android:textSize="14sp" />
 
   <Button
@@ -30,7 +30,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginTop="24dp"
-    android:text="Zurueck"
-    android:backgroundTint="#2563eb"
-    android:textColor="#ffffff" />
+    android:text="Zurück"
+    android:backgroundTint="#f4b545"
+    android:textColor="#fff7ea" />
 </LinearLayout>
