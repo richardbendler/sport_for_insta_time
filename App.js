@@ -148,6 +148,9 @@ const COLORS = {
   cardAlt: "rgba(244, 226, 194, 0.18)",
   cardDark: "rgba(24, 22, 18, 0.9)",
   sportCard: "rgba(24, 22, 18, 0.9)",
+  overlay: "rgba(20, 40, 30, 0.92)",
+  modalSurface: "rgba(32, 70, 52, 0.96)",
+  menuSurface: "rgba(32, 70, 52, 0.9)",
   text: "#f4e2c2",
   muted: "rgba(244, 226, 194, 0.68)",
   accent: "#f4b545",
@@ -174,6 +177,7 @@ const STRINGS = {
     "label.editEntries": "Einträge bearbeiten",
     "label.deleteAllEntries": "Alle Einträge (diese Sportart) löschen",
     "label.deleteAllEntriesGlobal": "Alle Einträge löschen",
+    "label.editSport": "Sportart bearbeiten",
     "label.editEntry": "Eintrag bearbeiten",
     "label.save": "Speichern",
     "label.editHint": "Nur verringern möglich.",
@@ -260,6 +264,7 @@ const STRINGS = {
     "label.editEntries": "Edit entries",
     "label.deleteAllEntries": "Delete entries (this sport)",
     "label.deleteAllEntriesGlobal": "Delete all entries",
+    "label.editSport": "Edit sport",
     "label.editEntry": "Edit entry",
     "label.save": "Save",
     "label.editHint": "Only reducing is possible.",
@@ -345,6 +350,7 @@ const STRINGS = {
     "label.editEntries": "Editar entradas",
     "label.deleteAllEntries": "Borrar entradas (este deporte)",
     "label.deleteAllEntriesGlobal": "Borrar todas",
+    "label.editSport": "Editar deporte",
     "label.editEntry": "Editar entrada",
     "label.save": "Guardar",
     "label.editHint": "Solo se puede reducir.",
@@ -431,6 +437,7 @@ const STRINGS = {
     "label.editEntries": "Modifier les entrées",
     "label.deleteAllEntries": "Supprimer (ce sport)",
     "label.deleteAllEntriesGlobal": "Supprimer tout",
+    "label.editSport": "Modifier le sport",
     "label.editEntry": "Modifier l’entrée",
     "label.save": "Enregistrer",
     "label.editHint": "Réduction uniquement.",
@@ -752,6 +759,8 @@ export default function App() {
   const [statsEditMode, setStatsEditMode] = useState(false);
   const [editEntryKey, setEditEntryKey] = useState(null);
   const [editEntryValue, setEditEntryValue] = useState("");
+  const [editingSportId, setEditingSportId] = useState(null);
+  const [isSportModalOpen, setIsSportModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [showHidden, setShowHidden] = useState(false);
   const [newName, setNewName] = useState("");
@@ -924,7 +933,35 @@ export default function App() {
     await saveStats({});
   };
 
-  const handleAddSport = async () => {
+  const openSportModal = (sport = null) => {
+    if (sport) {
+      const rateMinutes =
+        sport.type === "reps"
+          ? Math.max(0, Number(sport.screenSecondsPerUnit) || 0) / 60
+          : Math.max(0, Number(sport.screenSecondsPerUnit) || 0);
+      setEditingSportId(sport.id);
+      setNewName(getSportLabel(sport));
+      setNewType(sport.type);
+      setNewIcon(sport.icon || "");
+      setNewRateMinutes(String(rateMinutes || getDefaultRateMinutes(sport.type)));
+    } else {
+      setEditingSportId(null);
+      setNewName("");
+      setNewType("reps");
+      setNewIcon("");
+      setNewRateMinutes(String(getDefaultRateMinutes("reps")));
+    }
+    setShowIconInput(false);
+    setIsSportModalOpen(true);
+  };
+
+  const closeSportModal = () => {
+    setIsSportModalOpen(false);
+    setEditingSportId(null);
+    setShowIconInput(false);
+  };
+
+  const saveSportModal = async () => {
     const trimmed = newName.trim();
     if (!trimmed) {
       return;
@@ -936,21 +973,38 @@ export default function App() {
     );
     const screenSecondsPerUnit =
       newType === "reps" ? rateMinutes * 60 : rateMinutes;
-    const newSport = {
-      id: generateId(),
-      name: trimmed,
-      type: newType,
-      hidden: false,
-      icon,
-      screenSecondsPerUnit,
-      createdAt: Date.now(),
-    };
-    await saveSports([newSport, ...sports]);
-    setNewName("");
-    setNewType("reps");
-    setNewIcon("");
-    setNewRateMinutes(String(getDefaultRateMinutes("reps")));
-    setShowIconInput(false);
+    if (editingSportId) {
+      const nextSports = sports.map((sport) => {
+        if (sport.id !== editingSportId) {
+          return sport;
+        }
+        const keepPresetKey =
+          sport.presetKey && trimmed === getSportLabel(sport)
+            ? sport.presetKey
+            : undefined;
+        return {
+          ...sport,
+          name: trimmed,
+          type: newType,
+          icon,
+          screenSecondsPerUnit,
+          presetKey: keepPresetKey,
+        };
+      });
+      await saveSports(nextSports);
+    } else {
+      const newSport = {
+        id: generateId(),
+        name: trimmed,
+        type: newType,
+        hidden: false,
+        icon,
+        screenSecondsPerUnit,
+        createdAt: Date.now(),
+      };
+      await saveSports([newSport, ...sports]);
+    }
+    closeSportModal();
   };
 
   const handleHideSport = async (sportId, hidden) => {
@@ -1272,6 +1326,38 @@ export default function App() {
             );
           })}
         </ScrollView>
+        {editEntryKey ? (
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalCard}>
+              <Text style={styles.modalTitle}>{t("label.editEntry")}</Text>
+              <Text style={styles.modalSubtitle}>{formatDateLabel(editEntryKey)}</Text>
+              <TextInput
+                style={styles.input}
+                value={editEntryValue}
+                onChangeText={setEditEntryValue}
+                keyboardType="number-pad"
+                placeholder="0"
+                placeholderTextColor="#7a7a7a"
+              />
+              <Text style={styles.modalUnit}>{editUnitLabel}</Text>
+              <Text style={styles.helperText}>{t("label.editHint")}</Text>
+              <View style={styles.modalActions}>
+                <Pressable
+                  style={styles.secondaryButton}
+                  onPress={() => {
+                    setEditEntryKey(null);
+                    setEditEntryValue("");
+                  }}
+                >
+                  <Text style={styles.secondaryButtonText}>{t("label.cancel")}</Text>
+                </Pressable>
+                <Pressable style={styles.primaryButton} onPress={saveEditedEntry}>
+                  <Text style={styles.primaryButtonText}>{t("label.save")}</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        ) : null}
       </SafeAreaView>
     );
   }
@@ -1434,38 +1520,6 @@ export default function App() {
             );
           })}
         </ScrollView>
-        {editEntryKey ? (
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
-              <Text style={styles.modalTitle}>{t("label.editEntry")}</Text>
-              <Text style={styles.modalSubtitle}>{formatDateLabel(editEntryKey)}</Text>
-              <TextInput
-                style={styles.input}
-                value={editEntryValue}
-                onChangeText={setEditEntryValue}
-                keyboardType="number-pad"
-                placeholder="0"
-                placeholderTextColor="#7a7a7a"
-              />
-              <Text style={styles.modalUnit}>{editUnitLabel}</Text>
-              <Text style={styles.helperText}>{t("label.editHint")}</Text>
-              <View style={styles.modalActions}>
-                <Pressable
-                  style={styles.secondaryButton}
-                  onPress={() => {
-                    setEditEntryKey(null);
-                    setEditEntryValue("");
-                  }}
-                >
-                  <Text style={styles.secondaryButtonText}>{t("label.cancel")}</Text>
-                </Pressable>
-                <Pressable style={styles.primaryButton} onPress={saveEditedEntry}>
-                  <Text style={styles.primaryButtonText}>{t("label.save")}</Text>
-                </Pressable>
-              </View>
-            </View>
-          </View>
-        ) : null}
       </SafeAreaView>
     );
   }
@@ -1722,46 +1776,6 @@ export default function App() {
             const sportLabel = getSportLabel(sport);
             return (
               <View key={sport.id} style={styles.sportCard}>
-                <View style={styles.cardActionsTop}>
-                  <Pressable
-                    style={styles.iconAction}
-                    onPress={() => setStatsSportId(sport.id)}
-                  >
-                    <Text style={styles.iconActionText}>📅</Text>
-                  </Pressable>
-                  <Pressable
-                    style={styles.iconAction}
-                    onPress={() =>
-                      confirmAction(t("label.confirmHide"), () =>
-                        handleHideSport(sport.id, true)
-                      )
-                    }
-                  >
-                    <Text style={styles.iconActionText}>👁</Text>
-                  </Pressable>
-                  <Pressable
-                    style={styles.iconAction}
-                    onPress={() =>
-                      confirmAction(t("label.confirmDelete"), () =>
-                        handleDeleteSport(sport.id)
-                      )
-                    }
-                  >
-                    <Text style={styles.iconActionText}>✕</Text>
-                  </Pressable>
-                  <Pressable
-                    style={styles.iconAction}
-                    onPress={() => moveSport(sport.id, -1)}
-                  >
-                    <Text style={styles.iconActionText}>↑</Text>
-                  </Pressable>
-                  <Pressable
-                    style={styles.iconAction}
-                    onPress={() => moveSport(sport.id, 1)}
-                  >
-                    <Text style={styles.iconActionText}>↓</Text>
-                  </Pressable>
-                </View>
                 <Pressable
                   style={styles.sportBodyPressable}
                   onPress={() => setSelectedSportId(sport.id)}
@@ -1832,92 +1846,67 @@ export default function App() {
                       {t("label.widget")}
                     </Text>
                   </Pressable>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.cardActionsBottom}
+                  >
+                    <Pressable
+                      style={styles.iconAction}
+                      onPress={() => setStatsSportId(sport.id)}
+                    >
+                      <Text style={styles.iconActionText}>📅</Text>
+                    </Pressable>
+                    <Pressable
+                      style={styles.iconAction}
+                      onPress={() => openSportModal(sport)}
+                    >
+                      <Text style={styles.iconActionText}>🛠</Text>
+                    </Pressable>
+                    <Pressable
+                      style={styles.iconAction}
+                      onPress={() =>
+                        confirmAction(t("label.confirmHide"), () =>
+                          handleHideSport(sport.id, true)
+                        )
+                      }
+                    >
+                      <Text style={styles.iconActionText}>👁</Text>
+                    </Pressable>
+                    <Pressable
+                      style={styles.iconAction}
+                      onPress={() =>
+                        confirmAction(t("label.confirmDelete"), () =>
+                          handleDeleteSport(sport.id)
+                        )
+                      }
+                    >
+                      <Text style={styles.iconActionText}>✕</Text>
+                    </Pressable>
+                    <Pressable
+                      style={styles.iconAction}
+                      onPress={() => moveSport(sport.id, -1)}
+                    >
+                      <Text style={styles.iconActionText}>↑</Text>
+                    </Pressable>
+                    <Pressable
+                      style={styles.iconAction}
+                      onPress={() => moveSport(sport.id, 1)}
+                    >
+                      <Text style={styles.iconActionText}>↓</Text>
+                    </Pressable>
+                  </ScrollView>
                 </View>
               </View>
             );
           })}
         </View>
         <View style={styles.addCard}>
-          <Text style={styles.addTitle}>{t("label.addSport")}</Text>
-          <TextInput
-            style={styles.input}
-            value={newName}
-            onChangeText={setNewName}
-            placeholder={t("placeholder.sportName")}
-            placeholderTextColor="#7a7a7a"
-          />
-          <View style={styles.iconRow}>
-            <Pressable
-              style={styles.secondaryButton}
-              onPress={() => setShowIconInput((prev) => !prev)}
-            >
-              <Text style={styles.secondaryButtonText}>{t("label.iconChoose")}</Text>
-            </Pressable>
-            <Text style={styles.iconPreview}>{newIcon || DEFAULT_ICON}</Text>
-          </View>
-          {showIconInput ? (
-            <TextInput
-              style={styles.input}
-              value={newIcon}
-              onChangeText={(text) => setNewIcon(normalizeIcon(text))}
-              placeholder={t("label.iconPlaceholder")}
-              placeholderTextColor="#7a7a7a"
-              maxLength={2}
-            />
-          ) : null}
-          <Text style={styles.rateLabel}>
-            {newType === "reps" ? t("label.screenRateReps") : t("label.screenRateTime")}
-          </Text>
-          <TextInput
-            style={styles.input}
-            value={newRateMinutes}
-            onChangeText={setNewRateMinutes}
-            placeholder="1"
-            keyboardType="decimal-pad"
-            placeholderTextColor="#7a7a7a"
-          />
-          <View style={styles.typeRow}>
-            <Pressable
-              style={[
-                styles.typeButton,
-                newType === "reps" && styles.typeButtonActive,
-              ]}
-              onPress={() => {
-                setNewType("reps");
-                setNewRateMinutes(String(getDefaultRateMinutes("reps")));
-              }}
-            >
-              <Text
-                style={[
-                  styles.typeButtonText,
-                  newType === "reps" && styles.typeButtonTextActive,
-                ]}
-              >
-                {t("label.reps")}
-              </Text>
-            </Pressable>
-            <Pressable
-              style={[
-                styles.typeButton,
-                newType === "time" && styles.typeButtonActive,
-              ]}
-              onPress={() => {
-                setNewType("time");
-                setNewRateMinutes(String(getDefaultRateMinutes("time")));
-              }}
-            >
-              <Text
-                style={[
-                  styles.typeButtonText,
-                  newType === "time" && styles.typeButtonTextActive,
-                ]}
-              >
-                {t("label.timeBased")}
-              </Text>
-            </Pressable>
-          </View>
-          <Pressable style={styles.primaryButton} onPress={handleAddSport}>
-            <Text style={styles.primaryButtonText}>{t("label.add")}</Text>
+          <Pressable
+            style={[styles.primaryButton, styles.fullWidthButton]}
+            onPress={() => openSportModal()}
+          >
+            <Text style={styles.primaryButtonText}>{t("label.addSport")}</Text>
           </Pressable>
         </View>
         <View style={styles.hiddenSection}>
@@ -2037,7 +2026,108 @@ export default function App() {
               ))
             : null}
         </View>
-      </ScrollView>
+    </ScrollView>
+      {isSportModalOpen ? (
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>
+              {editingSportId ? t("label.editSport") : t("label.addSport")}
+            </Text>
+            <TextInput
+              style={styles.input}
+              value={newName}
+              onChangeText={setNewName}
+              placeholder={t("placeholder.sportName")}
+              placeholderTextColor="#7a7a7a"
+            />
+            <View style={styles.iconRow}>
+              <Pressable
+                style={styles.secondaryButton}
+                onPress={() => setShowIconInput((prev) => !prev)}
+              >
+                <Text style={styles.secondaryButtonText}>
+                  {t("label.iconChoose")}
+                </Text>
+              </Pressable>
+              <Text style={styles.iconPreview}>{newIcon || DEFAULT_ICON}</Text>
+            </View>
+            {showIconInput ? (
+              <TextInput
+                style={styles.input}
+                value={newIcon}
+                onChangeText={(text) => setNewIcon(normalizeIcon(text))}
+                placeholder={t("label.iconPlaceholder")}
+                placeholderTextColor="#7a7a7a"
+                maxLength={2}
+              />
+            ) : null}
+            <Text style={styles.rateLabel}>
+              {newType === "reps"
+                ? t("label.screenRateReps")
+                : t("label.screenRateTime")}
+            </Text>
+            <TextInput
+              style={styles.input}
+              value={newRateMinutes}
+              onChangeText={setNewRateMinutes}
+              placeholder="1"
+              keyboardType="decimal-pad"
+              placeholderTextColor="#7a7a7a"
+            />
+            <View style={styles.typeRow}>
+              <Pressable
+                style={[
+                  styles.typeButton,
+                  newType === "reps" && styles.typeButtonActive,
+                ]}
+                onPress={() => {
+                  setNewType("reps");
+                  setNewRateMinutes(String(getDefaultRateMinutes("reps")));
+                }}
+              >
+                <Text
+                  style={[
+                    styles.typeButtonText,
+                    newType === "reps" && styles.typeButtonTextActive,
+                  ]}
+                >
+                  {t("label.reps")}
+                </Text>
+              </Pressable>
+              <Pressable
+                style={[
+                  styles.typeButton,
+                  newType === "time" && styles.typeButtonActive,
+                ]}
+                onPress={() => {
+                  setNewType("time");
+                  setNewRateMinutes(String(getDefaultRateMinutes("time")));
+                }}
+              >
+                <Text
+                  style={[
+                    styles.typeButtonText,
+                    newType === "time" && styles.typeButtonTextActive,
+                  ]}
+                >
+                  {t("label.timeBased")}
+                </Text>
+              </Pressable>
+            </View>
+            <View style={styles.modalActions}>
+              <Pressable
+                style={styles.secondaryButton}
+                onPress={closeSportModal}
+              >
+                <Text style={styles.secondaryButtonText}>{t("label.cancel")}</Text>
+              </Pressable>
+              <Pressable style={styles.primaryButton} onPress={saveSportModal}>
+                <Text style={styles.primaryButtonText}>{t("label.save")}</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      ) : null}
       <View style={styles.languageWrap}>
         {showLanguageMenu ? (
           <View style={styles.languageMenu}>
@@ -2107,8 +2197,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   headerActions: {
-    alignItems: "flex-end",
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
+    marginTop: 6,
   },
   sportsGrid: {
     flexDirection: "row",
@@ -2196,6 +2288,7 @@ const styles = StyleSheet.create({
   },
   sportInfo: {
     marginBottom: 12,
+    alignItems: "center",
   },
   sportBodyPressable: {
     flexGrow: 1,
@@ -2209,6 +2302,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+    justifyContent: "center",
   },
   sportIcon: {
     fontSize: 18,
@@ -2386,14 +2480,14 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    backgroundColor: COLORS.overlay,
     alignItems: "center",
     justifyContent: "center",
     padding: 16,
     zIndex: 30,
   },
   modalCard: {
-    backgroundColor: COLORS.cardDark,
+    backgroundColor: COLORS.modalSurface,
     borderRadius: 12,
     padding: 16,
     width: "100%",
@@ -2438,13 +2532,11 @@ const styles = StyleSheet.create({
     gap: 6,
     alignItems: "stretch",
   },
-  cardActionsTop: {
-    position: "absolute",
-    right: 6,
-    top: 6,
+  cardActionsBottom: {
     flexDirection: "row",
-    gap: 4,
-    zIndex: 1,
+    alignItems: "center",
+    gap: 6,
+    justifyContent: "center",
   },
   iconAction: {
     backgroundColor: COLORS.cardAlt,
@@ -2663,7 +2755,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   languageMenu: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.menuSurface,
     borderRadius: 12,
     padding: 10,
     marginBottom: 8,
