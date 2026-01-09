@@ -173,10 +173,13 @@ const STRINGS = {
     "label.remaining": "Übrig",
     "label.editEntries": "Einträge bearbeiten",
     "label.deleteAllEntries": "Alle Einträge löschen",
+    "label.deleteAllEntriesGlobal": "Alle Einträge löschen",
     "label.editEntry": "Eintrag bearbeiten",
     "label.save": "Speichern",
     "label.editHint": "Nur verringern möglich.",
     "label.confirmDeleteAll": "Sicher, dass du alle Einträge löschen willst?",
+    "label.confirmDeleteAllGlobal":
+      "Sicher, dass du wirklich alle Einträge aller Sportarten löschen willst?",
     "label.overallStats": "Gesamtstatistik",
     "label.overallStatsHint":
       "Einträge bearbeiten geht nur in der jeweiligen Sportart über die Statistik.",
@@ -253,10 +256,13 @@ const STRINGS = {
     "label.remaining": "Remaining",
     "label.editEntries": "Edit entries",
     "label.deleteAllEntries": "Delete all entries",
+    "label.deleteAllEntriesGlobal": "Delete all entries",
     "label.editEntry": "Edit entry",
     "label.save": "Save",
     "label.editHint": "Only reducing is possible.",
     "label.confirmDeleteAll": "Are you sure you want to delete all entries?",
+    "label.confirmDeleteAllGlobal":
+      "Are you sure you want to delete all entries for all sports?",
     "label.overallStats": "Overall stats",
     "label.overallStatsHint":
       "To edit entries, open a sport from the main menu and then its stats.",
@@ -332,10 +338,13 @@ const STRINGS = {
     "label.remaining": "Restante",
     "label.editEntries": "Editar entradas",
     "label.deleteAllEntries": "Borrar todas",
+    "label.deleteAllEntriesGlobal": "Borrar todas",
     "label.editEntry": "Editar entrada",
     "label.save": "Guardar",
     "label.editHint": "Solo se puede reducir.",
     "label.confirmDeleteAll": "¿Seguro que quieres borrar todas las entradas?",
+    "label.confirmDeleteAllGlobal":
+      "¿Seguro que quieres borrar todas las entradas de todos los deportes?",
     "label.overallStats": "Estadísticas generales",
     "label.overallStatsHint":
       "Para editar entradas, abre un deporte y luego su estadística.",
@@ -412,10 +421,13 @@ const STRINGS = {
     "label.remaining": "Restant",
     "label.editEntries": "Modifier les entrées",
     "label.deleteAllEntries": "Supprimer tout",
+    "label.deleteAllEntriesGlobal": "Supprimer tout",
     "label.editEntry": "Modifier l’entrée",
     "label.save": "Enregistrer",
     "label.editHint": "Réduction uniquement.",
     "label.confirmDeleteAll": "Confirmer la suppression de toutes les entrées ?",
+    "label.confirmDeleteAllGlobal":
+      "Confirmer la suppression de toutes les entrées de tous les sports ?",
     "label.overallStats": "Statistiques globales",
     "label.overallStatsHint":
       "Pour modifier des entrées, ouvrez un sport puis sa statistique.",
@@ -890,6 +902,10 @@ export default function App() {
     await saveStats(nextStats);
   };
 
+  const clearAllStats = async () => {
+    await saveStats({});
+  };
+
   const handleAddSport = async () => {
     const trimmed = newName.trim();
     if (!trimmed) {
@@ -1154,6 +1170,16 @@ export default function App() {
     }, {});
     return (
       <SafeAreaView style={styles.container}>
+        <Pressable
+          style={styles.deleteAllButton}
+          onPress={() =>
+            confirmAction(t("label.confirmDeleteAllGlobal"), clearAllStats)
+          }
+        >
+          <Text style={styles.deleteAllText}>
+            {t("label.deleteAllEntriesGlobal")}
+          </Text>
+        </Pressable>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.headerRow}>
             <Pressable
