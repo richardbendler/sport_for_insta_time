@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="#0f1114"
+  android:gravity="center"
+  android:orientation="vertical"
+  android:padding="24dp">
+
+  <TextView
+    android:id="@+id/blocker_title"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Zeit ist aufgebraucht"
+    android:textColor="#ffffff"
+    android:textSize="22sp"
+    android:textStyle="bold" />
+
+  <TextView
+    android:id="@+id/blocker_subtitle"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:text="Mach Sport, um weitere Minuten zu verdienen."
+    android:textColor="#9aa0a6"
+    android:textSize="14sp" />
+
+  <Button
+    android:id="@+id/blocker_button"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="24dp"
+    android:text="Zurueck"
+    android:backgroundTint="#2563eb"
+    android:textColor="#ffffff" />
+</LinearLayout>
