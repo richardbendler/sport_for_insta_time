@@ -1742,16 +1742,6 @@ export default function App() {
             >
               <Text style={styles.iconButtonText}>{t("label.overallStats")}</Text>
             </Pressable>
-            <Pressable
-              style={styles.iconButton}
-              onPress={() => {
-                setIsSettingsOpen(true);
-                loadInstalledApps();
-                refreshUsageState();
-              }}
-            >
-              <Text style={styles.iconButtonText}>{t("menu.apps")}</Text>
-            </Pressable>
           </View>
         </View>
         {showPermissionPrompt ? (
@@ -2128,6 +2118,16 @@ export default function App() {
           </View>
         </View>
       ) : null}
+      <Pressable
+        style={styles.appsFloatingButton}
+        onPress={() => {
+          setIsSettingsOpen(true);
+          loadInstalledApps();
+          refreshUsageState();
+        }}
+      >
+        <Text style={styles.appsFloatingText}>{t("menu.apps")}</Text>
+      </Pressable>
       <View style={styles.languageWrap}>
         {showLanguageMenu ? (
           <View style={styles.languageMenu}>
@@ -2201,6 +2201,26 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     marginTop: 6,
+  },
+  appsFloatingButton: {
+    position: "absolute",
+    left: 16,
+    bottom: 16,
+    backgroundColor: COLORS.accent,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  appsFloatingText: {
+    color: COLORS.ink,
+    fontWeight: "800",
+    fontSize: 12,
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
   },
   sportsGrid: {
     flexDirection: "row",
