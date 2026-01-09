@@ -65,6 +65,70 @@ const DEFAULT_SETTINGS = {
 };
 
 const WEEKDAY_LABELS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+const WEEKDAY_LABELS_BY_LANG = {
+  de: ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"],
+  en: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+  es: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
+  fr: ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"],
+};
+const MONTH_LABELS = {
+  de: [
+    "Januar",
+    "Februar",
+    "März",
+    "April",
+    "Mai",
+    "Juni",
+    "Juli",
+    "August",
+    "September",
+    "Oktober",
+    "November",
+    "Dezember",
+  ],
+  en: [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ],
+  es: [
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
+  ],
+  fr: [
+    "Janvier",
+    "Février",
+    "Mars",
+    "Avril",
+    "Mai",
+    "Juin",
+    "Juillet",
+    "Août",
+    "Septembre",
+    "Octobre",
+    "Novembre",
+    "Décembre",
+  ],
+};
 const DEFAULT_ICON = "⭐";
 const PRESET_KEYS = {
   pushups: "pushups",
@@ -107,6 +171,15 @@ const STRINGS = {
     "label.weekScreenTime": "Bildschirmzeit Woche",
     "label.screenTime": "Bildschirmzeit",
     "label.remaining": "Übrig",
+    "label.editEntries": "Einträge bearbeiten",
+    "label.deleteAllEntries": "Alle Einträge löschen",
+    "label.editEntry": "Eintrag bearbeiten",
+    "label.save": "Speichern",
+    "label.editHint": "Nur verringern möglich.",
+    "label.confirmDeleteAll": "Sicher, dass du alle Einträge löschen willst?",
+    "label.overallStats": "Gesamtstatistik",
+    "label.overallStatsHint":
+      "Einträge bearbeiten geht nur in der jeweiligen Sportart über die Statistik.",
     "label.runningSession": "Laufende Session",
     "label.availableToday": "Heute verfügbar",
     "label.used": "Verbraucht",
@@ -178,6 +251,15 @@ const STRINGS = {
     "label.weekScreenTime": "Screen Time Week",
     "label.screenTime": "Screen Time",
     "label.remaining": "Remaining",
+    "label.editEntries": "Edit entries",
+    "label.deleteAllEntries": "Delete all entries",
+    "label.editEntry": "Edit entry",
+    "label.save": "Save",
+    "label.editHint": "Only reducing is possible.",
+    "label.confirmDeleteAll": "Are you sure you want to delete all entries?",
+    "label.overallStats": "Overall stats",
+    "label.overallStatsHint":
+      "To edit entries, open a sport from the main menu and then its stats.",
     "label.runningSession": "Running session",
     "label.availableToday": "Available today",
     "label.used": "Used",
@@ -248,6 +330,15 @@ const STRINGS = {
     "label.weekScreenTime": "Tiempo de pantalla semanal",
     "label.screenTime": "Tiempo de pantalla",
     "label.remaining": "Restante",
+    "label.editEntries": "Editar entradas",
+    "label.deleteAllEntries": "Borrar todas",
+    "label.editEntry": "Editar entrada",
+    "label.save": "Guardar",
+    "label.editHint": "Solo se puede reducir.",
+    "label.confirmDeleteAll": "¿Seguro que quieres borrar todas las entradas?",
+    "label.overallStats": "Estadísticas generales",
+    "label.overallStatsHint":
+      "Para editar entradas, abre un deporte y luego su estadística.",
     "label.runningSession": "Sesión activa",
     "label.availableToday": "Disponible hoy",
     "label.used": "Usado",
@@ -319,6 +410,15 @@ const STRINGS = {
     "label.weekScreenTime": "Temps d’écran hebdo",
     "label.screenTime": "Temps d’écran",
     "label.remaining": "Restant",
+    "label.editEntries": "Modifier les entrées",
+    "label.deleteAllEntries": "Supprimer tout",
+    "label.editEntry": "Modifier l’entrée",
+    "label.save": "Enregistrer",
+    "label.editHint": "Réduction uniquement.",
+    "label.confirmDeleteAll": "Confirmer la suppression de toutes les entrées ?",
+    "label.overallStats": "Statistiques globales",
+    "label.overallStatsHint":
+      "Pour modifier des entrées, ouvrez un sport puis sa statistique.",
     "label.runningSession": "Session en cours",
     "label.availableToday": "Disponible aujourd'hui",
     "label.used": "Utilisé",
@@ -404,6 +504,49 @@ const getWeekKeys = () => {
       label: WEEKDAY_LABELS[index],
     };
   });
+};
+
+const parseDateKey = (key) => {
+  const [year, month, day] = key.split("-").map(Number);
+  return new Date(year, month - 1, day);
+};
+
+const formatMonthLabel = (date, language) => {
+  const labels = MONTH_LABELS[language] || MONTH_LABELS.en;
+  return `${labels[date.getMonth()]} ${date.getFullYear()}`;
+};
+
+const buildCalendarDays = (sportStats) => {
+  const keys = Object.keys(sportStats || {}).sort();
+  const today = new Date();
+  const startDate = keys.length > 0 ? parseDateKey(keys[0]) : new Date();
+  startDate.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+  const days = [];
+  for (let d = new Date(startDate); d <= today; d.setDate(d.getDate() + 1)) {
+    days.push({ key: dateKeyFromDate(d), date: new Date(d) });
+  }
+  return days;
+};
+
+const buildCalendarDaysFromKeys = (keys) => {
+  const sorted = [...keys].sort();
+  const today = new Date();
+  const startDate = sorted.length > 0 ? parseDateKey(sorted[0]) : new Date();
+  startDate.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+  const days = [];
+  for (let d = new Date(startDate); d <= today; d.setDate(d.getDate() + 1)) {
+    days.push({ key: dateKeyFromDate(d), date: new Date(d) });
+  }
+  return days;
+};
+
+const formatDateLabel = (key) => {
+  const date = parseDateKey(key);
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${day}.${month}.${date.getFullYear()}`;
 };
 
 const formatSeconds = (totalSeconds) => {
@@ -581,6 +724,10 @@ export default function App() {
   const [language, setLanguage] = useState(DEFAULT_SETTINGS.language);
   const [selectedSportId, setSelectedSportId] = useState(null);
   const [statsSportId, setStatsSportId] = useState(null);
+  const [overallStatsOpen, setOverallStatsOpen] = useState(false);
+  const [statsEditMode, setStatsEditMode] = useState(false);
+  const [editEntryKey, setEditEntryKey] = useState(null);
+  const [editEntryValue, setEditEntryValue] = useState("");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [showHidden, setShowHidden] = useState(false);
   const [newName, setNewName] = useState("");
@@ -716,6 +863,33 @@ export default function App() {
     });
   };
 
+  const updateSpecificDayStat = (sportId, dayKey, updater) => {
+    setStats((prev) => {
+      const nextStats = { ...prev };
+      const sportStats = { ...(nextStats[sportId] || {}) };
+      const current = { reps: 0, seconds: 0, ...(sportStats[dayKey] || {}) };
+      const updated = updater(current);
+      if ((updated.reps || 0) <= 0 && (updated.seconds || 0) <= 0) {
+        delete sportStats[dayKey];
+      } else {
+        sportStats[dayKey] = updated;
+      }
+      if (Object.keys(sportStats).length === 0) {
+        delete nextStats[sportId];
+      } else {
+        nextStats[sportId] = sportStats;
+      }
+      AsyncStorage.setItem(STORAGE_KEYS.stats, JSON.stringify(nextStats));
+      return nextStats;
+    });
+  };
+
+  const clearAllStatsForSport = async (sportId) => {
+    const nextStats = { ...stats };
+    delete nextStats[sportId];
+    await saveStats(nextStats);
+  };
+
   const handleAddSport = async () => {
     const trimmed = newName.trim();
     if (!trimmed) {
@@ -843,6 +1017,10 @@ export default function App() {
         setStatsSportId(null);
         return true;
       }
+      if (overallStatsOpen) {
+        setOverallStatsOpen(false);
+        return true;
+      }
       if (selectedSportId) {
         setSelectedSportId(null);
         return true;
@@ -858,7 +1036,15 @@ export default function App() {
       handler
     );
     return () => subscription.remove();
-  }, [statsSportId, selectedSportId, isSettingsOpen]);
+  }, [statsSportId, overallStatsOpen, selectedSportId, isSettingsOpen]);
+
+  useEffect(() => {
+    if (!statsSportId) {
+      setStatsEditMode(false);
+      setEditEntryKey(null);
+      setEditEntryValue("");
+    }
+  }, [statsSportId]);
 
   const loadInstalledApps = async () => {
     if (!InstaControl?.getInstalledApps) {
@@ -933,6 +1119,95 @@ export default function App() {
     });
     InstaControl.updateWidgets();
   }, [sports, stats, language]);
+  if (overallStatsOpen) {
+    const allKeys = Object.values(stats || {}).reduce((acc, sportStats) => {
+      Object.keys(sportStats || {}).forEach((key) => acc.add(key));
+      return acc;
+    }, new Set());
+    const calendarDays = buildCalendarDaysFromKeys(allKeys);
+    const monthMap = calendarDays.reduce((acc, day) => {
+      const monthKey = day.key.slice(0, 7);
+      if (!acc[monthKey]) {
+        acc[monthKey] = {
+          label: formatMonthLabel(day.date, language),
+          days: [],
+        };
+      }
+      acc[monthKey].days.push(day);
+      return acc;
+    }, {});
+    const monthEntries = Object.keys(monthMap)
+      .sort()
+      .map((key) => ({ key, ...monthMap[key] }));
+    const weekdayLabels = WEEKDAY_LABELS_BY_LANG[language] || WEEKDAY_LABELS;
+    const dayTotals = calendarDays.reduce((acc, day) => {
+      let total = 0;
+      sports.forEach((sport) => {
+        const sportStats = stats[sport.id] || {};
+        const dayStats = sportStats[day.key];
+        if (dayStats) {
+          total += screenSecondsForStats(sport, dayStats);
+        }
+      });
+      acc[day.key] = total;
+      return acc;
+    }, {});
+    return (
+      <SafeAreaView style={styles.container}>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View style={styles.headerRow}>
+            <Pressable
+              style={styles.backButton}
+              onPress={() => setOverallStatsOpen(false)}
+            >
+              <Text style={styles.backText}>{t("label.back")}</Text>
+            </Pressable>
+            <Text style={styles.headerTitle}>{t("label.overallStats")}</Text>
+          </View>
+          <View style={styles.infoCard}>
+            <Text style={styles.sectionTitle}>{t("label.overallStats")}</Text>
+            <Text style={styles.helperText}>{t("label.overallStatsHint")}</Text>
+          </View>
+          {monthEntries.map((month) => {
+            const firstDay = month.days[0];
+            const firstWeekday = (firstDay.date.getDay() + 6) % 7;
+            const placeholders = Array.from({ length: firstWeekday }, (_, index) => (
+              <View key={`spacer-${month.key}-${index}`} style={styles.calendarSpacer} />
+            ));
+            return (
+              <View key={month.key} style={styles.calendarMonth}>
+                <Text style={styles.calendarMonthTitle}>{month.label}</Text>
+                <View style={styles.calendarHeaderRow}>
+                  {weekdayLabels.map((label) => (
+                    <Text key={`${month.key}-${label}`} style={styles.calendarWeekLabel}>
+                      {label}
+                    </Text>
+                  ))}
+                </View>
+                <View style={styles.calendarGrid}>
+                  {placeholders}
+                  {month.days.map((day) => {
+                    const totalSeconds = dayTotals[day.key] || 0;
+                    const hasValue = totalSeconds > 0;
+                    const displayValue = hasValue ? formatScreenTime(totalSeconds) : "-";
+                    return (
+                      <View key={day.key} style={styles.calendarCell}>
+                        <Text style={styles.calendarDayText}>
+                          {day.date.getDate()}
+                        </Text>
+                        <Text style={styles.calendarValueText}>{displayValue}</Text>
+                      </View>
+                    );
+                  })}
+                </View>
+              </View>
+            );
+          })}
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
   if (statsSport) {
     const weekEntries = getWeeklyStats(stats, statsSport.id);
     const weeklyTotal =
@@ -942,8 +1217,82 @@ export default function App() {
             (sum, entry) => sum + (entry.dayStats.seconds || 0),
             0
           );
+    const sportStats = stats[statsSport.id] || {};
+    const calendarDays = buildCalendarDays(sportStats);
+    const monthMap = calendarDays.reduce((acc, day) => {
+      const monthKey = day.key.slice(0, 7);
+      if (!acc[monthKey]) {
+        acc[monthKey] = {
+          label: formatMonthLabel(day.date, language),
+          days: [],
+        };
+      }
+      acc[monthKey].days.push(day);
+      return acc;
+    }, {});
+    const monthEntries = Object.keys(monthMap)
+      .sort()
+      .map((key) => ({ key, ...monthMap[key] }));
+    const weekdayLabels = WEEKDAY_LABELS_BY_LANG[language] || WEEKDAY_LABELS;
+    const editUnitLabel =
+      statsSport.type === "reps" ? repsShort : t("label.timeUnit");
+
+    const openEditEntry = (dayKey) => {
+      const dayStats = sportStats[dayKey] || { reps: 0, seconds: 0 };
+      const currentValue =
+        statsSport.type === "reps"
+          ? dayStats.reps
+          : Math.floor((dayStats.seconds || 0) / 60);
+      if (currentValue <= 0) {
+        return;
+      }
+      setEditEntryKey(dayKey);
+      setEditEntryValue(String(currentValue));
+    };
+
+    const saveEditedEntry = () => {
+      if (!editEntryKey) {
+        return;
+      }
+      const dayStats = sportStats[editEntryKey] || { reps: 0, seconds: 0 };
+      const currentValue =
+        statsSport.type === "reps"
+          ? dayStats.reps
+          : Math.floor((dayStats.seconds || 0) / 60);
+      const parsed = Math.max(0, Number.parseInt(editEntryValue, 10) || 0);
+      const nextValue = Math.min(parsed, currentValue);
+      if (statsSport.type === "reps") {
+        updateSpecificDayStat(statsSport.id, editEntryKey, (current) => ({
+          ...current,
+          reps: nextValue,
+        }));
+      } else {
+        updateSpecificDayStat(statsSport.id, editEntryKey, (current) => ({
+          ...current,
+          seconds: nextValue * 60,
+        }));
+      }
+      setEditEntryKey(null);
+      setEditEntryValue("");
+    };
     return (
       <SafeAreaView style={styles.container}>
+        <Pressable
+          style={styles.editEntriesButton}
+          onPress={() => setStatsEditMode((prev) => !prev)}
+        >
+          <Text style={styles.editEntriesText}>{t("label.editEntries")}</Text>
+        </Pressable>
+        <Pressable
+          style={styles.deleteAllButton}
+          onPress={() =>
+            confirmAction(t("label.confirmDeleteAll"), () =>
+              clearAllStatsForSport(statsSport.id)
+            )
+          }
+        >
+          <Text style={styles.deleteAllText}>{t("label.deleteAllEntries")}</Text>
+        </Pressable>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.headerRow}>
             <Pressable
@@ -966,18 +1315,89 @@ export default function App() {
               {t("label.screenTime")}: {formatScreenTime(weeklyScreenSeconds(stats, statsSport))}
             </Text>
           </View>
-          <View style={styles.infoCard}>
-            <Text style={styles.sectionTitle}>{t("label.weekOverview")}</Text>
-            {weekEntries.map((entry) => (
-              <View key={entry.key} style={styles.statRow}>
-                <Text style={styles.statLabel}>{entry.label}</Text>
-                <Text style={styles.statValue}>
-                  {formatSportValue(statsSport.type, entry.dayStats, repsShort)}
-                </Text>
+          {monthEntries.map((month) => {
+            const firstDay = month.days[0];
+            const firstWeekday = (firstDay.date.getDay() + 6) % 7;
+            const placeholders = Array.from({ length: firstWeekday }, (_, index) => (
+              <View key={`spacer-${month.key}-${index}`} style={styles.calendarSpacer} />
+            ));
+            return (
+              <View key={month.key} style={styles.calendarMonth}>
+                <Text style={styles.calendarMonthTitle}>{month.label}</Text>
+                <View style={styles.calendarHeaderRow}>
+                  {weekdayLabels.map((label) => (
+                    <Text key={`${month.key}-${label}`} style={styles.calendarWeekLabel}>
+                      {label}
+                    </Text>
+                  ))}
+                </View>
+                <View style={styles.calendarGrid}>
+                  {placeholders}
+                  {month.days.map((day) => {
+                    const dayStats = sportStats[day.key] || { reps: 0, seconds: 0 };
+                    const hasValue =
+                      statsSport.type === "reps"
+                        ? dayStats.reps > 0
+                        : (dayStats.seconds || 0) > 0;
+                    const displayValue = hasValue
+                      ? statsSport.type === "reps"
+                        ? `${dayStats.reps}`
+                        : formatSeconds(dayStats.seconds || 0)
+                      : "-";
+                    return (
+                      <View key={day.key} style={styles.calendarCell}>
+                        <Text style={styles.calendarDayText}>
+                          {day.date.getDate()}
+                        </Text>
+                        <Text style={styles.calendarValueText}>{displayValue}</Text>
+                        {statsEditMode && hasValue ? (
+                          <Pressable
+                            style={styles.calendarEditButton}
+                            onPress={() => openEditEntry(day.key)}
+                          >
+                            <Text style={styles.calendarEditText}>−</Text>
+                          </Pressable>
+                        ) : null}
+                      </View>
+                    );
+                  })}
+                </View>
               </View>
-            ))}
-          </View>
+            );
+          })}
         </ScrollView>
+        {editEntryKey ? (
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalCard}>
+              <Text style={styles.modalTitle}>{t("label.editEntry")}</Text>
+              <Text style={styles.modalSubtitle}>{formatDateLabel(editEntryKey)}</Text>
+              <TextInput
+                style={styles.input}
+                value={editEntryValue}
+                onChangeText={setEditEntryValue}
+                keyboardType="number-pad"
+                placeholder="0"
+                placeholderTextColor="#7a7a7a"
+              />
+              <Text style={styles.modalUnit}>{editUnitLabel}</Text>
+              <Text style={styles.helperText}>{t("label.editHint")}</Text>
+              <View style={styles.modalActions}>
+                <Pressable
+                  style={styles.secondaryButton}
+                  onPress={() => {
+                    setEditEntryKey(null);
+                    setEditEntryValue("");
+                  }}
+                >
+                  <Text style={styles.secondaryButtonText}>{t("label.cancel")}</Text>
+                </Pressable>
+                <Pressable style={styles.primaryButton} onPress={saveEditedEntry}>
+                  <Text style={styles.primaryButtonText}>{t("label.save")}</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        ) : null}
       </SafeAreaView>
     );
   }
@@ -988,16 +1408,24 @@ export default function App() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <Pressable
-            style={styles.backButton}
-            onPress={() => setSelectedSportId(null)}
-          >
-            <Text style={styles.backText}>{t("label.back")}</Text>
-          </Pressable>
-          <View style={styles.headerTitleRow}>
-            <Text style={styles.headerIcon}>{selectedSport.icon || DEFAULT_ICON}</Text>
-            <Text style={styles.headerTitle}>{getSportLabel(selectedSport)}</Text>
+          <View style={styles.headerLeft}>
+            <Pressable
+              style={styles.backButton}
+              onPress={() => setSelectedSportId(null)}
+            >
+              <Text style={styles.backText}>{t("label.back")}</Text>
+            </Pressable>
+            <View style={styles.headerTitleRow}>
+              <Text style={styles.headerIcon}>{selectedSport.icon || DEFAULT_ICON}</Text>
+              <Text style={styles.headerTitle}>{getSportLabel(selectedSport)}</Text>
+            </View>
           </View>
+          <Pressable
+            style={styles.iconButton}
+            onPress={() => setStatsSportId(selectedSport.id)}
+          >
+            <Text style={styles.iconButtonText}>{t("menu.stats")}</Text>
+          </Pressable>
         </View>
         <Pressable
           style={styles.statsCard}
@@ -1185,16 +1613,24 @@ export default function App() {
             <Text style={styles.title}>{t("app.title")}</Text>
             <Text style={styles.subtitle}>{t("menu.sports")}</Text>
           </View>
-          <Pressable
-            style={styles.iconButton}
-            onPress={() => {
-              setIsSettingsOpen(true);
-              loadInstalledApps();
-              refreshUsageState();
-            }}
-          >
-            <Text style={styles.iconButtonText}>{t("menu.apps")}</Text>
-          </Pressable>
+          <View style={styles.headerActions}>
+            <Pressable
+              style={styles.iconButton}
+              onPress={() => setOverallStatsOpen(true)}
+            >
+              <Text style={styles.iconButtonText}>{t("label.overallStats")}</Text>
+            </Pressable>
+            <Pressable
+              style={styles.iconButton}
+              onPress={() => {
+                setIsSettingsOpen(true);
+                loadInstalledApps();
+                refreshUsageState();
+              }}
+            >
+              <Text style={styles.iconButtonText}>{t("menu.apps")}</Text>
+            </Pressable>
+          </View>
         </View>
         {showPermissionPrompt ? (
           <View style={styles.permissionCard}>
@@ -1219,6 +1655,12 @@ export default function App() {
             return (
               <View key={sport.id} style={styles.sportCard}>
                 <View style={styles.cardActionsTop}>
+                  <Pressable
+                    style={styles.iconAction}
+                    onPress={() => setStatsSportId(sport.id)}
+                  >
+                    <Text style={styles.iconActionText}>📅</Text>
+                  </Pressable>
                   <Pressable
                     style={styles.iconAction}
                     onPress={() =>
@@ -1252,66 +1694,62 @@ export default function App() {
                     <Text style={styles.iconActionText}>↓</Text>
                   </Pressable>
                 </View>
-                <View style={styles.sportInfo}>
-                  <View style={styles.sportTitleRow}>
-                    <Text style={styles.sportIcon}>{sport.icon || DEFAULT_ICON}</Text>
-                  <Text style={styles.sportName} numberOfLines={1}>
-                    {sportLabel}
-                  </Text>
-                  </View>
-                </View>
                 <Pressable
-                  style={[styles.primaryButton, styles.trackButtonTop]}
+                  style={styles.sportBodyPressable}
                   onPress={() => setSelectedSportId(sport.id)}
                 >
-                  <Text style={styles.primaryButtonText}>{t("label.track")}</Text>
-                </Pressable>
-                <Pressable
-                  style={styles.statsInlineCard}
-                  onPress={() => setStatsSportId(sport.id)}
-                >
-                  <View style={styles.counterRow}>
-                    <View style={styles.counterBlock}>
-                      <Text style={styles.counterLabel}>{t("label.today")}</Text>
-                      <Text style={styles.counterValueSmall}>
-                        {sport.type === "reps"
-                          ? `${daily.reps}`
-                          : formatSeconds(daily.seconds || 0)}
-                      </Text>
-                      <Text style={styles.counterUnit}>
-                        {sport.type === "reps" ? repsShort : t("label.timeUnit")}
-                      </Text>
-                    </View>
-                    <View style={styles.counterBlock}>
-                      <Text style={styles.counterLabel}>{t("label.week")}</Text>
-                      <Text style={styles.counterValueSmall}>
-                        {sport.type === "reps"
-                          ? `${weeklyTotal}`
-                          : formatSeconds(weeklyTotal)}
-                      </Text>
-                      <Text style={styles.counterUnit}>
-                        {sport.type === "reps" ? repsShort : t("label.timeUnit")}
-                      </Text>
+                  <View style={styles.sportInfo}>
+                    <View style={styles.sportTitleRow}>
+                      <Text style={styles.sportIcon}>{sport.icon || DEFAULT_ICON}</Text>
+                    <Text style={styles.sportName} numberOfLines={1}>
+                      {sportLabel}
+                    </Text>
                     </View>
                   </View>
-                  <View style={styles.screenRow}>
-                    <View style={styles.screenBlock}>
-                      <Text style={styles.screenLabel}>{t("label.screenTime")}</Text>
-                      <Text style={styles.screenValue}>
-                        {formatScreenTime(screenSecondsForStats(sport, daily))}
-                      </Text>
+                  <View style={styles.statsInlineCard}>
+                    <View style={styles.counterRow}>
+                      <View style={styles.counterBlock}>
+                        <Text style={styles.counterLabel}>{t("label.today")}</Text>
+                        <Text style={styles.counterValueSmall}>
+                          {sport.type === "reps"
+                            ? `${daily.reps}`
+                            : formatSeconds(daily.seconds || 0)}
+                        </Text>
+                        <Text style={styles.counterUnit}>
+                          {sport.type === "reps" ? repsShort : t("label.timeUnit")}
+                        </Text>
+                      </View>
+                      <View style={styles.counterBlock}>
+                        <Text style={styles.counterLabel}>{t("label.week")}</Text>
+                        <Text style={styles.counterValueSmall}>
+                          {sport.type === "reps"
+                            ? `${weeklyTotal}`
+                            : formatSeconds(weeklyTotal)}
+                        </Text>
+                        <Text style={styles.counterUnit}>
+                          {sport.type === "reps" ? repsShort : t("label.timeUnit")}
+                        </Text>
+                      </View>
                     </View>
-                    <View style={styles.screenBlock}>
-                      <Text style={styles.screenLabel}>{t("label.remaining")}</Text>
-                      <Text style={styles.screenValue}>
-                        {formatScreenTime(
-                          Math.max(
-                            0,
-                            screenSecondsForStats(sport, daily) -
-                              usageState.usedSeconds
-                          )
-                        )}
-                      </Text>
+                    <View style={styles.screenRow}>
+                      <View style={styles.screenBlock}>
+                        <Text style={styles.screenLabel}>{t("label.screenTime")}</Text>
+                        <Text style={styles.screenValue}>
+                          {formatScreenTime(screenSecondsForStats(sport, daily))}
+                        </Text>
+                      </View>
+                      <View style={styles.screenBlock}>
+                        <Text style={styles.screenLabel}>{t("label.remaining")}</Text>
+                        <Text style={styles.screenValue}>
+                          {formatScreenTime(
+                            Math.max(
+                              0,
+                              screenSecondsForStats(sport, daily) -
+                                usageState.usedSeconds
+                            )
+                          )}
+                        </Text>
+                      </View>
                     </View>
                   </View>
                 </Pressable>
@@ -1569,7 +2007,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 16,
-    paddingTop: 28,
+    paddingTop: 44,
     paddingBottom: 32,
   },
   title: {
@@ -1584,8 +2022,13 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 16,
-    paddingTop: 24,
+    paddingTop: 36,
     paddingBottom: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  headerLeft: {
     flexDirection: "row",
     alignItems: "center",
   },
@@ -1594,6 +2037,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 16,
+  },
+  headerActions: {
+    alignItems: "flex-end",
+    gap: 8,
   },
   sportsGrid: {
     flexDirection: "row",
@@ -1682,6 +2129,9 @@ const styles = StyleSheet.create({
   sportInfo: {
     marginBottom: 12,
   },
+  sportBodyPressable: {
+    flexGrow: 1,
+  },
   sportName: {
     fontSize: 15,
     fontWeight: "700",
@@ -1766,6 +2216,140 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     borderRadius: 8,
     padding: 10,
+  },
+  editEntriesButton: {
+    position: "absolute",
+    top: 28,
+    right: 16,
+    backgroundColor: COLORS.cardAlt,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+    zIndex: 20,
+  },
+  editEntriesText: {
+    color: COLORS.text,
+    fontWeight: "600",
+    fontSize: 12,
+  },
+  deleteAllButton: {
+    position: "absolute",
+    bottom: 24,
+    right: 16,
+    backgroundColor: COLORS.danger,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    zIndex: 20,
+  },
+  deleteAllText: {
+    color: COLORS.white,
+    fontWeight: "700",
+    fontSize: 12,
+  },
+  calendarMonth: {
+    marginTop: 16,
+    backgroundColor: COLORS.surface,
+    borderRadius: 10,
+    padding: 12,
+  },
+  calendarMonthTitle: {
+    color: COLORS.text,
+    fontSize: 14,
+    fontWeight: "700",
+    marginBottom: 8,
+  },
+  calendarHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 6,
+  },
+  calendarWeekLabel: {
+    width: "14.28%",
+    textAlign: "center",
+    color: COLORS.muted,
+    fontSize: 10,
+  },
+  calendarGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+  calendarSpacer: {
+    width: "14.28%",
+    height: 46,
+  },
+  calendarCell: {
+    width: "14.28%",
+    height: 46,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 6,
+    backgroundColor: COLORS.card,
+    marginBottom: 6,
+  },
+  calendarDayText: {
+    color: COLORS.text,
+    fontSize: 11,
+    fontWeight: "700",
+  },
+  calendarValueText: {
+    color: COLORS.white,
+    fontSize: 10,
+  },
+  calendarEditButton: {
+    position: "absolute",
+    top: -6,
+    right: -6,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: COLORS.danger,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  calendarEditText: {
+    color: COLORS.white,
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  modalOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 16,
+    zIndex: 30,
+  },
+  modalCard: {
+    backgroundColor: COLORS.cardDark,
+    borderRadius: 12,
+    padding: 16,
+    width: "100%",
+  },
+  modalTitle: {
+    color: COLORS.text,
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  modalSubtitle: {
+    color: COLORS.muted,
+    marginBottom: 10,
+  },
+  modalUnit: {
+    color: COLORS.muted,
+    marginTop: -6,
+    marginBottom: 6,
+  },
+  modalActions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 10,
+    marginTop: 10,
   },
   statsTitle: {
     color: COLORS.muted,
