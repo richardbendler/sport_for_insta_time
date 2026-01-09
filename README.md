@@ -1,25 +1,28 @@
-# Sport for Screen Time
+﻿# Sport for Screen Time
 
 Eine einfache React Native App, die Sport gegen Social Media Zeit tauscht. Sportarten und Tageswerte werden lokal gespeichert, und ausgewählte Apps können auf Android blockiert werden, sobald die verdiente Zeit verbraucht ist.
 
 ## Features
-- Presets: Liegestütze, Klimmzüge, Pushups, Joggen
+- Presets: Liegestütze, Klimmzüge, Situps, Joggen (mit Icons)
 - Eigene Sportarten erstellen, ausblenden oder löschen
 - Tracking: Wiederholungen per Tap, Zeit via Start/Stop
 - Tagesstatistik wird gespeichert und täglich neu gestartet
 - Screen Controller: Apps auswählen, verdiente Zeit berechnen, Blocker bei Zeitende
 - Statistik-Ansicht pro Sportart (Tag & Woche)
+- Icons pro Sportart, Auswahl beim Anlegen
+- Widgets pro Sportart (heutige Werte + Screen Time)
+- Sprache umschaltbar (Deutsch, Englisch, Spanisch, Französisch)
 
 ## Zeit-Logik
-- Wiederholungen: 1 Rep = 1 Minute Social Time
-- Zeitbasiert: 1 Sekunde Sport = 1 Sekunde Social Time
+- Wiederholungen: Presets haben eigene Umrechnung, eigene Sportarten können es frei setzen
+- Zeitbasiert: Standard 1:1, eigene Sportarten frei definierbar
 - Die Tageszeit wird aus allen Sportarten des aktuellen Tages summiert
 
 ## Speicherung
 AsyncStorage Keys:
 - `@sports_v1`: Liste der Sportarten
 - `@stats_v1`: Tageswerte je Sportart (`{ sportId: { "YYYY-MM-DD": { reps, seconds } } }`)
-- `@settings_v1`: Controller-Einstellungen (ausgewählte Apps)
+- `@settings_v1`: Controller-Einstellungen (ausgewählte Apps, Sprache)
 
 ## Android Berechtigungen
 Die App nutzt eine Accessibility Service, um Apps im Vordergrund zu erkennen und bei Ablauf der Zeit eine Sperrseite anzuzeigen.
@@ -40,3 +43,5 @@ npx expo start --dev-client
 ## Hinweise
 - Die Blocker-Seite führt zurück zum Homescreen, sobald die Zeit aufgebraucht ist.
 - Die App ist aktuell Android-only für die App-Auswahl und den Blocker.
+Build (Cloud)
+- `npx eas build -p android --profile production`

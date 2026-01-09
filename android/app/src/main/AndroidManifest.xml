@@ -36,6 +36,20 @@
       android:excludeFromRecents="true"
       android:taskAffinity=""
       android:theme="@style/Theme.App.Blocker" />
+    <activity
+      android:name=".SportWidgetConfigActivity"
+      android:exported="false"
+      android:theme="@style/Theme.App.Blocker" />
+    <receiver
+      android:name=".SportWidgetProvider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/sport_widget_info" />
+    </receiver>
     <service
       android:name=".InstaBlockerService"
       android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"

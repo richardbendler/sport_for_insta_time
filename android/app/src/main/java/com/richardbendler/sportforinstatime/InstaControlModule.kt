@@ -6,6 +6,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import com.facebook.react.bridge.*
 import org.json.JSONArray
 import java.text.SimpleDateFormat
@@ -113,8 +115,62 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
     }
   }
 
+  @ReactMethod
+  fun requestPinWidget(sportId: String, sportName: String, promise: Promise) {
+    try {
+      val manager = AppWidgetManager.getInstance(reactContext)
+      val provider = ComponentName(reactContext, SportWidgetProvider::class.java)
+      val supported = manager.isRequestPinAppWidgetSupported
+      if (!supported) {
+        promise.resolve(false)
+        return
+      }
+      val prefs = getWidgetPrefs()
+      prefs.edit()
+        .putString("pending_sport_id", sportId)
+        .putString("pending_sport_name", sportName)
+        .apply()
+      val requested = manager.requestPinAppWidget(provider, null, null)
+      promise.resolve(requested)
+    } catch (e: Exception) {
+      promise.reject("WIDGET_PIN_ERROR", e)
+    }
+  }
+
+  @ReactMethod
+  fun setWidgetSportData(
+    sportId: String,
+    title: String,
+    value: String,
+    screenTime: String,
+    screenLabel: String,
+    icon: String
+  ) {
+    val prefs = getWidgetPrefs()
+    prefs.edit()
+      .putString("${sportId}_title", title)
+      .putString("${sportId}_value", value)
+      .putString("${sportId}_screen", screenTime)
+      .putString("${sportId}_screen_label", screenLabel)
+      .putString("${sportId}_icon", icon)
+      .apply()
+  }
+
+  @ReactMethod
+  fun updateWidgets() {
+    val manager = AppWidgetManager.getInstance(reactContext)
+    val provider = ComponentName(reactContext, SportWidgetProvider::class.java)
+    val ids = manager.getAppWidgetIds(provider)
+    ids.forEach { id ->
+      SportWidgetProvider.updateAppWidget(reactContext, manager, id)
+    }
+  }
+
   private fun getPrefs() =
     reactContext.getSharedPreferences("insta_control", Context.MODE_PRIVATE)
+
+  private fun getWidgetPrefs() =
+    reactContext.getSharedPreferences("widget_data", Context.MODE_PRIVATE)
 
   private fun todayKey(): String {
     val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
