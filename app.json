@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Sport gegen Insta Zeit",
-    "slug": "sport-for-insta-time",
+    "name": "Sport for Screen Time",
+    "slug": "sport-for-screen-time",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
@@ -13,6 +13,12 @@
     },
     "android": {
       "package": "com.richardbendler.sportforinstatime"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "32a0b590-ad4f-4ba9-ab84-5bb4b071ba6a"
+      }
+    },
+    "owner": "felsbend"
   }
 }
