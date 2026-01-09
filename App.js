@@ -187,6 +187,9 @@ const STRINGS = {
     "label.availableToday": "Heute verfügbar",
     "label.used": "Verbraucht",
     "label.permissions": "Berechtigungen",
+    "label.permissionsIntro":
+      "Damit Screen Time berechnet und Apps blockiert werden können, braucht die App Zugriff. Du wirst jetzt zu den Einstellungen geführt.",
+    "label.later": "Später",
     "label.apps": "Apps auswählen",
     "label.noApps": "Keine Apps geladen. Tippe auf \"Apps laden\".",
     "label.accessibilityMissing": "Zugriffshilfe fehlt",
@@ -270,6 +273,9 @@ const STRINGS = {
     "label.availableToday": "Available today",
     "label.used": "Used",
     "label.permissions": "Permissions",
+    "label.permissionsIntro":
+      "To track screen time and block apps, the app needs access. You'll be sent to settings now.",
+    "label.later": "Later",
     "label.apps": "Choose apps",
     "label.noApps": "No apps loaded. Tap \"Load apps\".",
     "label.accessibilityMissing": "Accessibility missing",
@@ -352,6 +358,9 @@ const STRINGS = {
     "label.availableToday": "Disponible hoy",
     "label.used": "Usado",
     "label.permissions": "Permisos",
+    "label.permissionsIntro":
+      "Para medir el tiempo de pantalla y bloquear apps, la app necesita acceso. Ahora te llevaremos a ajustes.",
+    "label.later": "Más tarde",
     "label.apps": "Elegir apps",
     "label.noApps": "No hay apps cargadas. Toca \"Cargar apps\".",
     "label.accessibilityMissing": "Accesibilidad desactivada",
@@ -435,6 +444,9 @@ const STRINGS = {
     "label.availableToday": "Disponible aujourd'hui",
     "label.used": "Utilisé",
     "label.permissions": "Autorisations",
+    "label.permissionsIntro":
+      "Pour suivre le temps d’écran et bloquer des apps, l’app a besoin d’accès. Vous allez être redirigé vers les réglages.",
+    "label.later": "Plus tard",
     "label.apps": "Choisir les apps",
     "label.noApps": "Aucune app chargée. Touchez \"Charger les apps\".",
     "label.accessibilityMissing": "Accessibilité inactive",
@@ -755,11 +767,13 @@ export default function App() {
   });
   const [needsAccessibility, setNeedsAccessibility] = useState(false);
   const [permissionsPrompted, setPermissionsPrompted] = useState(false);
+  const [permissionsCheckTick, setPermissionsCheckTick] = useState(0);
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
 
   const [sessionSeconds, setSessionSeconds] = useState(0);
   const [running, setRunning] = useState(false);
   const intervalRef = useRef(null);
+  const lastPermissionPromptAt = useRef(0);
 
   const t = (key) => {
     const dict = STRINGS[language] || STRINGS.de;
@@ -819,6 +833,10 @@ export default function App() {
       setPermissionsPrompted(permissionsRaw === "true");
     };
     load();
+  }, []);
+
+  useEffect(() => {
+    checkAccessibility();
   }, []);
 
   useEffect(() => {
@@ -982,6 +1000,7 @@ export default function App() {
     }
     const enabled = await InstaControl.isAccessibilityEnabled();
     setNeedsAccessibility(!enabled);
+    setPermissionsCheckTick((tick) => tick + 1);
   };
 
   const refreshUsageState = async () => {
@@ -1019,6 +1038,29 @@ export default function App() {
   useEffect(() => {
     checkAccessibility();
   }, [isSettingsOpen, statsSportId]);
+
+  useEffect(() => {
+    if (Platform.OS !== "android") {
+      return;
+    }
+    if (!needsAccessibility) {
+      return;
+    }
+    const now = Date.now();
+    if (now - lastPermissionPromptAt.current < 10000) {
+      return;
+    }
+    lastPermissionPromptAt.current = now;
+    Alert.alert(
+      t("label.permissions"),
+      t("label.permissionsIntro"),
+      [
+        { text: t("label.later"), style: "cancel" },
+        { text: t("label.confirm"), onPress: openAccessibilitySettings },
+      ],
+      { cancelable: true }
+    );
+  }, [needsAccessibility, permissionsCheckTick]);
 
   useEffect(() => {
     if (!selectedSportId) {
