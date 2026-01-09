@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+﻿import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -22,8 +22,8 @@ const STORAGE_KEYS = {
 };
 
 const DEFAULT_SPORTS = [
-  { id: "pushups", name: "Liegestuetze", type: "reps", hidden: false },
-  { id: "pullups", name: "Klimmzuege", type: "reps", hidden: false },
+  { id: "pushups", name: "Liegestütze", type: "reps", hidden: false },
+  { id: "pullups", name: "Klimmzüge", type: "reps", hidden: false },
   { id: "pushups_alt", name: "Pushups", type: "reps", hidden: false },
   { id: "jogging", name: "Joggen", type: "time", hidden: false },
 ];
@@ -33,8 +33,33 @@ const DEFAULT_SETTINGS = {
 };
 
 const REPS_TO_MINUTES = 1;
+const WEEKDAY_LABELS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
 const todayKey = () => new Date().toISOString().slice(0, 10);
+
+const dateKeyFromDate = (date) => {
+  return new Date(date).toISOString().slice(0, 10);
+};
+
+const startOfWeek = (date) => {
+  const current = new Date(date);
+  const day = (current.getDay() + 6) % 7;
+  current.setDate(current.getDate() - day);
+  current.setHours(0, 0, 0, 0);
+  return current;
+};
+
+const getWeekKeys = () => {
+  const start = startOfWeek(new Date());
+  return Array.from({ length: 7 }, (_, index) => {
+    const entry = new Date(start);
+    entry.setDate(start.getDate() + index);
+    return {
+      key: dateKeyFromDate(entry),
+      label: WEEKDAY_LABELS[index],
+    };
+  });
+};
 
 const formatSeconds = (totalSeconds) => {
   const hours = Math.floor(totalSeconds / 3600);
@@ -57,6 +82,33 @@ const getTodayStat = (stats, sportId) => {
   const sportStats = stats[sportId] || {};
   const dayStats = sportStats[day] || { reps: 0, seconds: 0 };
   return dayStats;
+};
+
+const getWeeklyStats = (stats, sportId) => {
+  const weekKeys = getWeekKeys();
+  return weekKeys.map(({ key, label }) => ({
+    key,
+    label,
+    dayStats: (stats[sportId] || {})[key] || { reps: 0, seconds: 0 },
+  }));
+};
+
+const formatSportValue = (sportType, dayStats) => {
+  if (sportType === "reps") {
+    return `${dayStats.reps} Wdh.`;
+  }
+  return formatSeconds(dayStats.seconds || 0);
+};
+
+const computeWeeklyTotal = (stats, sport) => {
+  const weekEntries = getWeeklyStats(stats, sport.id);
+  if (sport.type === "reps") {
+    return weekEntries.reduce((sum, entry) => sum + entry.dayStats.reps, 0);
+  }
+  return weekEntries.reduce(
+    (sum, entry) => sum + (entry.dayStats.seconds || 0),
+    0
+  );
 };
 
 const ensureDefaultSports = async () => {
@@ -102,6 +154,7 @@ export default function App() {
   const [stats, setStats] = useState({});
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [selectedSportId, setSelectedSportId] = useState(null);
+  const [statsSportId, setStatsSportId] = useState(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [showHidden, setShowHidden] = useState(false);
   const [newName, setNewName] = useState("");
@@ -263,7 +316,7 @@ export default function App() {
 
   useEffect(() => {
     checkAccessibility();
-  }, [isSettingsOpen]);
+  }, [isSettingsOpen, statsSportId]);
 
   useEffect(() => {
     if (!selectedSportId) {
@@ -311,6 +364,7 @@ export default function App() {
   const activeSports = sports.filter((sport) => !sport.hidden);
   const hiddenSports = sports.filter((sport) => sport.hidden);
   const selectedSport = sports.find((sport) => sport.id === selectedSportId);
+  const statsSport = sports.find((sport) => sport.id === statsSportId);
 
   const todayStats = useMemo(() => {
     if (!selectedSport) {
@@ -322,8 +376,55 @@ export default function App() {
   const showPermissionPrompt =
     Platform.OS === "android" && !permissionsPrompted && needsAccessibility;
 
+  if (statsSport) {
+    const weekEntries = getWeeklyStats(stats, statsSport.id);
+    const weeklyTotal =
+      statsSport.type === "reps"
+        ? weekEntries.reduce((sum, entry) => sum + entry.dayStats.reps, 0)
+        : weekEntries.reduce(
+            (sum, entry) => sum + (entry.dayStats.seconds || 0),
+            0
+          );
+    return (
+      <SafeAreaView style={styles.container}>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View style={styles.headerRow}>
+            <Pressable
+              style={styles.backButton}
+              onPress={() => setStatsSportId(null)}
+            >
+              <Text style={styles.backText}>Zurück</Text>
+            </Pressable>
+            <Text style={styles.headerTitle}>Statistik</Text>
+          </View>
+          <View style={styles.infoCard}>
+            <Text style={styles.sectionTitle}>{statsSport.name}</Text>
+            <Text style={styles.cardMeta}>Diese Woche</Text>
+            <Text style={styles.cardValue}>
+              {statsSport.type === "reps"
+                ? `${weeklyTotal} Wdh.`
+                : formatSeconds(weeklyTotal)}
+            </Text>
+          </View>
+          <View style={styles.infoCard}>
+            <Text style={styles.sectionTitle}>Tagesübersicht</Text>
+            {weekEntries.map((entry) => (
+              <View key={entry.key} style={styles.statRow}>
+                <Text style={styles.statLabel}>{entry.label}</Text>
+                <Text style={styles.statValue}>
+                  {formatSportValue(statsSport.type, entry.dayStats)}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
   if (selectedSport) {
     const isReps = selectedSport.type === "reps";
+    const weeklyTotal = computeWeeklyTotal(stats, selectedSport);
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
@@ -331,10 +432,25 @@ export default function App() {
             style={styles.backButton}
             onPress={() => setSelectedSportId(null)}
           >
-            <Text style={styles.backText}>Zurueck</Text>
+            <Text style={styles.backText}>Zurück</Text>
           </Pressable>
           <Text style={styles.headerTitle}>{selectedSport.name}</Text>
         </View>
+        <Pressable
+          style={styles.statsCard}
+          onPress={() => setStatsSportId(selectedSport.id)}
+        >
+          <Text style={styles.statsTitle}>Heute</Text>
+          <Text style={styles.statsValue}>
+            {formatSportValue(selectedSport.type, todayStats)}
+          </Text>
+          <Text style={styles.statsMeta}>
+            Woche:{" "}
+            {selectedSport.type === "reps"
+              ? `${weeklyTotal} Wdh.`
+              : formatSeconds(weeklyTotal)}
+          </Text>
+        </Pressable>
         {isReps ? (
           <Pressable
             style={styles.trackingArea}
@@ -386,12 +502,12 @@ export default function App() {
               style={styles.backButton}
               onPress={() => setIsSettingsOpen(false)}
             >
-              <Text style={styles.backText}>Zurueck</Text>
+              <Text style={styles.backText}>Zurück</Text>
             </Pressable>
-            <Text style={styles.headerTitle}>Insta Controller</Text>
+            <Text style={styles.headerTitle}>Screen Controller</Text>
           </View>
           <View style={styles.infoCard}>
-            <Text style={styles.cardTitle}>Heute verfuegbar</Text>
+            <Text style={styles.cardTitle}>Heute verfügbar</Text>
             <Text style={styles.cardValue}>
               {Math.floor(allowanceSeconds / 60)} min
             </Text>
@@ -402,14 +518,14 @@ export default function App() {
           <View style={styles.infoCard}>
             <Text style={styles.sectionTitle}>Berechtigungen</Text>
             <Text style={styles.helperText}>
-              Aktivere die Zugriffshilfe, damit die App Social Apps blockieren
+              Aktiviere die Zugriffshilfe, damit die App Social Apps blockieren
               kann, wenn die Zeit aufgebraucht ist.
             </Text>
             <Pressable
               style={styles.primaryButton}
               onPress={openAccessibilitySettings}
             >
-              <Text style={styles.primaryButtonText}>Zugriffshilfe oeffnen</Text>
+              <Text style={styles.primaryButtonText}>Zugriffshilfe öffnen</Text>
             </Pressable>
             {needsAccessibility ? (
               <Text style={styles.warningText}>Zugriffshilfe fehlt</Text>
@@ -418,10 +534,10 @@ export default function App() {
             )}
           </View>
           <View style={styles.infoCard}>
-            <Text style={styles.sectionTitle}>Apps auswaehlen</Text>
+            <Text style={styles.sectionTitle}>Apps auswählen</Text>
             {Platform.OS !== "android" ? (
               <Text style={styles.helperText}>
-                App-Auswahl ist nur auf Android verfuegbar.
+                App-Auswahl ist nur auf Android verfügbar.
               </Text>
             ) : (
               <View>
@@ -475,7 +591,7 @@ export default function App() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.headerRow}>
           <View>
-            <Text style={styles.title}>Sport gegen Insta Zeit</Text>
+            <Text style={styles.title}>Sport for Screen Time</Text>
             <Text style={styles.subtitle}>Deine Sportarten</Text>
           </View>
           <Pressable
@@ -491,10 +607,10 @@ export default function App() {
         </View>
         {showPermissionPrompt ? (
           <View style={styles.permissionCard}>
-            <Text style={styles.sectionTitle}>Zugriffshilfe noetig</Text>
+            <Text style={styles.sectionTitle}>Zugriffshilfe nötig</Text>
             <Text style={styles.helperText}>
               Aktiviere die Zugriffshilfe, damit Social Apps gesperrt werden
-              koennen.
+              können.
             </Text>
             <Pressable
               style={styles.primaryButton}
@@ -506,41 +622,59 @@ export default function App() {
         ) : null}
         {activeSports.length === 0 ? (
           <Text style={styles.helperText}>
-            Keine aktiven Sportarten. Fuege neue hinzu.
+            Keine aktiven Sportarten. Füge neue hinzu.
           </Text>
         ) : null}
-        {activeSports.map((sport) => (
-          <View key={sport.id} style={styles.sportCard}>
-            <View style={styles.sportInfo}>
-              <Text style={styles.sportName}>{sport.name}</Text>
-              <Text style={styles.sportMeta}>
-                {sport.type === "reps"
-                  ? "Wiederholungen"
-                  : "Zeitbasiert"}
-              </Text>
+        {activeSports.map((sport) => {
+          const daily = getTodayStat(stats, sport.id);
+          const weeklyTotal = computeWeeklyTotal(stats, sport);
+          return (
+            <View key={sport.id} style={styles.sportCard}>
+              <View style={styles.sportInfo}>
+                <Text style={styles.sportName}>{sport.name}</Text>
+                <Text style={styles.sportMeta}>
+                  {sport.type === "reps"
+                    ? "Wiederholungen"
+                    : "Zeitbasiert"}
+                </Text>
+              </View>
+              <Pressable
+                style={styles.statsInlineCard}
+                onPress={() => setStatsSportId(sport.id)}
+              >
+                <Text style={styles.statsInlineText}>
+                  Heute: {formatSportValue(sport.type, daily)}
+                </Text>
+                <Text style={styles.statsInlineText}>
+                  Woche:{" "}
+                  {sport.type === "reps"
+                    ? `${weeklyTotal} Wdh.`
+                    : formatSeconds(weeklyTotal)}
+                </Text>
+              </Pressable>
+              <View style={styles.cardActions}>
+                <Pressable
+                  style={styles.primaryButton}
+                  onPress={() => setSelectedSportId(sport.id)}
+                >
+                  <Text style={styles.primaryButtonText}>Tracken</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.secondaryButton}
+                  onPress={() => handleHideSport(sport.id, true)}
+                >
+                  <Text style={styles.secondaryButtonText}>Ausblenden</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.dangerButton}
+                  onPress={() => handleDeleteSport(sport.id)}
+                >
+                  <Text style={styles.primaryButtonText}>Löschen</Text>
+                </Pressable>
+              </View>
             </View>
-            <View style={styles.cardActions}>
-              <Pressable
-                style={styles.primaryButton}
-                onPress={() => setSelectedSportId(sport.id)}
-              >
-                <Text style={styles.primaryButtonText}>Tracken</Text>
-              </Pressable>
-              <Pressable
-                style={styles.secondaryButton}
-                onPress={() => handleHideSport(sport.id, true)}
-              >
-                <Text style={styles.secondaryButtonText}>Ausblenden</Text>
-              </Pressable>
-              <Pressable
-                style={styles.dangerButton}
-                onPress={() => handleDeleteSport(sport.id)}
-              >
-                <Text style={styles.primaryButtonText}>Loeschen</Text>
-              </Pressable>
-            </View>
-          </View>
-        ))}
+          );
+        })}
         <View style={styles.addCard}>
           <Text style={styles.addTitle}>Neue Sportart</Text>
           <TextInput
@@ -585,7 +719,7 @@ export default function App() {
             </Pressable>
           </View>
           <Pressable style={styles.primaryButton} onPress={handleAddSport}>
-            <Text style={styles.primaryButtonText}>Hinzufuegen</Text>
+            <Text style={styles.primaryButtonText}>Hinzufügen</Text>
           </Pressable>
         </View>
         <View style={styles.hiddenSection}>
@@ -611,6 +745,24 @@ export default function App() {
                         : "Zeitbasiert"}
                     </Text>
                   </View>
+                  <Pressable
+                    style={styles.statsInlineCard}
+                    onPress={() => setStatsSportId(sport.id)}
+                  >
+                    <Text style={styles.statsInlineText}>
+                      Heute:{" "}
+                      {formatSportValue(
+                        sport.type,
+                        getTodayStat(stats, sport.id)
+                      )}
+                    </Text>
+                    <Text style={styles.statsInlineText}>
+                      Woche:{" "}
+                      {sport.type === "reps"
+                        ? `${computeWeeklyTotal(stats, sport)} Wdh.`
+                        : formatSeconds(computeWeeklyTotal(stats, sport))}
+                    </Text>
+                  </Pressable>
                   <View style={styles.cardActions}>
                     <Pressable
                       style={styles.secondaryButton}
@@ -624,7 +776,7 @@ export default function App() {
                       style={styles.dangerButton}
                       onPress={() => handleDeleteSport(sport.id)}
                     >
-                      <Text style={styles.primaryButtonText}>Loeschen</Text>
+                      <Text style={styles.primaryButtonText}>Löschen</Text>
                     </Pressable>
                   </View>
                 </View>
@@ -643,6 +795,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20,
+    paddingTop: 32,
     paddingBottom: 40,
   },
   title: {
@@ -657,7 +810,8 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingTop: 28,
+    paddingBottom: 12,
     flexDirection: "row",
     alignItems: "center",
   },
@@ -743,6 +897,37 @@ const styles = StyleSheet.create({
   sportMeta: {
     marginTop: 4,
     color: "#8b8b8b",
+  },
+  statsInlineCard: {
+    backgroundColor: "#1f232a",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+  },
+  statsInlineText: {
+    color: "#e5e7eb",
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  statsCard: {
+    marginHorizontal: 20,
+    marginTop: 8,
+    backgroundColor: "#1f232a",
+    borderRadius: 16,
+    padding: 16,
+  },
+  statsTitle: {
+    color: "#9aa0a6",
+    marginBottom: 6,
+  },
+  statsValue: {
+    color: "#ffffff",
+    fontSize: 22,
+    fontWeight: "700",
+  },
+  statsMeta: {
+    marginTop: 6,
+    color: "#9aa0a6",
   },
   cardActions: {
     flexDirection: "row",
@@ -894,5 +1079,20 @@ const styles = StyleSheet.create({
   },
   appToggleActive: {
     color: "#22c55e",
+  },
+  statRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#1f232a",
+  },
+  statLabel: {
+    color: "#9aa0a6",
+    fontWeight: "600",
+  },
+  statValue: {
+    color: "#ffffff",
+    fontWeight: "600",
   },
 });
