@@ -1,13 +1,14 @@
-# Sport gegen Insta Zeit
+# Sport for Screen Time
 
-Eine einfache React Native App, die Sport gegen Social Media Zeit tauscht. Sportarten und Tageswerte werden lokal gespeichert, und ausgewaehlte Apps koennen auf Android blockiert werden, sobald die verdiente Zeit verbraucht ist.
+Eine einfache React Native App, die Sport gegen Social Media Zeit tauscht. Sportarten und Tageswerte werden lokal gespeichert, und ausgewählte Apps können auf Android blockiert werden, sobald die verdiente Zeit verbraucht ist.
 
 ## Features
-- Presets: Liegestuetze, Klimmzuege, Pushups, Joggen
-- Eigene Sportarten erstellen, ausblenden oder loeschen
+- Presets: Liegestütze, Klimmzüge, Pushups, Joggen
+- Eigene Sportarten erstellen, ausblenden oder löschen
 - Tracking: Wiederholungen per Tap, Zeit via Start/Stop
-- Tagesstatistik wird gespeichert und taeglich neu gestartet
-- Insta Controller: Apps auswaehlen, verdiente Zeit berechnen, Blocker bei Zeitende
+- Tagesstatistik wird gespeichert und täglich neu gestartet
+- Screen Controller: Apps auswählen, verdiente Zeit berechnen, Blocker bei Zeitende
+- Statistik-Ansicht pro Sportart (Tag & Woche)
 
 ## Zeit-Logik
 - Wiederholungen: 1 Rep = 1 Minute Social Time
@@ -18,17 +19,17 @@ Eine einfache React Native App, die Sport gegen Social Media Zeit tauscht. Sport
 AsyncStorage Keys:
 - `@sports_v1`: Liste der Sportarten
 - `@stats_v1`: Tageswerte je Sportart (`{ sportId: { "YYYY-MM-DD": { reps, seconds } } }`)
-- `@settings_v1`: Controller-Einstellungen (ausgewaehlte Apps)
+- `@settings_v1`: Controller-Einstellungen (ausgewählte Apps)
 
 ## Android Berechtigungen
 Die App nutzt eine Accessibility Service, um Apps im Vordergrund zu erkennen und bei Ablauf der Zeit eine Sperrseite anzuzeigen.
 - Zugriffshilfe (Accessibility Service) muss aktiviert werden
 - `QUERY_ALL_PACKAGES` wird verwendet, um installierte Apps zu listen
 
-Beim ersten Start wird nach der Zugriffshilfe gefragt. Die Freigabe kann jederzeit im Controller-Menue erneut geoeffnet werden.
+Beim ersten Start wird nach der Zugriffshilfe gefragt. Die Freigabe kann jederzeit im Controller-Menü erneut geöffnet werden.
 
 ## Entwicklung (Android)
-Ein Dev Build ist notwendig (Expo Go auf Android 14 hat Einschraenkungen).
+Ein Dev Build ist notwendig (Expo Go auf Android 14 hat Einschränkungen).
 
 ```bash
 npm install
@@ -37,5 +38,5 @@ npx expo start --dev-client
 ```
 
 ## Hinweise
-- Die Blocker-Seite fuehrt zurueck zum Homescreen, sobald die Zeit aufgebraucht ist.
-- Die App ist aktuell Android-only fuer die App-Auswahl und den Blocker.
+- Die Blocker-Seite führt zurück zum Homescreen, sobald die Zeit aufgebraucht ist.
+- Die App ist aktuell Android-only für die App-Auswahl und den Blocker.

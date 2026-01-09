@@ -1,4 +1,4 @@
 <resources>
-  <string name="app_name">Sport gegen Insta Zeit</string>
-  <string name="accessibility_service_description">Blockiert ausgewaehlte Apps, wenn keine Zeit mehr uebrig ist.</string>
+  <string name="app_name">Sport for Screen Time</string>
+  <string name="accessibility_service_description">Blockiert ausgewählte Apps, wenn keine Zeit mehr übrig ist.</string>
 </resources>
