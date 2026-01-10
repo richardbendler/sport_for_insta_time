@@ -589,6 +589,53 @@ const formatDateLabel = (key) => {
   return `${day}.${month}.${date.getFullYear()}`;
 };
 
+const getMonthsForCalendar = (keysSet) => {
+  const earliestKey = keysSet.size > 0 ? [...keysSet].sort()[0] : todayKey();
+  const earliestDate = parseDateKey(earliestKey);
+  const earliestMonthStart = new Date(
+    earliestDate.getFullYear(),
+    earliestDate.getMonth(),
+    1
+  );
+  const currentMonthStart = new Date();
+  currentMonthStart.setDate(1);
+  currentMonthStart.setHours(0, 0, 0, 0);
+  const months = [];
+  let cursor = new Date(currentMonthStart);
+  while (months.length < 2 || cursor >= earliestMonthStart) {
+    months.push(new Date(cursor));
+    cursor.setMonth(cursor.getMonth() - 1);
+  }
+  return months;
+};
+
+const buildWeeksForMonth = (monthDate) => {
+  const monthStart = new Date(
+    monthDate.getFullYear(),
+    monthDate.getMonth(),
+    1
+  );
+  const monthEnd = new Date(
+    monthDate.getFullYear(),
+    monthDate.getMonth() + 1,
+    0
+  );
+  const firstWeekStart = startOfWeek(monthStart);
+  const weeks = [];
+  const cursorDate = new Date(firstWeekStart);
+  while (cursorDate <= monthEnd) {
+    const weekStart = new Date(cursorDate);
+    const days = Array.from({ length: 7 }, (_, index) => {
+      const day = new Date(weekStart);
+      day.setDate(weekStart.getDate() + index);
+      return day;
+    });
+    weeks.push(days);
+    cursorDate.setDate(cursorDate.getDate() + 7);
+  }
+  return weeks;
+};
+
 const formatSeconds = (totalSeconds) => {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -796,6 +843,7 @@ export default function App() {
   const [statsSportId, setStatsSportId] = useState(null);
   const [statsDayKey, setStatsDayKey] = useState(null);
   const [overallStatsOpen, setOverallStatsOpen] = useState(false);
+  const [overallDayKey, setOverallDayKey] = useState(null);
   const [statsEditMode, setStatsEditMode] = useState(false);
   const [editEntryKey, setEditEntryKey] = useState(null);
   const [editEntryValue, setEditEntryValue] = useState("");
@@ -1241,6 +1289,10 @@ export default function App() {
         setStatsDayKey(null);
         return true;
       }
+      if (overallDayKey) {
+        setOverallDayKey(null);
+        return true;
+      }
       if (overallStatsOpen) {
         setOverallStatsOpen(false);
         return true;
@@ -1260,7 +1312,14 @@ export default function App() {
       handler
     );
     return () => subscription.remove();
-  }, [statsSportId, statsDayKey, overallStatsOpen, selectedSportId, isSettingsOpen]);
+  }, [
+    statsSportId,
+    statsDayKey,
+    overallDayKey,
+    overallStatsOpen,
+    selectedSportId,
+    isSettingsOpen,
+  ]);
 
   useEffect(() => {
     if (!statsSportId) {
@@ -1270,6 +1329,12 @@ export default function App() {
       setStatsDayKey(null);
     }
   }, [statsSportId]);
+
+  useEffect(() => {
+    if (!overallStatsOpen) {
+      setOverallDayKey(null);
+    }
+  }, [overallStatsOpen]);
 
   const loadInstalledApps = async () => {
     if (!InstaControl?.getInstalledApps) {
@@ -1364,49 +1429,56 @@ export default function App() {
       });
       return acc;
     }, {});
-    const earliestKey =
-      allKeys.size > 0 ? [...allKeys].sort()[0] : todayKey();
-    const earliestDate = parseDateKey(earliestKey);
-    const earliestMonthStart = new Date(
-      earliestDate.getFullYear(),
-      earliestDate.getMonth(),
-      1
-    );
-    const currentMonthStart = new Date();
-    currentMonthStart.setDate(1);
-    currentMonthStart.setHours(0, 0, 0, 0);
-    const months = [];
-    let cursor = new Date(currentMonthStart);
-    while (months.length < 2 || cursor >= earliestMonthStart) {
-      months.push(new Date(cursor));
-      cursor.setMonth(cursor.getMonth() - 1);
+    const months = getMonthsForCalendar(allKeys);
+    if (overallDayKey) {
+      const flatEntries = sports.flatMap((sport) => {
+        const dayLogs = (logs[sport.id] || {})[overallDayKey] || [];
+        return dayLogs.map((entry) => ({
+          ts: entry.ts,
+          seconds:
+            sport.type === "reps"
+              ? (entry.reps || 0) * (sport.screenSecondsPerUnit || 0)
+              : (entry.seconds || 0) * (sport.screenSecondsPerUnit || 0),
+        }));
+      });
+      const groups = groupEntriesByWindow(flatEntries, "time");
+      return (
+        <SafeAreaView style={styles.container}>
+          <ScrollView contentContainerStyle={styles.scrollContent}>
+            <View style={styles.headerRow}>
+              <Pressable
+                style={styles.backButton}
+                onPress={() => setOverallDayKey(null)}
+              >
+                <Text style={styles.backText}>{t("label.back")}</Text>
+              </Pressable>
+              <Text style={styles.headerTitle}>{t("label.dayDetails")}</Text>
+            </View>
+            <View style={styles.infoCard}>
+              <Text style={styles.sectionTitle}>{formatDateLabel(overallDayKey)}</Text>
+              <Text style={styles.cardMeta}>{t("label.overallStats")}</Text>
+            </View>
+            {groups.length === 0 ? (
+              <Text style={styles.helperText}>{t("label.noEntries")}</Text>
+            ) : (
+              groups.map((group, index) => {
+                const valueText = formatScreenTime(group.seconds || 0);
+                const range =
+                  group.startTs === group.endTs
+                    ? formatTime(group.startTs)
+                    : `${formatTime(group.startTs)}-${formatTime(group.endTs)}`;
+                return (
+                  <View key={`${group.startTs}-${index}`} style={styles.statRow}>
+                    <Text style={styles.statLabel}>{range}</Text>
+                    <Text style={styles.statValue}>{valueText}</Text>
+                  </View>
+                );
+              })
+            )}
+          </ScrollView>
+        </SafeAreaView>
+      );
     }
-    const buildWeeksForMonth = (monthDate) => {
-      const monthStart = new Date(
-        monthDate.getFullYear(),
-        monthDate.getMonth(),
-        1
-      );
-      const monthEnd = new Date(
-        monthDate.getFullYear(),
-        monthDate.getMonth() + 1,
-        0
-      );
-      const firstWeekStart = startOfWeek(monthStart);
-      const weeks = [];
-      const cursorDate = new Date(firstWeekStart);
-      while (cursorDate <= monthEnd) {
-        const weekStart = new Date(cursorDate);
-        const days = Array.from({ length: 7 }, (_, index) => {
-          const day = new Date(weekStart);
-          day.setDate(weekStart.getDate() + index);
-          return day;
-        });
-        weeks.push(days);
-        cursorDate.setDate(cursorDate.getDate() + 7);
-      }
-      return weeks;
-    };
     return (
       <SafeAreaView style={styles.container}>
         <Pressable
@@ -1450,13 +1522,16 @@ export default function App() {
                       const totalSeconds = dayTotals[key] || 0;
                       const hasValue = totalSeconds > 0;
                       const inMonth = day.getMonth() === monthDate.getMonth();
+                      const isToday = key === todayKey();
                       return (
-                        <View
+                        <Pressable
                           key={key}
                           style={[
                             styles.overallDayCell,
                             !inMonth && styles.overallDayCellOut,
+                            isToday && styles.overallDayCellToday,
                           ]}
+                          onPress={() => setOverallDayKey(key)}
                         >
                           <Text style={styles.overallWeekday}>
                             {weekdayLabels[index]}
@@ -1465,7 +1540,7 @@ export default function App() {
                           <Text style={styles.overallDayValue}>
                             {hasValue ? formatScreenTime(totalSeconds) : "-"}
                           </Text>
-                        </View>
+                        </Pressable>
                       );
                     })}
                   </View>
@@ -1520,21 +1595,8 @@ export default function App() {
             0
           );
     const sportStats = stats[statsSport.id] || {};
-    const calendarDays = buildCalendarDays(sportStats);
-    const monthMap = calendarDays.reduce((acc, day) => {
-      const monthKey = day.key.slice(0, 7);
-      if (!acc[monthKey]) {
-        acc[monthKey] = {
-          label: formatMonthLabel(day.date, language),
-          days: [],
-        };
-      }
-      acc[monthKey].days.push(day);
-      return acc;
-    }, {});
-    const monthEntries = Object.keys(monthMap)
-      .sort()
-      .map((key) => ({ key, ...monthMap[key] }));
+    const sportKeys = new Set(Object.keys(sportStats || {}));
+    const months = getMonthsForCalendar(sportKeys);
     const weekdayLabels = WEEKDAY_LABELS_BY_LANG[language] || WEEKDAY_LABELS;
     const editUnitLabel =
       statsSport.type === "reps" ? repsShort : t("label.timeUnit");
@@ -1579,6 +1641,49 @@ export default function App() {
       setEditEntryKey(null);
       setEditEntryValue("");
     };
+    if (statsDayKey) {
+      const dayLogs = (logs[statsSport.id] || {})[statsDayKey] || [];
+      const groups = groupEntriesByWindow(dayLogs, statsSport.type);
+      return (
+        <SafeAreaView style={styles.container}>
+          <ScrollView contentContainerStyle={styles.scrollContent}>
+            <View style={styles.headerRow}>
+              <Pressable
+                style={styles.backButton}
+                onPress={() => setStatsDayKey(null)}
+              >
+                <Text style={styles.backText}>{t("label.back")}</Text>
+              </Pressable>
+              <Text style={styles.headerTitle}>{t("label.dayDetails")}</Text>
+            </View>
+            <View style={styles.infoCard}>
+              <Text style={styles.sectionTitle}>{formatDateLabel(statsDayKey)}</Text>
+              <Text style={styles.cardMeta}>{getSportLabel(statsSport)}</Text>
+            </View>
+            {groups.length === 0 ? (
+              <Text style={styles.helperText}>{t("label.noEntries")}</Text>
+            ) : (
+              groups.map((group, index) => {
+                const valueText =
+                  statsSport.type === "reps"
+                    ? `${group.reps} ${repsShort}`
+                    : formatSeconds(group.seconds);
+                const range =
+                  group.startTs === group.endTs
+                    ? formatTime(group.startTs)
+                    : `${formatTime(group.startTs)}-${formatTime(group.endTs)}`;
+                return (
+                  <View key={`${group.startTs}-${index}`} style={styles.statRow}>
+                    <Text style={styles.statLabel}>{range}</Text>
+                    <Text style={styles.statValue}>{valueText}</Text>
+                  </View>
+                );
+              })
+            )}
+          </ScrollView>
+        </SafeAreaView>
+      );
+    }
     return (
       <SafeAreaView style={styles.container}>
         <Pressable
@@ -1619,61 +1724,64 @@ export default function App() {
               {t("label.screenTime")}: {formatScreenTime(weeklyScreenSeconds(stats, statsSport))}
             </Text>
           </View>
-          {monthEntries.map((month) => {
-            const firstDay = month.days[0];
-            const firstWeekday = (firstDay.date.getDay() + 6) % 7;
-            const placeholders = Array.from({ length: firstWeekday }, (_, index) => (
-              <View key={`spacer-${month.key}-${index}`} style={styles.calendarSpacer} />
-            ));
+          {months.map((monthDate) => {
+            const monthKey = `${monthDate.getFullYear()}-${String(
+              monthDate.getMonth() + 1
+            ).padStart(2, "0")}`;
+            const weeks = buildWeeksForMonth(monthDate);
             return (
-              <View key={month.key} style={styles.calendarMonth}>
-                <Text style={styles.calendarMonthTitle}>{month.label}</Text>
-                <View style={styles.calendarHeaderRow}>
-                  {weekdayLabels.map((label) => (
-                    <Text key={`${month.key}-${label}`} style={styles.calendarWeekLabel}>
-                      {label}
-                    </Text>
-                  ))}
-                </View>
-                <View style={styles.calendarGrid}>
-                  {placeholders}
-                  {month.days.map((day) => {
-                    const dayStats = sportStats[day.key] || { reps: 0, seconds: 0 };
-                    const hasValue =
-                      statsSport.type === "reps"
-                        ? dayStats.reps > 0
-                        : (dayStats.seconds || 0) > 0;
-                    const displayValue = hasValue
-                      ? statsSport.type === "reps"
-                        ? `${dayStats.reps}`
-                        : formatSeconds(dayStats.seconds || 0)
-                      : "-";
-                    return (
-                      <Pressable
-                        key={day.key}
-                        style={styles.calendarCell}
-                        onPress={() => {
-                          if (!statsEditMode) {
-                            setStatsDayKey(day.key);
-                          }
-                        }}
-                      >
-                        <Text style={styles.calendarDayText}>
-                          {day.date.getDate()}
-                        </Text>
-                        <Text style={styles.calendarValueText}>{displayValue}</Text>
-                        {statsEditMode && hasValue ? (
-                          <Pressable
-                            style={styles.calendarEditButton}
-                            onPress={() => openEditEntry(day.key)}
-                          >
-                            <Text style={styles.calendarEditText}>−</Text>
-                          </Pressable>
-                        ) : null}
-                      </Pressable>
-                    );
-                  })}
-                </View>
+              <View key={monthKey} style={styles.overallMonth}>
+                <Text style={styles.calendarMonthTitle}>
+                  {formatMonthLabel(monthDate, language)}
+                </Text>
+                {weeks.map((weekDays, weekIndex) => (
+                  <View key={`${monthKey}-w${weekIndex}`} style={styles.overallWeekRow}>
+                    {weekDays.map((day, index) => {
+                      const key = dateKeyFromDate(day);
+                      const dayStats = sportStats[key] || { reps: 0, seconds: 0 };
+                      const hasValue =
+                        statsSport.type === "reps"
+                          ? dayStats.reps > 0
+                          : (dayStats.seconds || 0) > 0;
+                      const displayValue = hasValue
+                        ? statsSport.type === "reps"
+                          ? `${dayStats.reps}`
+                          : formatSeconds(dayStats.seconds || 0)
+                        : "-";
+                      const inMonth = day.getMonth() === monthDate.getMonth();
+                      const isToday = key === todayKey();
+                      return (
+                        <Pressable
+                          key={key}
+                          style={[
+                            styles.overallDayCell,
+                            !inMonth && styles.overallDayCellOut,
+                            isToday && styles.overallDayCellToday,
+                          ]}
+                          onPress={() => {
+                            if (!statsEditMode) {
+                              setStatsDayKey(key);
+                            }
+                          }}
+                        >
+                          <Text style={styles.overallWeekday}>
+                            {weekdayLabels[index]}
+                          </Text>
+                          <Text style={styles.overallDayNumber}>{day.getDate()}</Text>
+                          <Text style={styles.overallDayValue}>{displayValue}</Text>
+                          {statsEditMode && hasValue ? (
+                            <Pressable
+                              style={styles.calendarEditButton}
+                              onPress={() => openEditEntry(key)}
+                            >
+                              <Text style={styles.calendarEditText}>-</Text>
+                            </Pressable>
+                          ) : null}
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                ))}
               </View>
             );
           })}
@@ -2650,6 +2758,10 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.card,
     paddingVertical: 6,
   },
+  overallDayCellToday: {
+    borderWidth: 1,
+    borderColor: COLORS.accent,
+  },
   overallDayCellOut: {
     opacity: 0.4,
   },
@@ -2997,46 +3109,3 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 });
-    if (statsDayKey) {
-      const dayLogs = (logs[statsSport.id] || {})[statsDayKey] || [];
-      const groups = groupEntriesByWindow(dayLogs, statsSport.type);
-      return (
-        <SafeAreaView style={styles.container}>
-          <ScrollView contentContainerStyle={styles.scrollContent}>
-            <View style={styles.headerRow}>
-              <Pressable
-                style={styles.backButton}
-                onPress={() => setStatsDayKey(null)}
-              >
-                <Text style={styles.backText}>{t("label.back")}</Text>
-              </Pressable>
-              <Text style={styles.headerTitle}>{t("label.dayDetails")}</Text>
-            </View>
-            <View style={styles.infoCard}>
-              <Text style={styles.sectionTitle}>{formatDateLabel(statsDayKey)}</Text>
-              <Text style={styles.cardMeta}>{getSportLabel(statsSport)}</Text>
-            </View>
-            {groups.length === 0 ? (
-              <Text style={styles.helperText}>{t("label.noEntries")}</Text>
-            ) : (
-              groups.map((group, index) => {
-                const valueText =
-                  statsSport.type === "reps"
-                    ? `${group.reps} ${repsShort}`
-                    : formatSeconds(group.seconds);
-                const range =
-                  group.startTs === group.endTs
-                    ? formatTime(group.startTs)
-                    : `${formatTime(group.startTs)}–${formatTime(group.endTs)}`;
-                return (
-                  <View key={`${group.startTs}-${index}`} style={styles.statRow}>
-                    <Text style={styles.statLabel}>{range}</Text>
-                    <Text style={styles.statValue}>{valueText}</Text>
-                  </View>
-                );
-              })
-            )}
-          </ScrollView>
-        </SafeAreaView>
-      );
-    }
