@@ -1,18 +1,21 @@
 {
-  "name": "sport_for_insta_time",
-  "version": "1.0.0",
-  "main": "node_modules/expo/AppEntry.js",
-  "scripts": {
-    "start": "expo start",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
-    "web": "expo start --web"
-  },
-  "dependencies": {
-    "@react-native-async-storage/async-storage": "1.21.0",
-    "expo": "~50.0.14",
-    "expo-dev-client": "~3.3.12",
-    "react": "18.2.0",
-    "react-native": "0.73.6"
-  }
+    "name":  "sport_for_insta_time",
+    "version":  "1.0.0",
+    "main":  "node_modules/expo/AppEntry.js",
+    "scripts":  {
+                    "start":  "expo start",
+                    "android":  "expo run:android",
+                    "ios":  "expo run:ios",
+                    "web":  "expo start --web"
+                },
+    "dependencies":  {
+                         "@react-native-async-storage/async-storage":  "1.21.0",
+                         "expo":  "~50.0.14",
+                         "expo-dev-client":  "~3.3.12",
+                         "react":  "18.2.0",
+                         "react-native":  "0.73.6"
+                     },
+    "devDependencies":  {
+
+                        }
 }
