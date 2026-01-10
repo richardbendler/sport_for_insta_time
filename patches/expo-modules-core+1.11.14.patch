@@ -36364,7 +36364,7 @@ new file mode 100644
 index 0000000..7170888
 Binary files /dev/null and b/node_modules/expo-modules-core/android/build/tmp/kotlin-classes/debug/expo/modules/kotlin/views/ViewWrapperDelegateHolder.class differ
 diff --git a/node_modules/expo-modules-core/android/src/main/java/expo/modules/adapters/react/permissions/PermissionsService.kt b/node_modules/expo-modules-core/android/src/main/java/expo/modules/adapters/react/permissions/PermissionsService.kt
-index ae0a811..386f773 100644
+index ae0a811..05ca9f3 100644
 --- a/node_modules/expo-modules-core/android/src/main/java/expo/modules/adapters/react/permissions/PermissionsService.kt
 +++ b/node_modules/expo-modules-core/android/src/main/java/expo/modules/adapters/react/permissions/PermissionsService.kt
 @@ -163,7 +163,7 @@ open class PermissionsService(val context: Context) : InternalModule, Permission
@@ -36376,3 +36376,12 @@ index ae0a811..386f773 100644
        }
        return false
      } catch (e: PackageManager.NameNotFoundException) {
+@@ -267,7 +267,7 @@ open class PermissionsService(val context: Context) : InternalModule, Permission
+       if (requestCode == PERMISSIONS_REQUEST) {
+         synchronized(this@PermissionsService) {
+           val currentListener = requireNotNull(mCurrentPermissionListener)
+-          currentListener.onResult(parseNativeResult(receivePermissions, grantResults))
++          currentListener.onResult(parseNativeResult(receivePermissions ?: emptyArray(), grantResults))
+           mCurrentPermissionListener = null
+ 
+           mPendingPermissionCalls.poll()?.let { pendingCall ->
