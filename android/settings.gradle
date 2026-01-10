@@ -1,5 +1,10 @@
 pluginManagement {
-  includeBuild(new File(rootDir, "../node_modules/@react-native/gradle-plugin"))
+  includeBuild("../node_modules/@react-native/gradle-plugin")
+  repositories {
+    mavenCentral()
+    google()
+    gradlePluginPortal()
+  }
 }
 
 plugins {
