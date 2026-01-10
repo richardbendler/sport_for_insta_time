@@ -1,4 +1,4 @@
-﻿<resources>
+<resources>
   <string name="app_name">Sport for Screen Time</string>
   <string name="accessibility_service_description">Blockiert ausgewählte Apps, wenn keine Zeit mehr übrig ist.</string>
 </resources>
