@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
   <uses-permission android:name="android.permission.INTERNET"/>
-  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
   <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
   <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
   <uses-permission android:name="android.permission.VIBRATE"/>
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
@@ -12,9 +12,8 @@
       <data android:scheme="https"/>
     </intent>
   </queries>
-  <application android:name=".MainApplication" android:label="@string/app_name" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" android:allowBackup="true" android:theme="@style/AppTheme">
+  <application android:name=".MainApplication" android:label="@string/app_name" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" android:allowBackup="true" android:theme="@style/AppTheme" android:supportsRtl="true" android:enableOnBackInvokedCallback="false">
     <meta-data android:name="expo.modules.updates.ENABLED" android:value="false"/>
-    <meta-data android:name="expo.modules.updates.EXPO_SDK_VERSION" android:value="50.0.0"/>
     <meta-data android:name="expo.modules.updates.EXPO_UPDATES_CHECK_ON_LAUNCH" android:value="ALWAYS"/>
     <meta-data android:name="expo.modules.updates.EXPO_UPDATES_LAUNCH_WAIT_MS" android:value="0"/>
     <activity android:name=".MainActivity" android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|uiMode" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:theme="@style/Theme.App.SplashScreen" android:exported="true" android:screenOrientation="portrait">
@@ -27,40 +26,22 @@
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="com.richardbendler.sportforinstatime"/>
-        <data android:scheme="exp+sport-for-insta-time"/>
+        <data android:scheme="exp+sport-for-screen-time"/>
       </intent-filter>
     </activity>
-    <activity
-      android:name=".InstaBlockerActivity"
-      android:exported="false"
-      android:excludeFromRecents="true"
-      android:taskAffinity=""
-      android:theme="@style/Theme.App.Blocker" />
-    <activity
-      android:name=".SportWidgetConfigActivity"
-      android:exported="false"
-      android:theme="@style/Theme.App.Blocker" />
-    <receiver
-      android:name=".SportWidgetProvider"
-      android:exported="true">
+    <activity android:name=".InstaBlockerActivity" android:exported="false" android:excludeFromRecents="true" android:taskAffinity="" android:theme="@style/Theme.App.Blocker"/>
+    <activity android:name=".SportWidgetConfigActivity" android:exported="false" android:theme="@style/Theme.App.Blocker"/>
+    <receiver android:name=".SportWidgetProvider" android:exported="true">
       <intent-filter>
-        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
       </intent-filter>
-      <meta-data
-        android:name="android.appwidget.provider"
-        android:resource="@xml/sport_widget_info" />
+      <meta-data android:name="android.appwidget.provider" android:resource="@xml/sport_widget_info"/>
     </receiver>
-    <service
-      android:name=".InstaBlockerService"
-      android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-      android:exported="false">
+    <service android:name=".InstaBlockerService" android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" android:exported="false">
       <intent-filter>
-        <action android:name="android.accessibilityservice.AccessibilityService" />
+        <action android:name="android.accessibilityservice.AccessibilityService"/>
       </intent-filter>
-      <meta-data
-        android:name="android.accessibilityservice"
-        android:resource="@xml/accessibility_service_config" />
+      <meta-data android:name="android.accessibilityservice" android:resource="@xml/accessibility_service_config"/>
     </service>
-    <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" android:exported="false"/>
   </application>
 </manifest>
