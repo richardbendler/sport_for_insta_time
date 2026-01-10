@@ -12,6 +12,7 @@ import {
   Platform,
   BackHandler,
   Alert,
+  useWindowDimensions,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -22,43 +23,13 @@ const STORAGE_KEYS = {
   stats: "@stats_v1",
   settings: "@settings_v1",
   permissions: "@permissions_prompted_v1",
+  usagePermissions: "@usage_permissions_prompted_v1",
+  carryover: "@carryover_seconds_v1",
+  carryoverDay: "@carryover_day_v1",
+  usageSnapshot: "@usage_snapshot_v1",
   logs: "@logs_v1",
 };
 
-const DEFAULT_SPORTS = [
-  {
-    id: "pushups",
-    name: "Liegestütze",
-    type: "reps",
-    hidden: false,
-    icon: "💪",
-    screenSecondsPerUnit: 60,
-  },
-  {
-    id: "pullups",
-    name: "Klimmzüge",
-    type: "reps",
-    hidden: false,
-    icon: "🏋️",
-    screenSecondsPerUnit: 90,
-  },
-  {
-    id: "pushups_alt",
-    name: "Situps",
-    type: "reps",
-    hidden: false,
-    icon: "🧘",
-    screenSecondsPerUnit: 45,
-  },
-  {
-    id: "jogging",
-    name: "Joggen",
-    type: "time",
-    hidden: false,
-    icon: "🏃",
-    screenSecondsPerUnit: 1.2,
-  },
-];
 
 const DEFAULT_SETTINGS = {
   controlledApps: [],
@@ -139,34 +110,34 @@ const PRESET_KEYS = {
 };
 
 const COLORS = {
-  ink: "#100f0c",
-  amber: "#f4b545",
-  ember: "#e55c4f",
-  olive: "#7fb069",
-  background: "#100f0c",
-  surface: "rgba(244, 226, 194, 0.12)",
-  card: "rgba(244, 226, 194, 0.08)",
-  cardAlt: "rgba(244, 226, 194, 0.18)",
-  cardDark: "rgba(24, 22, 18, 0.9)",
-  sportCard: "rgba(24, 22, 18, 0.9)",
-  overlay: "rgba(20, 40, 30, 0.92)",
-  modalSurface: "rgba(32, 70, 52, 0.96)",
-  menuSurface: "rgba(32, 70, 52, 0.9)",
-  text: "#f4e2c2",
-  muted: "rgba(244, 226, 194, 0.68)",
-  accent: "#f4b545",
-  accentDark: "rgba(244, 181, 69, 0.85)",
-  success: "rgba(127, 176, 105, 0.9)",
-  warning: "rgba(244, 181, 69, 0.9)",
-  danger: "rgba(229, 92, 79, 0.9)",
-  white: "#fff7ea",
+  ink: "#0b1020",
+  amber: "#f59e0b",
+  ember: "#ef4444",
+  olive: "#22c55e",
+  background: "#0f172a",
+  surface: "rgba(148, 163, 184, 0.12)",
+  card: "rgba(15, 23, 42, 0.72)",
+  cardAlt: "rgba(148, 163, 184, 0.18)",
+  cardDark: "rgba(2, 6, 23, 0.9)",
+  sportCard: "rgba(15, 23, 42, 0.9)",
+  overlay: "rgba(3, 7, 18, 0.94)",
+  modalSurface: "rgba(15, 23, 42, 0.96)",
+  menuSurface: "rgba(30, 41, 59, 0.95)",
+  text: "#f8fafc",
+  muted: "rgba(226, 232, 240, 0.7)",
+  accent: "#f59e0b",
+  accentDark: "rgba(245, 158, 11, 0.85)",
+  success: "rgba(34, 197, 94, 0.9)",
+  warning: "rgba(245, 158, 11, 0.9)",
+  danger: "rgba(239, 68, 68, 0.9)",
+  white: "#f8fafc",
 };
 
 const STRINGS = {
   de: {
     "app.title": "Sport für Screen Time",
     "menu.sports": "Deine Sportarten",
-    "menu.apps": "Apps",
+    "menu.apps": "Eingeschränkte Apps bearbeiten",
     "menu.settings": "Screen Controller",
     "menu.stats": "Statistik",
     "menu.language": "Sprache",
@@ -196,8 +167,16 @@ const STRINGS = {
     "label.permissions": "Berechtigungen",
     "label.permissionsIntro":
       "Damit Screen Time berechnet und Apps blockiert werden können, braucht die App Zugriff. Du wirst jetzt zu den Einstellungen geführt.",
+    "label.carryover": "Uebertrag (50% von gestern)",
+    "label.usageAccess": "Nutzungszugriff",
+    "label.usageAccessHint":
+      "Damit Apps nach Nutzungszeit sortiert werden k?nnen, braucht die App Nutzungszugriff.",
+    "label.openUsageAccess": "Nutzungszugriff aktivieren",
+    "label.usageAccessMissing": "Nutzungszugriff fehlt",
+    "label.usageAccessActive": "Nutzungszugriff aktiv",
     "label.later": "Später",
     "label.apps": "Apps auswählen",
+    "label.searchApps": "Apps suchen",
     "label.noApps": "Keine Apps geladen. Tippe auf \"Apps laden\".",
     "label.accessibilityMissing": "Zugriffshilfe fehlt",
     "label.accessibilityActive": "Zugriffshilfe aktiv",
@@ -218,6 +197,8 @@ const STRINGS = {
     "label.repsShort": "Wdh.",
     "label.timeUnit": "Zeit",
     "label.timeBased": "Zeitbasiert",
+    "label.typeHelp":
+      "Wiederholungen: fuer Zaehlen (z.B. 10 Liegestuetze). Zeitbasiert: fuer Minuten/Sekunden (z.B. 15 Minuten Joggen).",
     "label.activateNow": "Jetzt aktivieren",
     "label.loadApps": "Apps laden",
     "label.androidOnly": "App-Auswahl ist nur auf Android verfügbar.",
@@ -255,7 +236,7 @@ const STRINGS = {
   en: {
     "app.title": "Sport for Screen Time",
     "menu.sports": "Your sports",
-    "menu.apps": "Apps",
+    "menu.apps": "Edit restricted apps",
     "menu.settings": "Screen Controller",
     "menu.stats": "Stats",
     "menu.language": "Language",
@@ -285,8 +266,16 @@ const STRINGS = {
     "label.permissions": "Permissions",
     "label.permissionsIntro":
       "To track screen time and block apps, the app needs access. You'll be sent to settings now.",
+    "label.carryover": "Carryover (50% of yesterday)",
+    "label.usageAccess": "Usage access",
+    "label.usageAccessHint":
+      "Allow usage access so apps can be sorted by usage time.",
+    "label.openUsageAccess": "Enable usage access",
+    "label.usageAccessMissing": "Usage access missing",
+    "label.usageAccessActive": "Usage access active",
     "label.later": "Later",
     "label.apps": "Choose apps",
+    "label.searchApps": "Search apps",
     "label.noApps": "No apps loaded. Tap \"Load apps\".",
     "label.accessibilityMissing": "Accessibility missing",
     "label.accessibilityActive": "Accessibility active",
@@ -307,6 +296,8 @@ const STRINGS = {
     "label.repsShort": "reps",
     "label.timeUnit": "Time",
     "label.timeBased": "Time-based",
+    "label.typeHelp":
+      "Repetitions: for counting sets (e.g. 10 push-ups). Time-based: for minutes/seconds (e.g. 15 minutes jogging).",
     "label.activateNow": "Enable now",
     "label.loadApps": "Load apps",
     "label.androidOnly": "App selection is Android-only.",
@@ -343,7 +334,7 @@ const STRINGS = {
   es: {
     "app.title": "Deporte por tiempo de pantalla",
     "menu.sports": "Tus deportes",
-    "menu.apps": "Apps",
+    "menu.apps": "Editar apps restringidas",
     "menu.settings": "Control de pantalla",
     "menu.stats": "Estadísticas",
     "menu.language": "Idioma",
@@ -373,8 +364,16 @@ const STRINGS = {
     "label.permissions": "Permisos",
     "label.permissionsIntro":
       "Para medir el tiempo de pantalla y bloquear apps, la app necesita acceso. Ahora te llevaremos a ajustes.",
+    "label.carryover": "Arrastre (50% de ayer)",
+    "label.usageAccess": "Acceso de uso",
+    "label.usageAccessHint":
+      "Permite el acceso de uso para ordenar las apps por tiempo de uso.",
+    "label.openUsageAccess": "Activar acceso de uso",
+    "label.usageAccessMissing": "Acceso de uso faltante",
+    "label.usageAccessActive": "Acceso de uso activo",
     "label.later": "Más tarde",
     "label.apps": "Elegir apps",
+    "label.searchApps": "Buscar apps",
     "label.noApps": "No hay apps cargadas. Toca \"Cargar apps\".",
     "label.accessibilityMissing": "Accesibilidad desactivada",
     "label.accessibilityActive": "Accesibilidad activa",
@@ -395,6 +394,8 @@ const STRINGS = {
     "label.repsShort": "rep.",
     "label.timeUnit": "Tiempo",
     "label.timeBased": "Por tiempo",
+    "label.typeHelp":
+      "Repeticiones: para contar series (p. ej. 10 flexiones). Tiempo: para minutos/segundos (p. ej. 15 minutos).",
     "label.activateNow": "Activar ahora",
     "label.loadApps": "Cargar apps",
     "label.androidOnly": "La selección de apps es solo para Android.",
@@ -432,7 +433,7 @@ const STRINGS = {
   fr: {
     "app.title": "Sport pour le temps d’écran",
     "menu.sports": "Tes sports",
-    "menu.apps": "Apps",
+    "menu.apps": "Modifier les apps restreintes",
     "menu.settings": "Contrôle écran",
     "menu.stats": "Statistiques",
     "menu.language": "Langue",
@@ -462,8 +463,16 @@ const STRINGS = {
     "label.permissions": "Autorisations",
     "label.permissionsIntro":
       "Pour suivre le temps d’écran et bloquer des apps, l’app a besoin d’accès. Vous allez être redirigé vers les réglages.",
+    "label.carryover": "Report (50% d'hier)",
+    "label.usageAccess": "Acces d'utilisation",
+    "label.usageAccessHint":
+      "Autorisez l'acces d'utilisation pour trier les apps par temps d'usage.",
+    "label.openUsageAccess": "Activer l'acces d'utilisation",
+    "label.usageAccessMissing": "Acces d'utilisation manquant",
+    "label.usageAccessActive": "Acces d'utilisation actif",
     "label.later": "Plus tard",
     "label.apps": "Choisir les apps",
+    "label.searchApps": "Rechercher des apps",
     "label.noApps": "Aucune app chargée. Touchez \"Charger les apps\".",
     "label.accessibilityMissing": "Accessibilité inactive",
     "label.accessibilityActive": "Accessibilité active",
@@ -484,6 +493,8 @@ const STRINGS = {
     "label.repsShort": "rép.",
     "label.timeUnit": "Temps",
     "label.timeBased": "Basé sur le temps",
+    "label.typeHelp":
+      "Repetitions: pour compter les series (ex. 10 pompes). Temps: pour minutes/secondes (ex. 15 minutes).",
     "label.activateNow": "Activer",
     "label.loadApps": "Charger les apps",
     "label.androidOnly": "La sélection des apps est uniquement sur Android.",
@@ -800,16 +811,6 @@ const computeWeeklyTotal = (stats, sport) => {
   );
 };
 
-const ensureDefaultSports = async () => {
-  const existing = await AsyncStorage.getItem(STORAGE_KEYS.sports);
-  if (!existing) {
-    await AsyncStorage.setItem(
-      STORAGE_KEYS.sports,
-      JSON.stringify(DEFAULT_SPORTS)
-    );
-  }
-};
-
 const ensureDefaultSettings = async () => {
   const existing = await AsyncStorage.getItem(STORAGE_KEYS.settings);
   if (!existing) {
@@ -834,6 +835,7 @@ const computeAllowanceSeconds = (stats, sports) => {
   return Math.max(0, Math.floor(totalSeconds));
 };
 export default function App() {
+  const { width } = useWindowDimensions();
   const [sports, setSports] = useState([]);
   const [stats, setStats] = useState({});
   const [logs, setLogs] = useState({});
@@ -857,6 +859,9 @@ export default function App() {
   const [newRateMinutes, setNewRateMinutes] = useState("1");
   const [showIconInput, setShowIconInput] = useState(false);
   const [installedApps, setInstalledApps] = useState([]);
+  const [appSearch, setAppSearch] = useState("");
+  const [appUsageMap, setAppUsageMap] = useState({});
+  const [carryoverSeconds, setCarryoverSeconds] = useState(0);
   const [usageState, setUsageState] = useState({
     allowanceSeconds: 0,
     usedSeconds: 0,
@@ -864,6 +869,8 @@ export default function App() {
   });
   const [needsAccessibility, setNeedsAccessibility] = useState(false);
   const [permissionsPrompted, setPermissionsPrompted] = useState(false);
+  const [usagePermissionsPrompted, setUsagePermissionsPrompted] = useState(false);
+  const [usageAccessGranted, setUsageAccessGranted] = useState(true);
   const [permissionsCheckTick, setPermissionsCheckTick] = useState(0);
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
 
@@ -906,13 +913,19 @@ export default function App() {
 
   useEffect(() => {
     const load = async () => {
-      await ensureDefaultSports();
       await ensureDefaultSettings();
       const sportsRaw = await AsyncStorage.getItem(STORAGE_KEYS.sports);
       const statsRaw = await AsyncStorage.getItem(STORAGE_KEYS.stats);
       const logsRaw = await AsyncStorage.getItem(STORAGE_KEYS.logs);
       const settingsRaw = await AsyncStorage.getItem(STORAGE_KEYS.settings);
       const permissionsRaw = await AsyncStorage.getItem(STORAGE_KEYS.permissions);
+      const usagePermissionsRaw = await AsyncStorage.getItem(
+        STORAGE_KEYS.usagePermissions
+      );
+      const carryoverDayRaw = await AsyncStorage.getItem(
+        STORAGE_KEYS.carryoverDay
+      );
+      const carryoverRaw = await AsyncStorage.getItem(STORAGE_KEYS.carryover);
       const parsedSports = sportsRaw ? JSON.parse(sportsRaw) : [];
       const { normalized, changed } = normalizeSports(parsedSports);
       setSports(normalized);
@@ -930,6 +943,14 @@ export default function App() {
       setSettings(parsedSettings);
       setLanguage(parsedSettings.language || DEFAULT_SETTINGS.language);
       setPermissionsPrompted(permissionsRaw === "true");
+      setUsagePermissionsPrompted(usagePermissionsRaw === "true");
+      const today = todayKey();
+      if (carryoverDayRaw === today) {
+        const parsedCarryover = Number(carryoverRaw || 0);
+        setCarryoverSeconds(Number.isFinite(parsedCarryover) ? parsedCarryover : 0);
+      } else {
+        setCarryoverSeconds(0);
+      }
     };
     load();
   }, []);
@@ -1213,6 +1234,15 @@ export default function App() {
     setPermissionsCheckTick((tick) => tick + 1);
   };
 
+  const checkUsageAccess = async () => {
+    if (!InstaControl?.hasUsageAccess) {
+      return true;
+    }
+    const hasAccess = await InstaControl.hasUsageAccess();
+    setUsageAccessGranted(!!hasAccess);
+    return !!hasAccess;
+  };
+
   const refreshUsageState = async () => {
     if (!InstaControl?.getUsageState) {
       return;
@@ -1231,10 +1261,19 @@ export default function App() {
     }
   };
 
-  const allowanceSeconds = useMemo(
+  const openUsageAccessSettings = async () => {
+    if (InstaControl?.openUsageAccessSettings) {
+      InstaControl.openUsageAccessSettings();
+      await AsyncStorage.setItem(STORAGE_KEYS.usagePermissions, "true");
+      setUsagePermissionsPrompted(true);
+    }
+  };
+
+  const baseAllowanceSeconds = useMemo(
     () => computeAllowanceSeconds(stats, sports),
     [stats, sports]
   );
+  const allowanceSeconds = baseAllowanceSeconds + carryoverSeconds;
 
   useEffect(() => {
     if (!InstaControl?.setControlledApps || !InstaControl?.setDailyAllowanceSeconds) {
@@ -1246,7 +1285,65 @@ export default function App() {
   }, [settings, allowanceSeconds]);
 
   useEffect(() => {
+    if (!usageState.day) {
+      return;
+    }
+    const reconcileCarryover = async () => {
+      const today = usageState.day || todayKey();
+      const carryoverDayRaw = await AsyncStorage.getItem(
+        STORAGE_KEYS.carryoverDay
+      );
+      const snapshotRaw = await AsyncStorage.getItem(STORAGE_KEYS.usageSnapshot);
+      const snapshot = snapshotRaw ? JSON.parse(snapshotRaw) : null;
+      let nextCarryover = carryoverSeconds;
+
+      if (
+        snapshot?.day &&
+        snapshot.day !== today &&
+        carryoverDayRaw !== today
+      ) {
+        const remaining = Math.max(
+          0,
+          (snapshot.allowanceSeconds || 0) - (snapshot.usedSeconds || 0)
+        );
+        nextCarryover = Math.floor(remaining / 2);
+        await AsyncStorage.setItem(STORAGE_KEYS.carryoverDay, today);
+        await AsyncStorage.setItem(
+          STORAGE_KEYS.carryover,
+          String(nextCarryover)
+        );
+        setCarryoverSeconds(nextCarryover);
+      } else if (carryoverDayRaw !== today && !snapshot?.day) {
+        await AsyncStorage.setItem(STORAGE_KEYS.carryoverDay, today);
+        await AsyncStorage.setItem(STORAGE_KEYS.carryover, "0");
+        if (carryoverSeconds !== 0) {
+          setCarryoverSeconds(0);
+        }
+        nextCarryover = 0;
+      }
+
+      const totalAllowance = baseAllowanceSeconds + nextCarryover;
+      const nextSnapshot = {
+        day: today,
+        allowanceSeconds: totalAllowance,
+        usedSeconds: usageState.usedSeconds || 0,
+      };
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.usageSnapshot,
+        JSON.stringify(nextSnapshot)
+      );
+    };
+    reconcileCarryover();
+  }, [
+    usageState.day,
+    usageState.usedSeconds,
+    baseAllowanceSeconds,
+    carryoverSeconds,
+  ]);
+
+  useEffect(() => {
     checkAccessibility();
+    checkUsageAccess();
   }, [isSettingsOpen, statsSportId]);
 
   useEffect(() => {
@@ -1271,6 +1368,29 @@ export default function App() {
       { cancelable: true }
     );
   }, [needsAccessibility, permissionsCheckTick]);
+
+  useEffect(() => {
+    if (Platform.OS !== "android") {
+      return;
+    }
+    if (usageAccessGranted || usagePermissionsPrompted) {
+      return;
+    }
+    const now = Date.now();
+    if (now - lastPermissionPromptAt.current < 10000) {
+      return;
+    }
+    lastPermissionPromptAt.current = now;
+    Alert.alert(
+      t("label.usageAccess"),
+      t("label.usageAccessHint"),
+      [
+        { text: t("label.later"), style: "cancel" },
+        { text: t("label.confirm"), onPress: openUsageAccessSettings },
+      ],
+      { cancelable: true }
+    );
+  }, [usageAccessGranted, usagePermissionsPrompted]);
 
   useEffect(() => {
     if (!selectedSportId) {
@@ -1340,8 +1460,23 @@ export default function App() {
     if (!InstaControl?.getInstalledApps) {
       return;
     }
+    const hasUsageAccess = await checkUsageAccess();
     const apps = await InstaControl.getInstalledApps();
     setInstalledApps(apps || []);
+    if (!hasUsageAccess || !InstaControl?.getAppUsageStats) {
+      setAppUsageMap({});
+      return;
+    }
+    const usageStats = await InstaControl.getAppUsageStats();
+    const usageMap = {};
+    (usageStats || []).forEach((entry) => {
+      if (!entry?.packageName) {
+        return;
+      }
+      const totalMs = Number(entry.totalTimeMs || 0);
+      usageMap[entry.packageName] = Number.isFinite(totalMs) ? totalMs : 0;
+    });
+    setAppUsageMap(usageMap);
   };
 
   const toggleControlledApp = async (packageName) => {
@@ -1351,6 +1486,9 @@ export default function App() {
       ? current.filter((pkg) => pkg !== packageName)
       : [packageName, ...current];
     await saveSettings({ ...settings, controlledApps: nextApps });
+    if (InstaControl?.setControlledApps) {
+      InstaControl.setControlledApps(nextApps);
+    }
   };
 
   const handleStart = () => {
@@ -1389,7 +1527,27 @@ export default function App() {
   }, [stats, selectedSport]);
 
   const showPermissionPrompt =
-    Platform.OS === "android" && !permissionsPrompted && needsAccessibility;
+    Platform.OS === "android" &&
+    ((needsAccessibility && !permissionsPrompted) ||
+      (!usageAccessGranted && !usagePermissionsPrompted));
+  const missingPermissions = needsAccessibility || !usageAccessGranted;
+  const appSearchTerm = appSearch.trim().toLowerCase();
+  const filteredApps = installedApps.filter((app) => {
+    if (!appSearchTerm) {
+      return true;
+    }
+    const label = (app.label || "").toLowerCase();
+    const pkg = (app.packageName || "").toLowerCase();
+    return label.includes(appSearchTerm) || pkg.includes(appSearchTerm);
+  });
+  const sortedApps = [...filteredApps].sort((a, b) => {
+    const aUsage = appUsageMap[a.packageName] || 0;
+    const bUsage = appUsageMap[b.packageName] || 0;
+    if (bUsage !== aUsage) {
+      return bUsage - aUsage;
+    }
+    return (a.label || "").localeCompare(b.label || "");
+  });
 
   useEffect(() => {
     if (Platform.OS !== "android") {
@@ -1931,30 +2089,63 @@ export default function App() {
             <Text style={styles.cardMeta}>
               {t("label.used")}: {Math.floor(usageState.usedSeconds / 60)} min
             </Text>
+            <Text style={styles.cardMeta}>
+              {t("label.carryover")}: {Math.floor(carryoverSeconds / 60)} min
+            </Text>
           </View>
-          <View style={styles.infoCard}>
-            <Text style={styles.sectionTitle}>{t("label.permissions")}</Text>
-            <Text style={styles.helperText}>{t("label.settingsHint")}</Text>
-            <Pressable
-              style={styles.primaryButton}
-              onPress={openAccessibilitySettings}
-            >
-              <Text style={styles.primaryButtonText}>
-                {t("label.permissionNeeded")}
+          {missingPermissions ? (
+            <View style={styles.permissionAlertCard}>
+              <Text style={styles.permissionAlertTitle}>
+                {t("label.permissions")}
               </Text>
-            </Pressable>
-            {needsAccessibility ? (
-              <Text style={styles.warningText}>{t("label.accessibilityMissing")}</Text>
-            ) : (
-              <Text style={styles.successText}>{t("label.accessibilityActive")}</Text>
-            )}
-          </View>
+              <Text style={styles.permissionAlertText}>
+                {t("label.settingsHint")}
+              </Text>
+              {needsAccessibility ? (
+                <>
+                  <Pressable
+                    style={styles.primaryButton}
+                    onPress={openAccessibilitySettings}
+                  >
+                    <Text style={styles.primaryButtonText}>
+                      {t("label.permissionNeeded")}
+                    </Text>
+                  </Pressable>
+                  <Text style={styles.warningText}>
+                    {t("label.accessibilityMissing")}
+                  </Text>
+                </>
+              ) : null}
+              {!usageAccessGranted ? (
+                <>
+                  <Pressable
+                    style={styles.secondaryButton}
+                    onPress={openUsageAccessSettings}
+                  >
+                    <Text style={styles.secondaryButtonText}>
+                      {t("label.openUsageAccess")}
+                    </Text>
+                  </Pressable>
+                  <Text style={styles.warningText}>
+                    {t("label.usageAccessMissing")}
+                  </Text>
+                </>
+              ) : null}
+            </View>
+          ) : null}
           <View style={styles.infoCard}>
             <Text style={styles.sectionTitle}>{t("label.apps")}</Text>
             {Platform.OS !== "android" ? (
               <Text style={styles.helperText}>{t("label.androidOnly")}</Text>
             ) : (
               <View>
+                <TextInput
+                  style={styles.searchInput}
+                  value={appSearch}
+                  onChangeText={setAppSearch}
+                  placeholder={t("label.searchApps")}
+                  placeholderTextColor="#7a7a7a"
+                />
                 <Pressable
                   style={styles.secondaryButton}
                   onPress={loadInstalledApps}
@@ -1964,10 +2155,12 @@ export default function App() {
                 {installedApps.length === 0 ? (
                   <Text style={styles.helperText}>{t("label.noApps")}</Text>
                 ) : null}
-                {installedApps.map((app) => {
+                {sortedApps.map((app) => {
                   const enabled = settings.controlledApps.includes(
                     app.packageName
                   );
+                  const usageMs = appUsageMap[app.packageName] || 0;
+                  const usageMinutes = Math.floor(usageMs / 60000);
                   return (
                     <Pressable
                       key={app.packageName}
@@ -1979,6 +2172,9 @@ export default function App() {
                     >
                       <Text style={styles.appLabel}>{app.label}</Text>
                       <Text style={styles.appPackage}>{app.packageName}</Text>
+                      <Text style={styles.appUsageText}>
+                        {usageMinutes} min
+                      </Text>
                       <Text
                         style={[
                           styles.appToggle,
@@ -1997,13 +2193,31 @@ export default function App() {
       </SafeAreaView>
     );
   }
+  const gridPadding = 16;
+  const gridGap = 12;
+  const gridWidth = Math.max(0, width - gridPadding * 2);
+  const columnCount = width >= 900 ? 3 : width >= 520 ? 2 : 1;
+  const cardWidth = Math.max(
+    0,
+    Math.floor((gridWidth - gridGap * (columnCount - 1)) / columnCount)
+  );
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.headerRow}>
-          <View>
+          <View style={styles.headerTitleBlock}>
             <Text style={styles.title}>{t("app.title")}</Text>
             <Text style={styles.subtitle}>{t("menu.sports")}</Text>
+            <Pressable
+              style={styles.appsHeaderButton}
+              onPress={() => {
+                setIsSettingsOpen(true);
+                loadInstalledApps();
+                refreshUsageState();
+              }}
+            >
+              <Text style={styles.appsHeaderText}>{t("menu.apps")}</Text>
+            </Pressable>
           </View>
           <View style={styles.headerActions}>
             <Pressable
@@ -2016,14 +2230,33 @@ export default function App() {
         </View>
         {showPermissionPrompt ? (
           <View style={styles.permissionCard}>
-            <Text style={styles.sectionTitle}>{t("label.permissionNeeded")}</Text>
-            <Text style={styles.helperText}>{t("label.accessibilityHint")}</Text>
-            <Pressable
-              style={styles.primaryButton}
-              onPress={openAccessibilitySettings}
-            >
-              <Text style={styles.primaryButtonText}>{t("label.activateNow")}</Text>
-            </Pressable>
+            <Text style={styles.sectionTitle}>{t("label.permissions")}</Text>
+            {needsAccessibility && !permissionsPrompted ? (
+              <>
+                <Text style={styles.helperText}>{t("label.accessibilityHint")}</Text>
+                <Pressable
+                  style={styles.primaryButton}
+                  onPress={openAccessibilitySettings}
+                >
+                  <Text style={styles.primaryButtonText}>
+                    {t("label.permissionNeeded")}
+                  </Text>
+                </Pressable>
+              </>
+            ) : null}
+            {!usageAccessGranted && !usagePermissionsPrompted ? (
+              <>
+                <Text style={styles.helperText}>{t("label.usageAccessHint")}</Text>
+                <Pressable
+                  style={styles.primaryButton}
+                  onPress={openUsageAccessSettings}
+                >
+                  <Text style={styles.primaryButtonText}>
+                    {t("label.openUsageAccess")}
+                  </Text>
+                </Pressable>
+              </>
+            ) : null}
           </View>
         ) : null}
         {activeSports.length === 0 ? (
@@ -2035,7 +2268,45 @@ export default function App() {
             const weeklyTotal = computeWeeklyTotal(stats, sport);
             const sportLabel = getSportLabel(sport);
             return (
-              <View key={sport.id} style={styles.sportCard}>
+              <View key={sport.id} style={[styles.sportCard, { width: cardWidth }]}>
+                <View style={styles.cardActionsOverlay}>
+                  <View style={styles.cardActionsLeft}>
+                    <Pressable
+                      style={styles.iconAction}
+                      onPress={() => setStatsSportId(sport.id)}
+                    >
+                      <Text style={styles.iconActionText}>📅</Text>
+                    </Pressable>
+                    <Pressable
+                      style={styles.iconAction}
+                      onPress={() => openSportModal(sport)}
+                    >
+                      <Text style={styles.iconActionText}>🛠</Text>
+                    </Pressable>
+                  </View>
+                  <View style={styles.cardActionsRight}>
+                    <Pressable
+                      style={styles.iconAction}
+                      onPress={() =>
+                        confirmAction(t("label.confirmHide"), () =>
+                          handleHideSport(sport.id, true)
+                        )
+                      }
+                    >
+                      <Text style={styles.iconActionText}>👁</Text>
+                    </Pressable>
+                    <Pressable
+                      style={styles.iconAction}
+                      onPress={() =>
+                        confirmAction(t("label.confirmDelete"), () =>
+                          handleDeleteSport(sport.id)
+                        )
+                      }
+                    >
+                      <Text style={styles.iconActionText}>✕</Text>
+                    </Pressable>
+                  </View>
+                </View>
                 <Pressable
                   style={styles.sportBodyPressable}
                   onPress={() => setSelectedSportId(sport.id)}
@@ -2096,53 +2367,17 @@ export default function App() {
                   </View>
                 </Pressable>
                 <View style={styles.cardActions}>
-                <Pressable
-                  style={[styles.secondaryButton, styles.fullWidthButton]}
-                  onPress={() =>
-                    InstaControl?.requestPinWidget?.(sport.id, sportLabel)
-                  }
-                >
+                  <Pressable
+                    style={[styles.secondaryButton, styles.fullWidthButton]}
+                    onPress={() =>
+                      InstaControl?.requestPinWidget?.(sport.id, sportLabel)
+                    }
+                  >
                     <Text style={styles.secondaryButtonText}>
                       {t("label.widget")}
                     </Text>
                   </Pressable>
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.cardActionsBottom}
-                  >
-                    <Pressable
-                      style={styles.iconAction}
-                      onPress={() => setStatsSportId(sport.id)}
-                    >
-                      <Text style={styles.iconActionText}>📅</Text>
-                    </Pressable>
-                    <Pressable
-                      style={styles.iconAction}
-                      onPress={() => openSportModal(sport)}
-                    >
-                      <Text style={styles.iconActionText}>🛠</Text>
-                    </Pressable>
-                    <Pressable
-                      style={styles.iconAction}
-                      onPress={() =>
-                        confirmAction(t("label.confirmHide"), () =>
-                          handleHideSport(sport.id, true)
-                        )
-                      }
-                    >
-                      <Text style={styles.iconActionText}>👁</Text>
-                    </Pressable>
-                    <Pressable
-                      style={styles.iconAction}
-                      onPress={() =>
-                        confirmAction(t("label.confirmDelete"), () =>
-                          handleDeleteSport(sport.id)
-                        )
-                      }
-                    >
-                      <Text style={styles.iconActionText}>✕</Text>
-                    </Pressable>
+                  <View style={styles.cardActionsBottom}>
                     <Pressable
                       style={styles.iconAction}
                       onPress={() => moveSport(sport.id, -1)}
@@ -2155,7 +2390,7 @@ export default function App() {
                     >
                       <Text style={styles.iconActionText}>↓</Text>
                     </Pressable>
-                  </ScrollView>
+                  </View>
                 </View>
               </View>
             );
@@ -2334,6 +2569,7 @@ export default function App() {
               keyboardType="decimal-pad"
               placeholderTextColor="#7a7a7a"
             />
+            <Text style={styles.typeHelpText}>{t("label.typeHelp")}</Text>
             <View style={styles.typeRow}>
               <Pressable
                 style={[
@@ -2388,16 +2624,6 @@ export default function App() {
           </View>
         </View>
       ) : null}
-      <Pressable
-        style={styles.appsFloatingButton}
-        onPress={() => {
-          setIsSettingsOpen(true);
-          loadInstalledApps();
-          refreshUsageState();
-        }}
-      >
-        <Text style={styles.appsFloatingText}>{t("menu.apps")}</Text>
-      </Pressable>
       <View style={styles.languageWrap}>
         {showLanguageMenu ? (
           <View style={styles.languageMenu}>
@@ -2435,11 +2661,11 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 16,
-    paddingTop: 44,
-    paddingBottom: 32,
+    paddingTop: 68,
+    paddingBottom: 96,
   },
   title: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: "700",
     color: COLORS.text,
   },
@@ -2450,7 +2676,7 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 16,
-    paddingTop: 36,
+    paddingTop: 48,
     paddingBottom: 10,
     flexDirection: "row",
     alignItems: "center",
@@ -2466,37 +2692,41 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 16,
   },
+  headerTitleBlock: {
+    flex: 1,
+    paddingRight: 12,
+  },
   headerActions: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
     marginTop: 6,
   },
-  appsFloatingButton: {
-    position: "absolute",
-    left: 16,
-    bottom: 16,
+  appsHeaderButton: {
+    alignSelf: "flex-start",
+    marginTop: 10,
     backgroundColor: COLORS.accent,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 10,
     shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowOpacity: 0.18,
+    shadowRadius: 6,
+    elevation: 4,
   },
-  appsFloatingText: {
+  appsHeaderText: {
     color: COLORS.ink,
     fontWeight: "800",
     fontSize: 12,
     textTransform: "uppercase",
-    letterSpacing: 0.6,
+    letterSpacing: 0.5,
   },
   sportsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     gap: 12,
+    width: "100%",
   },
   backButton: {
     paddingVertical: 6,
@@ -2563,12 +2793,16 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.sportCard,
     borderRadius: 8,
     padding: 10,
-    paddingTop: 30,
+    paddingTop: 46,
     marginBottom: 10,
-    width: "48%",
     position: "relative",
     borderWidth: 1,
-    borderColor: "rgba(244, 181, 69, 0.35)",
+    borderColor: COLORS.accentDark,
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6,
   },
   hiddenCard: {
     backgroundColor: COLORS.cardAlt,
@@ -2584,7 +2818,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   sportName: {
-    fontSize: 15,
+    fontSize: 20,
     fontWeight: "700",
     color: COLORS.text,
   },
@@ -2863,6 +3097,25 @@ const styles = StyleSheet.create({
     gap: 6,
     alignItems: "stretch",
   },
+  cardActionsOverlay: {
+    position: "absolute",
+    top: 8,
+    left: 8,
+    right: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    zIndex: 2,
+    elevation: 2,
+  },
+  cardActionsLeft: {
+    flexDirection: "row",
+    gap: 6,
+  },
+  cardActionsRight: {
+    flexDirection: "row",
+    gap: 6,
+  },
   cardActionsBottom: {
     flexDirection: "row",
     alignItems: "center",
@@ -2941,6 +3194,14 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     marginBottom: 10,
   },
+  searchInput: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    color: COLORS.text,
+    marginBottom: 10,
+  },
   iconRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -2954,6 +3215,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
     marginBottom: 12,
+  },
+  typeHelpText: {
+    color: COLORS.muted,
+    fontSize: 12,
+    marginBottom: 8,
+    lineHeight: 16,
   },
   typeButton: {
     flex: 1,
@@ -3023,6 +3290,25 @@ const styles = StyleSheet.create({
     color: COLORS.success,
     fontWeight: "600",
   },
+  permissionAlertCard: {
+    backgroundColor: "rgba(239, 68, 68, 0.18)",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "rgba(239, 68, 68, 0.7)",
+  },
+  permissionAlertTitle: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 6,
+  },
+  permissionAlertText: {
+    color: COLORS.text,
+    marginBottom: 10,
+    fontWeight: "600",
+  },
   appRow: {
     backgroundColor: COLORS.surface,
     borderRadius: 12,
@@ -3038,6 +3324,11 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   appPackage: {
+    color: COLORS.muted,
+    marginTop: 4,
+    fontSize: 12,
+  },
+  appUsageText: {
     color: COLORS.muted,
     marginTop: 4,
     fontSize: 12,
@@ -3068,7 +3359,7 @@ const styles = StyleSheet.create({
   languageWrap: {
     position: "absolute",
     right: 16,
-    bottom: 16,
+    bottom: 28,
     alignItems: "flex-end",
   },
   languageButton: {

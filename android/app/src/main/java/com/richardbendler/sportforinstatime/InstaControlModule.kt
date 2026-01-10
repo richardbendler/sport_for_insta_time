@@ -1,16 +1,19 @@
 package com.richardbendler.sportforinstatime
 
 import android.accessibilityservice.AccessibilityServiceInfo
+import android.app.AppOpsManager
+import android.app.usage.UsageStatsManager
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
-import android.appwidget.AppWidgetManager
-import android.content.ComponentName
 import com.facebook.react.bridge.*
 import org.json.JSONArray
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -71,6 +74,79 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
     val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     reactContext.startActivity(intent)
+  }
+
+  @ReactMethod
+  fun openUsageAccessSettings() {
+    try {
+      val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      reactContext.startActivity(intent)
+    } catch (e: Exception) {
+      val fallback = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+      fallback.data = android.net.Uri.parse("package:${reactContext.packageName}")
+      fallback.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      reactContext.startActivity(fallback)
+    }
+  }
+
+  @ReactMethod
+  fun hasUsageAccess(promise: Promise) {
+    try {
+      val appOps = reactContext.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+      val mode = appOps.checkOpNoThrow(
+        AppOpsManager.OPSTR_GET_USAGE_STATS,
+        android.os.Process.myUid(),
+        reactContext.packageName
+      )
+      promise.resolve(mode == AppOpsManager.MODE_ALLOWED)
+    } catch (e: Exception) {
+      promise.reject("USAGE_ACCESS_CHECK_ERROR", e)
+    }
+  }
+
+  @ReactMethod
+  fun getAppUsageStats(promise: Promise) {
+    try {
+      val appOps = reactContext.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+      val mode = appOps.checkOpNoThrow(
+        AppOpsManager.OPSTR_GET_USAGE_STATS,
+        android.os.Process.myUid(),
+        reactContext.packageName
+      )
+      if (mode != AppOpsManager.MODE_ALLOWED) {
+        promise.resolve(Arguments.createArray())
+        return
+      }
+      val usageManager =
+        reactContext.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+      val calendar = Calendar.getInstance()
+      calendar.set(Calendar.HOUR_OF_DAY, 0)
+      calendar.set(Calendar.MINUTE, 0)
+      calendar.set(Calendar.SECOND, 0)
+      calendar.set(Calendar.MILLISECOND, 0)
+      val start = calendar.timeInMillis
+      val end = System.currentTimeMillis()
+      val stats = usageManager.queryUsageStats(
+        UsageStatsManager.INTERVAL_DAILY,
+        start,
+        end
+      )
+      val array = Arguments.createArray()
+      for (entry in stats) {
+        val total = entry.totalTimeInForeground
+        if (total <= 0) {
+          continue
+        }
+        val map = Arguments.createMap()
+        map.putString("packageName", entry.packageName)
+        map.putDouble("totalTimeMs", total.toDouble())
+        array.pushMap(map)
+      }
+      promise.resolve(array)
+    } catch (e: Exception) {
+      promise.reject("USAGE_STATS_ERROR", e)
+    }
   }
 
   @ReactMethod
