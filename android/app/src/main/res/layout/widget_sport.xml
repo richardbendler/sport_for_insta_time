@@ -3,35 +3,44 @@
   android:id="@+id/widget_root"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
-  android:background="#100f0c"
+  android:background="@drawable/widget_sport_bg"
   android:orientation="vertical"
-  android:padding="12dp">
+  android:padding="10dp">
 
   <TextView
     android:id="@+id/widget_title"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:ellipsize="end"
+    android:maxLines="1"
     android:text="Sport"
-    android:textColor="#f4e2c2"
-    android:textSize="14sp"
+    android:textColor="#f8fafc"
+    android:textSize="12sp"
     android:textStyle="bold" />
 
-  <TextView
-    android:id="@+id/widget_value"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="6dp"
-    android:text="0 Wdh."
-    android:textColor="#fff7ea"
-    android:textSize="18sp"
-    android:textStyle="bold" />
-
-  <TextView
-    android:id="@+id/widget_screen_time"
-    android:layout_width="wrap_content"
+  <LinearLayout
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="4dp"
-    android:text="Screen Time: 00:00"
-    android:textColor="#cbb48f"
-    android:textSize="12sp" />
+    android:orientation="horizontal"
+    android:gravity="center_vertical">
+
+    <TextView
+      android:id="@+id/widget_value"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginEnd="6dp"
+      android:text="0 Wdh."
+      android:textColor="#f8fafc"
+      android:textSize="14sp"
+      android:textStyle="bold" />
+
+    <TextView
+      android:id="@+id/widget_screen_time"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="00:00"
+      android:textColor="#94a3b8"
+      android:textSize="11sp" />
+  </LinearLayout>
 </LinearLayout>
