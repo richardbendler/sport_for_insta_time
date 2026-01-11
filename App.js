@@ -19,7 +19,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Voice from "@react-native-voice/voice";
 import { Camera, useCameraDevices, useFrameProcessor } from "react-native-vision-camera";
-import { runOnJS } from "react-native-reanimated";
+import { useRunOnJS } from "react-native-worklets-core";
 import { detectPose } from "vision-camera-pose-detector";
 
 const InstaControl = NativeModules.InstaControl;
@@ -1159,15 +1159,17 @@ const AiCameraScreen = ({
     }
   };
 
+  const handlePoseOnJS = useRunOnJS(handlePose, [handlePose]);
+
   const frameProcessor = useFrameProcessor(
     (frame) => {
       "worklet";
       const pose = detectPose(frame);
       if (pose) {
-        runOnJS(handlePose)(pose);
+        handlePoseOnJS(pose);
       }
     },
-    [handlePose]
+    [handlePoseOnJS]
   );
 
   const isAuthorized = permissionStatus === "authorized";
