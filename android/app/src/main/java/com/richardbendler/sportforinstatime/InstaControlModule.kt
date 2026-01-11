@@ -4,6 +4,7 @@ import android.accessibilityservice.AccessibilityServiceInfo
 import android.app.AppOpsManager
 import android.app.usage.UsageStatsManager
 import android.appwidget.AppWidgetManager
+import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -170,6 +171,12 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
+  fun setAppLanguage(language: String) {
+    val prefs = getPrefs()
+    prefs.edit().putString("app_language", language).apply()
+  }
+
+  @ReactMethod
   fun getUsageState(promise: Promise) {
     try {
       val prefs = getPrefs()
@@ -195,17 +202,37 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
   fun requestPinWidget(sportId: String, sportName: String, promise: Promise) {
     try {
       val manager = AppWidgetManager.getInstance(reactContext)
-      val provider = ComponentName(reactContext, SportWidgetProvider::class.java)
+      val provider = if (sportId == "overall") {
+        ComponentName(reactContext, OverallWidgetProvider::class.java)
+      } else {
+        ComponentName(reactContext, SportWidgetProvider::class.java)
+      }
       val supported = manager.isRequestPinAppWidgetSupported
       if (!supported) {
         promise.resolve(false)
         return
       }
-      val prefs = getWidgetPrefs()
-      prefs.edit()
-        .putString("pending_sport_id", sportId)
-        .putString("pending_sport_name", sportName)
-        .apply()
+      if (sportId != "overall") {
+        val prefs = getWidgetPrefs()
+        prefs.edit()
+          .putString("pending_sport_id", sportId)
+          .putString("pending_sport_name", sportName)
+          .putLong("pending_request_time", System.currentTimeMillis())
+          .putString("last_widget_sport_id", sportId)
+          .putString("last_widget_sport_name", sportName)
+          .putLong("last_widget_request_time", System.currentTimeMillis())
+          .apply()
+        val intent = Intent(reactContext, WidgetPinReceiver::class.java)
+        intent.action = "com.richardbendler.sportforinstatime.PIN_WIDGET"
+        intent.putExtra("sport_id", sportId)
+        intent.putExtra("sport_name", sportName)
+        val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        val requestCode = (sportId.hashCode() xor System.currentTimeMillis().toInt())
+        val callback = PendingIntent.getBroadcast(reactContext, requestCode, intent, flags)
+        val requested = manager.requestPinAppWidget(provider, null, callback)
+        promise.resolve(requested)
+        return
+      }
       val requested = manager.requestPinAppWidget(provider, null, null)
       promise.resolve(requested)
     } catch (e: Exception) {
@@ -235,10 +262,15 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
   @ReactMethod
   fun updateWidgets() {
     val manager = AppWidgetManager.getInstance(reactContext)
-    val provider = ComponentName(reactContext, SportWidgetProvider::class.java)
-    val ids = manager.getAppWidgetIds(provider)
-    ids.forEach { id ->
+    val sportProvider = ComponentName(reactContext, SportWidgetProvider::class.java)
+    val sportIds = manager.getAppWidgetIds(sportProvider)
+    sportIds.forEach { id ->
       SportWidgetProvider.updateAppWidget(reactContext, manager, id)
+    }
+    val overallProvider = ComponentName(reactContext, OverallWidgetProvider::class.java)
+    val overallIds = manager.getAppWidgetIds(overallProvider)
+    overallIds.forEach { id ->
+      OverallWidgetProvider.updateAppWidget(reactContext, manager, id)
     }
   }
 

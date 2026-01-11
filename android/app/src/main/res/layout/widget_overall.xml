@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  android:id="@+id/widget_root"
+  android:id="@+id/widget_overall_root"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   android:background="@drawable/widget_sport_bg"
@@ -8,35 +8,36 @@
   android:padding="8dp">
 
   <TextView
-    android:id="@+id/widget_title"
+    android:id="@+id/widget_overall_title"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:ellipsize="end"
     android:maxLines="1"
-    android:text="Sport"
-    android:textColor="#94a3b8"
-    android:textSize="10sp"
+    android:text="Screen Time"
+    android:textColor="#f8fafc"
+    android:textSize="11sp"
     android:textStyle="bold" />
 
   <TextView
-    android:id="@+id/widget_value"
+    android:id="@+id/widget_overall_used"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="4dp"
+    android:ellipsize="end"
+    android:maxLines="1"
+    android:text="Used: 00:00"
+    android:textColor="#f8fafc"
+    android:textSize="12sp"
+    android:textStyle="bold" />
+
+  <TextView
+    android:id="@+id/widget_overall_remaining"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="2dp"
     android:ellipsize="end"
     android:maxLines="1"
-    android:text="0"
-    android:textColor="#f8fafc"
-    android:textSize="20sp"
-    android:textStyle="bold" />
-
-  <TextView
-    android:id="@+id/widget_screen_time"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:ellipsize="end"
-    android:maxLines="1"
-    android:text="00:00"
+    android:text="Remaining: 00:00"
     android:textColor="#94a3b8"
     android:textSize="10sp" />
 </LinearLayout>

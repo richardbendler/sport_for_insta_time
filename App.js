@@ -10,11 +10,14 @@ import {
   StyleSheet,
   NativeModules,
   Platform,
+  PermissionsAndroid,
+  AppState,
   BackHandler,
   Alert,
   useWindowDimensions,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Voice from "@react-native-voice/voice";
 
 const InstaControl = NativeModules.InstaControl;
 
@@ -24,6 +27,7 @@ const STORAGE_KEYS = {
   settings: "@settings_v1",
   permissions: "@permissions_prompted_v1",
   usagePermissions: "@usage_permissions_prompted_v1",
+  notificationsPermissions: "@notifications_permissions_prompted_v1",
   carryover: "@carryover_seconds_v1",
   carryoverDay: "@carryover_day_v1",
   usageSnapshot: "@usage_snapshot_v1",
@@ -34,6 +38,109 @@ const STORAGE_KEYS = {
 const DEFAULT_SETTINGS = {
   controlledApps: [],
   language: "en",
+};
+
+const SPEECH_LOCALES = {
+  de: "de-DE",
+  en: "en-US",
+  es: "es-ES",
+  fr: "fr-FR",
+};
+
+const NUMBER_WORDS = {
+  de: [
+    "null",
+    "eins",
+    "ein",
+    "zwei",
+    "drei",
+    "vier",
+    "funf",
+    "sechs",
+    "sieben",
+    "acht",
+    "neun",
+    "zehn",
+    "elf",
+    "zwolf",
+    "dreizehn",
+    "vierzehn",
+    "funfzehn",
+    "sechzehn",
+    "siebzehn",
+    "achtzehn",
+    "neunzehn",
+    "zwanzig",
+  ],
+  en: [
+    "zero",
+    "one",
+    "two",
+    "three",
+    "four",
+    "five",
+    "six",
+    "seven",
+    "eight",
+    "nine",
+    "ten",
+    "eleven",
+    "twelve",
+    "thirteen",
+    "fourteen",
+    "fifteen",
+    "sixteen",
+    "seventeen",
+    "eighteen",
+    "nineteen",
+    "twenty",
+  ],
+  es: [
+    "cero",
+    "uno",
+    "dos",
+    "tres",
+    "cuatro",
+    "cinco",
+    "seis",
+    "siete",
+    "ocho",
+    "nueve",
+    "diez",
+    "once",
+    "doce",
+    "trece",
+    "catorce",
+    "quince",
+    "dieciseis",
+    "diecisiete",
+    "dieciocho",
+    "diecinueve",
+    "veinte",
+  ],
+  fr: [
+    "zero",
+    "un",
+    "deux",
+    "trois",
+    "quatre",
+    "cinq",
+    "six",
+    "sept",
+    "huit",
+    "neuf",
+    "dix",
+    "onze",
+    "douze",
+    "treize",
+    "quatorze",
+    "quinze",
+    "seize",
+    "dixsept",
+    "dixhuit",
+    "dixneuf",
+    "vingt",
+  ],
 };
 
 const WEEKDAY_LABELS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
@@ -190,6 +297,7 @@ const STRINGS = {
     "label.noSports": "Keine aktiven Sportarten. Füge neue hinzu.",
     "label.todayScreenTime": "Bildschirmzeit",
     "label.widget": "Widget auf Startbildschirm",
+    "label.widgetOverall": "Widget Gesamt",
     "label.iconChoose": "Icon wählen",
     "label.iconPlaceholder": "Ein Icon",
     "label.addSport": "Neue Sportart",
@@ -207,6 +315,13 @@ const STRINGS = {
     "label.settingsHint":
       "Aktiviere die Zugriffshilfe, damit die App Social Apps blockieren kann, wenn die Zeit aufgebraucht ist.",
     "label.tapAnywhere": "Tippe irgendwo",
+    "label.voiceOn": "Mikrofon an",
+    "label.voiceOff": "Mikrofon aus",
+    "label.voiceListening": "Hoert zu...",
+    "label.voiceIdle": "Bereit",
+    "label.voiceHint": "Zaehle laut, die App zaehlt mit (Mikrofonzugriff noetig).",
+    "label.voicePermissionMissing": "Mikrofon-Zugriff fehlt",
+    "label.voiceError": "Spracherkennung fehlgeschlagen",
     "label.back": "Zurück",
     "label.start": "Start",
     "label.stop": "Stop",
@@ -289,6 +404,7 @@ const STRINGS = {
     "label.noSports": "No active sports. Add new ones.",
     "label.todayScreenTime": "Screen Time",
     "label.widget": "Widget on home screen",
+    "label.widgetOverall": "Overall widget",
     "label.iconChoose": "Choose icon",
     "label.iconPlaceholder": "One icon",
     "label.addSport": "New sport",
@@ -305,6 +421,13 @@ const STRINGS = {
     "label.settingsHint":
       "Enable accessibility so the app can block social apps when time is up.",
     "label.tapAnywhere": "Tap anywhere",
+    "label.voiceOn": "Mic on",
+    "label.voiceOff": "Mic off",
+    "label.voiceListening": "Listening...",
+    "label.voiceIdle": "Ready",
+    "label.voiceHint": "Say numbers out loud to count (microphone access required).",
+    "label.voicePermissionMissing": "Microphone access missing",
+    "label.voiceError": "Speech recognition failed",
     "label.back": "Back",
     "label.start": "Start",
     "label.stop": "Stop",
@@ -387,6 +510,7 @@ const STRINGS = {
     "label.noSports": "No hay deportes activos. Añade nuevos.",
     "label.todayScreenTime": "Tiempo de pantalla",
     "label.widget": "Widget en inicio",
+    "label.widgetOverall": "Widget general",
     "label.iconChoose": "Elegir icono",
     "label.iconPlaceholder": "Un icono",
     "label.addSport": "Nuevo deporte",
@@ -404,6 +528,13 @@ const STRINGS = {
     "label.settingsHint":
       "Activa la accesibilidad para que la app bloquee redes sociales cuando se acabe el tiempo.",
     "label.tapAnywhere": "Toca en cualquier lugar",
+    "label.voiceOn": "Microfono activado",
+    "label.voiceOff": "Microfono desactivado",
+    "label.voiceListening": "Escuchando...",
+    "label.voiceIdle": "Listo",
+    "label.voiceHint": "Di numeros en voz alta para contar (requiere microfono).",
+    "label.voicePermissionMissing": "Falta acceso al microfono",
+    "label.voiceError": "Fallo de reconocimiento de voz",
     "label.back": "Atrás",
     "label.start": "Iniciar",
     "label.stop": "Parar",
@@ -486,6 +617,7 @@ const STRINGS = {
     "label.noSports": "Aucun sport actif. Ajoutez-en.",
     "label.todayScreenTime": "Temps d’écran",
     "label.widget": "Widget sur l’accueil",
+    "label.widgetOverall": "Widget global",
     "label.iconChoose": "Choisir une icône",
     "label.iconPlaceholder": "Une icône",
     "label.addSport": "Nouveau sport",
@@ -503,6 +635,13 @@ const STRINGS = {
     "label.settingsHint":
       "Activez l’accessibilité pour que l’app bloque les apps sociales quand le temps est écoulé.",
     "label.tapAnywhere": "Touchez n’importe où",
+    "label.voiceOn": "Micro actif",
+    "label.voiceOff": "Micro inactif",
+    "label.voiceListening": "Ecoute...",
+    "label.voiceIdle": "Pret",
+    "label.voiceHint": "Dis les numeros a voix haute pour compter (micro requis).",
+    "label.voicePermissionMissing": "Acces micro manquant",
+    "label.voiceError": "Echec de reconnaissance vocale",
     "label.back": "Retour",
     "label.start": "Démarrer",
     "label.stop": "Arrêter",
@@ -834,6 +973,36 @@ const computeAllowanceSeconds = (stats, sports) => {
   });
   return Math.max(0, Math.floor(totalSeconds));
 };
+
+const normalizeSpeechText = (value) =>
+  String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ß/g, "ss")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+const extractNumberToken = (value, lang) => {
+  const normalized = normalizeSpeechText(value);
+  if (!normalized) {
+    return null;
+  }
+  const digitMatches = normalized.match(/\d+/g);
+  if (digitMatches && digitMatches.length > 0) {
+    return digitMatches[digitMatches.length - 1];
+  }
+  const words = NUMBER_WORDS[lang] || NUMBER_WORDS.en;
+  const tokens = normalized.split(/\s+/).filter(Boolean);
+  let found = null;
+  tokens.forEach((token) => {
+    if (words.includes(token)) {
+      found = token;
+    }
+  });
+  return found;
+};
+
 export default function App() {
   const { width } = useWindowDimensions();
   const [sports, setSports] = useState([]);
@@ -876,14 +1045,37 @@ export default function App() {
 
   const [sessionSeconds, setSessionSeconds] = useState(0);
   const [running, setRunning] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const [voiceListening, setVoiceListening] = useState(false);
+  const [voiceError, setVoiceError] = useState(null);
+  const [isAppActive, setIsAppActive] = useState(
+    AppState.currentState === "active"
+  );
   const intervalRef = useRef(null);
   const lastPermissionPromptAt = useRef(0);
+  const lastVoiceTokenRef = useRef(null);
+  const lastVoiceAtRef = useRef(0);
+  const voiceEnabledRef = useRef(false);
+  const voiceListeningRef = useRef(false);
+  const languageRef = useRef(language);
+  const selectedSportRef = useRef(null);
 
   const t = (key) => {
     const dict = STRINGS[language] || STRINGS.de;
     return dict[key] ?? STRINGS.de[key] ?? key;
   };
   const repsShort = t("label.repsShort");
+  const voiceStatusText = voiceError
+    ? voiceError
+    : voiceEnabled
+    ? voiceListening
+      ? t("label.voiceListening")
+      : t("label.voiceIdle")
+    : "";
+
+  useEffect(() => {
+    languageRef.current = language;
+  }, [language]);
 
   const getSportLabel = (sport) => {
     if (sport.presetKey) {
@@ -907,6 +1099,9 @@ export default function App() {
   const setAppLanguage = async (nextLanguage) => {
     const nextSettings = { ...settings, language: nextLanguage };
     await saveSettings(nextSettings);
+    if (InstaControl?.setAppLanguage) {
+      InstaControl.setAppLanguage(nextLanguage);
+    }
     setLanguage(nextLanguage);
     setShowLanguageMenu(false);
   };
@@ -942,6 +1137,11 @@ export default function App() {
         : DEFAULT_SETTINGS;
       setSettings(parsedSettings);
       setLanguage(parsedSettings.language || DEFAULT_SETTINGS.language);
+      if (InstaControl?.setAppLanguage) {
+        InstaControl.setAppLanguage(
+          parsedSettings.language || DEFAULT_SETTINGS.language
+        );
+      }
       setPermissionsPrompted(permissionsRaw === "true");
       setUsagePermissionsPrompted(usagePermissionsRaw === "true");
       const today = todayKey();
@@ -953,6 +1153,23 @@ export default function App() {
       }
     };
     load();
+  }, []);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextState) => {
+      const active = nextState === "active";
+      setIsAppActive(active);
+      if (active) {
+        refreshUsageState();
+      }
+    });
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    requestNotificationPermissionIfNeeded();
   }, []);
 
   useEffect(() => {
@@ -977,6 +1194,18 @@ export default function App() {
       }
     };
   }, [running]);
+
+  useEffect(() => {
+    if (!isAppActive || !usageAccessGranted) {
+      return;
+    }
+    const usageInterval = setInterval(() => {
+      refreshUsageState();
+    }, 2000);
+    return () => {
+      clearInterval(usageInterval);
+    };
+  }, [isAppActive, usageAccessGranted, permissionsCheckTick]);
 
   const saveSports = async (nextSports) => {
     setSports(nextSports);
@@ -1108,6 +1337,12 @@ export default function App() {
 
   const clearAllStats = async () => {
     await saveStats({});
+    await AsyncStorage.multiRemove([
+      STORAGE_KEYS.carryover,
+      STORAGE_KEYS.carryoverDay,
+      STORAGE_KEYS.usageSnapshot,
+    ]);
+    setCarryoverSeconds(0);
   };
 
   const openSportModal = (sport = null) => {
@@ -1514,6 +1749,125 @@ export default function App() {
     setSessionSeconds(0);
   };
 
+  const getSpeechLocale = () => SPEECH_LOCALES[language] || "en-US";
+
+  const incrementReps = () => {
+    const currentSport = selectedSportRef.current;
+    if (!currentSport || currentSport.type !== "reps") {
+      return;
+    }
+    addLogEntry(currentSport.id, {
+      ts: Date.now(),
+      reps: 1,
+    });
+    updateDayStat(currentSport.id, (dayStats) => ({
+      ...dayStats,
+      reps: dayStats.reps + 1,
+    }));
+  };
+
+  const ensureAudioPermission = async () => {
+    if (Platform.OS !== "android") {
+      return true;
+    }
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.RECORD_AUDIO
+    );
+    return granted === PermissionsAndroid.RESULTS.GRANTED;
+  };
+
+  const requestNotificationPermissionIfNeeded = async () => {
+    if (Platform.OS !== "android") {
+      return;
+    }
+    const prompted = await AsyncStorage.getItem(
+      STORAGE_KEYS.notificationsPermissions
+    );
+    if (prompted) {
+      return;
+    }
+    if (Number(Platform.Version) >= 33) {
+      await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+      );
+    }
+    await AsyncStorage.setItem(STORAGE_KEYS.notificationsPermissions, "1");
+  };
+
+  const setListeningState = (value) => {
+    voiceListeningRef.current = value;
+    setVoiceListening(value);
+  };
+
+  const startVoice = async () => {
+    if (voiceListeningRef.current) {
+      return;
+    }
+    setVoiceError(null);
+    const hasPermission = await ensureAudioPermission();
+    if (!hasPermission) {
+      setVoiceError(t("label.voicePermissionMissing"));
+      setVoiceEnabled(false);
+      return;
+    }
+    try {
+      await Voice.start(getSpeechLocale());
+      setListeningState(true);
+    } catch (error) {
+      setListeningState(false);
+      setVoiceError(t("label.voiceError"));
+    }
+  };
+
+  const stopVoice = async () => {
+    setListeningState(false);
+    try {
+      await Voice.stop();
+    } catch (error) {
+      // Ignore stop errors when not active.
+    }
+  };
+
+  const handleVoiceResults = (event) => {
+    const currentSport = selectedSportRef.current;
+    if (!currentSport || currentSport.type !== "reps") {
+      return;
+    }
+    const transcript = (event?.value || []).join(" ");
+    const token = extractNumberToken(transcript, languageRef.current);
+    if (!token) {
+      return;
+    }
+    const now = Date.now();
+    if (
+      token === lastVoiceTokenRef.current &&
+      now - lastVoiceAtRef.current < 1200
+    ) {
+      return;
+    }
+    lastVoiceTokenRef.current = token;
+    lastVoiceAtRef.current = now;
+    incrementReps();
+  };
+
+  const handleVoiceError = () => {
+    setListeningState(false);
+    if (voiceEnabledRef.current) {
+      setVoiceError(t("label.voiceError"));
+    }
+  };
+
+  const handleVoiceEnd = () => {
+    setListeningState(false);
+    if (voiceEnabledRef.current) {
+      startVoice();
+    }
+  };
+
+  const toggleVoice = () => {
+    setVoiceEnabled((current) => !current);
+  };
+
   const activeSports = sports.filter((sport) => !sport.hidden);
   const hiddenSports = sports.filter((sport) => sport.hidden);
   const selectedSport = sports.find((sport) => sport.id === selectedSportId);
@@ -1525,6 +1879,21 @@ export default function App() {
     }
     return getTodayStat(stats, selectedSport.id);
   }, [stats, selectedSport]);
+
+  useEffect(() => {
+    selectedSportRef.current = selectedSport || null;
+  }, [selectedSport]);
+
+  useEffect(() => {
+    voiceEnabledRef.current = voiceEnabled;
+  }, [voiceEnabled]);
+
+  useEffect(() => {
+    if (voiceEnabled) {
+      lastVoiceTokenRef.current = null;
+      lastVoiceAtRef.current = 0;
+    }
+  }, [voiceEnabled]);
 
   const showPermissionPrompt =
     Platform.OS === "android" &&
@@ -1550,6 +1919,35 @@ export default function App() {
   });
 
   useEffect(() => {
+    Voice.onSpeechResults = handleVoiceResults;
+    Voice.onSpeechError = handleVoiceError;
+    Voice.onSpeechEnd = handleVoiceEnd;
+    Voice.onSpeechStart = () => setListeningState(true);
+  }, [language]);
+
+  useEffect(() => {
+    if (!voiceEnabled) {
+      stopVoice();
+      return;
+    }
+    startVoice();
+  }, [voiceEnabled, language]);
+
+  useEffect(() => {
+    if (!selectedSport || selectedSport.type !== "reps") {
+      if (voiceEnabled) {
+        setVoiceEnabled(false);
+      }
+    }
+  }, [selectedSport, voiceEnabled]);
+
+  useEffect(() => {
+    return () => {
+      Voice.destroy().then(Voice.removeAllListeners);
+    };
+  }, []);
+
+  useEffect(() => {
     if (Platform.OS !== "android") {
       return;
     }
@@ -1563,7 +1961,7 @@ export default function App() {
       InstaControl.setWidgetSportData(
         sport.id,
         label,
-        formatSportValue(sport.type, dayStats, repsShort),
+        `${t("label.today")}: ${formatSportValue(sport.type, dayStats, repsShort)}`,
         formatScreenTime(screenSeconds),
         t("label.screenTime"),
         sport.icon || DEFAULT_ICON
@@ -2025,20 +2423,41 @@ export default function App() {
         {isReps ? (
           <Pressable
             style={styles.trackingArea}
-            onPress={() => {
-              addLogEntry(selectedSport.id, {
-                ts: Date.now(),
-                reps: 1,
-              });
-              updateDayStat(selectedSport.id, (dayStats) => ({
-                ...dayStats,
-                reps: dayStats.reps + 1,
-              }));
-            }}
+            onPress={incrementReps}
           >
             <Text style={styles.counterValue}>{todayStats.reps}</Text>
             <Text style={styles.plusSign}>+</Text>
             <Text style={styles.helperText}>{t("label.tapAnywhere")}</Text>
+            <View style={styles.voiceRow}>
+              <Pressable
+                style={[
+                  styles.secondaryButton,
+                  styles.voiceButton,
+                  voiceEnabled && styles.voiceButtonActive,
+                ]}
+                onPress={toggleVoice}
+              >
+                <Text
+                  style={[
+                    styles.secondaryButtonText,
+                    voiceEnabled && styles.voiceButtonTextActive,
+                  ]}
+                >
+                  {voiceEnabled ? t("label.voiceOn") : t("label.voiceOff")}
+                </Text>
+              </Pressable>
+              <Text style={styles.voiceHint}>{t("label.voiceHint")}</Text>
+              {voiceStatusText ? (
+                <Text
+                  style={[
+                    styles.voiceStatus,
+                    voiceError && styles.voiceStatusError,
+                  ]}
+                >
+                  {voiceStatusText}
+                </Text>
+              ) : null}
+            </View>
           </Pressable>
         ) : (
           <View style={styles.trackingArea}>
@@ -2219,14 +2638,22 @@ export default function App() {
               <Text style={styles.appsHeaderText}>{t("menu.apps")}</Text>
             </Pressable>
           </View>
-          <View style={styles.headerActions}>
-            <Pressable
-              style={styles.iconButton}
-              onPress={() => setOverallStatsOpen(true)}
-            >
-              <Text style={styles.iconButtonText}>{t("label.overallStats")}</Text>
-            </Pressable>
-          </View>
+        <View style={styles.headerActions}>
+          <Pressable
+            style={styles.iconButton}
+            onPress={() => setOverallStatsOpen(true)}
+          >
+            <Text style={styles.iconButtonText}>{t("label.overallStats")}</Text>
+          </Pressable>
+          <Pressable
+            style={styles.iconButton}
+            onPress={() =>
+              InstaControl?.requestPinWidget?.("overall", t("label.todayScreenTime"))
+            }
+          >
+            <Text style={styles.iconButtonText}>{t("label.widgetOverall")}</Text>
+          </Pressable>
+        </View>
         </View>
         {showPermissionPrompt ? (
           <View style={styles.permissionCard}>
@@ -2293,7 +2720,7 @@ export default function App() {
                         )
                       }
                     >
-                      <Text style={styles.iconActionText}>👁</Text>
+                      <Text style={styles.iconActionText}>🚫👁</Text>
                     </Pressable>
                     <Pressable
                       style={styles.iconAction}
@@ -2414,111 +2841,149 @@ export default function App() {
             </Text>
           </Pressable>
           {showHidden
-            ? hiddenSports.map((sport) => (
-                <View key={sport.id} style={styles.hiddenCard}>
-                  <View style={styles.sportInfo}>
-                    <View style={styles.sportTitleRow}>
-                      <Text style={styles.sportIcon}>{sport.icon || DEFAULT_ICON}</Text>
-                      <Text style={styles.sportName} numberOfLines={1}>
-                        {getSportLabel(sport)}
-                      </Text>
-                    </View>
-                    <Text style={styles.sportMeta}>
-                      {sport.type === "reps" ? t("label.reps") : t("label.timeBased")}
-                    </Text>
-                  </View>
-                  <Pressable
-                    style={styles.statsInlineCard}
-                    onPress={() => setStatsSportId(sport.id)}
+            ? hiddenSports.map((sport) => {
+                const daily = getTodayStat(stats, sport.id);
+                const weeklyTotal = computeWeeklyTotal(stats, sport);
+                const sportLabel = getSportLabel(sport);
+                return (
+                  <View
+                    key={sport.id}
+                    style={[styles.sportCard, styles.hiddenCard, { width: cardWidth }]}
                   >
-                    <View style={styles.counterRow}>
-                      <View style={styles.counterBlock}>
-                        <Text style={styles.counterLabel}>{t("label.today")}</Text>
-                        <Text style={styles.counterValueSmall}>
-                          {sport.type === "reps"
-                            ? `${getTodayStat(stats, sport.id).reps}`
-                            : formatSeconds(getTodayStat(stats, sport.id).seconds || 0)}
-                        </Text>
-                        <Text style={styles.counterUnit}>
-                          {sport.type === "reps" ? repsShort : t("label.timeUnit")}
-                        </Text>
+                    <View style={styles.cardActionsOverlay}>
+                      <View style={styles.cardActionsLeft}>
+                        <Pressable
+                          style={styles.iconAction}
+                          onPress={() => setStatsSportId(sport.id)}
+                        >
+                          <Text style={styles.iconActionText}>📅</Text>
+                        </Pressable>
+                        <Pressable
+                          style={styles.iconAction}
+                          onPress={() => openSportModal(sport)}
+                        >
+                          <Text style={styles.iconActionText}>🛠</Text>
+                        </Pressable>
                       </View>
-                      <View style={styles.counterBlock}>
-                        <Text style={styles.counterLabel}>{t("label.week")}</Text>
-                        <Text style={styles.counterValueSmall}>
-                          {sport.type === "reps"
-                            ? `${computeWeeklyTotal(stats, sport)}`
-                            : formatSeconds(computeWeeklyTotal(stats, sport))}
-                        </Text>
-                        <Text style={styles.counterUnit}>
-                          {sport.type === "reps" ? repsShort : t("label.timeUnit")}
-                        </Text>
+                      <View style={styles.cardActionsRight}>
+                        <Pressable
+                          style={styles.iconAction}
+                          onPress={() =>
+                            confirmAction(t("label.confirmShow"), () =>
+                              handleHideSport(sport.id, false)
+                            )
+                          }
+                        >
+                          <Text style={styles.iconActionText}>👁</Text>
+                        </Pressable>
+                        <Pressable
+                          style={styles.iconAction}
+                          onPress={() =>
+                            confirmAction(t("label.confirmDelete"), () =>
+                              handleDeleteSport(sport.id)
+                            )
+                          }
+                        >
+                          <Text style={styles.iconActionText}>✕</Text>
+                        </Pressable>
                       </View>
                     </View>
-                    <View style={styles.screenRow}>
-                      <View style={styles.screenBlock}>
-                        <Text style={styles.screenLabel}>{t("label.screenTime")}</Text>
-                        <Text style={styles.screenValue}>
-                          {formatScreenTime(
-                            screenSecondsForStats(
-                              sport,
-                              getTodayStat(stats, sport.id)
-                            )
-                          )}
-                        </Text>
+                    <Pressable
+                      style={styles.sportBodyPressable}
+                      onPress={() => setSelectedSportId(sport.id)}
+                    >
+                      <View style={styles.sportInfo}>
+                        <View style={styles.sportTitleRow}>
+                          <Text style={styles.sportIcon}>
+                            {sport.icon || DEFAULT_ICON}
+                          </Text>
+                          <Text style={styles.sportName} numberOfLines={1}>
+                            {sportLabel}
+                          </Text>
+                        </View>
                       </View>
-                      <View style={styles.screenBlock}>
-                        <Text style={styles.screenLabel}>{t("label.remaining")}</Text>
-                        <Text style={styles.screenValue}>
-                          {formatScreenTime(
-                            Math.max(
-                              0,
-                              screenSecondsForStats(
-                                sport,
-                                getTodayStat(stats, sport.id)
-                              ) - usageState.usedSeconds
-                            )
-                          )}
+                      <View style={styles.statsInlineCard}>
+                        <View style={styles.counterRow}>
+                          <View style={styles.counterBlock}>
+                            <Text style={styles.counterLabel}>{t("label.today")}</Text>
+                            <Text style={styles.counterValueSmall}>
+                              {sport.type === "reps"
+                                ? `${daily.reps}`
+                                : formatSeconds(daily.seconds || 0)}
+                            </Text>
+                            <Text style={styles.counterUnit}>
+                              {sport.type === "reps" ? repsShort : t("label.timeUnit")}
+                            </Text>
+                          </View>
+                          <View style={styles.counterBlock}>
+                            <Text style={styles.counterLabel}>{t("label.week")}</Text>
+                            <Text style={styles.counterValueSmall}>
+                              {sport.type === "reps"
+                                ? `${weeklyTotal}`
+                                : formatSeconds(weeklyTotal)}
+                            </Text>
+                            <Text style={styles.counterUnit}>
+                              {sport.type === "reps" ? repsShort : t("label.timeUnit")}
+                            </Text>
+                          </View>
+                        </View>
+                        <View style={styles.screenRow}>
+                          <View style={styles.screenBlock}>
+                            <Text style={styles.screenLabel}>
+                              {t("label.screenTime")}
+                            </Text>
+                            <Text style={styles.screenValue}>
+                              {formatScreenTime(
+                                screenSecondsForStats(sport, daily)
+                              )}
+                            </Text>
+                          </View>
+                          <View style={styles.screenBlock}>
+                            <Text style={styles.screenLabel}>
+                              {t("label.remaining")}
+                            </Text>
+                            <Text style={styles.screenValue}>
+                              {formatScreenTime(
+                                Math.max(
+                                  0,
+                                  screenSecondsForStats(sport, daily) -
+                                    usageState.usedSeconds
+                                )
+                              )}
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    </Pressable>
+                    <View style={styles.cardActions}>
+                      <Pressable
+                        style={[styles.secondaryButton, styles.fullWidthButton]}
+                        onPress={() =>
+                          InstaControl?.requestPinWidget?.(sport.id, sportLabel)
+                        }
+                      >
+                        <Text style={styles.secondaryButtonText}>
+                          {t("label.widget")}
                         </Text>
+                      </Pressable>
+                      <View style={styles.cardActionsBottom}>
+                        <Pressable
+                          style={styles.iconAction}
+                          onPress={() => moveSport(sport.id, -1)}
+                        >
+                          <Text style={styles.iconActionText}>↑</Text>
+                        </Pressable>
+                        <Pressable
+                          style={styles.iconAction}
+                          onPress={() => moveSport(sport.id, 1)}
+                        >
+                          <Text style={styles.iconActionText}>↓</Text>
+                        </Pressable>
                       </View>
                     </View>
-                  </Pressable>
-                  <View style={styles.cardActions}>
-                    <Pressable
-                      style={styles.secondaryButton}
-                      onPress={() =>
-                        confirmAction(t("label.confirmShow"), () =>
-                          handleHideSport(sport.id, false)
-                        )
-                      }
-                    >
-                      <Text style={styles.secondaryButtonText}>
-                        {t("label.show")}
-                      </Text>
-                    </Pressable>
-                    <Pressable
-                      style={styles.secondaryButton}
-                      onPress={() =>
-                        InstaControl?.requestPinWidget?.(sport.id, getSportLabel(sport))
-                      }
-                    >
-                      <Text style={styles.secondaryButtonText}>
-                        {t("label.widget")}
-                      </Text>
-                    </Pressable>
-                    <Pressable
-                      style={styles.dangerButton}
-                      onPress={() =>
-                        confirmAction(t("label.confirmDelete"), () =>
-                          handleDeleteSport(sport.id)
-                        )
-                      }
-                    >
-                      <Text style={styles.primaryButtonText}>{t("label.delete")}</Text>
-                    </Pressable>
                   </View>
-                </View>
-              ))
+                );
+              })
             : null}
         </View>
     </ScrollView>
@@ -2697,8 +3162,8 @@ const styles = StyleSheet.create({
     paddingRight: 12,
   },
   headerActions: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: "column",
+    alignItems: "flex-end",
     gap: 8,
     marginTop: 6,
   },
@@ -2785,6 +3250,33 @@ const styles = StyleSheet.create({
     marginTop: 12,
     color: COLORS.muted,
   },
+  voiceRow: {
+    marginTop: 16,
+    alignItems: "center",
+    gap: 8,
+  },
+  voiceButton: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  voiceButtonActive: {
+    backgroundColor: COLORS.accentDark,
+  },
+  voiceButtonTextActive: {
+    color: COLORS.white,
+  },
+  voiceStatus: {
+    color: COLORS.muted,
+    textAlign: "center",
+  },
+  voiceHint: {
+    color: COLORS.muted,
+    textAlign: "center",
+    fontSize: 12,
+  },
+  voiceStatusError: {
+    color: COLORS.danger,
+  },
   timerRow: {
     flexDirection: "row",
     marginTop: 24,
@@ -2806,9 +3298,9 @@ const styles = StyleSheet.create({
   },
   hiddenCard: {
     backgroundColor: COLORS.cardAlt,
-    borderRadius: 8,
-    padding: 12,
+    borderColor: COLORS.cardAlt,
     marginTop: 8,
+    opacity: 0.9,
   },
   sportInfo: {
     marginBottom: 12,

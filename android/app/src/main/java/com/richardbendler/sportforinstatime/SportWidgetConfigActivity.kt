@@ -24,7 +24,10 @@ class SportWidgetConfigActivity : Activity() {
     val pendingSportId = prefs.getString("pending_sport_id", null)
     val pendingSportName = prefs.getString("pending_sport_name", "Sport")
     if (pendingSportId == null) {
-      setResult(Activity.RESULT_CANCELED)
+      val result = Intent()
+      result.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+      setResult(Activity.RESULT_OK, result)
+      SportWidgetProvider.refreshAll(this)
       finish()
       return
     }
@@ -34,6 +37,7 @@ class SportWidgetConfigActivity : Activity() {
       .putString("widget_${appWidgetId}_sport_name", pendingSportName)
       .remove("pending_sport_id")
       .remove("pending_sport_name")
+      .remove("pending_request_time")
       .apply()
 
     SportWidgetProvider.updateAppWidget(
@@ -41,6 +45,7 @@ class SportWidgetConfigActivity : Activity() {
       AppWidgetManager.getInstance(this),
       appWidgetId
     )
+    SportWidgetProvider.refreshAll(this)
 
     val result = Intent()
     result.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
