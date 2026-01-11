@@ -18,6 +18,9 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Voice from "@react-native-voice/voice";
+import { Camera, useCameraDevices, useFrameProcessor } from "react-native-vision-camera";
+import { runOnJS } from "react-native-reanimated";
+import { detectPose } from "vision-camera-pose-detector";
 
 const InstaControl = NativeModules.InstaControl;
 
@@ -141,6 +144,16 @@ const NUMBER_WORDS = {
     "dixneuf",
     "vingt",
   ],
+};
+
+const AI_EXERCISES = {
+  pushups: {
+    id: "pushups",
+    minConfidence: 0.5,
+    upAngle: 160,
+    downAngle: 95,
+    minRepMs: 700,
+  },
 };
 
 const WEEKDAY_LABELS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
@@ -323,6 +336,12 @@ const STRINGS = {
     "label.voicePermissionMissing": "Mikrofon-Zugriff fehlt",
     "label.voiceError": "Spracherkennung fehlgeschlagen",
     "label.voiceUnavailable": "Spracherkennung nicht verfuegbar",
+    "label.aiStart": "AI-Zaehlen starten",
+    "label.aiStop": "AI stoppen",
+    "label.aiHint": "Kamera seitlich platzieren, Oberkoerper sichtbar halten.",
+    "label.aiHintInline": "AI zaehlt Push-ups automatisch (Kamera noetig).",
+    "label.aiPermission": "Kamera-Zugriff fehlt oder wurde verweigert.",
+    "label.aiLoading": "Kamera wird geladen...",
     "label.back": "Zurück",
     "label.start": "Start",
     "label.stop": "Stop",
@@ -430,6 +449,12 @@ const STRINGS = {
     "label.voicePermissionMissing": "Microphone access missing",
     "label.voiceError": "Speech recognition failed",
     "label.voiceUnavailable": "Speech recognition unavailable",
+    "label.aiStart": "Start AI counting",
+    "label.aiStop": "Stop AI",
+    "label.aiHint": "Place the camera sideways and keep your upper body visible.",
+    "label.aiHintInline": "AI counts push-ups automatically (camera required).",
+    "label.aiPermission": "Camera access is missing or denied.",
+    "label.aiLoading": "Loading camera...",
     "label.back": "Back",
     "label.start": "Start",
     "label.stop": "Stop",
@@ -538,6 +563,12 @@ const STRINGS = {
     "label.voicePermissionMissing": "Falta acceso al microfono",
     "label.voiceError": "Fallo de reconocimiento de voz",
     "label.voiceUnavailable": "Reconocimiento de voz no disponible",
+    "label.aiStart": "Iniciar conteo AI",
+    "label.aiStop": "Detener AI",
+    "label.aiHint": "Coloca la camara de lado y mantente visible.",
+    "label.aiHintInline": "AI cuenta flexiones automaticamente (camara necesaria).",
+    "label.aiPermission": "Falta acceso a la camara.",
+    "label.aiLoading": "Cargando camara...",
     "label.back": "Atrás",
     "label.start": "Iniciar",
     "label.stop": "Parar",
@@ -646,6 +677,12 @@ const STRINGS = {
     "label.voicePermissionMissing": "Acces micro manquant",
     "label.voiceError": "Echec de reconnaissance vocale",
     "label.voiceUnavailable": "Reconnaissance vocale indisponible",
+    "label.aiStart": "Demarrer AI",
+    "label.aiStop": "Arreter AI",
+    "label.aiHint": "Place la camera de cote et reste visible.",
+    "label.aiHintInline": "AI compte les pompes automatiquement (camera requise).",
+    "label.aiPermission": "Acces camera manquant.",
+    "label.aiLoading": "Chargement de la camera...",
     "label.back": "Retour",
     "label.start": "Démarrer",
     "label.stop": "Arrêter",
@@ -934,6 +971,7 @@ const normalizeSports = (sportList) => {
       icon: sport.icon || defaultIconForSport(sport),
       screenSecondsPerUnit:
         sport.screenSecondsPerUnit ?? defaultScreenSecondsPerUnit(sport),
+      supportsAi: sport.supportsAi ?? getAiModeForSport(sport),
     };
     if (!sport.icon || sport.screenSecondsPerUnit == null || presetKey) {
       changed = true;
@@ -1007,6 +1045,168 @@ const extractNumberToken = (value, lang) => {
   return found;
 };
 
+const getAiModeForSport = (sport) => {
+  if (!sport) {
+    return null;
+  }
+  if (sport.id === "pushups") {
+    return "pushups";
+  }
+  return null;
+};
+
+const angleBetween = (a, b, c) => {
+  if (!a || !b || !c) {
+    return null;
+  }
+  const ab = { x: a.x - b.x, y: a.y - b.y };
+  const cb = { x: c.x - b.x, y: c.y - b.y };
+  const dot = ab.x * cb.x + ab.y * cb.y;
+  const abLen = Math.hypot(ab.x, ab.y);
+  const cbLen = Math.hypot(cb.x, cb.y);
+  if (!abLen || !cbLen) {
+    return null;
+  }
+  const cos = Math.max(-1, Math.min(1, dot / (abLen * cbLen)));
+  return (Math.acos(cos) * 180) / Math.PI;
+};
+
+const pickElbowAngle = (landmarks, side, minConfidence) => {
+  const shoulder = landmarks[`${side}Shoulder`];
+  const elbow = landmarks[`${side}Elbow`];
+  const wrist = landmarks[`${side}Wrist`];
+  if (
+    !shoulder ||
+    !elbow ||
+    !wrist ||
+    shoulder.confidence < minConfidence ||
+    elbow.confidence < minConfidence ||
+    wrist.confidence < minConfidence
+  ) {
+    return null;
+  }
+  return angleBetween(shoulder, elbow, wrist);
+};
+
+const AiCameraScreen = ({
+  onClose,
+  onRep,
+  repsValue,
+  t,
+  exerciseId = "pushups",
+}) => {
+  const devices = useCameraDevices();
+  const device = devices.back;
+  const [permissionStatus, setPermissionStatus] = useState("not-determined");
+  const phaseRef = useRef("up");
+  const lastRepAtRef = useRef(0);
+  const aiConfig = AI_EXERCISES[exerciseId];
+
+  useEffect(() => {
+    let mounted = true;
+    const ensurePermission = async () => {
+      const status = await Camera.getCameraPermissionStatus();
+      if (!mounted) {
+        return;
+      }
+      if (status === "authorized") {
+        setPermissionStatus(status);
+        return;
+      }
+      const next = await Camera.requestCameraPermission();
+      if (mounted) {
+        setPermissionStatus(next);
+      }
+    };
+    ensurePermission();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const handlePose = (landmarks) => {
+    if (!aiConfig || !landmarks) {
+      return;
+    }
+    const leftAngle = pickElbowAngle(
+      landmarks,
+      "left",
+      aiConfig.minConfidence
+    );
+    const rightAngle = pickElbowAngle(
+      landmarks,
+      "right",
+      aiConfig.minConfidence
+    );
+    const angle =
+      leftAngle && rightAngle
+        ? (leftAngle + rightAngle) / 2
+        : leftAngle || rightAngle;
+    if (!angle) {
+      return;
+    }
+    const now = Date.now();
+    if (angle <= aiConfig.downAngle) {
+      phaseRef.current = "down";
+      return;
+    }
+    if (angle >= aiConfig.upAngle && phaseRef.current === "down") {
+      if (now - lastRepAtRef.current >= aiConfig.minRepMs) {
+        lastRepAtRef.current = now;
+        phaseRef.current = "up";
+        onRep();
+      }
+    }
+  };
+
+  const frameProcessor = useFrameProcessor(
+    (frame) => {
+      "worklet";
+      const pose = detectPose(frame);
+      if (pose) {
+        runOnJS(handlePose)(pose);
+      }
+    },
+    [handlePose]
+  );
+
+  const isAuthorized = permissionStatus === "authorized";
+
+  return (
+    <SafeAreaView style={styles.aiScreen}>
+      <View style={styles.aiHeader}>
+        <Text style={styles.aiCounter}>{repsValue}</Text>
+        <Pressable style={styles.aiStopButton} onPress={onClose}>
+          <Text style={styles.aiStopText}>{t("label.aiStop")}</Text>
+        </Pressable>
+      </View>
+      {!isAuthorized ? (
+        <View style={styles.aiPermission}>
+          <Text style={styles.aiPermissionText}>{t("label.aiPermission")}</Text>
+          <Pressable style={styles.primaryButton} onPress={onClose}>
+            <Text style={styles.primaryButtonText}>{t("label.back")}</Text>
+          </Pressable>
+        </View>
+      ) : device ? (
+        <Camera
+          style={styles.aiCamera}
+          device={device}
+          isActive
+          frameProcessor={frameProcessor}
+          frameProcessorFps={6}
+        />
+      ) : (
+        <View style={styles.aiPermission}>
+          <Text style={styles.aiPermissionText}>{t("label.aiLoading")}</Text>
+        </View>
+      )}
+      <View style={styles.aiFooter}>
+        <Text style={styles.aiHint}>{t("label.aiHint")}</Text>
+      </View>
+    </SafeAreaView>
+  );
+};
+
 export default function App() {
   const { width } = useWindowDimensions();
   const [sports, setSports] = useState([]);
@@ -1055,6 +1255,7 @@ export default function App() {
   const [isAppActive, setIsAppActive] = useState(
     AppState.currentState === "active"
   );
+  const [aiSession, setAiSession] = useState(null);
   const intervalRef = useRef(null);
   const lastPermissionPromptAt = useRef(0);
   const lastVoiceTokenRef = useRef(null);
@@ -1405,6 +1606,7 @@ export default function App() {
           icon,
           screenSecondsPerUnit,
           presetKey: keepPresetKey,
+          supportsAi: sport.supportsAi,
         };
       });
       await saveSports(nextSports);
@@ -1770,6 +1972,19 @@ export default function App() {
     }));
   };
 
+  const startAiSession = (sport) => {
+    const mode = getAiModeForSport(sport);
+    if (!mode) {
+      return;
+    }
+    setVoiceEnabled(false);
+    setAiSession({ sportId: sport.id, mode });
+  };
+
+  const stopAiSession = () => {
+    setAiSession(null);
+  };
+
   const ensureAudioPermission = async () => {
     if (Platform.OS !== "android") {
       return true;
@@ -1891,6 +2106,9 @@ export default function App() {
   const hiddenSports = sports.filter((sport) => sport.hidden);
   const selectedSport = sports.find((sport) => sport.id === selectedSportId);
   const statsSport = sports.find((sport) => sport.id === statsSportId);
+  const aiSport = aiSession
+    ? sports.find((sport) => sport.id === aiSession.sportId)
+    : null;
 
   const todayStats = useMemo(() => {
     if (!selectedSport) {
@@ -1898,6 +2116,13 @@ export default function App() {
     }
     return getTodayStat(stats, selectedSport.id);
   }, [stats, selectedSport]);
+
+  const aiTodayStats = useMemo(() => {
+    if (!aiSport) {
+      return { reps: 0, seconds: 0 };
+    }
+    return getTodayStat(stats, aiSport.id);
+  }, [stats, aiSport]);
 
   useEffect(() => {
     selectedSportRef.current = selectedSport || null;
@@ -1988,6 +2213,17 @@ export default function App() {
     });
     InstaControl.updateWidgets();
   }, [sports, stats, language]);
+  if (aiSession && aiSport) {
+    return (
+      <AiCameraScreen
+        onClose={stopAiSession}
+        onRep={incrementReps}
+        repsValue={aiTodayStats.reps}
+        t={t}
+        exerciseId={aiSession.mode}
+      />
+    );
+  }
   if (overallStatsOpen) {
     const allKeys = Object.values(stats || {}).reduce((acc, sportStats) => {
       Object.keys(sportStats || {}).forEach((key) => acc.add(key));
@@ -2477,6 +2713,19 @@ export default function App() {
                 </Text>
               ) : null}
             </View>
+            {selectedSport.supportsAi ? (
+              <View style={styles.aiRow}>
+                <Pressable
+                  style={[styles.secondaryButton, styles.aiButton]}
+                  onPress={() => startAiSession(selectedSport)}
+                >
+                  <Text style={styles.secondaryButtonText}>
+                    {t("label.aiStart")}
+                  </Text>
+                </Pressable>
+                <Text style={styles.aiHintInline}>{t("label.aiHintInline")}</Text>
+              </View>
+            ) : null}
           </Pressable>
         ) : (
           <View style={styles.trackingArea}>
@@ -2763,6 +3012,11 @@ export default function App() {
                     <Text style={styles.sportName} numberOfLines={1}>
                       {sportLabel}
                     </Text>
+                    {sport.supportsAi ? (
+                      <View style={styles.aiBadge}>
+                        <Text style={styles.aiBadgeText}>AI</Text>
+                      </View>
+                    ) : null}
                     </View>
                   </View>
                   <View style={styles.statsInlineCard}>
@@ -2919,6 +3173,11 @@ export default function App() {
                           <Text style={styles.sportName} numberOfLines={1}>
                             {sportLabel}
                           </Text>
+                          {sport.supportsAi ? (
+                            <View style={styles.aiBadge}>
+                              <Text style={styles.aiBadgeText}>AI</Text>
+                            </View>
+                          ) : null}
                         </View>
                       </View>
                       <View style={styles.statsInlineCard}>
@@ -3293,6 +3552,20 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 12,
   },
+  aiRow: {
+    marginTop: 16,
+    alignItems: "center",
+    gap: 6,
+  },
+  aiButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  aiHintInline: {
+    color: COLORS.muted,
+    textAlign: "center",
+    fontSize: 12,
+  },
   voiceStatusError: {
     color: COLORS.danger,
   },
@@ -3338,6 +3611,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     justifyContent: "center",
+  },
+  aiBadge: {
+    borderWidth: 1,
+    borderColor: COLORS.accent,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  aiBadgeText: {
+    color: COLORS.accent,
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 0.6,
   },
   sportIcon: {
     fontSize: 18,
@@ -3909,5 +4195,66 @@ const styles = StyleSheet.create({
   languageOptionText: {
     color: COLORS.text,
     fontWeight: "600",
+  },
+  aiScreen: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
+  aiCamera: {
+    flex: 1,
+  },
+  aiHeader: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    zIndex: 10,
+    backgroundColor: "rgba(0, 0, 0, 0.35)",
+  },
+  aiCounter: {
+    color: COLORS.white,
+    fontSize: 52,
+    fontWeight: "700",
+  },
+  aiStopButton: {
+    backgroundColor: COLORS.danger,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  aiStopText: {
+    color: COLORS.white,
+    fontWeight: "700",
+  },
+  aiFooter: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: "rgba(0, 0, 0, 0.35)",
+    alignItems: "center",
+  },
+  aiHint: {
+    color: COLORS.muted,
+    textAlign: "center",
+    fontSize: 12,
+  },
+  aiPermission: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 12,
+    padding: 24,
+  },
+  aiPermissionText: {
+    color: COLORS.muted,
+    textAlign: "center",
   },
 });

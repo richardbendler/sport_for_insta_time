@@ -13,7 +13,8 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSMicrophoneUsageDescription": "Allow microphone access to count reps by voice.",
-        "NSSpeechRecognitionUsageDescription": "Allow speech recognition to count reps by voice."
+        "NSSpeechRecognitionUsageDescription": "Allow speech recognition to count reps by voice.",
+        "NSCameraUsageDescription": "Allow camera access to count push-ups."
       }
     },
     "android": {
@@ -21,6 +22,7 @@
       "targetSdkVersion": 35,
       "permissions": [
         "RECORD_AUDIO",
+        "CAMERA",
         "POST_NOTIFICATIONS"
       ],
       "adaptiveIcon": {
