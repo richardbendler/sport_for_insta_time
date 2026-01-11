@@ -161,6 +161,8 @@ dependencies {
     implementation("com.facebook.react:react-android")
     implementation project(':react-native-async-storage_async-storage')
     implementation project(':react-native-voice_voice')
+    implementation project(':react-native-vision-camera')
+    implementation project(':vision-camera-pose-detector')
 
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";
