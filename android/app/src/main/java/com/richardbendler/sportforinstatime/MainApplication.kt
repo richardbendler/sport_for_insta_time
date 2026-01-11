@@ -18,6 +18,8 @@ import expo.modules.ReactNativeHostWrapper
 import com.richardbendler.sportforinstatime.InstaControlPackage
 import com.reactnativecommunity.asyncstorage.AsyncStoragePackage
 import com.wenkesj.voice.VoicePackage
+import com.mrousavy.camera.react.CameraPackage
+import com.visioncameraposedetector.VisionCameraPoseDetectorPackage
 
 class MainApplication : Application(), ReactApplication {
 
@@ -32,6 +34,12 @@ class MainApplication : Application(), ReactApplication {
               }
               if (none { it::class.java.name == VoicePackage::class.java.name }) {
                 add(VoicePackage())
+              }
+              if (none { it::class.java.name == CameraPackage::class.java.name }) {
+                add(CameraPackage())
+              }
+              if (none { it::class.java.name == VisionCameraPoseDetectorPackage::class.java.name }) {
+                add(VisionCameraPoseDetectorPackage())
               }
             }
 
