@@ -3,19 +3,27 @@ package com.richardbendler.sportforinstatime
 import android.accessibilityservice.AccessibilityService
 import android.content.Context
 import android.content.Intent
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.graphics.PixelFormat
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.widget.TextView
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import org.json.JSONArray
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.math.abs
 
 class InstaBlockerService : AccessibilityService() {
   private val handler = Handler(Looper.getMainLooper())
@@ -23,6 +31,20 @@ class InstaBlockerService : AccessibilityService() {
   private var windowManager: WindowManager? = null
   private var overlayView: View? = null
   private var overlayText: TextView? = null
+  private var overlayParams: WindowManager.LayoutParams? = null
+  private var lastWidgetUpdateAt: Long = 0
+  private var notificationManager: NotificationManager? = null
+
+  private val notificationChannelId = "restricted_timer"
+  private val notificationId = 1001
+
+  private val ignoredPackages = setOf("com.android.systemui", "android")
+  private val appActivities = setOf(
+    "com.richardbendler.sportforinstatime.MainActivity",
+    "com.richardbendler.sportforinstatime.InstaBlockerActivity",
+    "com.richardbendler.sportforinstatime.InstaPrefaceActivity",
+    "com.richardbendler.sportforinstatime.SportWidgetConfigActivity"
+  )
 
   private val ticker = object : Runnable {
     override fun run() {
@@ -34,24 +56,47 @@ class InstaBlockerService : AccessibilityService() {
   override fun onServiceConnected() {
     super.onServiceConnected()
     setupOverlay()
+    setupNotificationChannel()
     handler.post(ticker)
   }
 
   override fun onAccessibilityEvent(event: AccessibilityEvent?) {
     val pkg = event?.packageName?.toString() ?: return
+    val className = event.className?.toString()
+    if (event.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+      return
+    }
+    if (ignoredPackages.contains(pkg) || !isLaunchablePackage(pkg)) {
+      clearForegroundApp()
+      return
+    }
+    if (pkg == applicationContext.packageName && !appActivities.contains(className)) {
+      return
+    }
+    val previousPackage = currentPackage
     currentPackage = pkg
     if (pkg == applicationContext.packageName) {
       updateCountdownOverlay(0, false)
+      updateCountdownNotification(0, false, null)
       return
     }
     val controlled = getControlledApps()
     if (!controlled.contains(pkg)) {
       updateCountdownOverlay(0, false)
+      updateCountdownNotification(0, false, null)
       return
     }
+    val remaining = getRemainingSeconds()
+    updateCountdownOverlay(remaining, true)
+    updateCountdownNotification(remaining, true, pkg)
     if (shouldBlock(pkg)) {
       updateCountdownOverlay(0, true)
+      updateCountdownNotification(0, false, null)
       launchBlocker()
+      return
+    }
+    if (previousPackage != pkg && shouldShowPreface(pkg)) {
+      launchPreface(pkg, remaining)
     }
   }
 
@@ -60,17 +105,20 @@ class InstaBlockerService : AccessibilityService() {
   override fun onDestroy() {
     super.onDestroy()
     teardownOverlay()
+    updateCountdownNotification(0, false, null)
   }
 
   private fun tickUsage() {
     val pkg = currentPackage ?: return
     if (pkg == applicationContext.packageName) {
       updateCountdownOverlay(0, false)
+      updateCountdownNotification(0, false, null)
       return
     }
     val controlled = getControlledApps()
     if (!controlled.contains(pkg)) {
       updateCountdownOverlay(0, false)
+      updateCountdownNotification(0, false, null)
       return
     }
     val prefs = getPrefs()
@@ -82,6 +130,8 @@ class InstaBlockerService : AccessibilityService() {
     val allowance = prefs.getInt("allowance_seconds", 0)
     if (allowance <= 0) {
       updateCountdownOverlay(0, true)
+      updateCountdownNotification(0, true, pkg)
+      maybeUpdateWidgets()
       launchBlocker()
       return
     }
@@ -89,9 +139,17 @@ class InstaBlockerService : AccessibilityService() {
     prefs.edit().putInt("used_seconds", used).apply()
     val remaining = (allowance - used).coerceAtLeast(0)
     updateCountdownOverlay(remaining, true)
+    updateCountdownNotification(remaining, true, pkg)
+    maybeUpdateWidgets()
     if (used >= allowance) {
       launchBlocker()
     }
+  }
+
+  private fun clearForegroundApp() {
+    currentPackage = null
+    updateCountdownOverlay(0, false)
+    updateCountdownNotification(0, false, null)
   }
 
   private fun shouldBlock(pkg: String): Boolean {
@@ -139,8 +197,13 @@ class InstaBlockerService : AccessibilityService() {
     )
     params.gravity = Gravity.TOP or Gravity.START
     val density = resources.displayMetrics.density
-    params.x = (8 * density).toInt()
-    params.y = (8 * density).toInt()
+    val prefs = getPrefs()
+    val defaultX = (8 * density).toInt()
+    val defaultY = (8 * density).toInt()
+    params.x = prefs.getInt("overlay_x", defaultX)
+    params.y = prefs.getInt("overlay_y", defaultY)
+    overlayParams = params
+    overlayView?.setOnTouchListener(createOverlayDragListener())
     windowManager?.addView(overlayView, params)
   }
 
@@ -163,6 +226,170 @@ class InstaBlockerService : AccessibilityService() {
     val seconds = (remainingSeconds % 60).toString().padStart(2, '0')
     overlayText?.text = "$minutes:$seconds"
     view.visibility = View.VISIBLE
+  }
+
+  private fun setupNotificationChannel() {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+      return
+    }
+    val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    val channel = NotificationChannel(
+      notificationChannelId,
+      "Restricted app timer",
+      NotificationManager.IMPORTANCE_LOW
+    )
+    channel.setSound(null, null)
+    channel.enableVibration(false)
+    manager.createNotificationChannel(channel)
+    notificationManager = manager
+  }
+
+  private fun updateCountdownNotification(
+    remainingSeconds: Int,
+    show: Boolean,
+    pkg: String?
+  ) {
+    val manager = notificationManager
+      ?: getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    notificationManager = manager
+    if (!show || pkg == null) {
+      manager.cancel(notificationId)
+      return
+    }
+    if (Build.VERSION.SDK_INT >= 33) {
+      val status = ContextCompat.checkSelfPermission(
+        this,
+        "android.permission.POST_NOTIFICATIONS"
+      )
+      if (status != PackageManager.PERMISSION_GRANTED) {
+        return
+      }
+    }
+    val appLabel = getAppLabel(pkg)
+    val lang = getAppLanguage()
+    val formatted = formatDuration(remainingSeconds)
+    val title = when (lang) {
+      "de" -> "Restzeit fuer $appLabel"
+      "es" -> "Tiempo restante para $appLabel"
+      "fr" -> "Temps restant pour $appLabel"
+      else -> "Remaining time for $appLabel"
+    }
+    val text = when (lang) {
+      "de" -> "Uebrig: $formatted"
+      "es" -> "Queda: $formatted"
+      "fr" -> "Reste: $formatted"
+      else -> "Remaining: $formatted"
+    }
+    val notification = NotificationCompat.Builder(this, notificationChannelId)
+      .setSmallIcon(R.mipmap.ic_launcher)
+      .setContentTitle(title)
+      .setContentText(text)
+      .setOnlyAlertOnce(true)
+      .setOngoing(true)
+      .setPriority(NotificationCompat.PRIORITY_LOW)
+      .build()
+    manager.notify(notificationId, notification)
+  }
+
+  private fun formatDuration(seconds: Int): String {
+    val minutes = (seconds / 60).toString().padStart(2, '0')
+    val remaining = (seconds % 60).toString().padStart(2, '0')
+    return "$minutes:$remaining"
+  }
+
+  private fun getAppLabel(pkg: String): String {
+    return try {
+      val appInfo = packageManager.getApplicationInfo(pkg, 0)
+      packageManager.getApplicationLabel(appInfo).toString()
+    } catch (e: Exception) {
+      pkg
+    }
+  }
+
+  private fun getAppLanguage(): String {
+    val prefs = getPrefs()
+    return prefs.getString("app_language", "en") ?: "en"
+  }
+
+  private fun createOverlayDragListener(): View.OnTouchListener {
+    val prefs = getPrefs()
+    val threshold = (8 * resources.displayMetrics.density).toInt()
+    var startX = 0
+    var startY = 0
+    var touchStartX = 0f
+    var touchStartY = 0f
+    var moved = false
+    return View.OnTouchListener { view, event ->
+      val params = overlayParams ?: return@OnTouchListener false
+      when (event.action) {
+        MotionEvent.ACTION_DOWN -> {
+          startX = params.x
+          startY = params.y
+          touchStartX = event.rawX
+          touchStartY = event.rawY
+          moved = false
+          true
+        }
+        MotionEvent.ACTION_MOVE -> {
+          val dx = (event.rawX - touchStartX).toInt()
+          val dy = (event.rawY - touchStartY).toInt()
+          if (!moved && (abs(dx) > threshold || abs(dy) > threshold)) {
+            moved = true
+          }
+          params.x = startX + dx
+          params.y = startY + dy
+          windowManager?.updateViewLayout(view, params)
+          true
+        }
+        MotionEvent.ACTION_UP -> {
+          if (moved) {
+            prefs.edit().putInt("overlay_x", params.x).putInt("overlay_y", params.y).apply()
+          } else {
+            view.performClick()
+          }
+          true
+        }
+        else -> false
+      }
+    }
+  }
+
+  private fun shouldShowPreface(pkg: String): Boolean {
+    val prefs = getPrefs()
+    val allowedPkg = prefs.getString("preface_allow_package", null)
+    val allowUntil = prefs.getLong("preface_allow_until", 0L)
+    val now = System.currentTimeMillis()
+    return !(allowedPkg == pkg && now < allowUntil)
+  }
+
+  private fun launchPreface(pkg: String, remainingSeconds: Int) {
+    val intent = Intent(this, InstaPrefaceActivity::class.java)
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+    intent.putExtra("target_package", pkg)
+    intent.putExtra("remaining_seconds", remainingSeconds)
+    startActivity(intent)
+  }
+
+  private fun getRemainingSeconds(): Int {
+    val prefs = getPrefs()
+    val today = todayKey()
+    val lastDay = prefs.getString("last_day", "") ?: ""
+    if (lastDay != today) {
+      prefs.edit().putInt("used_seconds", 0).putString("last_day", today).apply()
+    }
+    val allowance = prefs.getInt("allowance_seconds", 0)
+    val used = prefs.getInt("used_seconds", 0)
+    return (allowance - used).coerceAtLeast(0)
+  }
+
+  private fun maybeUpdateWidgets() {
+    val now = System.currentTimeMillis()
+    if (now - lastWidgetUpdateAt < 5000) {
+      return
+    }
+    lastWidgetUpdateAt = now
+    SportWidgetProvider.refreshAll(applicationContext)
+    OverallWidgetProvider.refreshAll(applicationContext)
   }
 
   private fun openApp() {
@@ -188,5 +415,9 @@ class InstaBlockerService : AccessibilityService() {
   private fun todayKey(): String {
     val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
     return formatter.format(Date())
+  }
+
+  private fun isLaunchablePackage(pkg: String): Boolean {
+    return packageManager.getLaunchIntentForPackage(pkg) != null
   }
 }

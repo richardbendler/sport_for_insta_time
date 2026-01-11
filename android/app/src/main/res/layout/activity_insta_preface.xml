@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="#100f0c"
+  android:gravity="center"
+  android:orientation="vertical"
+  android:padding="24dp">
+
+  <TextView
+    android:id="@+id/preface_title"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/preface_title"
+    android:textColor="#f8fafc"
+    android:textSize="22sp"
+    android:textStyle="bold" />
+
+  <TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:text="@string/preface_remaining_label"
+    android:textColor="#94a3b8"
+    android:textSize="14sp" />
+
+  <TextView
+    android:id="@+id/preface_remaining"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="4dp"
+    android:text="00:00"
+    android:textColor="#f8fafc"
+    android:textSize="28sp"
+    android:textStyle="bold" />
+
+  <TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="20dp"
+    android:text="@string/preface_countdown_label"
+    android:textColor="#94a3b8"
+    android:textSize="14sp" />
+
+  <TextView
+    android:id="@+id/preface_countdown"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="6dp"
+    android:text="10"
+    android:textColor="#f59e0b"
+    android:textSize="42sp"
+    android:textStyle="bold" />
+
+  <Button
+    android:id="@+id/preface_button"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="24dp"
+    android:text="@string/preface_button"
+    android:backgroundTint="#f59e0b"
+    android:textColor="#0b1020" />
+</LinearLayout>
