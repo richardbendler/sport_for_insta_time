@@ -5,15 +5,28 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
+    "icon": "./assets/icon.png",
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Allow microphone access to count reps by voice.",
+        "NSSpeechRecognitionUsageDescription": "Allow speech recognition to count reps by voice."
+      }
     },
     "android": {
       "package": "com.richardbendler.sportforinstatime",
-      "targetSdkVersion": 35
+      "targetSdkVersion": 35,
+      "permissions": [
+        "RECORD_AUDIO",
+        "POST_NOTIFICATIONS"
+      ],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#0f172a"
+      }
     },
     "extra": {
       "eas": {

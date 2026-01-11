@@ -1,0 +1,16 @@
+<resources>
+  <string name="widget_used_label">Used</string>
+  <string name="widget_remaining_label">Remaining</string>
+  <string name="widget_overall_title">Screen Time</string>
+  <string name="widget_sport_title">Sport</string>
+  <string name="widget_today_label">Today</string>
+  <string name="widget_screen_time_label">Screen Time</string>
+  <string name="blocker_title">Time is up</string>
+  <string name="blocker_subtitle">Do sports to earn more minutes.</string>
+  <string name="blocker_open_app">Start sport now</string>
+  <string name="blocker_back">Back</string>
+  <string name="preface_title">Time remaining</string>
+  <string name="preface_remaining_label">Remaining:</string>
+  <string name="preface_countdown_label">Starts in</string>
+  <string name="preface_button">Open app</string>
+</resources>
