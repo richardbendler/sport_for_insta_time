@@ -322,6 +322,7 @@ const STRINGS = {
     "label.voiceHint": "Zaehle laut, die App zaehlt mit (Mikrofonzugriff noetig).",
     "label.voicePermissionMissing": "Mikrofon-Zugriff fehlt",
     "label.voiceError": "Spracherkennung fehlgeschlagen",
+    "label.voiceUnavailable": "Spracherkennung nicht verfuegbar",
     "label.back": "Zurück",
     "label.start": "Start",
     "label.stop": "Stop",
@@ -428,6 +429,7 @@ const STRINGS = {
     "label.voiceHint": "Say numbers out loud to count (microphone access required).",
     "label.voicePermissionMissing": "Microphone access missing",
     "label.voiceError": "Speech recognition failed",
+    "label.voiceUnavailable": "Speech recognition unavailable",
     "label.back": "Back",
     "label.start": "Start",
     "label.stop": "Stop",
@@ -535,6 +537,7 @@ const STRINGS = {
     "label.voiceHint": "Di numeros en voz alta para contar (requiere microfono).",
     "label.voicePermissionMissing": "Falta acceso al microfono",
     "label.voiceError": "Fallo de reconocimiento de voz",
+    "label.voiceUnavailable": "Reconocimiento de voz no disponible",
     "label.back": "Atrás",
     "label.start": "Iniciar",
     "label.stop": "Parar",
@@ -642,6 +645,7 @@ const STRINGS = {
     "label.voiceHint": "Dis les numeros a voix haute pour compter (micro requis).",
     "label.voicePermissionMissing": "Acces micro manquant",
     "label.voiceError": "Echec de reconnaissance vocale",
+    "label.voiceUnavailable": "Reconnaissance vocale indisponible",
     "label.back": "Retour",
     "label.start": "Démarrer",
     "label.stop": "Arrêter",
@@ -1811,11 +1815,21 @@ export default function App() {
       return;
     }
     try {
+      const available = await Voice.isAvailable();
+      if (!available) {
+        setVoiceError(t("label.voiceUnavailable"));
+        setVoiceEnabled(false);
+        return;
+      }
       await Voice.start(getSpeechLocale());
       setListeningState(true);
     } catch (error) {
       setListeningState(false);
-      setVoiceError(t("label.voiceError"));
+      const message =
+        typeof error?.message === "string" && error.message.trim().length > 0
+          ? error.message
+          : t("label.voiceError");
+      setVoiceError(message);
     }
   };
 
@@ -1850,10 +1864,15 @@ export default function App() {
     incrementReps();
   };
 
-  const handleVoiceError = () => {
+  const handleVoiceError = (event) => {
     setListeningState(false);
     if (voiceEnabledRef.current) {
-      setVoiceError(t("label.voiceError"));
+      const message =
+        typeof event?.error?.message === "string" &&
+        event.error.message.trim().length > 0
+          ? event.error.message
+          : t("label.voiceError");
+      setVoiceError(message);
     }
   };
 
