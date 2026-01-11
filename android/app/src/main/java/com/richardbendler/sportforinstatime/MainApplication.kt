@@ -16,6 +16,8 @@ import com.facebook.react.defaults.DefaultReactNativeHost
 import expo.modules.ApplicationLifecycleDispatcher
 import expo.modules.ReactNativeHostWrapper
 import com.richardbendler.sportforinstatime.InstaControlPackage
+import com.reactnativecommunity.asyncstorage.AsyncStoragePackage
+import com.wenkesj.voice.VoicePackage
 
 class MainApplication : Application(), ReactApplication {
 
@@ -25,6 +27,12 @@ class MainApplication : Application(), ReactApplication {
         override fun getPackages(): List<ReactPackage> =
             PackageList(this).packages.apply {
               add(InstaControlPackage())
+              if (none { it::class.java.name == AsyncStoragePackage::class.java.name }) {
+                add(AsyncStoragePackage())
+              }
+              if (none { it::class.java.name == VoicePackage::class.java.name }) {
+                add(VoicePackage())
+              }
             }
 
           override fun getJSMainModuleName(): String = ".expo/.virtual-metro-entry"
