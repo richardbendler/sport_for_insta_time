@@ -1,0 +1,34 @@
+diff --git a/node_modules/react-native-vision-camera/android/build.gradle b/node_modules/react-native-vision-camera/android/build.gradle
+index b1d9973..bcf5b3d 100644
+--- a/node_modules/react-native-vision-camera/android/build.gradle
++++ b/node_modules/react-native-vision-camera/android/build.gradle
+@@ -90,6 +90,10 @@ if (hasWorklets) {
+ def enableCodeScanner = safeExtGetBool('VisionCamera_enableCodeScanner', false)
+ logger.warn("[VisionCamera] VisionCamera_enableCodeScanner is set to $enableCodeScanner!")
+ 
++def visionCameraCxxDir = rootProject.hasProperty("visionCameraCxxDir")
++  ? rootProject.property("visionCameraCxxDir").toString()
++  : new File(rootProject.buildDir, "visioncamera_cxx").absolutePath
++
+ repositories {
+   google()
+   mavenCentral()
+@@ -134,7 +138,9 @@ android {
+         arguments "-DANDROID_STL=c++_shared",
+                 "-DNODE_MODULES_DIR=${nodeModules}",
+                 "-DENABLE_FRAME_PROCESSORS=${enableFrameProcessors ? "ON" : "OFF"}",
+-                "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
++                "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON",
++                "-DCMAKE_OBJECT_PATH_MAX=1024",
++                "-DCMAKE_NINJA_FORCE_RESPONSE_FILE=ON"
+         abiFilters (*reactNativeArchitectures())
+       }
+     }
+@@ -154,6 +160,7 @@ android {
+   externalNativeBuild {
+     cmake {
+       path "CMakeLists.txt"
++      buildStagingDirectory file(visionCameraCxxDir)
+     }
+   }
+   packagingOptions {
