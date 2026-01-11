@@ -67,7 +67,6 @@ class InstaBlockerService : AccessibilityService() {
       return
     }
     if (ignoredPackages.contains(pkg) || !isLaunchablePackage(pkg)) {
-      clearForegroundApp()
       return
     }
     if (pkg == applicationContext.packageName && !appActivities.contains(className)) {
