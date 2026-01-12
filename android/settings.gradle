@@ -39,8 +39,4 @@ rootProject.name = 'Sport for Screen Time'
 expoAutolinking.useExpoVersionCatalog()
 
 include ':app'
-include ':react-native-voice'
-project(':react-native-voice').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-voice/voice/android')
-include ':@react-native-async-storage_async-storage'
-project(':@react-native-async-storage_async-storage').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-async-storage/async-storage/android')
 includeBuild(expoAutolinking.reactNativeGradlePlugin)
