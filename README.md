@@ -2,6 +2,15 @@
 
 Eine einfache React Native App, die Sport gegen Social Media Zeit tauscht. Sportarten und Tageswerte werden lokal gespeichert, und ausgewählte Apps können auf Android blockiert werden, sobald die verdiente Zeit verbraucht ist.
 
+
+## Expo Befehle (wichtig)
+```bash
+npx expo run:android
+npx expo start --dev-client
+eas build --platform android --local
+npx eas build -p android --profile production
+```
+
 ## Features
 - Presets: Liegestütze, Klimmzüge, Situps, Joggen (mit Icons)
 - Eigene Sportarten erstellen, ausblenden oder löschen
@@ -33,15 +42,8 @@ Beim ersten Start wird nach der Zugriffshilfe gefragt. Die Freigabe kann jederze
 
 ## Entwicklung (Android)
 Ein Dev Build ist notwendig (Expo Go auf Android 14 hat Einschränkungen).
-
-```bash
-npm install
-npx expo run:android
-npx expo start --dev-client
-```
+`npm install`
 
 ## Hinweise
 - Die Blocker-Seite führt zurück zum Homescreen, sobald die Zeit aufgebraucht ist.
-- Die App ist aktuell Android-only für die App-Auswahl und den Blocker.
-Build (Cloud)
-- `npx eas build -p android --profile production`
+- Die App ist aktuell Android-only für die App-Auswahl und den Blocker.
