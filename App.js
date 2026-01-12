@@ -18,11 +18,9 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Voice from "@react-native-voice/voice";
-import { Camera, useCameraDevices, useFrameProcessor } from "react-native-vision-camera";
-import { useRunOnJS } from "react-native-worklets-core";
-import { detectPose } from "vision-camera-pose-detector";
 
 const InstaControl = NativeModules.InstaControl;
+const AI_CAMERA_ENABLED = false;
 
 const STORAGE_KEYS = {
   sports: "@sports_v1",
@@ -224,9 +222,34 @@ const MONTH_LABELS = {
 const DEFAULT_ICON = "⭐";
 const PRESET_KEYS = {
   pushups: "pushups",
-  pullups: "pullups",
-  pushups_alt: "situps",
-  jogging: "jogging",
+};
+
+const createDefaultPresetSports = () => {
+  const now = Date.now();
+  return [
+    {
+      id: "pushups",
+      name: "Pushups",
+      type: "reps",
+      hidden: false,
+      createdAt: now,
+    },
+  ];
+};
+
+const PRESET_IDS_TO_REMOVE = new Set(["pullups", "pushups_alt", "jogging"]);
+
+const pruneNonPushupPresets = (sportsList) =>
+  sportsList.filter((sport) => !PRESET_IDS_TO_REMOVE.has(sport.id));
+
+const ensurePushupPreset = (sportsList) => {
+  if (sportsList.some((sport) => sport.id === "pushups")) {
+    return sportsList;
+  }
+  const pushupPreset = createDefaultPresetSports().find(
+    (sport) => sport.id === "pushups"
+  );
+  return pushupPreset ? [pushupPreset, ...sportsList] : sportsList;
 };
 
 const COLORS = {
@@ -342,6 +365,8 @@ const STRINGS = {
     "label.aiHintInline": "AI zaehlt Push-ups automatisch (Kamera noetig).",
     "label.aiPermission": "Kamera-Zugriff fehlt oder wurde verweigert.",
     "label.aiLoading": "Kamera wird geladen...",
+    "label.aiUnavailable": "AI-Kamera ist voruebergehend deaktiviert.",
+    "label.aiUnavailableInline": "AI-Training ist derzeit deaktiviert.",
     "label.back": "Zurück",
     "label.start": "Start",
     "label.stop": "Stop",
@@ -455,6 +480,8 @@ const STRINGS = {
     "label.aiHintInline": "AI counts push-ups automatically (camera required).",
     "label.aiPermission": "Camera access is missing or denied.",
     "label.aiLoading": "Loading camera...",
+    "label.aiUnavailable": "AI camera is temporarily unavailable.",
+    "label.aiUnavailableInline": "AI training is temporarily unavailable.",
     "label.back": "Back",
     "label.start": "Start",
     "label.stop": "Stop",
@@ -569,6 +596,8 @@ const STRINGS = {
     "label.aiHintInline": "AI cuenta flexiones automaticamente (camara necesaria).",
     "label.aiPermission": "Falta acceso a la camara.",
     "label.aiLoading": "Cargando camara...",
+    "label.aiUnavailable": "La camara AI no esta disponible.",
+    "label.aiUnavailableInline": "AI temporalmente desactivado.",
     "label.back": "Atrás",
     "label.start": "Iniciar",
     "label.stop": "Parar",
@@ -683,6 +712,8 @@ const STRINGS = {
     "label.aiHintInline": "AI compte les pompes automatiquement (camera requise).",
     "label.aiPermission": "Acces camera manquant.",
     "label.aiLoading": "Chargement de la camera...",
+    "label.aiUnavailable": "La camera AI est temporairement indisponible.",
+    "label.aiUnavailableInline": "AI temporairement desactive.",
     "label.back": "Retour",
     "label.start": "Démarrer",
     "label.stop": "Arrêter",
@@ -964,6 +995,7 @@ const normalizeSports = (sportList) => {
       name = "Situps";
       changed = true;
     }
+    const supportsAi = sport.supportsAi ?? Boolean(getAiModeForSport(sport));
     const next = {
       ...sport,
       name,
@@ -971,7 +1003,8 @@ const normalizeSports = (sportList) => {
       icon: sport.icon || defaultIconForSport(sport),
       screenSecondsPerUnit:
         sport.screenSecondsPerUnit ?? defaultScreenSecondsPerUnit(sport),
-      supportsAi: sport.supportsAi ?? getAiModeForSport(sport),
+      supportsAi,
+      nonDeletable: supportsAi,
     };
     if (!sport.icon || sport.screenSecondsPerUnit == null || presetKey) {
       changed = true;
@@ -1088,126 +1121,25 @@ const pickElbowAngle = (landmarks, side, minConfidence) => {
   return angleBetween(shoulder, elbow, wrist);
 };
 
-const AiCameraScreen = ({
-  onClose,
-  onRep,
-  repsValue,
-  t,
-  exerciseId = "pushups",
-}) => {
-  const devices = useCameraDevices();
-  const device = devices.back;
-  const [permissionStatus, setPermissionStatus] = useState("not-determined");
-  const phaseRef = useRef("up");
-  const lastRepAtRef = useRef(0);
-  const aiConfig = AI_EXERCISES[exerciseId];
-
-  useEffect(() => {
-    let mounted = true;
-    const ensurePermission = async () => {
-      const status = await Camera.getCameraPermissionStatus();
-      if (!mounted) {
-        return;
-      }
-      if (status === "authorized") {
-        setPermissionStatus(status);
-        return;
-      }
-      const next = await Camera.requestCameraPermission();
-      if (mounted) {
-        setPermissionStatus(next);
-      }
-    };
-    ensurePermission();
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  const handlePose = (landmarks) => {
-    if (!aiConfig || !landmarks) {
-      return;
-    }
-    const leftAngle = pickElbowAngle(
-      landmarks,
-      "left",
-      aiConfig.minConfidence
-    );
-    const rightAngle = pickElbowAngle(
-      landmarks,
-      "right",
-      aiConfig.minConfidence
-    );
-    const angle =
-      leftAngle && rightAngle
-        ? (leftAngle + rightAngle) / 2
-        : leftAngle || rightAngle;
-    if (!angle) {
-      return;
-    }
-    const now = Date.now();
-    if (angle <= aiConfig.downAngle) {
-      phaseRef.current = "down";
-      return;
-    }
-    if (angle >= aiConfig.upAngle && phaseRef.current === "down") {
-      if (now - lastRepAtRef.current >= aiConfig.minRepMs) {
-        lastRepAtRef.current = now;
-        phaseRef.current = "up";
-        onRep();
-      }
-    }
-  };
-
-  const handlePoseOnJS = useRunOnJS(handlePose, [handlePose]);
-
-  const frameProcessor = useFrameProcessor(
-    (frame) => {
-      "worklet";
-      const pose = detectPose(frame);
-      if (pose) {
-        handlePoseOnJS(pose);
-      }
-    },
-    [handlePoseOnJS]
-  );
-
-  const isAuthorized = permissionStatus === "authorized";
-
-  return (
-    <SafeAreaView style={styles.aiScreen}>
-      <View style={styles.aiHeader}>
-        <Text style={styles.aiCounter}>{repsValue}</Text>
-        <Pressable style={styles.aiStopButton} onPress={onClose}>
-          <Text style={styles.aiStopText}>{t("label.aiStop")}</Text>
-        </Pressable>
-      </View>
-      {!isAuthorized ? (
-        <View style={styles.aiPermission}>
-          <Text style={styles.aiPermissionText}>{t("label.aiPermission")}</Text>
-          <Pressable style={styles.primaryButton} onPress={onClose}>
-            <Text style={styles.primaryButtonText}>{t("label.back")}</Text>
-          </Pressable>
-        </View>
-      ) : device ? (
-        <Camera
-          style={styles.aiCamera}
-          device={device}
-          isActive
-          frameProcessor={frameProcessor}
-          frameProcessorFps={6}
-        />
-      ) : (
-        <View style={styles.aiPermission}>
-          <Text style={styles.aiPermissionText}>{t("label.aiLoading")}</Text>
-        </View>
-      )}
-      <View style={styles.aiFooter}>
-        <Text style={styles.aiHint}>{t("label.aiHint")}</Text>
-      </View>
-    </SafeAreaView>
-  );
-};
+const AiCameraScreen = ({ onClose, repsValue, t }) => (
+  <SafeAreaView style={styles.aiScreen}>
+    <View style={styles.aiHeader}>
+      <Text style={styles.aiCounter}>{repsValue}</Text>
+      <Pressable style={styles.aiStopButton} onPress={onClose}>
+        <Text style={styles.aiStopText}>{t("label.aiStop")}</Text>
+      </Pressable>
+    </View>
+    <View style={styles.aiPermission}>
+      <Text style={styles.aiPermissionText}>{t("label.aiUnavailable")}</Text>
+      <Pressable style={styles.primaryButton} onPress={onClose}>
+        <Text style={styles.primaryButtonText}>{t("label.back")}</Text>
+      </Pressable>
+    </View>
+    <View style={styles.aiFooter}>
+      <Text style={styles.aiHint}>{t("label.aiUnavailableInline")}</Text>
+    </View>
+  </SafeAreaView>
+);
 
 export default function App() {
   const { width } = useWindowDimensions();
@@ -1291,7 +1223,7 @@ export default function App() {
     return sport.name;
   };
 
-  const confirmAction = (message, onConfirm) => {
+const confirmAction = (message, onConfirm) => {
     Alert.alert(
       t("label.confirmTitle"),
       message,
@@ -1301,7 +1233,9 @@ export default function App() {
       ],
       { cancelable: true }
     );
-  };
+};
+
+const canDeleteSport = (sport) => !sport.nonDeletable;
 
   const setAppLanguage = async (nextLanguage) => {
     const nextSettings = { ...settings, language: nextLanguage };
@@ -1329,9 +1263,15 @@ export default function App() {
       );
       const carryoverRaw = await AsyncStorage.getItem(STORAGE_KEYS.carryover);
       const parsedSports = sportsRaw ? JSON.parse(sportsRaw) : [];
-      const { normalized, changed } = normalizeSports(parsedSports);
+      const cleanedSports = parsedSports.length
+        ? pruneNonPushupPresets(parsedSports)
+        : parsedSports;
+      const baseSports = cleanedSports.length
+        ? ensurePushupPreset(cleanedSports)
+        : createDefaultPresetSports();
+      const { normalized, changed } = normalizeSports(baseSports);
       setSports(normalized);
-      if (changed) {
+      if (changed || !parsedSports.length) {
         await AsyncStorage.setItem(
           STORAGE_KEYS.sports,
           JSON.stringify(normalized)
@@ -1635,6 +1575,10 @@ export default function App() {
   };
 
   const handleDeleteSport = async (sportId) => {
+    const sport = sports.find((entry) => entry.id === sportId);
+    if (sport && !canDeleteSport(sport)) {
+      return;
+    }
     const nextSports = sports.filter((sport) => sport.id !== sportId);
     await saveSports(nextSports);
     if (selectedSportId === sportId) {
@@ -1975,6 +1919,10 @@ export default function App() {
   };
 
   const startAiSession = (sport) => {
+    if (!AI_CAMERA_ENABLED) {
+      Alert.alert(t("label.aiUnavailable"), t("label.aiUnavailableInline"));
+      return;
+    }
     const mode = getAiModeForSport(sport);
     if (!mode) {
       return;
@@ -2219,10 +2167,8 @@ export default function App() {
     return (
       <AiCameraScreen
         onClose={stopAiSession}
-        onRep={incrementReps}
         repsValue={aiTodayStats.reps}
         t={t}
-        exerciseId={aiSession.mode}
       />
     );
   }
@@ -2715,17 +2661,28 @@ export default function App() {
                 </Text>
               ) : null}
             </View>
-            {selectedSport.supportsAi ? (
+            {selectedSport.supportsAi || selectedSport.id === "pushups" ? (
               <View style={styles.aiRow}>
                 <Pressable
-                  style={[styles.secondaryButton, styles.aiButton]}
+                  style={[
+                    styles.secondaryButton,
+                    styles.aiButton,
+                    !AI_CAMERA_ENABLED && styles.aiButtonDisabled,
+                  ]}
                   onPress={() => startAiSession(selectedSport)}
+                  disabled={!AI_CAMERA_ENABLED}
                 >
                   <Text style={styles.secondaryButtonText}>
                     {t("label.aiStart")}
                   </Text>
                 </Pressable>
-                <Text style={styles.aiHintInline}>{t("label.aiHintInline")}</Text>
+                <Text style={styles.aiHintInline}>
+                  {t(
+                    AI_CAMERA_ENABLED
+                      ? "label.aiHintInline"
+                      : "label.aiUnavailableInline"
+                  )}
+                </Text>
               </View>
             ) : null}
           </Pressable>
@@ -2990,18 +2947,20 @@ export default function App() {
                         )
                       }
                     >
-                      <Text style={styles.iconActionText}>🚫👁</Text>
+                      <Text style={styles.iconActionText}>👁</Text>
                     </Pressable>
-                    <Pressable
-                      style={styles.iconAction}
-                      onPress={() =>
-                        confirmAction(t("label.confirmDelete"), () =>
-                          handleDeleteSport(sport.id)
-                        )
-                      }
-                    >
-                      <Text style={styles.iconActionText}>✕</Text>
-                    </Pressable>
+                    {canDeleteSport(sport) ? (
+                      <Pressable
+                        style={styles.iconAction}
+                        onPress={() =>
+                          confirmAction(t("label.confirmDelete"), () =>
+                            handleDeleteSport(sport.id)
+                          )
+                        }
+                      >
+                        <Text style={styles.iconActionText}>✕</Text>
+                      </Pressable>
+                    ) : null}
                   </View>
                 </View>
                 <Pressable
@@ -3142,7 +3101,7 @@ export default function App() {
                       </View>
                       <View style={styles.cardActionsRight}>
                         <Pressable
-                          style={styles.iconAction}
+                          style={[styles.iconAction, styles.iconActionWithLabel]}
                           onPress={() =>
                             confirmAction(t("label.confirmShow"), () =>
                               handleHideSport(sport.id, false)
@@ -3150,17 +3109,22 @@ export default function App() {
                           }
                         >
                           <Text style={styles.iconActionText}>👁</Text>
+                          <Text style={styles.iconActionLabel}>
+                            {t("label.show")}
+                          </Text>
                         </Pressable>
-                        <Pressable
-                          style={styles.iconAction}
-                          onPress={() =>
-                            confirmAction(t("label.confirmDelete"), () =>
-                              handleDeleteSport(sport.id)
-                            )
-                          }
-                        >
-                          <Text style={styles.iconActionText}>✕</Text>
-                        </Pressable>
+                        {canDeleteSport(sport) ? (
+                          <Pressable
+                            style={styles.iconAction}
+                            onPress={() =>
+                              confirmAction(t("label.confirmDelete"), () =>
+                                handleDeleteSport(sport.id)
+                              )
+                            }
+                          >
+                            <Text style={styles.iconActionText}>✕</Text>
+                          </Pressable>
+                        ) : null}
                       </View>
                     </View>
                     <Pressable
@@ -3563,6 +3527,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
+  aiButtonDisabled: {
+    backgroundColor: COLORS.cardAlt,
+    opacity: 0.7,
+  },
   aiHintInline: {
     color: COLORS.muted,
     textAlign: "center",
@@ -3929,9 +3897,19 @@ const styles = StyleSheet.create({
     minWidth: 22,
     alignItems: "center",
   },
+  iconActionWithLabel: {
+    flexDirection: "row",
+    gap: 4,
+    paddingHorizontal: 6,
+  },
   iconActionText: {
     color: COLORS.text,
     fontSize: 11,
+    fontWeight: "700",
+  },
+  iconActionLabel: {
+    color: COLORS.text,
+    fontSize: 10,
     fontWeight: "700",
   },
   primaryButton: {

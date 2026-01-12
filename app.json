@@ -20,6 +20,7 @@
     "android": {
       "package": "com.richardbendler.sportforinstatime",
       "targetSdkVersion": 35,
+      "icon": "./assets/icon.png",
       "permissions": [
         "RECORD_AUDIO",
         "CAMERA",

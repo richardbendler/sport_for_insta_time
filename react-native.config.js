@@ -21,16 +21,17 @@ module.exports = {
     },
     "react-native-vision-camera": {
       platforms: {
-        android: {
-          sourceDir: path.resolve(__dirname, "node_modules/react-native-vision-camera/android"),
-        },
+        android: null,
       },
     },
     "vision-camera-pose-detector": {
       platforms: {
-        android: {
-          sourceDir: path.resolve(__dirname, "node_modules/vision-camera-pose-detector/android"),
-        },
+        android: null,
+      },
+    },
+    "react-native-worklets-core": {
+      platforms: {
+        android: null,
       },
     },
   },
