@@ -10,16 +10,18 @@ import com.facebook.react.ReactPackage
 import com.facebook.react.ReactHost
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint
 import com.facebook.react.defaults.DefaultReactNativeHost
+import com.facebook.react.soloader.OpenSourceMergedSoMapping
+import com.facebook.soloader.SoLoader
 
 import expo.modules.ApplicationLifecycleDispatcher
 import expo.modules.ReactNativeHostWrapper
 import com.richardbendler.sportforinstatime.InstaControlPackage
 import com.reactnativecommunity.asyncstorage.AsyncStoragePackage
 import com.wenkesj.voice.VoicePackage
-import com.mrousavy.camera.react.CameraPackage
-import com.visioncameraposedetector.VisionCameraPoseDetectorPackage
 
 class MainApplication : Application(), ReactApplication {
+  private val newArchEnabled = false
+
   override val reactNativeHost: ReactNativeHost = ReactNativeHostWrapper(
       this,
       object : DefaultReactNativeHost(this) {
@@ -32,19 +34,13 @@ class MainApplication : Application(), ReactApplication {
               if (none { it::class.java.name == VoicePackage::class.java.name }) {
                 add(VoicePackage())
               }
-              if (none { it::class.java.name == CameraPackage::class.java.name }) {
-                add(CameraPackage())
-              }
-              if (none { it::class.java.name == VisionCameraPoseDetectorPackage::class.java.name }) {
-                add(VisionCameraPoseDetectorPackage())
-              }
             }
 
           override fun getJSMainModuleName(): String = ".expo/.virtual-metro-entry"
 
           override fun getUseDeveloperSupport(): Boolean = BuildConfig.DEBUG
 
-          override val isNewArchEnabled: Boolean = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED
+          override val isNewArchEnabled: Boolean = newArchEnabled
       }
   )
 
@@ -53,7 +49,13 @@ class MainApplication : Application(), ReactApplication {
 
   override fun onCreate() {
     super.onCreate()
-    if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
+    try {
+      SoLoader.init(this, OpenSourceMergedSoMapping)
+    } catch (e: Exception) {
+      // Fallback for unexpected SoLoader init issues.
+      SoLoader.init(this, false)
+    }
+    if (newArchEnabled) {
       DefaultNewArchitectureEntryPoint.load()
     }
     ApplicationLifecycleDispatcher.onApplicationCreate(this)

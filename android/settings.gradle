@@ -22,6 +22,20 @@ plugins {
   id("expo-autolinking-settings")
 }
 
+dependencyResolutionManagement {
+  versionCatalogs {
+    libs {
+      def reactNativeDir = new File(
+        providers.exec {
+          workingDir(rootDir)
+          commandLine("node", "--print", "require.resolve('react-native/package.json')")
+        }.standardOutput.asText.get().trim()
+      ).getParentFile()
+      from(files(new File(reactNativeDir, "gradle/libs.versions.toml")))
+    }
+  }
+}
+
 def useCommunityAutolinking = true
 
 extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
@@ -42,8 +56,4 @@ include ':react-native-async-storage_async-storage'
 project(':react-native-async-storage_async-storage').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-async-storage/async-storage/android')
 include ':react-native-voice_voice'
 project(':react-native-voice_voice').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-voice/voice/android')
-include ':react-native-vision-camera'
-project(':react-native-vision-camera').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-vision-camera/android')
-include ':vision-camera-pose-detector'
-project(':vision-camera-pose-detector').projectDir = new File(rootProject.projectDir, '../node_modules/vision-camera-pose-detector/android')
 includeBuild(expoAutolinking.reactNativeGradlePlugin)
