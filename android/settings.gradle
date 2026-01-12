@@ -22,23 +22,10 @@ plugins {
   id("expo-autolinking-settings")
 }
 
-dependencyResolutionManagement {
-  versionCatalogs {
-    libs {
-      def reactNativeDir = new File(
-        providers.exec {
-          workingDir(rootDir)
-          commandLine("node", "--print", "require.resolve('react-native/package.json')")
-        }.standardOutput.asText.get().trim()
-      ).getParentFile()
-      from(files(new File(reactNativeDir, "gradle/libs.versions.toml")))
-    }
-  }
-}
-
-def useCommunityAutolinking = true
-
 extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+  def useCommunityAutolinking =
+    System.getenv('EXPO_USE_COMMUNITY_AUTOLINKING') == '1' ||
+    (providers.gradleProperty('EXPO_USE_COMMUNITY_AUTOLINKING').orNull == '1')
   if (useCommunityAutolinking) {
     ex.autolinkLibrariesFromCommand()
   } else {
@@ -52,8 +39,8 @@ rootProject.name = 'Sport for Screen Time'
 expoAutolinking.useExpoVersionCatalog()
 
 include ':app'
-include ':react-native-async-storage_async-storage'
-project(':react-native-async-storage_async-storage').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-async-storage/async-storage/android')
-include ':react-native-voice_voice'
-project(':react-native-voice_voice').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-voice/voice/android')
+include ':react-native-voice'
+project(':react-native-voice').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-voice/voice/android')
+include ':@react-native-async-storage_async-storage'
+project(':@react-native-async-storage_async-storage').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-async-storage/async-storage/android')
 includeBuild(expoAutolinking.reactNativeGradlePlugin)
