@@ -1455,6 +1455,62 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     });
   };
 
+  const deleteLogGroup = (sportId, dayKey, group, type) => {
+    let nextDayLogs = null;
+    setLogs((prev) => {
+      const nextLogs = { ...prev };
+      const sportLogs = { ...(nextLogs[sportId] || {}) };
+      const dayLogs = [...(sportLogs[dayKey] || [])];
+      if (dayLogs.length === 0) {
+        return prev;
+      }
+      const filtered = dayLogs.filter(
+        (entry) => entry.ts < group.startTs || entry.ts > group.endTs
+      );
+      if (filtered.length === dayLogs.length) {
+        return prev;
+      }
+      nextDayLogs = filtered;
+      if (filtered.length === 0) {
+        delete sportLogs[dayKey];
+      } else {
+        sportLogs[dayKey] = filtered;
+      }
+      if (Object.keys(sportLogs).length === 0) {
+        delete nextLogs[sportId];
+      } else {
+        nextLogs[sportId] = sportLogs;
+      }
+      AsyncStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(nextLogs));
+      return nextLogs;
+    });
+    setStats((prev) => {
+      if (nextDayLogs == null) {
+        return prev;
+      }
+      const nextStats = { ...prev };
+      const sportStats = { ...(nextStats[sportId] || {}) };
+      const total =
+        type === "reps"
+          ? nextDayLogs.reduce((sum, e) => sum + (e.reps || 0), 0)
+          : nextDayLogs.reduce((sum, e) => sum + (e.seconds || 0), 0);
+      if (total <= 0) {
+        delete sportStats[dayKey];
+      } else if (type === "reps") {
+        sportStats[dayKey] = { reps: total, seconds: 0 };
+      } else {
+        sportStats[dayKey] = { reps: 0, seconds: total };
+      }
+      if (Object.keys(sportStats).length === 0) {
+        delete nextStats[sportId];
+      } else {
+        nextStats[sportId] = sportStats;
+      }
+      AsyncStorage.setItem(STORAGE_KEYS.stats, JSON.stringify(nextStats));
+      return nextStats;
+    });
+  };
+
   const updateSpecificDayStat = (sportId, dayKey, updater) => {
     setStats((prev) => {
       const nextStats = { ...prev };
@@ -2434,7 +2490,24 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 return (
                   <View key={`${group.startTs}-${index}`} style={styles.statRow}>
                     <Text style={styles.statLabel}>{range}</Text>
-                    <Text style={styles.statValue}>{valueText}</Text>
+                    <View style={styles.statRowActions}>
+                      <Text style={styles.statValue}>{valueText}</Text>
+                      <Pressable
+                        style={styles.statDeleteButton}
+                        onPress={() =>
+                          confirmAction(t("label.confirmDelete"), () =>
+                            deleteLogGroup(
+                              statsSport.id,
+                              statsDayKey,
+                              group,
+                              statsSport.type
+                            )
+                          )
+                        }
+                      >
+                        <Text style={styles.statDeleteText}>{t("label.delete")}</Text>
+                      </Pressable>
+                    </View>
                   </View>
                 );
               })
@@ -4121,9 +4194,14 @@ const styles = StyleSheet.create({
   statRow: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.cardAlt,
+  },
+  statRowActions: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   statLabel: {
     color: COLORS.muted,
@@ -4133,10 +4211,22 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     fontWeight: "600",
   },
+  statDeleteButton: {
+    marginLeft: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    backgroundColor: "rgba(239, 68, 68, 0.18)",
+  },
+  statDeleteText: {
+    color: COLORS.danger,
+    fontWeight: "700",
+    fontSize: 12,
+  },
   languageWrap: {
     position: "absolute",
     right: 16,
-    bottom: 28,
+    bottom: 48,
     alignItems: "flex-end",
   },
   languageButton: {
