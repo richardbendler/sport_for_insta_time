@@ -46,4 +46,4 @@ Ein Dev Build ist notwendig (Expo Go auf Android 14 hat Einschränkungen).
 
 ## Hinweise
 - Die Blocker-Seite führt zurück zum Homescreen, sobald die Zeit aufgebraucht ist.
-- Die App ist aktuell Android-only für die App-Auswahl und den Blocker.
+- Die App ist aktuell Android-only für die App-Auswahl und den Blocker.
