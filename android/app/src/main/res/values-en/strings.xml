@@ -1,0 +1,21 @@
+<resources>
+  <string name="app_name">Sport for Screen Time</string>
+  <string name="accessibility_service_description">Blocks selected apps when no time is left.</string>
+  <string name="widget_used_label">Used</string>
+  <string name="widget_remaining_label">Remaining</string>
+  <string name="widget_overall_title">Screen Time</string>
+  <string name="widget_overall_remaining_suffix">remaining</string>
+  <string name="widget_overall_total_suffix">total today</string>
+  <string name="widget_overall_carryover_suffix">carryover</string>
+  <string name="widget_sport_title">Sport</string>
+  <string name="widget_today_label">Today</string>
+  <string name="widget_screen_time_label">Screen Time</string>
+  <string name="blocker_title">Time is up</string>
+  <string name="blocker_subtitle">Do sports to earn more minutes.</string>
+  <string name="blocker_open_app">Start sport now</string>
+  <string name="blocker_back">Back</string>
+  <string name="preface_title">Time remaining</string>
+  <string name="preface_remaining_label">Remaining:</string>
+  <string name="preface_countdown_label">Starts in</string>
+  <string name="preface_button">Open app</string>
+</resources>

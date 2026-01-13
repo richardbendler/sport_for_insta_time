@@ -30,10 +30,16 @@ class OverallWidgetProvider : AppWidgetProvider() {
       val localizedContext = getLocalizedContext(context, getAppLanguage(context))
       val usagePrefs = context.getSharedPreferences("insta_control", Context.MODE_PRIVATE)
       val now = System.currentTimeMillis()
+      val totals = ScreenTimeStore.getTotals(usagePrefs, now)
       val breakdown = ScreenTimeStore.getBreakdown(usagePrefs, now)
-      val remaining = breakdown.remainingSeconds
-      val totalToday = breakdown.totalTodaySeconds
-      val carryover = breakdown.carryoverSeconds
+      val widgetPrefs = context.getSharedPreferences("widget_data", Context.MODE_PRIVATE)
+      val storedRemaining = widgetPrefs.getInt("overall_remaining", 0)
+      val storedTotal = widgetPrefs.getInt("overall_total", 0)
+      val storedCarryover = widgetPrefs.getInt("overall_carryover", 0)
+      val useStored = totals.entryCount <= 0 && storedRemaining > 0
+      val remaining = if (useStored) storedRemaining else breakdown.remainingSeconds
+      val totalToday = if (useStored) storedTotal else breakdown.totalTodaySeconds
+      val carryover = if (useStored) storedCarryover else breakdown.carryoverSeconds
 
       val remainingLabel = localizedContext.getString(R.string.widget_overall_remaining_suffix)
       val totalLabel = localizedContext.getString(R.string.widget_overall_total_suffix)

@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">Sport for Screen Time</string>
+  <string name="accessibility_service_description">Bloque les apps s\u00e9lectionn\u00e9es quand il n\'y a plus de temps.</string>
+  <string name="widget_used_label">Utilis\u00e9</string>
+  <string name="widget_remaining_label">Restant</string>
+  <string name="widget_overall_title">Temps d\'\u00e9cran</string>
+  <string name="widget_overall_remaining_suffix">restant</string>
+  <string name="widget_overall_total_suffix">total aujourd\'hui</string>
+  <string name="widget_overall_carryover_suffix">report</string>
+  <string name="widget_sport_title">Sport</string>
+  <string name="widget_today_label">Aujourd\'hui</string>
+  <string name="widget_screen_time_label">Temps d\'\u00e9cran</string>
+  <string name="blocker_title">Le temps est \u00e9coul\u00e9</string>
+  <string name="blocker_subtitle">Fais du sport pour gagner plus de minutes.</string>
+  <string name="blocker_open_app">D\u00e9marrer le sport</string>
+  <string name="blocker_back">Retour</string>
+  <string name="preface_title">Temps restant</string>
+  <string name="preface_remaining_label">Restant :</string>
+  <string name="preface_countdown_label">D\u00e9marre dans</string>
+  <string name="preface_button">Ouvrir l\'app</string>
+</resources>

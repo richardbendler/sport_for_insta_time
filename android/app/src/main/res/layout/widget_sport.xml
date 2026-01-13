@@ -4,7 +4,7 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   android:background="@drawable/widget_sport_bg"
-  android:gravity="center_horizontal"
+  android:gravity="center"
   android:orientation="vertical"
   android:padding="8dp">
 
@@ -42,5 +42,6 @@
     android:maxLines="1"
     android:text="00:00 verbleibend"
     android:textColor="#94a3b8"
-    android:textSize="10sp" />
+    android:textSize="10sp"
+    android:visibility="gone" />
 </LinearLayout>

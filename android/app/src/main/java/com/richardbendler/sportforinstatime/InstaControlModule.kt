@@ -76,6 +76,16 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
+  fun setAppLanguage(language: String?) {
+    val prefs = getPrefs()
+    if (language.isNullOrBlank()) {
+      prefs.edit().remove("app_language").apply()
+    } else {
+      prefs.edit().putString("app_language", language).apply()
+    }
+  }
+
+  @ReactMethod
   fun openAccessibilitySettings() {
     val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -190,6 +200,7 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
       createdAt.toLong(),
       totalSeconds
     )
+    OverallWidgetProvider.refreshAll(reactContext)
   }
 
   @ReactMethod
@@ -213,6 +224,17 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
+  fun setOverallWidgetData(remainingSeconds: Int, totalSeconds: Int, carryoverSeconds: Int) {
+    val prefs = getWidgetPrefs()
+    prefs.edit()
+      .putInt("overall_remaining", remainingSeconds.coerceAtLeast(0))
+      .putInt("overall_total", totalSeconds.coerceAtLeast(0))
+      .putInt("overall_carryover", carryoverSeconds.coerceAtLeast(0))
+      .apply()
+    OverallWidgetProvider.refreshAll(reactContext)
+  }
+
+  @ReactMethod
   fun getUsageState(promise: Promise) {
     try {
       val prefs = getPrefs()
@@ -220,16 +242,19 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
       val today = todayKey()
       val used = ScreenTimeStore.getUsedSecondsToday(prefs, now)
       val totals = ScreenTimeStore.getTotals(prefs, now)
+      val breakdown = ScreenTimeStore.getBreakdown(prefs, now)
       val map = Arguments.createMap()
       map.putInt("remainingSeconds", totals.remainingSeconds)
       map.putInt("usedSeconds", used)
       map.putString("day", today)
+      map.putInt("carryoverSeconds", breakdown.carryoverSeconds)
       map.putInt("entryCount", totals.entryCount)
       val bySport = Arguments.createMap()
       totals.remainingBySport.forEach { (sportKey, value) ->
         bySport.putInt(sportKey, value)
       }
       map.putMap("remainingBySport", bySport)
+      OverallWidgetProvider.refreshAll(reactContext)
       promise.resolve(map)
     } catch (e: Exception) {
       promise.reject("USAGE_STATE_ERROR", e)
@@ -240,20 +265,27 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
   fun requestPinWidget(sportId: String, sportName: String, promise: Promise) {
     try {
       val manager = AppWidgetManager.getInstance(reactContext)
-      val provider = ComponentName(reactContext, SportWidgetProvider::class.java)
+      val isOverall = sportId == "overall"
+      val provider = if (isOverall) {
+        ComponentName(reactContext, OverallWidgetProvider::class.java)
+      } else {
+        ComponentName(reactContext, SportWidgetProvider::class.java)
+      }
       val supported = manager.isRequestPinAppWidgetSupported
       if (!supported) {
         promise.resolve(false)
         return
       }
-      val prefs = getWidgetPrefs()
-      prefs.edit()
-        .putString("pending_sport_id", sportId)
-        .putString("pending_sport_name", sportName)
-        .putString("last_widget_sport_id", sportId)
-        .putString("last_widget_sport_name", sportName)
-        .putLong("last_widget_request_time", System.currentTimeMillis())
-        .apply()
+      if (!isOverall) {
+        val prefs = getWidgetPrefs()
+        prefs.edit()
+          .putString("pending_sport_id", sportId)
+          .putString("pending_sport_name", sportName)
+          .putString("last_widget_sport_id", sportId)
+          .putString("last_widget_sport_name", sportName)
+          .putLong("last_widget_request_time", System.currentTimeMillis())
+          .apply()
+      }
       val requested = manager.requestPinAppWidget(provider, null, null)
       promise.resolve(requested)
     } catch (e: Exception) {
@@ -288,6 +320,7 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
     ids.forEach { id ->
       SportWidgetProvider.updateAppWidget(reactContext, manager, id)
     }
+    OverallWidgetProvider.refreshAll(reactContext)
   }
 
   private fun getPrefs() =

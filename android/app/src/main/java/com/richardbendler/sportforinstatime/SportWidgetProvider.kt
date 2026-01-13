@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.view.View
 import android.widget.RemoteViews
 import java.util.Locale
 
@@ -75,18 +76,15 @@ class SportWidgetProvider : AppWidgetProvider() {
       val localizedContext =
         getLocalizedContext(context, getAppLanguage(context))
       val fallbackTitle = localizedContext.getString(R.string.widget_sport_title)
-      val remainingSuffix =
-        localizedContext.getString(R.string.widget_overall_remaining_suffix)
       val title = if (sportId != null) {
         prefs.getString("${sportId}_title", sportName) ?: sportName
       } else {
         fallbackTitle
       }
 
-      val (value, screenTime) = if (sportId != null) {
+      val (value, _) = if (sportId != null) {
         val v = prefs.getString("${sportId}_value", "0") ?: "0"
-        val s = prefs.getString("${sportId}_screen", "00:00") ?: "00:00"
-        Pair(v, s)
+        Pair(v, "")
       } else {
         Pair("0", "00:00")
       }
@@ -94,10 +92,7 @@ class SportWidgetProvider : AppWidgetProvider() {
       val views = RemoteViews(context.packageName, R.layout.widget_sport)
       views.setTextViewText(R.id.widget_title, title)
       views.setTextViewText(R.id.widget_value, value)
-      views.setTextViewText(
-        R.id.widget_screen_time,
-        "$screenTime $remainingSuffix"
-      )
+      views.setViewVisibility(R.id.widget_screen_time, View.GONE)
 
       val intent = Intent(context, MainActivity::class.java)
       val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
@@ -105,12 +100,6 @@ class SportWidgetProvider : AppWidgetProvider() {
       views.setOnClickPendingIntent(R.id.widget_root, pendingIntent)
 
       appWidgetManager.updateAppWidget(appWidgetId, views)
-    }
-
-    private fun formatDuration(totalSeconds: Int): String {
-      val minutes = (totalSeconds / 60).toString().padStart(2, '0')
-      val seconds = (totalSeconds % 60).toString().padStart(2, '0')
-      return "$minutes:$seconds"
     }
 
     private fun getAppLanguage(context: Context): String? {

@@ -4,7 +4,7 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   android:background="@drawable/widget_sport_bg"
-  android:gravity="center_horizontal"
+  android:gravity="center"
   android:orientation="vertical"
   android:padding="8dp">
 
