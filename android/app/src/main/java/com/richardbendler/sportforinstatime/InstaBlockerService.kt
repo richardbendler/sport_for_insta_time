@@ -64,7 +64,14 @@ class InstaBlockerService : AccessibilityService() {
       return
     }
     if (ignoredPackages.contains(pkg) || !isLaunchablePackage(pkg)) {
-      if (isHomePackage(pkg)) {
+      val classLower = className?.lowercase() ?: ""
+      if (
+        isHomePackage(pkg) ||
+        classLower.contains("recents") ||
+        classLower.contains("launcher") ||
+        classLower.contains("home") ||
+        classLower.contains("overview")
+      ) {
         clearForegroundApp()
       }
       return

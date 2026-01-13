@@ -4,6 +4,9 @@
   <string name="widget_used_label">Verbraucht</string>
   <string name="widget_remaining_label">Übrig</string>
   <string name="widget_overall_title">Bildschirmzeit</string>
+  <string name="widget_overall_remaining_suffix">verbleibend</string>
+  <string name="widget_overall_total_suffix">gesamt heute</string>
+  <string name="widget_overall_carryover_suffix">Uebertrag</string>
   <string name="widget_sport_title">Sport</string>
   <string name="widget_today_label">Heute</string>
   <string name="widget_screen_time_label">Bildschirmzeit</string>

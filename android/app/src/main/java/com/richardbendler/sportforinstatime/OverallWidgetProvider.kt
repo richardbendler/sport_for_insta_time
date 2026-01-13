@@ -30,22 +30,27 @@ class OverallWidgetProvider : AppWidgetProvider() {
       val localizedContext = getLocalizedContext(context, getAppLanguage(context))
       val usagePrefs = context.getSharedPreferences("insta_control", Context.MODE_PRIVATE)
       val now = System.currentTimeMillis()
-      val used = ScreenTimeStore.getUsedSecondsToday(usagePrefs, now)
-      val remaining = ScreenTimeStore.getTotals(usagePrefs, now).remainingSeconds
+      val breakdown = ScreenTimeStore.getBreakdown(usagePrefs, now)
+      val remaining = breakdown.remainingSeconds
+      val totalToday = breakdown.totalTodaySeconds
+      val carryover = breakdown.carryoverSeconds
 
-      val title = localizedContext.getString(R.string.widget_overall_title)
-      val usedLabel = localizedContext.getString(R.string.widget_used_label)
-      val remainingLabel = localizedContext.getString(R.string.widget_remaining_label)
+      val remainingLabel = localizedContext.getString(R.string.widget_overall_remaining_suffix)
+      val totalLabel = localizedContext.getString(R.string.widget_overall_total_suffix)
+      val carryoverLabel = localizedContext.getString(R.string.widget_overall_carryover_suffix)
 
       val views = RemoteViews(context.packageName, R.layout.widget_overall)
-      views.setTextViewText(R.id.widget_overall_title, title)
-      views.setTextViewText(
-        R.id.widget_overall_used,
-        "$usedLabel: ${formatDuration(used)}"
-      )
       views.setTextViewText(
         R.id.widget_overall_remaining,
-        "$remainingLabel: ${formatDuration(remaining)}"
+        "${formatDuration(remaining)} $remainingLabel"
+      )
+      views.setTextViewText(
+        R.id.widget_overall_total,
+        "${formatDuration(totalToday)} $totalLabel"
+      )
+      views.setTextViewText(
+        R.id.widget_overall_carryover,
+        "${formatDuration(carryover)} $carryoverLabel"
       )
 
       val intent = Intent(context, MainActivity::class.java)
