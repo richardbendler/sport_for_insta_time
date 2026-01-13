@@ -338,7 +338,7 @@ const STRINGS = {
     "label.usageAccess": "Nutzungszugriff",
     "label.usageAccessHint":
       "Damit Apps nach Nutzungszeit sortiert werden k?nnen, braucht die App Nutzungszugriff.",
-    "label.openUsageAccess": "Nutzungszugriff aktivieren",
+    "label.openUsageAccess": "Zugriff erlauben",
     "label.usageAccessMissing": "Nutzungszugriff fehlt",
     "label.usageAccessActive": "Nutzungszugriff aktiv",
     "label.later": "Später",
@@ -477,7 +477,7 @@ const STRINGS = {
     "label.usageAccess": "Usage access",
     "label.usageAccessHint":
       "Allow usage access so apps can be sorted by usage time.",
-    "label.openUsageAccess": "Enable usage access",
+    "label.openUsageAccess": "Allow access",
     "label.usageAccessMissing": "Usage access missing",
     "label.usageAccessActive": "Usage access active",
     "label.later": "Later",
@@ -490,7 +490,7 @@ const STRINGS = {
     "label.accessibilityDisclosureTitle": "Accessibility required",
     "label.accessibilityDisclosureBody":
       "We use Accessibility to detect which app is in the foreground and to block restricted apps when your earned screen time is used up. We do not read or share any content from your apps.",
-    "label.accessibilityDisclosureConfirm": "Open settings",
+    "label.accessibilityDisclosureConfirm": "Allow access",
     "label.accessibilityDisclosureCancel": "Not now",
     "label.hiddenShow": "Show hidden sports",
     "label.hiddenHide": "Hide hidden sports",
@@ -620,7 +620,7 @@ const STRINGS = {
     "label.usageAccess": "Acceso de uso",
     "label.usageAccessHint":
       "Permite el acceso de uso para ordenar las apps por tiempo de uso.",
-    "label.openUsageAccess": "Activar acceso de uso",
+    "label.openUsageAccess": "Permitir acceso",
     "label.usageAccessMissing": "Acceso de uso faltante",
     "label.usageAccessActive": "Acceso de uso activo",
     "label.later": "Más tarde",
@@ -633,7 +633,7 @@ const STRINGS = {
     "label.accessibilityDisclosureTitle": "Accesibilidad necesaria",
     "label.accessibilityDisclosureBody":
       "Usamos Accesibilidad para detectar qu\u00e9 app est\u00e1 en primer plano y bloquear apps restringidas cuando se acaba tu tiempo ganado. No leemos ni compartimos contenido de tus apps.",
-    "label.accessibilityDisclosureConfirm": "Abrir ajustes",
+    "label.accessibilityDisclosureConfirm": "Permitir acceso",
     "label.accessibilityDisclosureCancel": "M\u00e1s tarde",
     "label.hiddenShow": "Mostrar deportes ocultos",
     "label.hiddenHide": "Ocultar deportes ocultos",
@@ -764,7 +764,7 @@ const STRINGS = {
     "label.usageAccess": "Acces d'utilisation",
     "label.usageAccessHint":
       "Autorisez l'acces d'utilisation pour trier les apps par temps d'usage.",
-    "label.openUsageAccess": "Activer l'acces d'utilisation",
+    "label.openUsageAccess": "Autoriser l\u2019acc\u00e8s",
     "label.usageAccessMissing": "Acces d'utilisation manquant",
     "label.usageAccessActive": "Acces d'utilisation actif",
     "label.later": "Plus tard",
@@ -3437,10 +3437,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                   {!needsAccessibility ? null : (
                     <View style={styles.permissionItemActions}>
                       <Pressable
-                        style={styles.primaryButton}
+                        style={styles.permissionActionButton}
                         onPress={requestAccessibilityAccess}
                       >
-                        <Text style={styles.primaryButtonText}>
+                        <Text style={styles.permissionActionButtonText}>
                           {t("label.accessibilityDisclosureConfirm")}
                         </Text>
                       </Pressable>
@@ -3465,10 +3465,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                   {usageAccessGranted ? null : (
                     <View style={styles.permissionItemActions}>
                       <Pressable
-                        style={styles.primaryButton}
+                        style={styles.permissionActionButton}
                         onPress={openUsageAccessSettings}
                       >
-                        <Text style={styles.primaryButtonText}>
+                        <Text style={styles.permissionActionButtonText}>
                           {t("label.openUsageAccess")}
                         </Text>
                       </Pressable>
@@ -4731,6 +4731,18 @@ const styles = StyleSheet.create({
   },
   permissionItemActions: {
     alignItems: "flex-start",
+  },
+  permissionActionButton: {
+    backgroundColor: "rgba(34, 197, 94, 0.85)",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  permissionActionButtonText: {
+    color: COLORS.white,
+    fontWeight: "700",
+    fontSize: 12,
   },
   infoCard: {
     backgroundColor: COLORS.card,
