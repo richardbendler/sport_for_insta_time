@@ -296,6 +296,7 @@ const STRINGS = {
     "label.editEntry": "Eintrag bearbeiten",
     "label.dayDetails": "Tagesdetails",
     "label.noEntries": "Keine Einträge",
+    "label.breakdown": "Aufschluesselung",
     "label.save": "Speichern",
     "label.editHint": "Nur verringern möglich.",
     "label.confirmDeleteAll": "Sicher, dass du alle Einträge löschen willst?",
@@ -412,6 +413,7 @@ const STRINGS = {
     "label.editEntry": "Edit entry",
     "label.dayDetails": "Day details",
     "label.noEntries": "No entries",
+    "label.breakdown": "Breakdown",
     "label.save": "Save",
     "label.editHint": "Only reducing is possible.",
     "label.confirmDeleteAll": "Are you sure you want to delete all entries?",
@@ -527,6 +529,7 @@ const STRINGS = {
     "label.editEntry": "Editar entrada",
     "label.dayDetails": "Detalles del día",
     "label.noEntries": "Sin entradas",
+    "label.breakdown": "Desglose",
     "label.save": "Guardar",
     "label.editHint": "Solo se puede reducir.",
     "label.confirmDeleteAll": "¿Seguro que quieres borrar todas las entradas?",
@@ -643,6 +646,7 @@ const STRINGS = {
     "label.editEntry": "Modifier l’entrée",
     "label.dayDetails": "Détails du jour",
     "label.noEntries": "Aucune entrée",
+    "label.breakdown": "Detail",
     "label.save": "Enregistrer",
     "label.editHint": "Réduction uniquement.",
     "label.confirmDeleteAll": "Confirmer la suppression de toutes les entrées ?",
@@ -1445,6 +1449,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       entry.ts,
       entry.screenSeconds || 0
     );
+    InstaControl?.updateOverallWidgets?.();
   };
 
   const removeScreenTimeEntry = (entryId) => {
@@ -1452,6 +1457,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       return;
     }
     InstaControl.removeScreenTimeEntry(entryId);
+    InstaControl?.updateOverallWidgets?.();
   };
 
   const addLogEntry = (sport, entry) => {
@@ -1482,6 +1488,42 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     syncScreenTimeEntry(sport, nextEntry);
     refreshUsageState();
   };
+
+  useEffect(() => {
+    if (!InstaControl?.upsertScreenTimeEntry) {
+      return;
+    }
+    if (sports.length === 0) {
+      return;
+    }
+    const sportMap = new Map(sports.map((sport) => [sport.id, sport]));
+    Object.entries(logs || {}).forEach(([sportId, sportLogs]) => {
+      const sport = sportMap.get(sportId);
+      if (!sport) {
+        return;
+      }
+      Object.values(sportLogs || {}).forEach((dayEntries) => {
+        (dayEntries || []).forEach((entry) => {
+          if (!entry?.id || !entry?.ts) {
+            return;
+          }
+          const screenSeconds = Number.isFinite(entry.screenSeconds)
+            ? entry.screenSeconds
+            : screenSecondsForEntry(sport, entry);
+          InstaControl.upsertScreenTimeEntry(
+            entry.id,
+            sport.id,
+            entry.ts,
+            screenSeconds
+          );
+        });
+      });
+    });
+    if (InstaControl?.updateOverallWidgets) {
+      InstaControl.updateOverallWidgets();
+    }
+    refreshUsageState();
+  }, [logs, sports]);
 
   const adjustLogsToTarget = (sport, dayKey, targetValue) => {
     if (!sport) {
@@ -1608,6 +1650,105 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     });
   };
 
+  const decrementLogGroup = (sport, dayKey, group) => {
+    if (!sport) {
+      return;
+    }
+    let nextDayLogs = null;
+    let removedEntryId = null;
+    let updatedEntry = null;
+    setLogs((prev) => {
+      const nextLogs = { ...prev };
+      const sportLogs = { ...(nextLogs[sport.id] || {}) };
+      const dayLogs = [...(sportLogs[dayKey] || [])];
+      if (dayLogs.length === 0) {
+        return prev;
+      }
+      const candidates = dayLogs
+        .filter((entry) => entry.ts >= group.startTs && entry.ts <= group.endTs)
+        .sort((a, b) => b.ts - a.ts);
+      if (candidates.length === 0) {
+        return prev;
+      }
+      const target = candidates[0];
+      const index = dayLogs.findIndex((entry) => entry.id === target.id);
+      if (index < 0) {
+        return prev;
+      }
+      const entry = { ...dayLogs[index] };
+      if (sport.type === "reps") {
+        const nextReps = Math.max(0, (entry.reps || 0) - 1);
+        if (nextReps <= 0) {
+          removedEntryId = entry.id;
+          dayLogs.splice(index, 1);
+        } else {
+          entry.reps = nextReps;
+          entry.screenSeconds = screenSecondsForEntry(sport, entry);
+          dayLogs[index] = entry;
+          updatedEntry = entry;
+        }
+      } else {
+        const nextSeconds = Math.max(0, (entry.seconds || 0) - 60);
+        if (nextSeconds <= 0) {
+          removedEntryId = entry.id;
+          dayLogs.splice(index, 1);
+        } else {
+          entry.seconds = nextSeconds;
+          entry.screenSeconds = screenSecondsForEntry(sport, entry);
+          dayLogs[index] = entry;
+          updatedEntry = entry;
+        }
+      }
+      nextDayLogs = dayLogs;
+      if (dayLogs.length === 0) {
+        delete sportLogs[dayKey];
+      } else {
+        sportLogs[dayKey] = dayLogs;
+      }
+      if (Object.keys(sportLogs).length === 0) {
+        delete nextLogs[sport.id];
+      } else {
+        nextLogs[sport.id] = sportLogs;
+      }
+      AsyncStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(nextLogs));
+      if (removedEntryId) {
+        removeScreenTimeEntry(removedEntryId);
+      }
+      if (updatedEntry) {
+        syncScreenTimeEntry(sport, updatedEntry);
+      }
+      if (removedEntryId || updatedEntry) {
+        refreshUsageState();
+      }
+      return nextLogs;
+    });
+    setStats((prev) => {
+      if (nextDayLogs == null) {
+        return prev;
+      }
+      const nextStats = { ...prev };
+      const sportStats = { ...(nextStats[sport.id] || {}) };
+      const total =
+        sport.type === "reps"
+          ? nextDayLogs.reduce((sum, e) => sum + (e.reps || 0), 0)
+          : nextDayLogs.reduce((sum, e) => sum + (e.seconds || 0), 0);
+      if (total <= 0) {
+        delete sportStats[dayKey];
+      } else if (sport.type === "reps") {
+        sportStats[dayKey] = { reps: total, seconds: 0 };
+      } else {
+        sportStats[dayKey] = { reps: 0, seconds: total };
+      }
+      if (Object.keys(sportStats).length === 0) {
+        delete nextStats[sport.id];
+      } else {
+        nextStats[sport.id] = sportStats;
+      }
+      AsyncStorage.setItem(STORAGE_KEYS.stats, JSON.stringify(nextStats));
+      return nextStats;
+    });
+  };
+
   const updateSpecificDayStat = (sportId, dayKey, updater) => {
     setStats((prev) => {
       const nextStats = { ...prev };
@@ -1635,6 +1776,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     await saveStats(nextStats);
     if (InstaControl?.clearScreenTimeEntriesForSport) {
       InstaControl.clearScreenTimeEntriesForSport(sportId);
+      InstaControl?.updateOverallWidgets?.();
       refreshUsageState();
     }
   };
@@ -1643,6 +1785,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     await saveStats({});
     if (InstaControl?.clearAllScreenTimeEntries) {
       InstaControl.clearAllScreenTimeEntries();
+      InstaControl?.updateOverallWidgets?.();
       refreshUsageState();
     }
   };
@@ -2502,6 +2645,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     if (statsDayKey) {
       const dayLogs = (logs[statsSport.id] || {})[statsDayKey] || [];
       const groups = groupEntriesByWindow(dayLogs, statsSport.type);
+      const sortedEntries = [...dayLogs].sort((a, b) => a.ts - b.ts);
       return (
         <SafeAreaView style={styles.container}>
           <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -2536,6 +2680,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                     <View style={styles.statRowActions}>
                       <Text style={styles.statValue}>{valueText}</Text>
                       <Pressable
+                        style={styles.statMinusButton}
+                        onPress={() =>
+                          decrementLogGroup(statsSport, statsDayKey, group)
+                        }
+                      >
+                        <Text style={styles.statMinusText}>-</Text>
+                      </Pressable>
+                      <Pressable
                         style={styles.statDeleteButton}
                         onPress={() =>
                           confirmAction(t("label.confirmDelete"), () =>
@@ -2555,6 +2707,30 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 );
               })
             )}
+            {sortedEntries.length > 0 ? (
+              <View style={styles.breakdownSection}>
+                <Text style={styles.sectionTitle}>{t("label.breakdown")}</Text>
+                {sortedEntries.map((entry) => {
+                  const baseValue =
+                    statsSport.type === "reps"
+                      ? `${entry.reps || 0} ${repsShort}`
+                      : formatSeconds(entry.seconds || 0);
+                  const earnedSeconds = Number.isFinite(entry.screenSeconds)
+                    ? entry.screenSeconds
+                    : screenSecondsForEntry(statsSport, entry);
+                  return (
+                    <View key={entry.id} style={styles.statRow}>
+                      <Text style={styles.statLabel}>
+                        {formatTime(entry.ts)} · {baseValue}
+                      </Text>
+                      <Text style={styles.statValue}>
+                        +{formatScreenTime(earnedSeconds)}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+            ) : null}
           </ScrollView>
         </SafeAreaView>
       );
@@ -4233,6 +4409,18 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     fontWeight: "600",
   },
+  statMinusButton: {
+    marginLeft: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    backgroundColor: COLORS.cardAlt,
+  },
+  statMinusText: {
+    color: COLORS.text,
+    fontWeight: "700",
+    fontSize: 12,
+  },
   statDeleteButton: {
     marginLeft: 12,
     paddingHorizontal: 10,
@@ -4244,6 +4432,9 @@ const styles = StyleSheet.create({
     color: COLORS.danger,
     fontWeight: "700",
     fontSize: 12,
+  },
+  breakdownSection: {
+    marginTop: 16,
   },
   languageWrap: {
     position: "absolute",
