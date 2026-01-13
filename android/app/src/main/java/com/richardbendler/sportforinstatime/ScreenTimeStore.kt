@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import org.json.JSONArray
 import org.json.JSONObject
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -32,6 +33,12 @@ object ScreenTimeStore {
   data class ConsumptionResult(
     val remainingSeconds: Int,
     val consumedSeconds: Int
+  )
+
+  data class Breakdown(
+    val remainingSeconds: Int,
+    val totalTodaySeconds: Int,
+    val carryoverSeconds: Int
   )
 
   fun upsertEntry(
@@ -121,6 +128,28 @@ object ScreenTimeStore {
       saveEntries(prefs, cleaned)
     }
     return Totals(total, remainingBySport, cleaned.size)
+  }
+
+  fun getBreakdown(prefs: SharedPreferences, now: Long): Breakdown {
+    val entries = ensureLegacyMigration(loadEntries(prefs), prefs, now)
+    val changed = applyDecay(entries, now)
+    val cleaned = entries.filter { it.remainingSeconds > 0 }
+    val startOfDay = startOfDayMillis(now)
+    var remainingTotal = 0
+    var totalToday = 0
+    var carryover = 0
+    cleaned.forEach { entry ->
+      remainingTotal += entry.remainingSeconds
+      if (entry.createdAt >= startOfDay) {
+        totalToday += entry.originalSeconds
+      } else {
+        carryover += entry.remainingSeconds
+      }
+    }
+    if (changed || cleaned.size != entries.size) {
+      saveEntries(prefs, cleaned)
+    }
+    return Breakdown(remainingTotal, totalToday, carryover)
   }
 
   fun consumeSeconds(prefs: SharedPreferences, now: Long, seconds: Int): ConsumptionResult {
@@ -279,6 +308,16 @@ object ScreenTimeStore {
       }
     }
     return changed
+  }
+
+  private fun startOfDayMillis(now: Long): Long {
+    val calendar = Calendar.getInstance()
+    calendar.timeInMillis = now
+    calendar.set(Calendar.HOUR_OF_DAY, 0)
+    calendar.set(Calendar.MINUTE, 0)
+    calendar.set(Calendar.SECOND, 0)
+    calendar.set(Calendar.MILLISECOND, 0)
+    return calendar.timeInMillis
   }
 
   private fun todayKey(now: Long): String {

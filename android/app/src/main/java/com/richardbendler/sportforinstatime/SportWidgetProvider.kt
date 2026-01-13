@@ -75,6 +75,8 @@ class SportWidgetProvider : AppWidgetProvider() {
       val localizedContext =
         getLocalizedContext(context, getAppLanguage(context))
       val fallbackTitle = localizedContext.getString(R.string.widget_sport_title)
+      val remainingSuffix =
+        localizedContext.getString(R.string.widget_overall_remaining_suffix)
       val title = if (sportId != null) {
         prefs.getString("${sportId}_title", sportName) ?: sportName
       } else {
@@ -92,7 +94,10 @@ class SportWidgetProvider : AppWidgetProvider() {
       val views = RemoteViews(context.packageName, R.layout.widget_sport)
       views.setTextViewText(R.id.widget_title, title)
       views.setTextViewText(R.id.widget_value, value)
-      views.setTextViewText(R.id.widget_screen_time, screenTime)
+      views.setTextViewText(
+        R.id.widget_screen_time,
+        "$screenTime $remainingSuffix"
+      )
 
       val intent = Intent(context, MainActivity::class.java)
       val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE

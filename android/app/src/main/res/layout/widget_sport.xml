@@ -40,7 +40,7 @@
     android:ellipsize="end"
     android:gravity="center_horizontal"
     android:maxLines="1"
-    android:text="00:00"
+    android:text="00:00 verbleibend"
     android:textColor="#94a3b8"
     android:textSize="10sp" />
 </LinearLayout>
