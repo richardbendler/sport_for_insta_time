@@ -1,21 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="app_name">Sport for Screen Time</string>
-  <string name="accessibility_service_description">Blockiert ausgewählte Apps, wenn keine Zeit mehr übrig ist.</string>
+  <string name="accessibility_service_description">Blockiert ausgew\u00e4hlte Apps, wenn keine Zeit mehr \u00fcbrig ist.</string>
   <string name="widget_used_label">Verbraucht</string>
-  <string name="widget_remaining_label">Übrig</string>
+  <string name="widget_remaining_label">\u00dcbrig</string>
   <string name="widget_overall_title">Bildschirmzeit</string>
   <string name="widget_overall_remaining_suffix">verbleibend</string>
   <string name="widget_overall_total_suffix">gesamt heute</string>
-  <string name="widget_overall_carryover_suffix">Uebertrag</string>
+  <string name="widget_overall_carryover_suffix">\u00dcbertrag</string>
   <string name="widget_sport_title">Sport</string>
   <string name="widget_today_label">Heute</string>
   <string name="widget_screen_time_label">Bildschirmzeit</string>
   <string name="blocker_title">Zeit ist aufgebraucht</string>
   <string name="blocker_subtitle">Mach Sport, um weitere Minuten zu verdienen.</string>
   <string name="blocker_open_app">Jetzt Sport starten</string>
-  <string name="blocker_back">Zurück</string>
-  <string name="preface_title">Noch Zeit übrig</string>
+  <string name="blocker_back">Zur\u00fcck</string>
+  <string name="preface_title">Noch Zeit \u00fcbrig</string>
   <string name="preface_remaining_label">Verbleibend:</string>
   <string name="preface_countdown_label">Start in</string>
-  <string name="preface_button">App öffnen</string>
+  <string name="preface_button">App \u00f6ffnen</string>
 </resources>

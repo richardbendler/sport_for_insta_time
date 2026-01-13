@@ -97,6 +97,10 @@ class InstaBlockerService : AccessibilityService() {
       updateCountdownNotification(0, false, null)
       return
     }
+    if (currentPackage != null && currentPackage != pkg) {
+      updateCountdownOverlay(0, false)
+      updateCountdownNotification(0, false, null)
+    }
     val previousPackage = currentPackage
     currentPackage = pkg
     val remaining = getRemainingSeconds()
@@ -122,16 +126,22 @@ class InstaBlockerService : AccessibilityService() {
   }
 
   private fun tickUsage() {
-    val pkg = currentPackage ?: return
+    val pkg = currentPackage
+    if (pkg == null) {
+      maybeUpdateWidgets()
+      return
+    }
     if (pkg == applicationContext.packageName) {
       updateCountdownOverlay(0, false)
       updateCountdownNotification(0, false, null)
+      maybeUpdateWidgets()
       return
     }
     val controlled = getControlledApps()
     if (!controlled.contains(pkg)) {
       updateCountdownOverlay(0, false)
       updateCountdownNotification(0, false, null)
+      maybeUpdateWidgets()
       return
     }
     val prefs = getPrefs()

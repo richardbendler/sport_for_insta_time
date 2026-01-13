@@ -288,7 +288,9 @@ const STRINGS = {
     "label.week": "Woche",
     "label.weekScreenTime": "Bildschirmzeit Woche",
     "label.screenTime": "Bildschirmzeit",
+    "label.screenTimeHint": "Summe der erspielten Bildschirmzeit aus den letzten 24h.",
     "label.remaining": "Übrig",
+    "label.remainingHint": "Zeit, die aktuell noch genutzt werden darf.",
     "label.editEntries": "Einträge bearbeiten",
     "label.deleteAllEntries": "Alle Einträge (diese Sportart) löschen",
     "label.deleteAllEntriesGlobal": "Alle Einträge löschen",
@@ -311,7 +313,9 @@ const STRINGS = {
     "label.permissions": "Berechtigungen",
     "label.permissionsIntro":
       "Damit Screen Time berechnet und Apps blockiert werden können, braucht die App Zugriff. Du wirst jetzt zu den Einstellungen geführt.",
-    "label.carryover": "Uebertrag (50% von gestern)",
+    "label.carryover": "Uebertrag",
+    "label.carryoverHint":
+      "Restzeit aus Uebungen, die aelter als 24h sind. Sie halbiert sich alle 24h weiter.",
     "label.usageAccess": "Nutzungszugriff",
     "label.usageAccessHint":
       "Damit Apps nach Nutzungszeit sortiert werden k?nnen, braucht die App Nutzungszugriff.",
@@ -405,7 +409,9 @@ const STRINGS = {
     "label.week": "Week",
     "label.weekScreenTime": "Screen Time Week",
     "label.screenTime": "Screen Time",
+    "label.screenTimeHint": "Total earned screen time from the last 24h.",
     "label.remaining": "Remaining",
+    "label.remainingHint": "Time that is still available to use.",
     "label.editEntries": "Edit entries",
     "label.deleteAllEntries": "Delete entries (this sport)",
     "label.deleteAllEntriesGlobal": "Delete all entries",
@@ -428,7 +434,9 @@ const STRINGS = {
     "label.permissions": "Permissions",
     "label.permissionsIntro":
       "To track screen time and block apps, the app needs access. You'll be sent to settings now.",
-    "label.carryover": "Carryover (50% of yesterday)",
+    "label.carryover": "Carryover",
+    "label.carryoverHint":
+      "Remaining time from sessions older than 24h. It halves every 24h after that.",
     "label.usageAccess": "Usage access",
     "label.usageAccessHint":
       "Allow usage access so apps can be sorted by usage time.",
@@ -521,7 +529,9 @@ const STRINGS = {
     "label.week": "Semana",
     "label.weekScreenTime": "Tiempo de pantalla semanal",
     "label.screenTime": "Tiempo de pantalla",
+    "label.screenTimeHint": "Tiempo total ganado en las ultimas 24h.",
     "label.remaining": "Restante",
+    "label.remainingHint": "Tiempo que aun puedes usar.",
     "label.editEntries": "Editar entradas",
     "label.deleteAllEntries": "Borrar entradas (este deporte)",
     "label.deleteAllEntriesGlobal": "Borrar todas",
@@ -544,7 +554,9 @@ const STRINGS = {
     "label.permissions": "Permisos",
     "label.permissionsIntro":
       "Para medir el tiempo de pantalla y bloquear apps, la app necesita acceso. Ahora te llevaremos a ajustes.",
-    "label.carryover": "Arrastre (50% de ayer)",
+    "label.carryover": "Arrastre",
+    "label.carryoverHint":
+      "Tiempo restante de sesiones anteriores a 24h. Se reduce a la mitad cada 24h.",
     "label.usageAccess": "Acceso de uso",
     "label.usageAccessHint":
       "Permite el acceso de uso para ordenar las apps por tiempo de uso.",
@@ -638,7 +650,9 @@ const STRINGS = {
     "label.week": "Semaine",
     "label.weekScreenTime": "Temps d’écran hebdo",
     "label.screenTime": "Temps d’écran",
+    "label.screenTimeHint": "Temps total gagne pendant les dernieres 24h.",
     "label.remaining": "Restant",
+    "label.remainingHint": "Temps encore disponible a utiliser.",
     "label.editEntries": "Modifier les entrées",
     "label.deleteAllEntries": "Supprimer (ce sport)",
     "label.deleteAllEntriesGlobal": "Supprimer tout",
@@ -661,7 +675,9 @@ const STRINGS = {
     "label.permissions": "Autorisations",
     "label.permissionsIntro":
       "Pour suivre le temps d’écran et bloquer des apps, l’app a besoin d’accès. Vous allez être redirigé vers les réglages.",
-    "label.carryover": "Report (50% d'hier)",
+    "label.carryover": "Report",
+    "label.carryoverHint":
+      "Temps restant des sessions de plus de 24h. Il est divise par deux toutes les 24h.",
     "label.usageAccess": "Acces d'utilisation",
     "label.usageAccessHint":
       "Autorisez l'acces d'utilisation pour trier les apps par temps d'usage.",
@@ -878,11 +894,21 @@ const formatSeconds = (totalSeconds) => {
   )}`;
 };
 
-const getTodayStat = (stats, sportId) => {
-  const day = todayKey();
-  const sportStats = stats[sportId] || {};
-  const dayStats = sportStats[day] || { reps: 0, seconds: 0 };
-  return dayStats;
+const getRollingStats = (logs, sportId) => {
+  const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+  const sportLogs = logs[sportId] || {};
+  let reps = 0;
+  let seconds = 0;
+  Object.values(sportLogs).forEach((dayLogs) => {
+    (dayLogs || []).forEach((entry) => {
+      if (!entry || !entry.ts || entry.ts < cutoff) {
+        return;
+      }
+      reps += entry.reps || 0;
+      seconds += entry.seconds || 0;
+    });
+  });
+  return { reps, seconds };
 };
 
 const getWeeklyStats = (stats, sportId) => {
@@ -949,6 +975,37 @@ const screenSecondsForEntry = (sport, entry) => {
   return Math.max(0, Math.floor((entry.seconds || 0) * rate));
 };
 
+const widgetValueForStats = (sport, dayStats) => {
+  if (!sport) {
+    return "0";
+  }
+  if (sport.type === "reps") {
+    return String(dayStats.reps || 0);
+  }
+  return String(Math.floor((dayStats.seconds || 0) / 60));
+};
+
+const rollingScreenSecondsTotal = (logs, sports) => {
+  const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+  const sportMap = new Map(sports.map((sport) => [sport.id, sport]));
+  let totalSeconds = 0;
+  Object.entries(logs || {}).forEach(([sportId, sportLogs]) => {
+    const sport = sportMap.get(sportId);
+    if (!sport) {
+      return;
+    }
+    Object.values(sportLogs || {}).forEach((dayLogs) => {
+      (dayLogs || []).forEach((entry) => {
+        if (!entry || !entry.ts || entry.ts < cutoff) {
+          return;
+        }
+        totalSeconds += screenSecondsForEntry(sport, entry);
+      });
+    });
+  });
+  return Math.max(0, Math.floor(totalSeconds));
+};
+
 const normalizeLogs = (logs, sports) => {
   if (!logs) {
     return { normalized: {}, changed: false };
@@ -989,7 +1046,7 @@ const normalizeLogs = (logs, sports) => {
 const groupEntriesByWindow = (entries, type) => {
   const sorted = [...entries].sort((a, b) => a.ts - b.ts);
   const groups = [];
-  const windowMs = 30 * 60 * 1000;
+  const windowMs = type === "reps" ? 5 * 60 * 1000 : 30 * 60 * 1000;
   sorted.forEach((entry) => {
     const last = groups[groups.length - 1];
     if (!last || entry.ts - last.endTs > windowMs) {
@@ -1218,6 +1275,7 @@ export default function App() {
     day: todayKey(),
     remainingBySport: {},
     entryCount: 0,
+    carryoverSeconds: 0,
   });
   const [needsAccessibility, setNeedsAccessibility] = useState(false);
   const [permissionsPrompted, setPermissionsPrompted] = useState(false);
@@ -1225,6 +1283,9 @@ export default function App() {
   const [usageAccessGranted, setUsageAccessGranted] = useState(true);
   const [permissionsCheckTick, setPermissionsCheckTick] = useState(0);
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
+  const [infoHint, setInfoHint] = useState(null);
+  const [infoAnchors, setInfoAnchors] = useState({});
+  const [infoCardWidth, setInfoCardWidth] = useState(0);
 
   const [sessionSeconds, setSessionSeconds] = useState(0);
   const [running, setRunning] = useState(false);
@@ -1949,6 +2010,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         day: state.day || todayKey(),
         remainingBySport: state.remainingBySport || {},
         entryCount: state.entryCount || 0,
+        carryoverSeconds: state.carryoverSeconds || 0,
       });
     }
   };
@@ -2308,20 +2370,48 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   const aiSport = aiSession
     ? sports.find((sport) => sport.id === aiSession.sportId)
     : null;
+  const rollingEarnedSeconds = useMemo(
+    () => rollingScreenSecondsTotal(logs, sports),
+    [logs, sports]
+  );
+  const calendarIcon = "📅";
+  const widgetIcon = "📌";
+  const tooltipWidth =
+    infoCardWidth > 0 ? Math.min(220, Math.max(180, infoCardWidth - 24)) : 200;
+
+  useEffect(() => {
+    if (!infoHint) {
+      return;
+    }
+    return () => {};
+  }, [infoHint]);
+
+  const showInfoHint = (key, titleKey, bodyKey) => {
+    const anchor = infoAnchors[key];
+    if (!anchor) {
+      return;
+    }
+    setInfoHint({
+      title: t(titleKey),
+      body: t(bodyKey),
+      y: anchor.y,
+      height: anchor.height,
+    });
+  };
 
   const todayStats = useMemo(() => {
     if (!selectedSport) {
       return { reps: 0, seconds: 0 };
     }
-    return getTodayStat(stats, selectedSport.id);
-  }, [stats, selectedSport]);
+    return getRollingStats(logs, selectedSport.id);
+  }, [logs, selectedSport]);
 
   const aiTodayStats = useMemo(() => {
     if (!aiSport) {
       return { reps: 0, seconds: 0 };
     }
-    return getTodayStat(stats, aiSport.id);
-  }, [stats, aiSport]);
+    return getRollingStats(logs, aiSport.id);
+  }, [logs, aiSport]);
 
   useEffect(() => {
     selectedSportRef.current = selectedSport || null;
@@ -2397,31 +2487,37 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     if (!InstaControl?.setWidgetSportData || !InstaControl?.updateWidgets) {
       return;
     }
-    const remainingBySport = usageState.remainingBySport || {};
-    const getRemainingForSport = (sportId) => remainingBySport[sportId] || 0;
     sports.forEach((sport) => {
-      const dayStats = getTodayStat(stats, sport.id);
-      const screenSeconds = screenSecondsForStats(sport, dayStats);
+      const dayStats = getRollingStats(logs, sport.id);
       const label = getSportLabel(sport);
-      const remainingSeconds = getRemainingForSport(sport.id);
       InstaControl.setWidgetSportData(
         sport.id,
         label,
-        `${t("label.today")}: ${formatSportValue(sport.type, dayStats, repsShort)}`,
-        formatScreenTime(remainingSeconds || screenSeconds),
+        widgetValueForStats(sport, dayStats),
+        "",
         t("label.screenTime"),
         sport.icon || DEFAULT_ICON
       );
     });
     InstaControl.updateWidgets();
-  }, [sports, stats, language, usageState.remainingBySport]);
+  }, [sports, logs, stats, language, usageState.remainingBySport]);
 
   useEffect(() => {
     if (Platform.OS !== "android") {
       return;
     }
     InstaControl?.updateOverallWidgets?.();
-  }, [usageState.remainingSeconds, usageState.usedSeconds]);
+    InstaControl?.setOverallWidgetData?.(
+      usageState.remainingSeconds || 0,
+      rollingEarnedSeconds,
+      usageState.carryoverSeconds || 0
+    );
+  }, [
+    usageState.remainingSeconds,
+    usageState.usedSeconds,
+    usageState.carryoverSeconds,
+    rollingEarnedSeconds,
+  ]);
   if (aiSession && aiSport) {
     return (
       <AiCameraScreen
@@ -2860,7 +2956,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
 
   if (selectedSport) {
     const isReps = selectedSport.type === "reps";
-    const weeklyTotal = computeWeeklyTotal(stats, selectedSport);
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
@@ -2898,31 +2993,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               <Text style={styles.counterUnit}>
                 {selectedSport.type === "reps" ? repsShort : t("label.timeUnit")}
               </Text>
-            </View>
-            <View style={styles.counterBlock}>
-              <Text style={styles.counterLabel}>{t("label.week")}</Text>
-              <Text style={styles.counterValueSmall}>
-                {selectedSport.type === "reps"
-                  ? `${weeklyTotal}`
-                  : formatSeconds(weeklyTotal)}
-              </Text>
-              <Text style={styles.counterUnit}>
-                {selectedSport.type === "reps" ? repsShort : t("label.timeUnit")}
-              </Text>
-            </View>
-          </View>
-          <View style={styles.screenRow}>
-            <View style={styles.screenBlock}>
-              <Text style={styles.screenLabel}>{t("label.screenTime")}</Text>
-              <Text style={styles.screenValue}>
-                {formatScreenTime(screenSecondsForStats(selectedSport, todayStats))}
-              </Text>
-            </View>
-            <View style={styles.screenBlock}>
-              <Text style={styles.screenLabel}>{t("label.remaining")}</Text>
-                        <Text style={styles.screenValue}>
-                          {formatScreenTime(usageState.remainingSeconds || 0)}
-                        </Text>
             </View>
           </View>
         </Pressable>
@@ -3149,7 +3219,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   );
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        onTouchStart={() => {
+          if (infoHint) {
+            setInfoHint(null);
+          }
+        }}
+      >
         <View style={styles.headerRow}>
           <View style={styles.headerTitleBlock}>
             <Text style={styles.title}>{t("app.title")}</Text>
@@ -3170,7 +3247,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             style={styles.iconButton}
             onPress={() => setOverallStatsOpen(true)}
           >
-            <Text style={styles.iconButtonText}>{t("label.overallStats")}</Text>
+            <Text style={styles.iconButtonText}>
+              {calendarIcon} {t("label.overallStats")}
+            </Text>
           </Pressable>
           <Pressable
             style={styles.iconButton}
@@ -3178,7 +3257,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               InstaControl?.requestPinWidget?.("overall", t("label.todayScreenTime"))
             }
           >
-            <Text style={styles.iconButtonText}>{t("label.widgetOverall")}</Text>
+            <Text style={styles.iconButtonText}>
+              {widgetIcon} {t("label.widgetOverall")}
+            </Text>
           </Pressable>
         </View>
         </View>
@@ -3213,13 +3294,110 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             ) : null}
           </View>
         ) : null}
+        <Pressable
+          style={[styles.infoCard, styles.infoCardMain]}
+          onLayout={(event) => setInfoCardWidth(event.nativeEvent.layout.width)}
+          onPress={() => setInfoHint(null)}
+        >
+          <Text style={styles.sectionTitle}>{t("label.screenTime")}</Text>
+          <View style={styles.infoRow}>
+            <Pressable
+              style={styles.infoItem}
+              onLayout={(event) => {
+                const layout = event.nativeEvent.layout;
+                setInfoAnchors((prev) => ({
+                  ...prev,
+                  screenTime: layout,
+                }));
+              }}
+              onPress={() =>
+                showInfoHint(
+                  "screenTime",
+                  "label.screenTime",
+                  "label.screenTimeHint"
+                )
+              }
+            >
+              <Text style={styles.infoIcon}>⏱</Text>
+              <Text style={styles.infoValue}>
+                {formatScreenTime(rollingEarnedSeconds)}
+              </Text>
+              <Text style={styles.infoLabel}>{t("label.screenTime")}</Text>
+            </Pressable>
+            <Pressable
+              style={styles.infoItem}
+              onLayout={(event) => {
+                const layout = event.nativeEvent.layout;
+                setInfoAnchors((prev) => ({
+                  ...prev,
+                  remaining: layout,
+                }));
+              }}
+              onPress={() =>
+                showInfoHint(
+                  "remaining",
+                  "label.remaining",
+                  "label.remainingHint"
+                )
+              }
+            >
+              <Text style={styles.infoIcon}>⏳</Text>
+              <Text style={styles.infoValue}>
+                {formatScreenTime(usageState.remainingSeconds || 0)}
+              </Text>
+              <Text style={styles.infoLabel}>{t("label.remaining")}</Text>
+            </Pressable>
+            <Pressable
+              style={styles.infoItem}
+              onLayout={(event) => {
+                const layout = event.nativeEvent.layout;
+                setInfoAnchors((prev) => ({
+                  ...prev,
+                  carryover: layout,
+                }));
+              }}
+              onPress={() =>
+                showInfoHint(
+                  "carryover",
+                  "label.carryover",
+                  "label.carryoverHint"
+                )
+              }
+            >
+              <Text style={styles.infoIcon}>↺</Text>
+              <Text style={styles.infoValue}>
+                {formatScreenTime(usageState.carryoverSeconds || 0)}
+              </Text>
+              <Text style={styles.infoLabel}>{t("label.carryover")}</Text>
+            </Pressable>
+          </View>
+          {infoHint ? (
+            <Pressable
+              style={[
+                styles.infoTooltip,
+                {
+                  width: tooltipWidth,
+                  left:
+                    infoCardWidth > 0
+                      ? Math.max(12, (infoCardWidth - tooltipWidth) / 2)
+                      : 12,
+                  top: Math.max(8, infoHint.y + infoHint.height / 2 - 24),
+                },
+              ]}
+              onPress={() => setInfoHint(null)}
+            >
+              <Text style={styles.infoTooltipTitle}>{infoHint.title}</Text>
+              <Text style={styles.infoTooltipText}>{infoHint.body}</Text>
+            </Pressable>
+          ) : null}
+        </Pressable>
+        <Text style={styles.sectionTitle}>{t("menu.sports")}</Text>
         {activeSports.length === 0 ? (
           <Text style={styles.helperText}>{t("label.noSports")}</Text>
         ) : null}
         <View style={styles.sportsGrid}>
           {activeSports.map((sport) => {
-            const daily = getTodayStat(stats, sport.id);
-            const weeklyTotal = computeWeeklyTotal(stats, sport);
+            const daily = getRollingStats(logs, sport.id);
             const sportLabel = getSportLabel(sport);
             return (
               <View key={sport.id} style={[styles.sportCard, { width: cardWidth }]}>
@@ -3293,31 +3471,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                           {sport.type === "reps" ? repsShort : t("label.timeUnit")}
                         </Text>
                       </View>
-                      <View style={styles.counterBlock}>
-                        <Text style={styles.counterLabel}>{t("label.week")}</Text>
-                        <Text style={styles.counterValueSmall}>
-                          {sport.type === "reps"
-                            ? `${weeklyTotal}`
-                            : formatSeconds(weeklyTotal)}
-                        </Text>
-                        <Text style={styles.counterUnit}>
-                          {sport.type === "reps" ? repsShort : t("label.timeUnit")}
-                        </Text>
-                      </View>
-                    </View>
-                    <View style={styles.screenRow}>
-                      <View style={styles.screenBlock}>
-                        <Text style={styles.screenLabel}>{t("label.screenTime")}</Text>
-                        <Text style={styles.screenValue}>
-                          {formatScreenTime(screenSecondsForStats(sport, daily))}
-                        </Text>
-                      </View>
-                      <View style={styles.screenBlock}>
-                        <Text style={styles.screenLabel}>{t("label.remaining")}</Text>
-                        <Text style={styles.screenValue}>
-                          {formatScreenTime(usageState.remainingSeconds || 0)}
-                        </Text>
-                      </View>
                     </View>
                   </View>
                 </Pressable>
@@ -3329,7 +3482,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                     }
                   >
                     <Text style={styles.secondaryButtonText}>
-                      {t("label.widget")}
+                      {widgetIcon} {t("label.widget")}
                     </Text>
                   </Pressable>
                   <View style={styles.cardActionsBottom}>
@@ -3353,10 +3506,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         </View>
         <View style={styles.addCard}>
           <Pressable
-            style={[styles.primaryButton, styles.fullWidthButton]}
+            style={[styles.addSportButton, styles.fullWidthButton]}
             onPress={() => openSportModal()}
           >
-            <Text style={styles.primaryButtonText}>{t("label.addSport")}</Text>
+            <Text style={styles.addSportButtonText}>
+              + {t("label.addSport")}
+            </Text>
           </Pressable>
         </View>
         <View style={styles.hiddenSection}>
@@ -3370,8 +3525,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           </Pressable>
           {showHidden
             ? hiddenSports.map((sport) => {
-                const daily = getTodayStat(stats, sport.id);
-                const weeklyTotal = computeWeeklyTotal(stats, sport);
+                const daily = getRollingStats(logs, sport.id);
                 const sportLabel = getSportLabel(sport);
                 return (
                   <View
@@ -3453,37 +3607,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                               {sport.type === "reps" ? repsShort : t("label.timeUnit")}
                             </Text>
                           </View>
-                          <View style={styles.counterBlock}>
-                            <Text style={styles.counterLabel}>{t("label.week")}</Text>
-                            <Text style={styles.counterValueSmall}>
-                              {sport.type === "reps"
-                                ? `${weeklyTotal}`
-                                : formatSeconds(weeklyTotal)}
-                            </Text>
-                            <Text style={styles.counterUnit}>
-                              {sport.type === "reps" ? repsShort : t("label.timeUnit")}
-                            </Text>
-                          </View>
-                        </View>
-                        <View style={styles.screenRow}>
-                          <View style={styles.screenBlock}>
-                            <Text style={styles.screenLabel}>
-                              {t("label.screenTime")}
-                            </Text>
-                            <Text style={styles.screenValue}>
-                              {formatScreenTime(
-                                screenSecondsForStats(sport, daily)
-                              )}
-                            </Text>
-                          </View>
-                          <View style={styles.screenBlock}>
-                            <Text style={styles.screenLabel}>
-                              {t("label.remaining")}
-                            </Text>
-                            <Text style={styles.screenValue}>
-                              {formatScreenTime(usageState.remainingSeconds || 0)}
-                            </Text>
-                          </View>
                         </View>
                       </View>
                     </Pressable>
@@ -3495,7 +3618,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                         }
                       >
                         <Text style={styles.secondaryButtonText}>
-                          {t("label.widget")}
+                          {widgetIcon} {t("label.widget")}
                         </Text>
                       </Pressable>
                       <View style={styles.cardActionsBottom}>
@@ -3832,19 +3955,21 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   sportCard: {
-    backgroundColor: COLORS.sportCard,
-    borderRadius: 8,
+    backgroundColor: "rgba(30, 41, 59, 0.9)",
+    borderRadius: 12,
     padding: 10,
     paddingTop: 46,
     marginBottom: 10,
     position: "relative",
     borderWidth: 1,
-    borderColor: COLORS.accentDark,
+    borderColor: "rgba(148, 163, 184, 0.35)",
+    borderTopWidth: 2,
+    borderTopColor: COLORS.accent,
     shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 6,
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 7,
   },
   hiddenCard: {
     backgroundColor: COLORS.cardAlt,
@@ -4221,6 +4346,25 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontSize: 11,
   },
+  addSportButton: {
+    backgroundColor: "rgba(34, 197, 94, 0.18)",
+    borderRadius: 18,
+    paddingVertical: 16,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: COLORS.olive,
+    shadowColor: "#000",
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  addSportButtonText: {
+    color: COLORS.olive,
+    fontWeight: "800",
+    fontSize: 16,
+    textAlign: "center",
+    letterSpacing: 0.4,
+  },
   secondaryButton: {
     backgroundColor: COLORS.cardAlt,
     paddingVertical: 5,
@@ -4325,6 +4469,60 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     marginBottom: 12,
+  },
+  infoCardMain: {
+    position: "relative",
+  },
+  infoRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 10,
+  },
+  infoItem: {
+    flex: 1,
+    alignItems: "center",
+    backgroundColor: COLORS.cardAlt,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 6,
+  },
+  infoIcon: {
+    fontSize: 16,
+    marginBottom: 4,
+  },
+  infoValue: {
+    fontSize: 16,
+    color: COLORS.text,
+    fontWeight: "700",
+  },
+  infoLabel: {
+    marginTop: 4,
+    color: COLORS.muted,
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  infoTooltip: {
+    position: "absolute",
+    backgroundColor: COLORS.cardDark,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: COLORS.accentDark,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  infoTooltipTitle: {
+    color: COLORS.white,
+    fontWeight: "700",
+    marginBottom: 4,
+    fontSize: 12,
+  },
+  infoTooltipText: {
+    color: COLORS.muted,
+    fontSize: 11,
   },
   cardTitle: {
     color: COLORS.muted,

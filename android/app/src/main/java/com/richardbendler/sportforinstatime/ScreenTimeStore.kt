@@ -4,7 +4,6 @@ import android.content.SharedPreferences
 import org.json.JSONArray
 import org.json.JSONObject
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -134,13 +133,13 @@ object ScreenTimeStore {
     val entries = ensureLegacyMigration(loadEntries(prefs), prefs, now)
     val changed = applyDecay(entries, now)
     val cleaned = entries.filter { it.remainingSeconds > 0 }
-    val startOfDay = startOfDayMillis(now)
+    val cutoff = now - DAY_MS
     var remainingTotal = 0
     var totalToday = 0
     var carryover = 0
     cleaned.forEach { entry ->
       remainingTotal += entry.remainingSeconds
-      if (entry.createdAt >= startOfDay) {
+      if (entry.createdAt >= cutoff) {
         totalToday += entry.originalSeconds
       } else {
         carryover += entry.remainingSeconds
@@ -159,7 +158,7 @@ object ScreenTimeStore {
     }
     val entries = ensureLegacyMigration(loadEntries(prefs), prefs, now)
     var changed = applyDecay(entries, now)
-    val sorted = entries.sortedBy { it.createdAt }.toMutableList()
+    val sorted = entries.sortedByDescending { it.createdAt }.toMutableList()
     var remainingToConsume = seconds
     for (entry in sorted) {
       if (remainingToConsume <= 0) {
@@ -308,16 +307,6 @@ object ScreenTimeStore {
       }
     }
     return changed
-  }
-
-  private fun startOfDayMillis(now: Long): Long {
-    val calendar = Calendar.getInstance()
-    calendar.timeInMillis = now
-    calendar.set(Calendar.HOUR_OF_DAY, 0)
-    calendar.set(Calendar.MINUTE, 0)
-    calendar.set(Calendar.SECOND, 0)
-    calendar.set(Calendar.MILLISECOND, 0)
-    return calendar.timeInMillis
   }
 
   private fun todayKey(now: Long): String {
