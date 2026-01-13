@@ -30,6 +30,7 @@ class InstaBlockerService : AccessibilityService() {
   private var overlayText: TextView? = null
   private var overlayParams: WindowManager.LayoutParams? = null
   private var lastWidgetUpdateAt: Long = 0
+  private var lastControlledSeenAt: Long = 0
   private var notificationManager: NotificationManager? = null
 
   private val notificationChannelId = "restricted_timer"
@@ -69,19 +70,26 @@ class InstaBlockerService : AccessibilityService() {
     if (pkg == applicationContext.packageName && !appActivities.contains(className)) {
       return
     }
-    val previousPackage = currentPackage
-    currentPackage = pkg
+    val now = System.currentTimeMillis()
     if (pkg == applicationContext.packageName) {
+      currentPackage = pkg
       updateCountdownOverlay(0, false)
       updateCountdownNotification(0, false, null)
       return
     }
     val controlled = getControlledApps()
     if (!controlled.contains(pkg)) {
+      if (lastControlledSeenAt > 0 && now - lastControlledSeenAt < 1500) {
+        return
+      }
+      currentPackage = pkg
       updateCountdownOverlay(0, false)
       updateCountdownNotification(0, false, null)
       return
     }
+    val previousPackage = currentPackage
+    currentPackage = pkg
+    lastControlledSeenAt = now
     val remaining = getRemainingSeconds()
     updateCountdownOverlay(remaining, true)
     updateCountdownNotification(remaining, true, pkg)

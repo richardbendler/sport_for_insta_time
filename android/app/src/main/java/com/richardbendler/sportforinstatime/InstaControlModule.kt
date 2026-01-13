@@ -190,25 +190,21 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
       createdAt.toLong(),
       totalSeconds
     )
-    OverallWidgetProvider.refreshAll(reactContext)
   }
 
   @ReactMethod
   fun removeScreenTimeEntry(entryId: String) {
     ScreenTimeStore.removeEntry(getPrefs(), entryId)
-    OverallWidgetProvider.refreshAll(reactContext)
   }
 
   @ReactMethod
   fun clearScreenTimeEntriesForSport(sportId: String) {
     ScreenTimeStore.clearEntriesForSport(getPrefs(), sportId)
-    OverallWidgetProvider.refreshAll(reactContext)
   }
 
   @ReactMethod
   fun clearAllScreenTimeEntries() {
     ScreenTimeStore.clearAllEntries(getPrefs())
-    OverallWidgetProvider.refreshAll(reactContext)
   }
 
   @ReactMethod
