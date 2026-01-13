@@ -20,9 +20,6 @@ import android.widget.TextView
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import org.json.JSONArray
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import kotlin.math.abs
 
 class InstaBlockerService : AccessibilityService() {
@@ -121,26 +118,16 @@ class InstaBlockerService : AccessibilityService() {
       return
     }
     val prefs = getPrefs()
-    val today = todayKey()
-    val lastDay = prefs.getString("last_day", "") ?: ""
-    if (lastDay != today) {
-      prefs.edit().putInt("used_seconds", 0).putString("last_day", today).apply()
+    val now = System.currentTimeMillis()
+    val result = ScreenTimeStore.consumeSeconds(prefs, now, 1)
+    val remaining = result.remainingSeconds
+    if (result.consumedSeconds > 0) {
+      ScreenTimeStore.addUsedSeconds(prefs, now, result.consumedSeconds)
     }
-    val allowance = prefs.getInt("allowance_seconds", 0)
-    if (allowance <= 0) {
-      updateCountdownOverlay(0, true)
-      updateCountdownNotification(0, true, pkg)
-      maybeUpdateWidgets()
-      launchBlocker()
-      return
-    }
-    val used = prefs.getInt("used_seconds", 0) + 1
-    prefs.edit().putInt("used_seconds", used).apply()
-    val remaining = (allowance - used).coerceAtLeast(0)
     updateCountdownOverlay(remaining, true)
     updateCountdownNotification(remaining, true, pkg)
     maybeUpdateWidgets()
-    if (used >= allowance) {
+    if (remaining <= 0) {
       launchBlocker()
     }
   }
@@ -160,14 +147,9 @@ class InstaBlockerService : AccessibilityService() {
       return false
     }
     val prefs = getPrefs()
-    val today = todayKey()
-    val lastDay = prefs.getString("last_day", "") ?: ""
-    if (lastDay != today) {
-      prefs.edit().putInt("used_seconds", 0).putString("last_day", today).apply()
-    }
-    val allowance = prefs.getInt("allowance_seconds", 0)
-    val used = prefs.getInt("used_seconds", 0)
-    return allowance <= 0 || used >= allowance
+    val now = System.currentTimeMillis()
+    val totals = ScreenTimeStore.getTotals(prefs, now)
+    return totals.remainingSeconds <= 0
   }
 
   private fun launchBlocker() {
@@ -371,14 +353,9 @@ class InstaBlockerService : AccessibilityService() {
 
   private fun getRemainingSeconds(): Int {
     val prefs = getPrefs()
-    val today = todayKey()
-    val lastDay = prefs.getString("last_day", "") ?: ""
-    if (lastDay != today) {
-      prefs.edit().putInt("used_seconds", 0).putString("last_day", today).apply()
-    }
-    val allowance = prefs.getInt("allowance_seconds", 0)
-    val used = prefs.getInt("used_seconds", 0)
-    return (allowance - used).coerceAtLeast(0)
+    val now = System.currentTimeMillis()
+    val totals = ScreenTimeStore.getTotals(prefs, now)
+    return totals.remainingSeconds
   }
 
   private fun maybeUpdateWidgets() {
@@ -410,11 +387,6 @@ class InstaBlockerService : AccessibilityService() {
 
   private fun getPrefs() =
     applicationContext.getSharedPreferences("insta_control", Context.MODE_PRIVATE)
-
-  private fun todayKey(): String {
-    val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-    return formatter.format(Date())
-  }
 
   private fun isLaunchablePackage(pkg: String): Boolean {
     return packageManager.getLaunchIntentForPackage(pkg) != null

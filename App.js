@@ -923,12 +923,63 @@ const getDefaultRateMinutes = (sportType) => {
   return 1;
 };
 
+const generateLogId = () =>
+  `log_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+
 const screenSecondsForStats = (sport, dayStats) => {
   const rate = sport.screenSecondsPerUnit ?? 0;
   if (sport.type === "reps") {
     return dayStats.reps * rate;
   }
   return (dayStats.seconds || 0) * rate;
+};
+
+const screenSecondsForEntry = (sport, entry) => {
+  if (!sport || !entry) {
+    return 0;
+  }
+  const rate = sport.screenSecondsPerUnit ?? 0;
+  if (sport.type === "reps") {
+    return Math.max(0, Math.floor((entry.reps || 0) * rate));
+  }
+  return Math.max(0, Math.floor((entry.seconds || 0) * rate));
+};
+
+const normalizeLogs = (logs, sports) => {
+  if (!logs) {
+    return { normalized: {}, changed: false };
+  }
+  const sportsMap = new Map(sports.map((sport) => [sport.id, sport]));
+  let changed = false;
+  const normalized = Object.entries(logs).reduce((acc, [sportId, sportLogs]) => {
+    const sport = sportsMap.get(sportId);
+    if (!sport) {
+      acc[sportId] = sportLogs;
+      return acc;
+    }
+    const nextLogsByDay = Object.entries(sportLogs || {}).reduce(
+      (dayAcc, [dayKey, entries]) => {
+        const nextEntries = (entries || []).map((entry) => {
+          const nextEntry = { ...entry };
+          if (!nextEntry.id) {
+            nextEntry.id = generateLogId();
+            changed = true;
+          }
+          if (!Number.isFinite(nextEntry.screenSeconds)) {
+            nextEntry.screenSeconds = screenSecondsForEntry(sport, nextEntry);
+            changed = true;
+          }
+          return nextEntry;
+        });
+        dayAcc[dayKey] = nextEntries;
+        return dayAcc;
+      },
+      {}
+    );
+    acc[sportId] = nextLogsByDay;
+    return acc;
+  }, {});
+  return { normalized, changed };
 };
 
 const groupEntriesByWindow = (entries, type) => {
@@ -1037,17 +1088,6 @@ const ensureDefaultSettings = async () => {
 
 const generateId = () =>
   `sport_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
-
-const computeAllowanceSeconds = (stats, sports) => {
-  const day = todayKey();
-  let totalSeconds = 0;
-  sports.forEach((sport) => {
-    const sportStats = stats[sport.id] || {};
-    const dayStats = sportStats[day] || { reps: 0, seconds: 0 };
-    totalSeconds += screenSecondsForStats(sport, dayStats);
-  });
-  return Math.max(0, Math.floor(totalSeconds));
-};
 
 const normalizeSpeechText = (value) =>
   String(value || "")
@@ -1168,11 +1208,12 @@ export default function App() {
   const [installedApps, setInstalledApps] = useState([]);
   const [appSearch, setAppSearch] = useState("");
   const [appUsageMap, setAppUsageMap] = useState({});
-  const [carryoverSeconds, setCarryoverSeconds] = useState(0);
   const [usageState, setUsageState] = useState({
-    allowanceSeconds: 0,
+    remainingSeconds: 0,
     usedSeconds: 0,
     day: todayKey(),
+    remainingBySport: {},
+    entryCount: 0,
   });
   const [needsAccessibility, setNeedsAccessibility] = useState(false);
   const [permissionsPrompted, setPermissionsPrompted] = useState(false);
@@ -1258,10 +1299,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       const usagePermissionsRaw = await AsyncStorage.getItem(
         STORAGE_KEYS.usagePermissions
       );
-      const carryoverDayRaw = await AsyncStorage.getItem(
-        STORAGE_KEYS.carryoverDay
-      );
-      const carryoverRaw = await AsyncStorage.getItem(STORAGE_KEYS.carryover);
       const parsedSports = sportsRaw ? JSON.parse(sportsRaw) : [];
       const cleanedSports = parsedSports.length
         ? pruneNonPushupPresets(parsedSports)
@@ -1277,8 +1314,19 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           JSON.stringify(normalized)
         );
       }
+      const parsedLogs = logsRaw ? JSON.parse(logsRaw) : {};
+      const { normalized: normalizedLogs, changed: logsChanged } = normalizeLogs(
+        parsedLogs,
+        normalized
+      );
       setStats(statsRaw ? JSON.parse(statsRaw) : {});
-      setLogs(logsRaw ? JSON.parse(logsRaw) : {});
+      setLogs(normalizedLogs);
+      if (logsChanged) {
+        await AsyncStorage.setItem(
+          STORAGE_KEYS.logs,
+          JSON.stringify(normalizedLogs)
+        );
+      }
       const parsedSettings = settingsRaw
         ? { ...DEFAULT_SETTINGS, ...JSON.parse(settingsRaw) }
         : DEFAULT_SETTINGS;
@@ -1291,13 +1339,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       }
       setPermissionsPrompted(permissionsRaw === "true");
       setUsagePermissionsPrompted(usagePermissionsRaw === "true");
-      const today = todayKey();
-      if (carryoverDayRaw === today) {
-        const parsedCarryover = Number(carryoverRaw || 0);
-        setCarryoverSeconds(Number.isFinite(parsedCarryover) ? parsedCarryover : 0);
-      } else {
-        setCarryoverSeconds(0);
-      }
     };
     load();
   }, []);
@@ -1394,37 +1435,78 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     });
   };
 
-  const addLogEntry = (sportId, entry) => {
-    const day = dateKeyFromDate(entry.ts);
+  const syncScreenTimeEntry = (sport, entry) => {
+    if (!sport || !entry?.id || !InstaControl?.upsertScreenTimeEntry) {
+      return;
+    }
+    InstaControl.upsertScreenTimeEntry(
+      entry.id,
+      sport.id,
+      entry.ts,
+      entry.screenSeconds || 0
+    );
+  };
+
+  const removeScreenTimeEntry = (entryId) => {
+    if (!entryId || !InstaControl?.removeScreenTimeEntry) {
+      return;
+    }
+    InstaControl.removeScreenTimeEntry(entryId);
+  };
+
+  const addLogEntry = (sport, entry) => {
+    if (!sport) {
+      return;
+    }
+    const nextEntry = {
+      id: entry.id || generateLogId(),
+      ts: entry.ts || Date.now(),
+      reps: entry.reps || 0,
+      seconds: entry.seconds || 0,
+    };
+    nextEntry.screenSeconds =
+      Number.isFinite(entry.screenSeconds) && entry.screenSeconds >= 0
+        ? entry.screenSeconds
+        : screenSecondsForEntry(sport, nextEntry);
+    const day = dateKeyFromDate(nextEntry.ts);
     setLogs((prev) => {
       const nextLogs = { ...prev };
-      const sportLogs = { ...(nextLogs[sportId] || {}) };
+      const sportLogs = { ...(nextLogs[sport.id] || {}) };
       const dayLogs = [...(sportLogs[day] || [])];
-      dayLogs.push(entry);
+      dayLogs.push(nextEntry);
       sportLogs[day] = dayLogs;
-      nextLogs[sportId] = sportLogs;
+      nextLogs[sport.id] = sportLogs;
       AsyncStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(nextLogs));
       return nextLogs;
     });
+    syncScreenTimeEntry(sport, nextEntry);
+    refreshUsageState();
   };
 
-  const adjustLogsToTarget = (sportId, dayKey, targetValue, type) => {
+  const adjustLogsToTarget = (sport, dayKey, targetValue) => {
+    if (!sport) {
+      return;
+    }
     setLogs((prev) => {
       const nextLogs = { ...prev };
-      const sportLogs = { ...(nextLogs[sportId] || {}) };
+      const sportLogs = { ...(nextLogs[sport.id] || {}) };
       const dayLogs = [...(sportLogs[dayKey] || [])].sort((a, b) => a.ts - b.ts);
       let total =
-        type === "reps"
+        sport.type === "reps"
           ? dayLogs.reduce((sum, e) => sum + (e.reps || 0), 0)
           : dayLogs.reduce((sum, e) => sum + (e.seconds || 0), 0);
       let remaining = Math.max(0, targetValue);
       if (total <= remaining) {
         return prev;
       }
+      const removedIds = [];
+      const updatedEntries = [];
       for (let i = dayLogs.length - 1; i >= 0; i -= 1) {
         const entry = dayLogs[i];
-        const value = type === "reps" ? entry.reps || 0 : entry.seconds || 0;
+        const value =
+          sport.type === "reps" ? entry.reps || 0 : entry.seconds || 0;
         if (remaining <= 0) {
+          removedIds.push(entry.id);
           dayLogs.splice(i, 1);
           continue;
         }
@@ -1432,11 +1514,13 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           remaining -= value;
         } else {
           const reduced = remaining;
-          if (type === "reps") {
+          if (sport.type === "reps") {
             entry.reps = reduced;
           } else {
             entry.seconds = reduced;
           }
+          entry.screenSeconds = screenSecondsForEntry(sport, entry);
+          updatedEntries.push(entry);
           remaining = 0;
         }
       }
@@ -1446,17 +1530,23 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         sportLogs[dayKey] = dayLogs;
       }
       if (Object.keys(sportLogs).length === 0) {
-        delete nextLogs[sportId];
+        delete nextLogs[sport.id];
       } else {
-        nextLogs[sportId] = sportLogs;
+        nextLogs[sport.id] = sportLogs;
       }
       AsyncStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(nextLogs));
+      removedIds.forEach((entryId) => removeScreenTimeEntry(entryId));
+      updatedEntries.forEach((entry) => syncScreenTimeEntry(sport, entry));
+      if (removedIds.length > 0 || updatedEntries.length > 0) {
+        refreshUsageState();
+      }
       return nextLogs;
     });
   };
 
   const deleteLogGroup = (sportId, dayKey, group, type) => {
     let nextDayLogs = null;
+    let removedIds = [];
     setLogs((prev) => {
       const nextLogs = { ...prev };
       const sportLogs = { ...(nextLogs[sportId] || {}) };
@@ -1464,6 +1554,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       if (dayLogs.length === 0) {
         return prev;
       }
+      removedIds = dayLogs
+        .filter((entry) => entry.ts >= group.startTs && entry.ts <= group.endTs)
+        .map((entry) => entry.id);
       const filtered = dayLogs.filter(
         (entry) => entry.ts < group.startTs || entry.ts > group.endTs
       );
@@ -1482,6 +1575,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         nextLogs[sportId] = sportLogs;
       }
       AsyncStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(nextLogs));
+      removedIds.forEach((entryId) => removeScreenTimeEntry(entryId));
+      if (removedIds.length > 0) {
+        refreshUsageState();
+      }
       return nextLogs;
     });
     setStats((prev) => {
@@ -1536,16 +1633,18 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     const nextStats = { ...stats };
     delete nextStats[sportId];
     await saveStats(nextStats);
+    if (InstaControl?.clearScreenTimeEntriesForSport) {
+      InstaControl.clearScreenTimeEntriesForSport(sportId);
+      refreshUsageState();
+    }
   };
 
   const clearAllStats = async () => {
     await saveStats({});
-    await AsyncStorage.multiRemove([
-      STORAGE_KEYS.carryover,
-      STORAGE_KEYS.carryoverDay,
-      STORAGE_KEYS.usageSnapshot,
-    ]);
-    setCarryoverSeconds(0);
+    if (InstaControl?.clearAllScreenTimeEntries) {
+      InstaControl.clearAllScreenTimeEntries();
+      refreshUsageState();
+    }
   };
 
   const openSportModal = (sport = null) => {
@@ -1692,7 +1791,13 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
     const state = await InstaControl.getUsageState();
     if (state) {
-      setUsageState(state);
+      setUsageState({
+        remainingSeconds: state.remainingSeconds || 0,
+        usedSeconds: state.usedSeconds || 0,
+        day: state.day || todayKey(),
+        remainingBySport: state.remainingBySport || {},
+        entryCount: state.entryCount || 0,
+      });
     }
   };
 
@@ -1712,77 +1817,13 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
   };
 
-  const baseAllowanceSeconds = useMemo(
-    () => computeAllowanceSeconds(stats, sports),
-    [stats, sports]
-  );
-  const allowanceSeconds = baseAllowanceSeconds + carryoverSeconds;
-
   useEffect(() => {
-    if (!InstaControl?.setControlledApps || !InstaControl?.setDailyAllowanceSeconds) {
+    if (!InstaControl?.setControlledApps) {
       return;
     }
     InstaControl.setControlledApps(settings.controlledApps || []);
-    InstaControl.setDailyAllowanceSeconds(allowanceSeconds);
     refreshUsageState();
-  }, [settings, allowanceSeconds]);
-
-  useEffect(() => {
-    if (!usageState.day) {
-      return;
-    }
-    const reconcileCarryover = async () => {
-      const today = usageState.day || todayKey();
-      const carryoverDayRaw = await AsyncStorage.getItem(
-        STORAGE_KEYS.carryoverDay
-      );
-      const snapshotRaw = await AsyncStorage.getItem(STORAGE_KEYS.usageSnapshot);
-      const snapshot = snapshotRaw ? JSON.parse(snapshotRaw) : null;
-      let nextCarryover = carryoverSeconds;
-
-      if (
-        snapshot?.day &&
-        snapshot.day !== today &&
-        carryoverDayRaw !== today
-      ) {
-        const remaining = Math.max(
-          0,
-          (snapshot.allowanceSeconds || 0) - (snapshot.usedSeconds || 0)
-        );
-        nextCarryover = Math.floor(remaining / 2);
-        await AsyncStorage.setItem(STORAGE_KEYS.carryoverDay, today);
-        await AsyncStorage.setItem(
-          STORAGE_KEYS.carryover,
-          String(nextCarryover)
-        );
-        setCarryoverSeconds(nextCarryover);
-      } else if (carryoverDayRaw !== today && !snapshot?.day) {
-        await AsyncStorage.setItem(STORAGE_KEYS.carryoverDay, today);
-        await AsyncStorage.setItem(STORAGE_KEYS.carryover, "0");
-        if (carryoverSeconds !== 0) {
-          setCarryoverSeconds(0);
-        }
-        nextCarryover = 0;
-      }
-
-      const totalAllowance = baseAllowanceSeconds + nextCarryover;
-      const nextSnapshot = {
-        day: today,
-        allowanceSeconds: totalAllowance,
-        usedSeconds: usageState.usedSeconds || 0,
-      };
-      await AsyncStorage.setItem(
-        STORAGE_KEYS.usageSnapshot,
-        JSON.stringify(nextSnapshot)
-      );
-    };
-    reconcileCarryover();
-  }, [
-    usageState.day,
-    usageState.usedSeconds,
-    baseAllowanceSeconds,
-    carryoverSeconds,
-  ]);
+  }, [settings]);
 
   useEffect(() => {
     checkAccessibility();
@@ -1945,7 +1986,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       return;
     }
     if (sessionSeconds > 0) {
-      addLogEntry(selectedSport.id, {
+      addLogEntry(selectedSport, {
         ts: Date.now(),
         seconds: sessionSeconds,
       });
@@ -1964,7 +2005,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     if (!currentSport || currentSport.type !== "reps") {
       return;
     }
-    addLogEntry(currentSport.id, {
+    addLogEntry(currentSport, {
       ts: Date.now(),
       reps: 1,
     });
@@ -2115,6 +2156,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   const aiSport = aiSession
     ? sports.find((sport) => sport.id === aiSession.sportId)
     : null;
+  const remainingBySport = usageState.remainingBySport || {};
+  const getRemainingForSport = (sportId) => remainingBySport[sportId] || 0;
 
   const todayStats = useMemo(() => {
     if (!selectedSport) {
@@ -2445,13 +2488,13 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           ...current,
           reps: nextValue,
         }));
-        adjustLogsToTarget(statsSport.id, editEntryKey, nextValue, "reps");
+        adjustLogsToTarget(statsSport, editEntryKey, nextValue);
       } else {
         updateSpecificDayStat(statsSport.id, editEntryKey, (current) => ({
           ...current,
           seconds: nextValue * 60,
         }));
-        adjustLogsToTarget(statsSport.id, editEntryKey, nextValue * 60, "time");
+        adjustLogsToTarget(statsSport, editEntryKey, nextValue * 60);
       }
       setEditEntryKey(null);
       setEditEntryValue("");
@@ -2685,13 +2728,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             <View style={styles.screenBlock}>
               <Text style={styles.screenLabel}>{t("label.remaining")}</Text>
               <Text style={styles.screenValue}>
-                {formatScreenTime(
-                  Math.max(
-                    0,
-                    screenSecondsForStats(selectedSport, todayStats) -
-                      usageState.usedSeconds
-                  )
-                )}
+                {formatScreenTime(getRemainingForSport(selectedSport.id))}
               </Text>
             </View>
           </View>
@@ -2803,13 +2840,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           <View style={styles.infoCard}>
             <Text style={styles.cardTitle}>{t("label.availableToday")}</Text>
             <Text style={styles.cardValue}>
-              {Math.floor(allowanceSeconds / 60)} min
+              {Math.floor((usageState.remainingSeconds || 0) / 60)} min
             </Text>
             <Text style={styles.cardMeta}>
               {t("label.used")}: {Math.floor(usageState.usedSeconds / 60)} min
-            </Text>
-            <Text style={styles.cardMeta}>
-              {t("label.carryover")}: {Math.floor(carryoverSeconds / 60)} min
             </Text>
           </View>
           {missingPermissions ? (
@@ -3088,13 +3122,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                       <View style={styles.screenBlock}>
                         <Text style={styles.screenLabel}>{t("label.remaining")}</Text>
                         <Text style={styles.screenValue}>
-                          {formatScreenTime(
-                            Math.max(
-                              0,
-                              screenSecondsForStats(sport, daily) -
-                                usageState.usedSeconds
-                            )
-                          )}
+                          {formatScreenTime(getRemainingForSport(sport.id))}
                         </Text>
                       </View>
                     </View>
@@ -3260,13 +3288,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                               {t("label.remaining")}
                             </Text>
                             <Text style={styles.screenValue}>
-                              {formatScreenTime(
-                                Math.max(
-                                  0,
-                                  screenSecondsForStats(sport, daily) -
-                                    usageState.usedSeconds
-                                )
-                              )}
+                              {formatScreenTime(getRemainingForSport(sport.id))}
                             </Text>
                           </View>
                         </View>

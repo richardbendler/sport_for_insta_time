@@ -176,21 +176,64 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
+  fun upsertScreenTimeEntry(
+    entryId: String,
+    sportId: String?,
+    createdAt: Double,
+    totalSeconds: Int
+  ) {
+    val prefs = getPrefs()
+    ScreenTimeStore.upsertEntry(
+      prefs,
+      entryId,
+      sportId,
+      createdAt.toLong(),
+      totalSeconds
+    )
+    OverallWidgetProvider.refreshAll(reactContext)
+  }
+
+  @ReactMethod
+  fun removeScreenTimeEntry(entryId: String) {
+    ScreenTimeStore.removeEntry(getPrefs(), entryId)
+    OverallWidgetProvider.refreshAll(reactContext)
+  }
+
+  @ReactMethod
+  fun clearScreenTimeEntriesForSport(sportId: String) {
+    ScreenTimeStore.clearEntriesForSport(getPrefs(), sportId)
+    OverallWidgetProvider.refreshAll(reactContext)
+  }
+
+  @ReactMethod
+  fun clearAllScreenTimeEntries() {
+    ScreenTimeStore.clearAllEntries(getPrefs())
+    OverallWidgetProvider.refreshAll(reactContext)
+  }
+
+  @ReactMethod
+  fun updateOverallWidgets() {
+    OverallWidgetProvider.refreshAll(reactContext)
+  }
+
+  @ReactMethod
   fun getUsageState(promise: Promise) {
     try {
       val prefs = getPrefs()
+      val now = System.currentTimeMillis()
       val today = todayKey()
-      val lastDay = prefs.getString("last_day", "") ?: ""
-      var used = prefs.getInt("used_seconds", 0)
-      if (lastDay != today) {
-        used = 0
-        prefs.edit().putInt("used_seconds", 0).putString("last_day", today).apply()
-      }
-      val allowance = prefs.getInt("allowance_seconds", 0)
+      val used = ScreenTimeStore.getUsedSecondsToday(prefs, now)
+      val totals = ScreenTimeStore.getTotals(prefs, now)
       val map = Arguments.createMap()
-      map.putInt("allowanceSeconds", allowance)
+      map.putInt("remainingSeconds", totals.remainingSeconds)
       map.putInt("usedSeconds", used)
       map.putString("day", today)
+      map.putInt("entryCount", totals.entryCount)
+      val bySport = Arguments.createMap()
+      totals.remainingBySport.forEach { (sportKey, value) ->
+        bySport.putInt(sportKey, value)
+      }
+      map.putMap("remainingBySport", bySport)
       promise.resolve(map)
     } catch (e: Exception) {
       promise.reject("USAGE_STATE_ERROR", e)
