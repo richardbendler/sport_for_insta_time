@@ -27,6 +27,7 @@ const STORAGE_KEYS = {
   stats: "@stats_v1",
   settings: "@settings_v1",
   permissions: "@permissions_prompted_v1",
+  accessibilityDisclosure: "@accessibility_disclosure_v1",
   usagePermissions: "@usage_permissions_prompted_v1",
   notificationsPermissions: "@notifications_permissions_prompted_v1",
   carryover: "@carryover_seconds_v1",
@@ -450,6 +451,11 @@ const STRINGS = {
     "label.accessibilityMissing": "Accessibility missing",
     "label.accessibilityActive": "Accessibility active",
     "label.permissionNeeded": "Accessibility required",
+    "label.accessibilityDisclosureTitle": "Accessibility required",
+    "label.accessibilityDisclosureBody":
+      "We use Accessibility to detect which app is in the foreground and to block restricted apps when your earned screen time is used up. We do not read or share any content from your apps.",
+    "label.accessibilityDisclosureConfirm": "Open settings",
+    "label.accessibilityDisclosureCancel": "Not now",
     "label.hiddenShow": "Show hidden sports",
     "label.hiddenHide": "Hide hidden sports",
     "label.screenRateReps": "Screen Time per rep (minutes)",
@@ -570,6 +576,11 @@ const STRINGS = {
     "label.accessibilityMissing": "Accesibilidad desactivada",
     "label.accessibilityActive": "Accesibilidad activa",
     "label.permissionNeeded": "Accesibilidad requerida",
+    "label.accessibilityDisclosureTitle": "Accesibilidad necesaria",
+    "label.accessibilityDisclosureBody":
+      "Usamos Accesibilidad para detectar qu\u00e9 app est\u00e1 en primer plano y bloquear apps restringidas cuando se acaba tu tiempo ganado. No leemos ni compartimos contenido de tus apps.",
+    "label.accessibilityDisclosureConfirm": "Abrir ajustes",
+    "label.accessibilityDisclosureCancel": "M\u00e1s tarde",
     "label.hiddenShow": "Mostrar deportes ocultos",
     "label.hiddenHide": "Ocultar deportes ocultos",
     "label.screenRateReps": "Tiempo de pantalla por repetición (minutos)",
@@ -1279,6 +1290,10 @@ export default function App() {
   });
   const [needsAccessibility, setNeedsAccessibility] = useState(false);
   const [permissionsPrompted, setPermissionsPrompted] = useState(false);
+  const [accessibilityDisclosureAccepted, setAccessibilityDisclosureAccepted] =
+    useState(false);
+  const [accessibilityDisclosureOpen, setAccessibilityDisclosureOpen] =
+    useState(false);
   const [usagePermissionsPrompted, setUsagePermissionsPrompted] = useState(false);
   const [usageAccessGranted, setUsageAccessGranted] = useState(true);
   const [permissionsCheckTick, setPermissionsCheckTick] = useState(0);
@@ -1361,6 +1376,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       const logsRaw = await AsyncStorage.getItem(STORAGE_KEYS.logs);
       const settingsRaw = await AsyncStorage.getItem(STORAGE_KEYS.settings);
       const permissionsRaw = await AsyncStorage.getItem(STORAGE_KEYS.permissions);
+      const accessibilityDisclosureRaw = await AsyncStorage.getItem(
+        STORAGE_KEYS.accessibilityDisclosure
+      );
       const usagePermissionsRaw = await AsyncStorage.getItem(
         STORAGE_KEYS.usagePermissions
       );
@@ -1403,6 +1421,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         );
       }
       setPermissionsPrompted(permissionsRaw === "true");
+      setAccessibilityDisclosureAccepted(
+        accessibilityDisclosureRaw === "true"
+      );
       setUsagePermissionsPrompted(usagePermissionsRaw === "true");
     };
     load();
@@ -2023,6 +2044,21 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
   };
 
+  const requestAccessibilityAccess = () => {
+    if (accessibilityDisclosureAccepted) {
+      openAccessibilitySettings();
+      return;
+    }
+    setAccessibilityDisclosureOpen(true);
+  };
+
+  const handleAccessibilityDisclosureConfirm = async () => {
+    setAccessibilityDisclosureOpen(false);
+    setAccessibilityDisclosureAccepted(true);
+    await AsyncStorage.setItem(STORAGE_KEYS.accessibilityDisclosure, "true");
+    openAccessibilitySettings();
+  };
+
   const openUsageAccessSettings = async () => {
     if (InstaControl?.openUsageAccessSettings) {
       InstaControl.openUsageAccessSettings();
@@ -2051,21 +2087,25 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     if (!needsAccessibility) {
       return;
     }
+    if (accessibilityDisclosureAccepted || accessibilityDisclosureOpen) {
+      return;
+    }
+    if (permissionsPrompted) {
+      return;
+    }
     const now = Date.now();
     if (now - lastPermissionPromptAt.current < 10000) {
       return;
     }
     lastPermissionPromptAt.current = now;
-    Alert.alert(
-      t("label.permissions"),
-      t("label.permissionsIntro"),
-      [
-        { text: t("label.later"), style: "cancel" },
-        { text: t("label.confirm"), onPress: openAccessibilitySettings },
-      ],
-      { cancelable: true }
-    );
-  }, [needsAccessibility, permissionsCheckTick]);
+    setAccessibilityDisclosureOpen(true);
+  }, [
+    needsAccessibility,
+    permissionsCheckTick,
+    accessibilityDisclosureAccepted,
+    accessibilityDisclosureOpen,
+    permissionsPrompted,
+  ]);
 
   useEffect(() => {
     if (Platform.OS !== "android") {
@@ -3121,7 +3161,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 <>
                   <Pressable
                     style={styles.primaryButton}
-                    onPress={openAccessibilitySettings}
+                    onPress={requestAccessibilityAccess}
                   >
                     <Text style={styles.primaryButtonText}>
                       {t("label.permissionNeeded")}
@@ -3271,7 +3311,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 <Text style={styles.helperText}>{t("label.accessibilityHint")}</Text>
                 <Pressable
                   style={styles.primaryButton}
-                  onPress={openAccessibilitySettings}
+                  onPress={requestAccessibilityAccess}
                 >
                   <Text style={styles.primaryButtonText}>
                     {t("label.permissionNeeded")}
@@ -3642,6 +3682,36 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             : null}
         </View>
     </ScrollView>
+      {accessibilityDisclosureOpen ? (
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>
+              {t("label.accessibilityDisclosureTitle")}
+            </Text>
+            <Text style={styles.modalSubtitle}>
+              {t("label.accessibilityDisclosureBody")}
+            </Text>
+            <View style={styles.modalActions}>
+              <Pressable
+                style={styles.secondaryButton}
+                onPress={() => setAccessibilityDisclosureOpen(false)}
+              >
+                <Text style={styles.secondaryButtonText}>
+                  {t("label.accessibilityDisclosureCancel")}
+                </Text>
+              </Pressable>
+              <Pressable
+                style={styles.primaryButton}
+                onPress={handleAccessibilityDisclosureConfirm}
+              >
+                <Text style={styles.primaryButtonText}>
+                  {t("label.accessibilityDisclosureConfirm")}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      ) : null}
       {isSportModalOpen ? (
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
