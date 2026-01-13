@@ -41,6 +41,21 @@ class SportWidgetProvider : AppWidgetProvider() {
       var sportId = prefs.getString("widget_${appWidgetId}_sport_id", null)
       var sportName = prefs.getString("widget_${appWidgetId}_sport_name", "Sport")
       if (sportId == null) {
+        val pendingSportId = prefs.getString("pending_sport_id", null)
+        val pendingSportName = prefs.getString("pending_sport_name", "Sport")
+        if (pendingSportId != null) {
+          prefs.edit()
+            .putString("widget_${appWidgetId}_sport_id", pendingSportId)
+            .putString("widget_${appWidgetId}_sport_name", pendingSportName)
+            .remove("pending_sport_id")
+            .remove("pending_sport_name")
+            .remove("pending_request_time")
+            .apply()
+          sportId = pendingSportId
+          sportName = pendingSportName
+        }
+      }
+      if (sportId == null) {
         val lastSportId = prefs.getString("last_widget_sport_id", null)
         val lastSportName = prefs.getString("last_widget_sport_name", "Sport")
         val lastAt = prefs.getLong("last_widget_request_time", 0L)

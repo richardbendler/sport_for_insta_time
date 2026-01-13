@@ -4,6 +4,7 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   android:background="@drawable/widget_sport_bg"
+  android:gravity="center_horizontal"
   android:orientation="vertical"
   android:padding="8dp">
 
@@ -12,6 +13,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:ellipsize="end"
+    android:gravity="center_horizontal"
     android:maxLines="1"
     android:text="Sport"
     android:textColor="#94a3b8"
@@ -24,6 +26,7 @@
     android:layout_height="wrap_content"
     android:layout_marginTop="2dp"
     android:ellipsize="end"
+    android:gravity="center_horizontal"
     android:maxLines="1"
     android:text="0"
     android:textColor="#f8fafc"
@@ -35,6 +38,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:ellipsize="end"
+    android:gravity="center_horizontal"
     android:maxLines="1"
     android:text="00:00"
     android:textColor="#94a3b8"

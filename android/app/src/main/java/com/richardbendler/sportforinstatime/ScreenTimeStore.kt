@@ -89,7 +89,10 @@ object ScreenTimeStore {
   }
 
   fun clearAllEntries(prefs: SharedPreferences) {
-    prefs.edit().remove(PREF_KEY_ENTRIES).apply()
+    prefs.edit()
+      .remove(PREF_KEY_ENTRIES)
+      .putInt(PREF_KEY_LEGACY_ALLOWANCE, 0)
+      .apply()
   }
 
   fun clearEntriesForSport(prefs: SharedPreferences, sportId: String) {

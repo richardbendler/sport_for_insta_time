@@ -1388,7 +1388,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   }, [running]);
 
   useEffect(() => {
-    if (!isAppActive || !usageAccessGranted) {
+    if (!isAppActive) {
       return;
     }
     const usageInterval = setInterval(() => {
@@ -1397,7 +1397,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     return () => {
       clearInterval(usageInterval);
     };
-  }, [isAppActive, usageAccessGranted, permissionsCheckTick]);
+  }, [isAppActive, permissionsCheckTick]);
 
   const saveSports = async (nextSports) => {
     setSports(nextSports);
@@ -1774,6 +1774,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     const nextStats = { ...stats };
     delete nextStats[sportId];
     await saveStats(nextStats);
+    const nextLogs = { ...logs };
+    delete nextLogs[sportId];
+    await saveLogs(nextLogs);
     if (InstaControl?.clearScreenTimeEntriesForSport) {
       InstaControl.clearScreenTimeEntriesForSport(sportId);
       InstaControl?.updateOverallWidgets?.();
@@ -1783,6 +1786,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
 
   const clearAllStats = async () => {
     await saveStats({});
+    await saveLogs({});
+    await AsyncStorage.multiRemove([
+      STORAGE_KEYS.carryover,
+      STORAGE_KEYS.carryoverDay,
+      STORAGE_KEYS.usageSnapshot,
+    ]);
     if (InstaControl?.clearAllScreenTimeEntries) {
       InstaControl.clearAllScreenTimeEntries();
       InstaControl?.updateOverallWidgets?.();
@@ -2299,8 +2308,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   const aiSport = aiSession
     ? sports.find((sport) => sport.id === aiSession.sportId)
     : null;
-  const remainingBySport = usageState.remainingBySport || {};
-  const getRemainingForSport = (sportId) => remainingBySport[sportId] || 0;
 
   const todayStats = useMemo(() => {
     if (!selectedSport) {
@@ -2390,21 +2397,31 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     if (!InstaControl?.setWidgetSportData || !InstaControl?.updateWidgets) {
       return;
     }
+    const remainingBySport = usageState.remainingBySport || {};
+    const getRemainingForSport = (sportId) => remainingBySport[sportId] || 0;
     sports.forEach((sport) => {
       const dayStats = getTodayStat(stats, sport.id);
       const screenSeconds = screenSecondsForStats(sport, dayStats);
       const label = getSportLabel(sport);
+      const remainingSeconds = getRemainingForSport(sport.id);
       InstaControl.setWidgetSportData(
         sport.id,
         label,
         `${t("label.today")}: ${formatSportValue(sport.type, dayStats, repsShort)}`,
-        formatScreenTime(screenSeconds),
+        formatScreenTime(remainingSeconds || screenSeconds),
         t("label.screenTime"),
         sport.icon || DEFAULT_ICON
       );
     });
     InstaControl.updateWidgets();
-  }, [sports, stats, language]);
+  }, [sports, stats, language, usageState.remainingBySport]);
+
+  useEffect(() => {
+    if (Platform.OS !== "android") {
+      return;
+    }
+    InstaControl?.updateOverallWidgets?.();
+  }, [usageState.remainingSeconds, usageState.usedSeconds]);
   if (aiSession && aiSport) {
     return (
       <AiCameraScreen
@@ -2903,9 +2920,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             </View>
             <View style={styles.screenBlock}>
               <Text style={styles.screenLabel}>{t("label.remaining")}</Text>
-              <Text style={styles.screenValue}>
-                {formatScreenTime(getRemainingForSport(selectedSport.id))}
-              </Text>
+                        <Text style={styles.screenValue}>
+                          {formatScreenTime(usageState.remainingSeconds || 0)}
+                        </Text>
             </View>
           </View>
         </Pressable>
@@ -3298,7 +3315,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                       <View style={styles.screenBlock}>
                         <Text style={styles.screenLabel}>{t("label.remaining")}</Text>
                         <Text style={styles.screenValue}>
-                          {formatScreenTime(getRemainingForSport(sport.id))}
+                          {formatScreenTime(usageState.remainingSeconds || 0)}
                         </Text>
                       </View>
                     </View>
@@ -3464,7 +3481,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                               {t("label.remaining")}
                             </Text>
                             <Text style={styles.screenValue}>
-                              {formatScreenTime(getRemainingForSport(sport.id))}
+                              {formatScreenTime(usageState.remainingSeconds || 0)}
                             </Text>
                           </View>
                         </View>

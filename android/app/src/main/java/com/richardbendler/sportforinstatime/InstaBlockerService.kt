@@ -30,7 +30,6 @@ class InstaBlockerService : AccessibilityService() {
   private var overlayText: TextView? = null
   private var overlayParams: WindowManager.LayoutParams? = null
   private var lastWidgetUpdateAt: Long = 0
-  private var lastControlledSeenAt: Long = 0
   private var notificationManager: NotificationManager? = null
 
   private val notificationChannelId = "restricted_timer"
@@ -65,6 +64,9 @@ class InstaBlockerService : AccessibilityService() {
       return
     }
     if (ignoredPackages.contains(pkg) || !isLaunchablePackage(pkg)) {
+      if (isHomePackage(pkg)) {
+        clearForegroundApp()
+      }
       return
     }
     if (pkg == applicationContext.packageName && !appActivities.contains(className)) {
@@ -79,7 +81,8 @@ class InstaBlockerService : AccessibilityService() {
     }
     val controlled = getControlledApps()
     if (!controlled.contains(pkg)) {
-      if (lastControlledSeenAt > 0 && now - lastControlledSeenAt < 1500) {
+      if (isHomePackage(pkg)) {
+        clearForegroundApp()
         return
       }
       currentPackage = pkg
@@ -89,7 +92,6 @@ class InstaBlockerService : AccessibilityService() {
     }
     val previousPackage = currentPackage
     currentPackage = pkg
-    lastControlledSeenAt = now
     val remaining = getRemainingSeconds()
     updateCountdownOverlay(remaining, true)
     updateCountdownNotification(remaining, true, pkg)
@@ -395,6 +397,13 @@ class InstaBlockerService : AccessibilityService() {
 
   private fun getPrefs() =
     applicationContext.getSharedPreferences("insta_control", Context.MODE_PRIVATE)
+
+  private fun isHomePackage(pkg: String): Boolean {
+    val intent = Intent(Intent.ACTION_MAIN)
+      .addCategory(Intent.CATEGORY_HOME)
+    val resolved = packageManager.queryIntentActivities(intent, 0)
+    return resolved.any { it.activityInfo?.packageName == pkg }
+  }
 
   private fun isLaunchablePackage(pkg: String): Boolean {
     return packageManager.getLaunchIntentForPackage(pkg) != null
