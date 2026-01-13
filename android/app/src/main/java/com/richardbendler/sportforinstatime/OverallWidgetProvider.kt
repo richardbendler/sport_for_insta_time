@@ -29,9 +29,9 @@ class OverallWidgetProvider : AppWidgetProvider() {
     ) {
       val localizedContext = getLocalizedContext(context, getAppLanguage(context))
       val usagePrefs = context.getSharedPreferences("insta_control", Context.MODE_PRIVATE)
-      val allowance = usagePrefs.getInt("allowance_seconds", 0)
-      val used = usagePrefs.getInt("used_seconds", 0)
-      val remaining = (allowance - used).coerceAtLeast(0)
+      val now = System.currentTimeMillis()
+      val used = ScreenTimeStore.getUsedSecondsToday(usagePrefs, now)
+      val remaining = ScreenTimeStore.getTotals(usagePrefs, now).remainingSeconds
 
       val title = localizedContext.getString(R.string.widget_overall_title)
       val usedLabel = localizedContext.getString(R.string.widget_used_label)
