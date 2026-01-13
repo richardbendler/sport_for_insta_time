@@ -314,6 +314,24 @@ const STRINGS = {
     "label.permissions": "Berechtigungen",
     "label.permissionsIntro":
       "Damit Screen Time berechnet und Apps blockiert werden können, braucht die App Zugriff. Du wirst jetzt zu den Einstellungen geführt.",
+      "label.gettingStarted": "Erste Schritte",
+      "label.permissionsNeeded": "Diese Berechtigungen sind erforderlich, damit die App funktioniert.",
+      "label.permissionsHint": "Tippe, um alles einzurichten",
+      "label.accessibilityTitle": "Zugriffshilfe",
+      "label.accessibilityReason": "N\u00f6tig, um die Vordergrund-App zu erkennen und gesperrte Apps zu blockieren.",
+      "label.accessibilitySteps": "Einstellungen > Zugriffshilfe > Sport for Screen Time > Aktivieren",
+      "label.usageAccessTitle": "Nutzungszugriff",
+      "label.usageAccessReason": "N\u00f6tig, um App-Nutzung zu erkennen und Zeiten zu berechnen.",
+      "label.usageAccessSteps": "Einstellungen > Nutzungszugriff > Sport for Screen Time",
+      "label.notificationsTitle": "Benachrichtigungen",
+      "label.notificationsOptional": "Optional",
+      "label.notificationsReason": "Optional, um an Timer oder Trainings erinnert zu werden.",
+      "label.notificationsSteps": "Einstellungen > Benachrichtigungen > Sport for Screen Time > Erlauben",
+      "label.notificationsButton": "Benachrichtigungen erlauben",
+      "label.notificationsPromptTitle": "Benachrichtigungen",
+      "label.notificationsPromptBody": "Wir nutzen Benachrichtigungen, um dich an Timer oder Trainings zu erinnern. Das ist optional.",
+      "label.notificationsPromptConfirm": "Erlauben",
+      "label.notificationsPromptCancel": "Nicht jetzt",
     "label.carryover": "Uebertrag",
     "label.carryoverHint":
       "Restzeit aus Uebungen, die aelter als 24h sind. Sie halbiert sich alle 24h weiter.",
@@ -435,6 +453,24 @@ const STRINGS = {
     "label.permissions": "Permissions",
     "label.permissionsIntro":
       "To track screen time and block apps, the app needs access. You'll be sent to settings now.",
+      "label.gettingStarted": "Getting started",
+      "label.permissionsNeeded": "These permissions are required for the app to work.",
+      "label.permissionsHint": "Tap to set everything up",
+      "label.accessibilityTitle": "Accessibility",
+      "label.accessibilityReason": "Needed to detect the foreground app and block restricted apps.",
+      "label.accessibilitySteps": "Settings > Accessibility > Sport for Screen Time > Enable",
+      "label.usageAccessTitle": "Usage access",
+      "label.usageAccessReason": "Needed to read app usage and calculate time.",
+      "label.usageAccessSteps": "Settings > Usage access > Sport for Screen Time",
+      "label.notificationsTitle": "Notifications",
+      "label.notificationsOptional": "Optional",
+      "label.notificationsReason": "Optional, for timer or training reminders.",
+      "label.notificationsSteps": "Settings > Notifications > Sport for Screen Time > Allow",
+      "label.notificationsButton": "Allow notifications",
+      "label.notificationsPromptTitle": "Notifications",
+      "label.notificationsPromptBody": "We use notifications to remind you about timers or training. This is optional.",
+      "label.notificationsPromptConfirm": "Allow",
+      "label.notificationsPromptCancel": "Not now",
     "label.carryover": "Carryover",
     "label.carryoverHint":
       "Remaining time from sessions older than 24h. It halves every 24h after that.",
@@ -560,6 +596,24 @@ const STRINGS = {
     "label.permissions": "Permisos",
     "label.permissionsIntro":
       "Para medir el tiempo de pantalla y bloquear apps, la app necesita acceso. Ahora te llevaremos a ajustes.",
+      "label.gettingStarted": "Comencemos",
+      "label.permissionsNeeded": "Estos permisos son necesarios para que la app funcione.",
+      "label.permissionsHint": "Toca para configurarlo todo",
+      "label.accessibilityTitle": "Accesibilidad",
+      "label.accessibilityReason": "Necesario para detectar la app en primer plano y bloquear apps restringidas.",
+      "label.accessibilitySteps": "Configuraci\u00f3n > Accesibilidad > Sport for Screen Time > Activar",
+      "label.usageAccessTitle": "Acceso de uso",
+      "label.usageAccessReason": "Necesario para leer el uso de apps y calcular el tiempo.",
+      "label.usageAccessSteps": "Configuraci\u00f3n > Acceso de uso > Sport for Screen Time",
+      "label.notificationsTitle": "Notificaciones",
+      "label.notificationsOptional": "Opcional",
+      "label.notificationsReason": "Opcional, para recordatorios del temporizador o entrenamiento.",
+      "label.notificationsSteps": "Configuraci\u00f3n > Notificaciones > Sport for Screen Time > Permitir",
+      "label.notificationsButton": "Permitir notificaciones",
+      "label.notificationsPromptTitle": "Notificaciones",
+      "label.notificationsPromptBody": "Usamos notificaciones para recordarte temporizadores o entrenamientos. Es opcional.",
+      "label.notificationsPromptConfirm": "Permitir",
+      "label.notificationsPromptCancel": "Ahora no",
     "label.carryover": "Arrastre",
     "label.carryoverHint":
       "Tiempo restante de sesiones anteriores a 24h. Se reduce a la mitad cada 24h.",
@@ -686,6 +740,24 @@ const STRINGS = {
     "label.permissions": "Autorisations",
     "label.permissionsIntro":
       "Pour suivre le temps d’écran et bloquer des apps, l’app a besoin d’accès. Vous allez être redirigé vers les réglages.",
+      "label.gettingStarted": "Bien d\u00e9marrer",
+      "label.permissionsNeeded": "Ces autorisations sont n\u00e9cessaires pour que l\u2019app fonctionne.",
+      "label.permissionsHint": "Appuie pour tout configurer",
+      "label.accessibilityTitle": "Accessibilit\u00e9",
+      "label.accessibilityReason": "N\u00e9cessaire pour d\u00e9tecter l\u2019app au premier plan et bloquer les apps restreintes.",
+      "label.accessibilitySteps": "R\u00e9glages > Accessibilit\u00e9 > Sport for Screen Time > Activer",
+      "label.usageAccessTitle": "Acc\u00e8s d\u2019utilisation",
+      "label.usageAccessReason": "N\u00e9cessaire pour lire l\u2019utilisation des apps et calculer le temps.",
+      "label.usageAccessSteps": "R\u00e9glages > Acc\u00e8s d\u2019utilisation > Sport for Screen Time",
+      "label.notificationsTitle": "Notifications",
+      "label.notificationsOptional": "Optionnel",
+      "label.notificationsReason": "Optionnel, pour des rappels de minuterie ou d\u2019entra\u00eenement.",
+      "label.notificationsSteps": "R\u00e9glages > Notifications > Sport for Screen Time > Autoriser",
+      "label.notificationsButton": "Autoriser les notifications",
+      "label.notificationsPromptTitle": "Notifications",
+      "label.notificationsPromptBody": "Nous utilisons les notifications pour te rappeler les minuteries ou les entra?nements. C’est optionnel.",
+      "label.notificationsPromptConfirm": "Autoriser",
+      "label.notificationsPromptCancel": "Pas maintenant",
     "label.carryover": "Report",
     "label.carryoverHint":
       "Temps restant des sessions de plus de 24h. Il est divise par deux toutes les 24h.",
@@ -1292,10 +1364,11 @@ export default function App() {
   const [permissionsPrompted, setPermissionsPrompted] = useState(false);
   const [accessibilityDisclosureAccepted, setAccessibilityDisclosureAccepted] =
     useState(false);
-  const [accessibilityDisclosureOpen, setAccessibilityDisclosureOpen] =
-    useState(false);
   const [usagePermissionsPrompted, setUsagePermissionsPrompted] = useState(false);
   const [usageAccessGranted, setUsageAccessGranted] = useState(true);
+  const [notificationsPrompted, setNotificationsPrompted] = useState(false);
+  const [notificationsGranted, setNotificationsGranted] = useState(false);
+  const [permissionsPanelOpen, setPermissionsPanelOpen] = useState(false);
   const [permissionsCheckTick, setPermissionsCheckTick] = useState(0);
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [infoHint, setInfoHint] = useState(null);
@@ -1313,6 +1386,7 @@ export default function App() {
   const [aiSession, setAiSession] = useState(null);
   const intervalRef = useRef(null);
   const lastPermissionPromptAt = useRef(0);
+  const notificationsPromptedRef = useRef(false);
   const lastVoiceTokenRef = useRef(null);
   const lastVoiceAtRef = useRef(0);
   const voiceEnabledRef = useRef(false);
@@ -1336,6 +1410,10 @@ export default function App() {
   useEffect(() => {
     languageRef.current = language;
   }, [language]);
+
+  useEffect(() => {
+    notificationsPromptedRef.current = notificationsPrompted;
+  }, [notificationsPrompted]);
 
   const getSportLabel = (sport) => {
     if (sport.presetKey) {
@@ -1378,6 +1456,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       const permissionsRaw = await AsyncStorage.getItem(STORAGE_KEYS.permissions);
       const accessibilityDisclosureRaw = await AsyncStorage.getItem(
         STORAGE_KEYS.accessibilityDisclosure
+      );
+      const notificationsPermissionsRaw = await AsyncStorage.getItem(
+        STORAGE_KEYS.notificationsPermissions
       );
       const usagePermissionsRaw = await AsyncStorage.getItem(
         STORAGE_KEYS.usagePermissions
@@ -1425,6 +1506,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         accessibilityDisclosureRaw === "true"
       );
       setUsagePermissionsPrompted(usagePermissionsRaw === "true");
+      setNotificationsPrompted(!!notificationsPermissionsRaw);
+      setNotificationsGranted(false);
     };
     load();
   }, []);
@@ -1435,15 +1518,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       setIsAppActive(active);
       if (active) {
         refreshUsageState();
+        checkAccessibility();
+        checkUsageAccess();
+        refreshNotificationPermission();
       }
     });
     return () => {
       subscription.remove();
     };
-  }, []);
-
-  useEffect(() => {
-    requestNotificationPermissionIfNeeded();
   }, []);
 
   useEffect(() => {
@@ -1569,6 +1651,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     });
     syncScreenTimeEntry(sport, nextEntry);
     refreshUsageState();
+    maybePromptNotifications();
   };
 
   useEffect(() => {
@@ -2036,6 +2119,19 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
   };
 
+  const refreshNotificationPermission = async () => {
+    if (Platform.OS !== "android") {
+      return;
+    }
+    if (Number(Platform.Version) < 33) {
+      return;
+    }
+    const granted = await PermissionsAndroid.check(
+      PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+    );
+    setNotificationsGranted(!!granted);
+  };
+
   const openAccessibilitySettings = async () => {
     if (InstaControl?.openAccessibilitySettings) {
       InstaControl.openAccessibilitySettings();
@@ -2044,18 +2140,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
   };
 
-  const requestAccessibilityAccess = () => {
-    if (accessibilityDisclosureAccepted) {
-      openAccessibilitySettings();
-      return;
+  const requestAccessibilityAccess = async () => {
+    if (!accessibilityDisclosureAccepted) {
+      setAccessibilityDisclosureAccepted(true);
+      await AsyncStorage.setItem(STORAGE_KEYS.accessibilityDisclosure, "true");
     }
-    setAccessibilityDisclosureOpen(true);
-  };
-
-  const handleAccessibilityDisclosureConfirm = async () => {
-    setAccessibilityDisclosureOpen(false);
-    setAccessibilityDisclosureAccepted(true);
-    await AsyncStorage.setItem(STORAGE_KEYS.accessibilityDisclosure, "true");
     openAccessibilitySettings();
   };
 
@@ -2078,57 +2167,16 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   useEffect(() => {
     checkAccessibility();
     checkUsageAccess();
+    refreshNotificationPermission();
   }, [isSettingsOpen, statsSportId]);
 
   useEffect(() => {
-    if (Platform.OS !== "android") {
-      return;
+    if (permissionsPanelOpen) {
+      checkAccessibility();
+      checkUsageAccess();
+      refreshNotificationPermission();
     }
-    if (!needsAccessibility) {
-      return;
-    }
-    if (accessibilityDisclosureAccepted || accessibilityDisclosureOpen) {
-      return;
-    }
-    if (permissionsPrompted) {
-      return;
-    }
-    const now = Date.now();
-    if (now - lastPermissionPromptAt.current < 10000) {
-      return;
-    }
-    lastPermissionPromptAt.current = now;
-    setAccessibilityDisclosureOpen(true);
-  }, [
-    needsAccessibility,
-    permissionsCheckTick,
-    accessibilityDisclosureAccepted,
-    accessibilityDisclosureOpen,
-    permissionsPrompted,
-  ]);
-
-  useEffect(() => {
-    if (Platform.OS !== "android") {
-      return;
-    }
-    if (usageAccessGranted || usagePermissionsPrompted) {
-      return;
-    }
-    const now = Date.now();
-    if (now - lastPermissionPromptAt.current < 10000) {
-      return;
-    }
-    lastPermissionPromptAt.current = now;
-    Alert.alert(
-      t("label.usageAccess"),
-      t("label.usageAccessHint"),
-      [
-        { text: t("label.later"), style: "cancel" },
-        { text: t("label.confirm"), onPress: openUsageAccessSettings },
-      ],
-      { cancelable: true }
-    );
-  }, [usageAccessGranted, usagePermissionsPrompted]);
+  }, [permissionsPanelOpen]);
 
   useEffect(() => {
     if (!selectedSportId) {
@@ -2296,22 +2344,64 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     return granted === PermissionsAndroid.RESULTS.GRANTED;
   };
 
-  const requestNotificationPermissionIfNeeded = async () => {
+  const requestNotificationPermission = async () => {
     if (Platform.OS !== "android") {
+      return;
+    }
+    if (Number(Platform.Version) < 33) {
+      return;
+    }
+    const result = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+    );
+    await AsyncStorage.setItem(STORAGE_KEYS.notificationsPermissions, "1");
+    setNotificationsPrompted(true);
+    setNotificationsGranted(
+      result === PermissionsAndroid.RESULTS.GRANTED
+    );
+  };
+
+  const maybePromptNotifications = async () => {
+    if (Platform.OS !== "android") {
+      return;
+    }
+    if (Number(Platform.Version) < 33) {
+      return;
+    }
+    if (notificationsPromptedRef.current) {
       return;
     }
     const prompted = await AsyncStorage.getItem(
       STORAGE_KEYS.notificationsPermissions
     );
     if (prompted) {
+      notificationsPromptedRef.current = true;
+      setNotificationsPrompted(true);
       return;
     }
-    if (Number(Platform.Version) >= 33) {
-      await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
-      );
-    }
-    await AsyncStorage.setItem(STORAGE_KEYS.notificationsPermissions, "1");
+    notificationsPromptedRef.current = true;
+    Alert.alert(
+      t("label.notificationsPromptTitle"),
+      t("label.notificationsPromptBody"),
+      [
+        {
+          text: t("label.notificationsPromptCancel"),
+          style: "cancel",
+          onPress: async () => {
+            await AsyncStorage.setItem(
+              STORAGE_KEYS.notificationsPermissions,
+              "1"
+            );
+            setNotificationsPrompted(true);
+          },
+        },
+        {
+          text: t("label.notificationsPromptConfirm"),
+          onPress: requestNotificationPermission,
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   const setListeningState = (value) => {
@@ -2469,9 +2559,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   }, [voiceEnabled]);
 
   const showPermissionPrompt =
-    Platform.OS === "android" &&
-    ((needsAccessibility && !permissionsPrompted) ||
-      (!usageAccessGranted && !usagePermissionsPrompted));
+    Platform.OS === "android" && (needsAccessibility || !usageAccessGranted);
   const missingPermissions = needsAccessibility || !usageAccessGranted;
   const appSearchTerm = appSearch.trim().toLowerCase();
   const filteredApps = installedApps.filter((app) => {
@@ -3304,33 +3392,90 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         </View>
         </View>
         {showPermissionPrompt ? (
-          <View style={styles.permissionCard}>
-            <Text style={styles.sectionTitle}>{t("label.permissions")}</Text>
-            {needsAccessibility && !permissionsPrompted ? (
-              <>
-                <Text style={styles.helperText}>{t("label.accessibilityHint")}</Text>
-                <Pressable
-                  style={styles.primaryButton}
-                  onPress={requestAccessibilityAccess}
+          <View
+            style={[
+              styles.permissionCardLarge,
+              !permissionsPanelOpen && styles.permissionCardCollapsed,
+            ]}
+          >
+            <Pressable
+              style={styles.permissionHeaderRow}
+              onPress={() => setPermissionsPanelOpen((prev) => !prev)}
+            >
+              <View>
+                <Text style={styles.permissionTitle}>
+                  {t("label.gettingStarted")}
+                </Text>
+                <Text style={styles.permissionSubtitle}>
+                  {t("label.permissionsNeeded")}
+                </Text>
+                <Text style={styles.permissionHint}>
+                  {t("label.permissionsHint")}
+                </Text>
+              </View>
+              <Text style={styles.permissionToggle}>
+                {permissionsPanelOpen ? "−" : "+"}
+              </Text>
+            </Pressable>
+            {permissionsPanelOpen ? (
+              <View style={styles.permissionList}>
+                <View
+                  style={[
+                    styles.permissionItem,
+                    !needsAccessibility && styles.permissionItemGranted,
+                  ]}
                 >
-                  <Text style={styles.primaryButtonText}>
-                    {t("label.permissionNeeded")}
+                  <Text style={styles.permissionItemTitle}>
+                    {t("label.accessibilityTitle")}
                   </Text>
-                </Pressable>
-              </>
-            ) : null}
-            {!usageAccessGranted && !usagePermissionsPrompted ? (
-              <>
-                <Text style={styles.helperText}>{t("label.usageAccessHint")}</Text>
-                <Pressable
-                  style={styles.primaryButton}
-                  onPress={openUsageAccessSettings}
+                  <Text style={styles.permissionItemText}>
+                    {t("label.accessibilityReason")}
+                  </Text>
+                  <Text style={styles.permissionItemSteps}>
+                    {t("label.accessibilitySteps")}
+                  </Text>
+                  {!needsAccessibility ? null : (
+                    <View style={styles.permissionItemActions}>
+                      <Pressable
+                        style={styles.primaryButton}
+                        onPress={requestAccessibilityAccess}
+                      >
+                        <Text style={styles.primaryButtonText}>
+                          {t("label.accessibilityDisclosureConfirm")}
+                        </Text>
+                      </Pressable>
+                    </View>
+                  )}
+                </View>
+                <View
+                  style={[
+                    styles.permissionItem,
+                    usageAccessGranted && styles.permissionItemGranted,
+                  ]}
                 >
-                  <Text style={styles.primaryButtonText}>
-                    {t("label.openUsageAccess")}
+                  <Text style={styles.permissionItemTitle}>
+                    {t("label.usageAccessTitle")}
                   </Text>
-                </Pressable>
-              </>
+                  <Text style={styles.permissionItemText}>
+                    {t("label.usageAccessReason")}
+                  </Text>
+                  <Text style={styles.permissionItemSteps}>
+                    {t("label.usageAccessSteps")}
+                  </Text>
+                  {usageAccessGranted ? null : (
+                    <View style={styles.permissionItemActions}>
+                      <Pressable
+                        style={styles.primaryButton}
+                        onPress={openUsageAccessSettings}
+                      >
+                        <Text style={styles.primaryButtonText}>
+                          {t("label.openUsageAccess")}
+                        </Text>
+                      </Pressable>
+                    </View>
+                  )}
+                </View>
+              </View>
             ) : null}
           </View>
         ) : null}
@@ -3682,36 +3827,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             : null}
         </View>
     </ScrollView>
-      {accessibilityDisclosureOpen ? (
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>
-              {t("label.accessibilityDisclosureTitle")}
-            </Text>
-            <Text style={styles.modalSubtitle}>
-              {t("label.accessibilityDisclosureBody")}
-            </Text>
-            <View style={styles.modalActions}>
-              <Pressable
-                style={styles.secondaryButton}
-                onPress={() => setAccessibilityDisclosureOpen(false)}
-              >
-                <Text style={styles.secondaryButtonText}>
-                  {t("label.accessibilityDisclosureCancel")}
-                </Text>
-              </Pressable>
-              <Pressable
-                style={styles.primaryButton}
-                onPress={handleAccessibilityDisclosureConfirm}
-              >
-                <Text style={styles.primaryButtonText}>
-                  {t("label.accessibilityDisclosureConfirm")}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      ) : null}
       {isSportModalOpen ? (
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
@@ -4533,6 +4648,89 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 16,
     marginBottom: 16,
+  },
+  permissionCardLarge: {
+    backgroundColor: COLORS.card,
+    borderRadius: 14,
+    padding: 24,
+    marginBottom: 24,
+    minHeight: 320,
+    borderWidth: 1,
+    borderColor: COLORS.accentDark,
+  },
+  permissionCardCollapsed: {
+    justifyContent: "center",
+  },
+  permissionHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 12,
+  },
+  permissionTitle: {
+    color: COLORS.text,
+    fontSize: 24,
+    fontWeight: "700",
+  },
+  permissionSubtitle: {
+    color: COLORS.muted,
+    marginTop: 6,
+    fontSize: 14,
+  },
+  permissionHint: {
+    color: COLORS.text,
+    marginTop: 8,
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  permissionToggle: {
+    color: COLORS.text,
+    fontSize: 20,
+    fontWeight: "700",
+    marginLeft: 12,
+  },
+  permissionList: {
+    marginTop: 18,
+    gap: 12,
+  },
+  permissionItem: {
+    backgroundColor: COLORS.cardAlt,
+    borderRadius: 12,
+    padding: 12,
+  },
+  permissionItemGranted: {
+    backgroundColor: "rgba(34, 197, 94, 0.22)",
+    borderWidth: 1,
+    borderColor: "rgba(34, 197, 94, 0.6)",
+  },
+  permissionItemTitle: {
+    color: COLORS.text,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  permissionItemHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  permissionOptionalBadge: {
+    color: COLORS.muted,
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+  },
+  permissionItemText: {
+    color: COLORS.muted,
+    marginBottom: 6,
+  },
+  permissionItemSteps: {
+    color: COLORS.muted,
+    fontSize: 12,
+    marginBottom: 10,
+  },
+  permissionItemActions: {
+    alignItems: "flex-start",
   },
   infoCard: {
     backgroundColor: COLORS.card,

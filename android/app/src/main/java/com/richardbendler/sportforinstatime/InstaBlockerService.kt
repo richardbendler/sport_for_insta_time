@@ -25,6 +25,7 @@ import kotlin.math.abs
 class InstaBlockerService : AccessibilityService() {
   private val handler = Handler(Looper.getMainLooper())
   private var currentPackage: String? = null
+  private var lastForegroundWasHome: Boolean = false
   private var windowManager: WindowManager? = null
   private var overlayView: View? = null
   private var overlayText: TextView? = null
@@ -68,11 +69,9 @@ class InstaBlockerService : AccessibilityService() {
       if (
         isHomePackage(pkg) ||
         classLower.contains("recents") ||
-        classLower.contains("launcher") ||
-        classLower.contains("home") ||
         classLower.contains("overview")
       ) {
-        clearForegroundApp()
+        clearForegroundApp(true)
       }
       return
     }
@@ -89,10 +88,11 @@ class InstaBlockerService : AccessibilityService() {
     val controlled = getControlledApps()
     if (!controlled.contains(pkg)) {
       if (isHomePackage(pkg)) {
-        clearForegroundApp()
+        clearForegroundApp(true)
         return
       }
       currentPackage = pkg
+      lastForegroundWasHome = false
       updateCountdownOverlay(0, false)
       updateCountdownNotification(0, false, null)
       return
@@ -103,6 +103,8 @@ class InstaBlockerService : AccessibilityService() {
     }
     val previousPackage = currentPackage
     currentPackage = pkg
+    val openedFromHome = lastForegroundWasHome
+    lastForegroundWasHome = false
     val remaining = getRemainingSeconds()
     updateCountdownOverlay(remaining, true)
     updateCountdownNotification(remaining, true, pkg)
@@ -112,7 +114,7 @@ class InstaBlockerService : AccessibilityService() {
       launchBlocker()
       return
     }
-    if (previousPackage != pkg && shouldShowPreface(pkg)) {
+    if ((previousPackage != pkg || openedFromHome) && shouldShowPreface(pkg) && openedFromHome) {
       launchPreface(pkg, remaining)
     }
   }
@@ -159,8 +161,11 @@ class InstaBlockerService : AccessibilityService() {
     }
   }
 
-  private fun clearForegroundApp() {
+  private fun clearForegroundApp(fromHome: Boolean) {
     currentPackage = null
+    if (fromHome) {
+      lastForegroundWasHome = true
+    }
     updateCountdownOverlay(0, false)
     updateCountdownNotification(0, false, null)
   }
