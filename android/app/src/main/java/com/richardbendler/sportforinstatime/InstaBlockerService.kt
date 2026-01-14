@@ -16,6 +16,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
+import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -36,7 +37,12 @@ class InstaBlockerService : AccessibilityService() {
   private val notificationChannelId = "restricted_timer"
   private val notificationId = 1001
 
-  private val ignoredPackages = setOf("com.android.systemui", "android")
+  private val ignoredPackages = setOf(
+    "com.android.systemui",
+    "android",
+    "com.android.permissioncontroller",
+    "com.google.android.permissioncontroller"
+  )
   private val appActivities = setOf(
     "com.richardbendler.sportforinstatime.MainActivity",
     "com.richardbendler.sportforinstatime.InstaBlockerActivity",
@@ -62,6 +68,9 @@ class InstaBlockerService : AccessibilityService() {
     val pkg = event?.packageName?.toString() ?: return
     val className = event.className?.toString()
     if (event.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+      return
+    }
+    if (isInputMethodPackage(pkg)) {
       return
     }
     if (ignoredPackages.contains(pkg) || !isLaunchablePackage(pkg)) {
@@ -424,5 +433,11 @@ class InstaBlockerService : AccessibilityService() {
 
   private fun isLaunchablePackage(pkg: String): Boolean {
     return packageManager.getLaunchIntentForPackage(pkg) != null
+  }
+
+  private fun isInputMethodPackage(pkg: String): Boolean {
+    val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+      ?: return false
+    return imm.enabledInputMethodList.any { it.packageName == pkg }
   }
 }

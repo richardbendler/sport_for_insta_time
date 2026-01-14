@@ -281,14 +281,16 @@ const COLORS = {
 const STRINGS = {
   de: {
     "app.title": "Sport für Screen Time",
+    "menu.home": "Start",
     "menu.sports": "Deine Sportarten",
     "menu.apps": "Eingeschränkte Apps bearbeiten",
-    "menu.settings": "Screen Controller",
+    "menu.settings": "Einstellungen",
     "menu.stats": "Statistik",
     "menu.language": "Sprache",
     "menu.preface": "Vorschaltseite",
     "label.today": "Heute",
     "label.week": "Woche",
+    "label.month": "Monat",
     "label.weekScreenTime": "Bildschirmzeit Woche",
     "label.screenTime": "Bildschirmzeit",
     "label.screenTimeHint": "Summe der erspielten Bildschirmzeit aus den letzten 24h.",
@@ -301,7 +303,7 @@ const STRINGS = {
     "label.editEntry": "Eintrag bearbeiten",
     "label.dayDetails": "Tagesdetails",
     "label.noEntries": "Keine Einträge",
-    "label.breakdown": "Aufschluesselung",
+    "label.breakdown": "Aufschlüsselung",
     "label.save": "Speichern",
     "label.editHint": "Nur verringern möglich.",
     "label.confirmDeleteAll": "Sicher, dass du alle Einträge löschen willst?",
@@ -329,14 +331,25 @@ const STRINGS = {
       "label.notificationsOptional": "Optional",
       "label.notificationsReason": "Optional, um an Timer oder Trainings erinnert zu werden.",
       "label.notificationsSteps": "Einstellungen > Benachrichtigungen > Sport for Screen Time > Erlauben",
-      "label.notificationsButton": "Benachrichtigungen erlauben",
-      "label.notificationsPromptTitle": "Benachrichtigungen",
-      "label.notificationsPromptBody": "Wir nutzen Benachrichtigungen, um dich an Timer oder Trainings zu erinnern. Das ist optional.",
-      "label.notificationsPromptConfirm": "Erlauben",
-      "label.notificationsPromptCancel": "Nicht jetzt",
-    "label.carryover": "Uebertrag",
+    "label.notificationsButton": "Benachrichtigungen erlauben",
+    "label.notificationsPromptTitle": "Benachrichtigungen",
+    "label.notificationsPromptBody": "Wir nutzen Benachrichtigungen, um dich an Timer oder Trainings zu erinnern. Das ist optional.",
+    "label.notificationsPromptConfirm": "Erlauben",
+    "label.notificationsPromptCancel": "Nicht jetzt",
+    "label.notificationsNotRequired": "Auf dieser Android-Version nicht nötig.",
+    "label.status": "Status",
+    "label.statusOverview": "Status",
+    "label.quickActions": "Quick actions",
+    "label.sectionData": "Data",
+    "label.statusOverview": "Status",
+    "label.quickActions": "Schnellzugriff",
+    "label.sectionData": "Daten",
+    "label.resetData": "App zurücksetzen",
+    "label.resetDataHint": "Löscht Sportarten, Statistik, Logs und Einstellungen.",
+    "label.confirmResetData": "Willst du wirklich alle App-Daten löschen?",
+    "label.carryover": "Übertrag",
     "label.carryoverHint":
-      "Restzeit aus Uebungen, die aelter als 24h sind. Sie halbiert sich alle 24h weiter.",
+      "Restzeit aus Übungen, die älter als 24h sind. Sie halbiert sich alle 24h weiter.",
     "label.usageAccess": "Nutzungszugriff",
     "label.usageAccessHint":
       "Damit Apps nach Nutzungszeit sortiert werden k?nnen, braucht die App Nutzungszugriff.",
@@ -345,6 +358,8 @@ const STRINGS = {
     "label.usageAccessActive": "Nutzungszugriff aktiv",
     "label.later": "Später",
     "label.apps": "Apps auswählen",
+    "label.openApps": "Apps öffnen",
+    "label.closeApps": "Apps schließen",
     "label.searchApps": "Apps suchen",
     "label.noApps": "Keine Apps geladen. Tippe auf \"Apps laden\".",
     "label.accessibilityMissing": "Zugriffshilfe fehlt",
@@ -358,8 +373,12 @@ const STRINGS = {
     "label.weekTotal": "Diese Woche",
     "label.noSports": "Keine aktiven Sportarten. Füge neue hinzu.",
     "label.todayScreenTime": "Bildschirmzeit",
+    "label.widgets": "Widgets",
     "label.widget": "Widget auf Startbildschirm",
-    "label.widgetOverall": "Widget Gesamt",
+    "label.widgetOverall": "Allgemeines Widget",
+    "label.recentActivity": "Letzte Aktivit\u00e4t",
+    "label.recentActivityEmpty": "Keine Eintr\u00e4ge vorhanden.",
+    "label.statsBySport": "Statistik nach Sportart",
     "label.iconChoose": "Icon wählen",
     "label.iconPlaceholder": "Ein Icon",
     "label.addSport": "Neue Sportart",
@@ -368,7 +387,7 @@ const STRINGS = {
     "label.timeUnit": "Zeit",
     "label.timeBased": "Zeitbasiert",
     "label.typeHelp":
-      "Wiederholungen: fuer Zaehlen (z.B. 10 Liegestuetze). Zeitbasiert: fuer Minuten/Sekunden (z.B. 15 Minuten Joggen).",
+      "Wiederholungen: für Zählen (z.B. 10 Liegestütze). Zeitbasiert: für Minuten/Sekunden (z.B. 15 Minuten Joggen).",
     "label.activateNow": "Jetzt aktivieren",
     "label.loadApps": "Apps laden",
     "label.androidOnly": "App-Auswahl ist nur auf Android verfügbar.",
@@ -381,19 +400,19 @@ const STRINGS = {
     "label.tapAnywhere": "Tippe irgendwo",
     "label.voiceOn": "Mikrofon an",
     "label.voiceOff": "Mikrofon aus",
-    "label.voiceListening": "Hoert zu...",
+    "label.voiceListening": "Hört zu...",
     "label.voiceIdle": "Bereit",
-    "label.voiceHint": "Zaehle laut, die App zaehlt mit (Mikrofonzugriff noetig).",
+    "label.voiceHint": "Zähle laut, die App zählt mit (Mikrofonzugriff nötig).",
     "label.voicePermissionMissing": "Mikrofon-Zugriff fehlt",
     "label.voiceError": "Spracherkennung fehlgeschlagen",
-    "label.voiceUnavailable": "Spracherkennung nicht verfuegbar",
-    "label.aiStart": "AI-Zaehlen starten",
+    "label.voiceUnavailable": "Spracherkennung nicht verfügbar",
+    "label.aiStart": "AI-Zählen starten",
     "label.aiStop": "AI stoppen",
-    "label.aiHint": "Kamera seitlich platzieren, Oberkoerper sichtbar halten.",
-    "label.aiHintInline": "AI zaehlt Push-ups automatisch (Kamera noetig).",
+    "label.aiHint": "Kamera seitlich platzieren, Oberkörper sichtbar halten.",
+    "label.aiHintInline": "AI zählt Push-ups automatisch (Kamera nötig).",
     "label.aiPermission": "Kamera-Zugriff fehlt oder wurde verweigert.",
     "label.aiLoading": "Kamera wird geladen...",
-    "label.aiUnavailable": "AI-Kamera ist voruebergehend deaktiviert.",
+    "label.aiUnavailable": "AI-Kamera ist vorübergehend deaktiviert.",
     "label.aiUnavailableInline": "AI-Training ist derzeit deaktiviert.",
     "label.back": "Zurück",
     "label.start": "Start",
@@ -423,14 +442,16 @@ const STRINGS = {
   },
   en: {
     "app.title": "Sport for Screen Time",
+    "menu.home": "Home",
     "menu.sports": "Your sports",
     "menu.apps": "Edit restricted apps",
-    "menu.settings": "Screen Controller",
+    "menu.settings": "Settings",
     "menu.stats": "Stats",
     "menu.language": "Language",
     "menu.preface": "Preface screen",
     "label.today": "Today",
     "label.week": "Week",
+    "label.month": "Month",
     "label.weekScreenTime": "Screen Time Week",
     "label.screenTime": "Screen Time",
     "label.screenTimeHint": "Total earned screen time from the last 24h.",
@@ -471,11 +492,16 @@ const STRINGS = {
       "label.notificationsOptional": "Optional",
       "label.notificationsReason": "Optional, for timer or training reminders.",
       "label.notificationsSteps": "Settings > Notifications > Sport for Screen Time > Allow",
-      "label.notificationsButton": "Allow notifications",
-      "label.notificationsPromptTitle": "Notifications",
-      "label.notificationsPromptBody": "We use notifications to remind you about timers or training. This is optional.",
-      "label.notificationsPromptConfirm": "Allow",
-      "label.notificationsPromptCancel": "Not now",
+    "label.notificationsButton": "Allow notifications",
+    "label.notificationsPromptTitle": "Notifications",
+    "label.notificationsPromptBody": "We use notifications to remind you about timers or training. This is optional.",
+    "label.notificationsPromptConfirm": "Allow",
+    "label.notificationsPromptCancel": "Not now",
+    "label.notificationsNotRequired": "Not required on this Android version.",
+    "label.status": "Status",
+    "label.resetData": "Reset app data",
+    "label.resetDataHint": "Deletes sports, stats, logs, and settings.",
+    "label.confirmResetData": "Are you sure you want to delete all app data?",
     "label.carryover": "Carryover",
     "label.carryoverHint":
       "Remaining time from sessions older than 24h. It halves every 24h after that.",
@@ -487,6 +513,8 @@ const STRINGS = {
     "label.usageAccessActive": "Usage access active",
     "label.later": "Later",
     "label.apps": "Choose apps",
+    "label.openApps": "Open apps",
+    "label.closeApps": "Close apps",
     "label.searchApps": "Search apps",
     "label.noApps": "No apps loaded. Tap \"Load apps\".",
     "label.accessibilityMissing": "Accessibility missing",
@@ -505,8 +533,12 @@ const STRINGS = {
     "label.weekTotal": "This week",
     "label.noSports": "No active sports. Add new ones.",
     "label.todayScreenTime": "Screen Time",
+    "label.widgets": "Widgets",
     "label.widget": "Widget on home screen",
-    "label.widgetOverall": "Overall widget",
+    "label.widgetOverall": "General widget",
+    "label.recentActivity": "Recent activity",
+    "label.recentActivityEmpty": "No recent entries yet.",
+    "label.statsBySport": "Stats by sport",
     "label.iconChoose": "Choose icon",
     "label.iconPlaceholder": "One icon",
     "label.addSport": "New sport",
@@ -569,14 +601,16 @@ const STRINGS = {
   },
   es: {
     "app.title": "Deporte por tiempo de pantalla",
+    "menu.home": "Inicio",
     "menu.sports": "Tus deportes",
     "menu.apps": "Editar apps restringidas",
-    "menu.settings": "Control de pantalla",
+    "menu.settings": "Ajustes",
     "menu.stats": "Estadísticas",
     "menu.language": "Idioma",
     "menu.preface": "Pantalla previa",
     "label.today": "Hoy",
     "label.week": "Semana",
+    "label.month": "Mes",
     "label.weekScreenTime": "Tiempo de pantalla semanal",
     "label.screenTime": "Tiempo de pantalla",
     "label.screenTimeHint": "Tiempo total ganado en las ultimas 24h.",
@@ -617,11 +651,19 @@ const STRINGS = {
       "label.notificationsOptional": "Opcional",
       "label.notificationsReason": "Opcional, para recordatorios del temporizador o entrenamiento.",
       "label.notificationsSteps": "Configuraci\u00f3n > Notificaciones > Sport for Screen Time > Permitir",
-      "label.notificationsButton": "Permitir notificaciones",
-      "label.notificationsPromptTitle": "Notificaciones",
-      "label.notificationsPromptBody": "Usamos notificaciones para recordarte temporizadores o entrenamientos. Es opcional.",
-      "label.notificationsPromptConfirm": "Permitir",
-      "label.notificationsPromptCancel": "Ahora no",
+    "label.notificationsButton": "Permitir notificaciones",
+    "label.notificationsPromptTitle": "Notificaciones",
+    "label.notificationsPromptBody": "Usamos notificaciones para recordarte temporizadores o entrenamientos. Es opcional.",
+    "label.notificationsPromptConfirm": "Permitir",
+    "label.notificationsPromptCancel": "Ahora no",
+    "label.notificationsNotRequired": "No requerido en esta version de Android.",
+    "label.status": "Estado",
+    "label.statusOverview": "Estado",
+    "label.quickActions": "Acciones rapidas",
+    "label.sectionData": "Datos",
+    "label.resetData": "Restablecer app",
+    "label.resetDataHint": "Borra deportes, estadisticas, logs y ajustes.",
+    "label.confirmResetData": "Seguro que quieres borrar todos los datos?",
     "label.carryover": "Arrastre",
     "label.carryoverHint":
       "Tiempo restante de sesiones anteriores a 24h. Se reduce a la mitad cada 24h.",
@@ -633,6 +675,8 @@ const STRINGS = {
     "label.usageAccessActive": "Acceso de uso activo",
     "label.later": "Más tarde",
     "label.apps": "Elegir apps",
+    "label.openApps": "Abrir apps",
+    "label.closeApps": "Cerrar apps",
     "label.searchApps": "Buscar apps",
     "label.noApps": "No hay apps cargadas. Toca \"Cargar apps\".",
     "label.accessibilityMissing": "Accesibilidad desactivada",
@@ -651,8 +695,12 @@ const STRINGS = {
     "label.weekTotal": "Esta semana",
     "label.noSports": "No hay deportes activos. Añade nuevos.",
     "label.todayScreenTime": "Tiempo de pantalla",
+    "label.widgets": "Widgets",
     "label.widget": "Widget en inicio",
     "label.widgetOverall": "Widget general",
+    "label.recentActivity": "Actividad reciente",
+    "label.recentActivityEmpty": "No hay registros recientes.",
+    "label.statsBySport": "Estadisticas por deporte",
     "label.iconChoose": "Elegir icono",
     "label.iconPlaceholder": "Un icono",
     "label.addSport": "Nuevo deporte",
@@ -716,14 +764,16 @@ const STRINGS = {
   },
   fr: {
     "app.title": "Sport pour le temps d’écran",
+    "menu.home": "Accueil",
     "menu.sports": "Tes sports",
     "menu.apps": "Modifier les apps restreintes",
-    "menu.settings": "Contrôle écran",
+    "menu.settings": "Reglages",
     "menu.stats": "Statistiques",
     "menu.language": "Langue",
     "menu.preface": "Ecran preface",
     "label.today": "Aujourd'hui",
     "label.week": "Semaine",
+    "label.month": "Mois",
     "label.weekScreenTime": "Temps d’écran hebdo",
     "label.screenTime": "Temps d’écran",
     "label.screenTimeHint": "Temps total gagne pendant les dernieres 24h.",
@@ -764,11 +814,19 @@ const STRINGS = {
       "label.notificationsOptional": "Optionnel",
       "label.notificationsReason": "Optionnel, pour des rappels de minuterie ou d\u2019entra\u00eenement.",
       "label.notificationsSteps": "R\u00e9glages > Notifications > Sport for Screen Time > Autoriser",
-      "label.notificationsButton": "Autoriser les notifications",
-      "label.notificationsPromptTitle": "Notifications",
-      "label.notificationsPromptBody": "Nous utilisons les notifications pour te rappeler les minuteries ou les entra?nements. C’est optionnel.",
-      "label.notificationsPromptConfirm": "Autoriser",
-      "label.notificationsPromptCancel": "Pas maintenant",
+    "label.notificationsButton": "Autoriser les notifications",
+    "label.notificationsPromptTitle": "Notifications",
+    "label.notificationsPromptBody": "Nous utilisons les notifications pour te rappeler les minuteries ou les entra?nements. C’est optionnel.",
+    "label.notificationsPromptConfirm": "Autoriser",
+    "label.notificationsPromptCancel": "Pas maintenant",
+    "label.notificationsNotRequired": "Pas requis sur cette version d'Android.",
+    "label.status": "Statut",
+    "label.statusOverview": "Statut",
+    "label.quickActions": "Actions rapides",
+    "label.sectionData": "Donnees",
+    "label.resetData": "Reinitialiser l'app",
+    "label.resetDataHint": "Supprime sports, stats, logs et reglages.",
+    "label.confirmResetData": "Confirmer la suppression de toutes les donnees?",
     "label.carryover": "Report",
     "label.carryoverHint":
       "Temps restant des sessions de plus de 24h. Il est divise par deux toutes les 24h.",
@@ -780,6 +838,8 @@ const STRINGS = {
     "label.usageAccessActive": "Acces d'utilisation actif",
     "label.later": "Plus tard",
     "label.apps": "Choisir les apps",
+    "label.openApps": "Ouvrir les apps",
+    "label.closeApps": "Fermer les apps",
     "label.searchApps": "Rechercher des apps",
     "label.noApps": "Aucune app chargée. Touchez \"Charger les apps\".",
     "label.accessibilityMissing": "Accessibilité inactive",
@@ -793,8 +853,12 @@ const STRINGS = {
     "label.weekTotal": "Cette semaine",
     "label.noSports": "Aucun sport actif. Ajoutez-en.",
     "label.todayScreenTime": "Temps d’écran",
+    "label.widgets": "Widgets",
     "label.widget": "Widget sur l’accueil",
-    "label.widgetOverall": "Widget global",
+    "label.widgetOverall": "Widget general",
+    "label.recentActivity": "Activite recente",
+    "label.recentActivityEmpty": "Aucune entree recente.",
+    "label.statsBySport": "Stats par sport",
     "label.iconChoose": "Choisir une icône",
     "label.iconPlaceholder": "Une icône",
     "label.addSport": "Nouveau sport",
@@ -1357,6 +1421,7 @@ export default function App() {
   const [isSportModalOpen, setIsSportModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isPrefaceSettingsOpen, setIsPrefaceSettingsOpen] = useState(false);
+  const [isAppsSettingsOpen, setIsAppsSettingsOpen] = useState(false);
   const [prefaceDelayInput, setPrefaceDelayInput] = useState("");
   const [showHidden, setShowHidden] = useState(false);
   const [newName, setNewName] = useState("");
@@ -1386,6 +1451,7 @@ export default function App() {
   const [permissionsPanelOpen, setPermissionsPanelOpen] = useState(false);
   const [permissionsCheckTick, setPermissionsCheckTick] = useState(0);
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
+  const [statsRange, setStatsRange] = useState("month");
   const [infoHint, setInfoHint] = useState(null);
   const [infoAnchors, setInfoAnchors] = useState({});
   const [infoCardWidth, setInfoCardWidth] = useState(0);
@@ -1979,6 +2045,59 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
   };
 
+  const resetAllData = async () => {
+    const nextSports = createDefaultPresetSports();
+    await AsyncStorage.multiRemove([
+      STORAGE_KEYS.sports,
+      STORAGE_KEYS.stats,
+      STORAGE_KEYS.settings,
+      STORAGE_KEYS.permissions,
+      STORAGE_KEYS.accessibilityDisclosure,
+      STORAGE_KEYS.usagePermissions,
+      STORAGE_KEYS.notificationsPermissions,
+      STORAGE_KEYS.carryover,
+      STORAGE_KEYS.carryoverDay,
+      STORAGE_KEYS.usageSnapshot,
+      STORAGE_KEYS.logs,
+    ]);
+    await saveSports(nextSports);
+    await saveStats({});
+    await saveLogs({});
+    await saveSettings(DEFAULT_SETTINGS);
+    setLanguage(DEFAULT_SETTINGS.language);
+    setSelectedSportId(null);
+    setStatsSportId(null);
+    setStatsDayKey(null);
+    setOverallStatsOpen(false);
+    setOverallDayKey(null);
+    setStatsEditMode(false);
+    setPermissionsPrompted(false);
+    setUsagePermissionsPrompted(false);
+    setAccessibilityDisclosureAccepted(false);
+    setNotificationsPrompted(false);
+    setPrefaceDelayInput(String(DEFAULT_SETTINGS.prefaceDelaySeconds));
+    setShowLanguageMenu(false);
+    setInstalledApps([]);
+    setAppSearch("");
+    setAppUsageMap({});
+    setUsageState({
+      remainingSeconds: 0,
+      usedSeconds: 0,
+      day: todayKey(),
+      remainingBySport: {},
+      entryCount: 0,
+      carryoverSeconds: 0,
+    });
+    if (InstaControl?.clearAllScreenTimeEntries) {
+      InstaControl.clearAllScreenTimeEntries();
+      InstaControl?.updateOverallWidgets?.();
+    }
+    await checkAccessibility();
+    await checkUsageAccess();
+    await refreshNotificationPermission();
+    refreshUsageState();
+  };
+
   const openSportModal = (sport = null) => {
     if (sport) {
       const rateMinutes =
@@ -2310,6 +2429,105 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setIsPrefaceSettingsOpen(true);
   };
 
+  const openHome = () => {
+    setIsSettingsOpen(false);
+    setOverallStatsOpen(false);
+    setIsPrefaceSettingsOpen(false);
+    setSelectedSportId(null);
+    setStatsSportId(null);
+    setStatsDayKey(null);
+    setOverallDayKey(null);
+    setStatsEditMode(false);
+  };
+
+  const openStatsOverview = () => {
+    setIsSettingsOpen(false);
+    setIsPrefaceSettingsOpen(false);
+    setSelectedSportId(null);
+    setStatsSportId(null);
+    setStatsDayKey(null);
+    setOverallDayKey(null);
+    setStatsEditMode(false);
+    setOverallStatsOpen(true);
+  };
+
+  const openSportStats = (sportId) => {
+    setIsSettingsOpen(false);
+    setIsPrefaceSettingsOpen(false);
+    setSelectedSportId(null);
+    setStatsDayKey(null);
+    setOverallDayKey(null);
+    setStatsEditMode(false);
+    setOverallStatsOpen(false);
+    setStatsSportId(sportId);
+  };
+
+  const openSettings = () => {
+    setOverallStatsOpen(false);
+    setIsPrefaceSettingsOpen(false);
+    setSelectedSportId(null);
+    setStatsSportId(null);
+    setStatsDayKey(null);
+    setOverallDayKey(null);
+    setStatsEditMode(false);
+    setIsSettingsOpen(true);
+    loadInstalledApps();
+    refreshUsageState();
+  };
+
+  const renderMainNav = (active) => (
+    <View style={styles.mainNav}>
+      <Pressable
+        style={[
+          styles.mainNavButton,
+          active === "home" && styles.mainNavButtonActive,
+        ]}
+        onPress={openHome}
+      >
+        <Text
+          style={[
+            styles.mainNavText,
+            active === "home" && styles.mainNavTextActive,
+          ]}
+        >
+          {t("menu.home")}
+        </Text>
+      </Pressable>
+      <Pressable
+        style={[
+          styles.mainNavButton,
+          active === "stats" && styles.mainNavButtonActive,
+        ]}
+        onPress={openStatsOverview}
+      >
+        <Text
+          style={[
+            styles.mainNavText,
+            active === "stats" && styles.mainNavTextActive,
+          ]}
+        >
+          {t("menu.stats")}
+        </Text>
+      </Pressable>
+      <Pressable
+        style={[
+          styles.mainNavButton,
+          active === "settings" && styles.mainNavButtonActive,
+        ]}
+        onPress={openSettings}
+      >
+        <Text
+          style={[
+            styles.mainNavText,
+            active === "settings" && styles.mainNavTextActive,
+          ]}
+        >
+          {t("menu.settings")}
+        </Text>
+      </Pressable>
+    </View>
+  );
+
   const savePrefaceSettings = async () => {
     const parsed = Math.max(0, Number.parseInt(prefaceDelayInput, 10) || 0);
     const nextSettings = { ...settings, prefaceDelaySeconds: parsed };
@@ -2547,8 +2765,37 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     () => rollingScreenSecondsTotal(logs, sports),
     [logs, sports]
   );
-  const calendarIcon = "\uD83D\uDCC5";
+  const recentActivityGroups = useMemo(() => {
+    const groups = [];
+    sports.forEach((sport) => {
+      const sportLogs = logs[sport.id] || {};
+      const dayKeys = Object.keys(sportLogs || {});
+      if (dayKeys.length === 0) {
+        return;
+      }
+      const latestKey = [...dayKeys].sort().pop();
+      if (!latestKey) {
+        return;
+      }
+      const dayLogs = sportLogs[latestKey] || [];
+      if (dayLogs.length === 0) {
+        return;
+      }
+      const sorted = [...dayLogs].sort((a, b) => (a.ts || 0) - (b.ts || 0));
+      const latestTs = sorted[sorted.length - 1]?.ts || 0;
+      groups.push({
+        sport,
+        dayKey: latestKey,
+        groups: groupEntriesByWindow(sorted, sport.type),
+        latestTs,
+      });
+    });
+    groups.sort((a, b) => b.latestTs - a.latestTs);
+    return groups;
+  }, [logs, sports]);
   const widgetIcon = "\uD83D\uDCCC";
+  const notificationsSupported =
+    Platform.OS === "android" && Number(Platform.Version) >= 33;
   const tooltipWidth =
     infoCardWidth > 0 ? Math.min(220, Math.max(180, infoCardWidth - 24)) : 200;
 
@@ -2714,6 +2961,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       });
       return acc;
     }, {});
+    const rangeKeys =
+      statsRange === "month"
+        ? []
+        : Array.from({ length: statsRange === "week" ? 7 : 1 }, (_, index) => {
+            const date = new Date();
+            date.setDate(date.getDate() - index);
+            return dateKeyFromDate(date);
+          });
     const months = getMonthsForCalendar(allKeys);
     if (overallDayKey) {
       const flatEntries = sports.flatMap((sport) => {
@@ -2739,6 +2994,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               </Pressable>
               <Text style={styles.headerTitle}>{t("label.dayDetails")}</Text>
             </View>
+            {renderMainNav("stats")}
             <View style={styles.infoCard}>
               <Text style={styles.sectionTitle}>{formatDateLabel(overallDayKey)}</Text>
               <Text style={styles.cardMeta}>{t("label.overallStats")}</Text>
@@ -2778,61 +3034,126 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         </Pressable>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.headerRow}>
-            <Pressable
-              style={styles.backButton}
-              onPress={() => setOverallStatsOpen(false)}
-            >
-              <Text style={styles.backText}>{t("label.back")}</Text>
-            </Pressable>
-            <Text style={styles.headerTitle}>{t("label.overallStats")}</Text>
+            <View style={styles.headerTitleBlock}>
+              <View style={styles.titleWrap}>
+                <Text style={styles.title}>{t("app.title")}</Text>
+                <View style={styles.titleDecoration} />
+              </View>
+              <Text style={styles.subtitle}>{t("menu.stats")}</Text>
+            </View>
           </View>
+          {renderMainNav("stats")}
+          <View style={styles.infoCard}>
+            <Text style={styles.sectionTitle}>{t("label.statsBySport")}</Text>
+            <View style={styles.quickActionsRow}>
+              {activeSports.length === 0 ? (
+                <Text style={styles.helperText}>{t("label.noSports")}</Text>
+              ) : (
+                activeSports.map((sport) => (
+                  <Pressable
+                    key={sport.id}
+                    style={styles.quickActionButton}
+                    onPress={() => openSportStats(sport.id)}
+                  >
+                    <Text style={styles.quickActionText}>
+                      {sport.icon || DEFAULT_ICON} {getSportLabel(sport)}
+                    </Text>
+                  </Pressable>
+                ))
+              )}
+            </View>
+          </View>
+          <View style={styles.filterRow}>
+            {[
+              { key: "today", label: t("label.today") },
+              { key: "week", label: t("label.week") },
+              { key: "month", label: t("label.month") },
+            ].map((item) => (
+              <Pressable
+                key={item.key}
+                style={[
+                  styles.filterChip,
+                  statsRange === item.key && styles.filterChipActive,
+                ]}
+                onPress={() => setStatsRange(item.key)}
+              >
+                <Text
+                  style={[
+                    styles.filterChipText,
+                    statsRange === item.key && styles.filterChipTextActive,
+                  ]}
+                >
+                  {item.label}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+          {statsRange !== "month" ? (
+            <View style={styles.infoCard}>
+              {rangeKeys.map((key) => (
+                <View key={key} style={styles.statRow}>
+                  <Text style={styles.statLabel}>{formatDateLabel(key)}</Text>
+                  <Text style={styles.statValue}>
+                    {formatScreenTime(dayTotals[key] || 0)}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          ) : null}
           <View style={styles.infoCard}>
             <Text style={styles.sectionTitle}>{t("label.overallStats")}</Text>
             <Text style={styles.helperText}>{t("label.overallStatsHint")}</Text>
           </View>
-          {months.map((monthDate) => {
-            const monthKey = `${monthDate.getFullYear()}-${String(
-              monthDate.getMonth() + 1
-            ).padStart(2, "0")}`;
-            const weeks = buildWeeksForMonth(monthDate);
-            return (
-              <View key={monthKey} style={styles.overallMonth}>
-                <Text style={styles.calendarMonthTitle}>
-                  {formatMonthLabel(monthDate, language)}
-                </Text>
-                {weeks.map((weekDays, weekIndex) => (
-                  <View key={`${monthKey}-w${weekIndex}`} style={styles.overallWeekRow}>
-                    {weekDays.map((day, index) => {
-                      const key = dateKeyFromDate(day);
-                      const totalSeconds = dayTotals[key] || 0;
-                      const hasValue = totalSeconds > 0;
-                      const inMonth = day.getMonth() === monthDate.getMonth();
-                      const isToday = key === todayKey();
-                      return (
-                        <Pressable
-                          key={key}
-                          style={[
-                            styles.overallDayCell,
-                            !inMonth && styles.overallDayCellOut,
-                            isToday && styles.overallDayCellToday,
-                          ]}
-                          onPress={() => setOverallDayKey(key)}
-                        >
-                          <Text style={styles.overallWeekday}>
-                            {weekdayLabels[index]}
-                          </Text>
-                          <Text style={styles.overallDayNumber}>{day.getDate()}</Text>
-                          <Text style={styles.overallDayValue}>
-                            {hasValue ? formatScreenTime(totalSeconds) : "-"}
-                          </Text>
-                        </Pressable>
-                      );
-                    })}
+          {statsRange === "month"
+            ? months.map((monthDate) => {
+                const monthKey = `${monthDate.getFullYear()}-${String(
+                  monthDate.getMonth() + 1
+                ).padStart(2, "0")}`;
+                const weeks = buildWeeksForMonth(monthDate);
+                return (
+                  <View key={monthKey} style={styles.overallMonth}>
+                    <Text style={styles.calendarMonthTitle}>
+                      {formatMonthLabel(monthDate, language)}
+                    </Text>
+                    {weeks.map((weekDays, weekIndex) => (
+                      <View
+                        key={`${monthKey}-w${weekIndex}`}
+                        style={styles.overallWeekRow}
+                      >
+                        {weekDays.map((day, index) => {
+                          const key = dateKeyFromDate(day);
+                          const totalSeconds = dayTotals[key] || 0;
+                          const hasValue = totalSeconds > 0;
+                          const inMonth = day.getMonth() === monthDate.getMonth();
+                          const isToday = key === todayKey();
+                          return (
+                            <Pressable
+                              key={key}
+                              style={[
+                                styles.overallDayCell,
+                                !inMonth && styles.overallDayCellOut,
+                                isToday && styles.overallDayCellToday,
+                              ]}
+                              onPress={() => setOverallDayKey(key)}
+                            >
+                              <Text style={styles.overallWeekday}>
+                                {weekdayLabels[index]}
+                              </Text>
+                              <Text style={styles.overallDayNumber}>
+                                {day.getDate()}
+                              </Text>
+                              <Text style={styles.overallDayValue}>
+                                {hasValue ? formatScreenTime(totalSeconds) : "-"}
+                              </Text>
+                            </Pressable>
+                          );
+                        })}
+                      </View>
+                    ))}
                   </View>
-                ))}
-              </View>
-            );
-          })}
+                );
+              })
+            : null}
         </ScrollView>
         {editEntryKey ? (
           <View style={styles.modalOverlay}>
@@ -3263,14 +3584,244 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       <SafeAreaView style={styles.container}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.headerRow}>
-            <Pressable
-              style={styles.backButton}
-              onPress={() => setIsSettingsOpen(false)}
-            >
-              <Text style={styles.backText}>{t("label.back")}</Text>
-            </Pressable>
-            <Text style={styles.headerTitle}>{t("menu.settings")}</Text>
+            <View style={styles.headerTitleBlock}>
+              <View style={styles.titleWrap}>
+                <Text style={styles.title}>{t("app.title")}</Text>
+                <View style={styles.titleDecoration} />
+              </View>
+              <Text style={styles.subtitle}>{t("menu.settings")}</Text>
+            </View>
           </View>
+          {renderMainNav("settings")}
+          <Text style={styles.settingsSectionTitle}>{t("label.apps")}</Text>
+          <View style={styles.infoCard}>
+            {Platform.OS !== "android" ? (
+              <Text style={styles.helperText}>{t("label.androidOnly")}</Text>
+            ) : (
+              <View>
+                <Pressable
+                  style={styles.secondaryButton}
+                  onPress={() => {
+                    setIsAppsSettingsOpen((prev) => {
+                      const next = !prev;
+                      if (next) {
+                        loadInstalledApps();
+                      }
+                      return next;
+                    });
+                  }}
+                >
+                  <Text style={styles.secondaryButtonText}>
+                    {isAppsSettingsOpen ? t("label.closeApps") : t("label.openApps")}
+                  </Text>
+                </Pressable>
+                {isAppsSettingsOpen ? (
+                  <>
+                    <TextInput
+                      style={styles.searchInput}
+                      value={appSearch}
+                      onChangeText={setAppSearch}
+                      placeholder={t("label.searchApps")}
+                      placeholderTextColor="#7a7a7a"
+                    />
+                    <Pressable
+                      style={styles.secondaryButton}
+                      onPress={loadInstalledApps}
+                    >
+                      <Text style={styles.secondaryButtonText}>
+                        {t("label.loadApps")}
+                      </Text>
+                    </Pressable>
+                    {installedApps.length === 0 ? (
+                      <Text style={styles.helperText}>{t("label.noApps")}</Text>
+                    ) : null}
+                    {sortedApps.map((app) => {
+                      const enabled = settings.controlledApps.includes(
+                        app.packageName
+                      );
+                      const usageMs = appUsageMap[app.packageName] || 0;
+                      const usageMinutes = Math.floor(usageMs / 60000);
+                      return (
+                        <Pressable
+                          key={app.packageName}
+                          style={[
+                            styles.appRow,
+                            enabled && styles.appRowActive,
+                          ]}
+                          onPress={() => toggleControlledApp(app.packageName)}
+                        >
+                          <Text style={styles.appLabel}>{app.label}</Text>
+                          <Text style={styles.appPackage}>{app.packageName}</Text>
+                          <Text style={styles.appUsageText}>
+                            {usageMinutes} min
+                          </Text>
+                          <Text
+                            style={[
+                              styles.appToggle,
+                              enabled && styles.appToggleActive,
+                            ]}
+                          >
+                            {enabled ? t("label.active") : t("label.off")}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </>
+                ) : null}
+              </View>
+            )}
+          </View>
+          <View style={styles.settingsDivider} />
+          <Text style={styles.settingsSectionTitle}>
+            {t("label.prefaceSettings")}
+          </Text>
+          <View style={styles.infoCard}>
+            <Text style={styles.helperText}>
+              {t("label.prefaceDelay")}: {settings.prefaceDelaySeconds} s
+            </Text>
+            <Pressable
+              style={styles.secondaryButton}
+              onPress={openPrefaceSettings}
+            >
+              <Text style={styles.secondaryButtonText}>
+                {t("label.prefaceSettings")}
+              </Text>
+            </Pressable>
+          </View>
+          <View style={styles.settingsDivider} />
+          <Text style={styles.settingsSectionTitle}>
+            {t("label.notificationsTitle")}
+          </Text>
+          <View style={styles.infoCard}>
+            <Text style={styles.helperText}>
+              {t("label.notificationsReason")}
+            </Text>
+            <Text style={styles.helperText}>
+              {t("label.status")}:{" "}
+              {notificationsSupported
+                ? notificationsGranted
+                  ? t("label.active")
+                  : t("label.off")
+                : t("label.notificationsNotRequired")}
+            </Text>
+            {notificationsSupported && !notificationsGranted ? (
+              <Pressable
+                style={styles.secondaryButton}
+                onPress={requestNotificationPermission}
+              >
+                <Text style={styles.secondaryButtonText}>
+                  {t("label.notificationsButton")}
+                </Text>
+              </Pressable>
+            ) : null}
+          </View>
+          <View style={styles.settingsDivider} />
+          <Text style={styles.settingsSectionTitle}>{t("menu.language")}</Text>
+          <View style={styles.infoCard}>
+            <View style={styles.languageWrap}>
+              {showLanguageMenu ? (
+                <View style={styles.languageMenu}>
+                  <Text style={styles.languageTitle}>{t("menu.language")}</Text>
+                  {["de", "en", "es", "fr"].map((code) => (
+                    <Pressable
+                      key={code}
+                      style={styles.languageOption}
+                      onPress={() => setAppLanguage(code)}
+                    >
+                      <Text style={styles.languageOptionText}>
+                        {t(`language.${code}`)}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              ) : null}
+              <Pressable
+                style={styles.languageButton}
+                onPress={() => setShowLanguageMenu((prev) => !prev)}
+              >
+                <Text style={styles.languageButtonText}>
+                  {t(`language.${language}`)}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+          <View style={styles.settingsDivider} />
+          <Text style={styles.settingsSectionTitle}>
+            {t("label.permissions")}
+          </Text>
+          <View style={styles.infoCard}>
+            <Text style={styles.helperText}>
+              {t("label.accessibilityTitle")}:{" "}
+              {needsAccessibility
+                ? t("label.accessibilityMissing")
+                : t("label.accessibilityActive")}
+            </Text>
+            <Text style={styles.helperText}>
+              {t("label.usageAccessTitle")}:{" "}
+              {!usageAccessGranted
+                ? t("label.usageAccessMissing")
+                : t("label.usageAccessActive")}
+            </Text>
+            {needsAccessibility ? (
+              <Pressable
+                style={styles.primaryButton}
+                onPress={requestAccessibilityAccess}
+              >
+                <Text style={styles.primaryButtonText}>
+                  {t("label.permissionNeeded")}
+                </Text>
+              </Pressable>
+            ) : null}
+            {!usageAccessGranted ? (
+              <Pressable
+                style={styles.secondaryButton}
+                onPress={openUsageAccessSettings}
+              >
+                <Text style={styles.secondaryButtonText}>
+                  {t("label.openUsageAccess")}
+                </Text>
+              </Pressable>
+            ) : null}
+          </View>
+          <View style={styles.settingsDivider} />
+          <Text style={styles.settingsSectionTitle}>
+            {t("label.widgets")}
+          </Text>
+          <View style={styles.infoCard}>
+            <Text style={styles.helperText}>{t("label.widgetOverall")}</Text>
+            <Pressable
+              style={styles.secondaryButton}
+              onPress={() =>
+                InstaControl?.requestPinWidget?.(
+                  "overall",
+                  t("label.todayScreenTime")
+                )
+              }
+            >
+              <Text style={styles.secondaryButtonText}>
+                {widgetIcon} {t("label.widgetOverall")}
+              </Text>
+            </Pressable>
+          </View>
+          <View style={styles.settingsDivider} />
+          <Text style={styles.settingsSectionTitle}>
+            {t("label.sectionData")}
+          </Text>
+          <View style={styles.infoCard}>
+            <Text style={styles.helperText}>{t("label.resetDataHint")}</Text>
+            <Pressable
+              style={styles.deleteAllButton}
+              onPress={() =>
+                confirmAction(t("label.confirmResetData"), resetAllData)
+              }
+            >
+              <Text style={styles.deleteAllText}>{t("label.resetData")}</Text>
+            </Pressable>
+          </View>
+          <View style={styles.settingsDivider} />
+          <Text style={styles.settingsSectionTitle}>
+            {t("label.statusOverview")}
+          </Text>
           <View style={styles.infoCard}>
             <Text style={styles.cardTitle}>{t("label.availableToday")}</Text>
             <Text style={styles.cardValue}>
@@ -3279,102 +3830,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             <Text style={styles.cardMeta}>
               {t("label.used")}: {Math.floor(usageState.usedSeconds / 60)} min
             </Text>
-          </View>
-          {missingPermissions ? (
-            <View style={styles.permissionAlertCard}>
-              <Text style={styles.permissionAlertTitle}>
-                {t("label.permissions")}
-              </Text>
-              <Text style={styles.permissionAlertText}>
-                {t("label.settingsHint")}
-              </Text>
-              {needsAccessibility ? (
-                <>
-                  <Pressable
-                    style={styles.primaryButton}
-                    onPress={requestAccessibilityAccess}
-                  >
-                    <Text style={styles.primaryButtonText}>
-                      {t("label.permissionNeeded")}
-                    </Text>
-                  </Pressable>
-                  <Text style={styles.warningText}>
-                    {t("label.accessibilityMissing")}
-                  </Text>
-                </>
-              ) : null}
-              {!usageAccessGranted ? (
-                <>
-                  <Pressable
-                    style={styles.secondaryButton}
-                    onPress={openUsageAccessSettings}
-                  >
-                    <Text style={styles.secondaryButtonText}>
-                      {t("label.openUsageAccess")}
-                    </Text>
-                  </Pressable>
-                  <Text style={styles.warningText}>
-                    {t("label.usageAccessMissing")}
-                  </Text>
-                </>
-              ) : null}
-            </View>
-          ) : null}
-          <View style={styles.infoCard}>
-            <Text style={styles.sectionTitle}>{t("label.apps")}</Text>
-            {Platform.OS !== "android" ? (
-              <Text style={styles.helperText}>{t("label.androidOnly")}</Text>
-            ) : (
-              <View>
-                <TextInput
-                  style={styles.searchInput}
-                  value={appSearch}
-                  onChangeText={setAppSearch}
-                  placeholder={t("label.searchApps")}
-                  placeholderTextColor="#7a7a7a"
-                />
-                <Pressable
-                  style={styles.secondaryButton}
-                  onPress={loadInstalledApps}
-                >
-                  <Text style={styles.secondaryButtonText}>{t("label.loadApps")}</Text>
-                </Pressable>
-                {installedApps.length === 0 ? (
-                  <Text style={styles.helperText}>{t("label.noApps")}</Text>
-                ) : null}
-                {sortedApps.map((app) => {
-                  const enabled = settings.controlledApps.includes(
-                    app.packageName
-                  );
-                  const usageMs = appUsageMap[app.packageName] || 0;
-                  const usageMinutes = Math.floor(usageMs / 60000);
-                  return (
-                    <Pressable
-                      key={app.packageName}
-                      style={[
-                        styles.appRow,
-                        enabled && styles.appRowActive,
-                      ]}
-                      onPress={() => toggleControlledApp(app.packageName)}
-                    >
-                      <Text style={styles.appLabel}>{app.label}</Text>
-                      <Text style={styles.appPackage}>{app.packageName}</Text>
-                      <Text style={styles.appUsageText}>
-                        {usageMinutes} min
-                      </Text>
-                      <Text
-                        style={[
-                          styles.appToggle,
-                          enabled && styles.appToggleActive,
-                        ]}
-                      >
-                        {enabled ? t("label.active") : t("label.off")}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            )}
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -3400,46 +3855,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       >
         <View style={styles.headerRow}>
           <View style={styles.headerTitleBlock}>
-            <Text style={styles.title}>{t("app.title")}</Text>
+            <View style={styles.titleWrap}>
+              <Text style={styles.title}>{t("app.title")}</Text>
+              <View style={styles.titleDecoration} />
+            </View>
             <Text style={styles.subtitle}>{t("menu.sports")}</Text>
-            <Pressable
-              style={styles.appsHeaderButton}
-              onPress={() => {
-                setIsSettingsOpen(true);
-                loadInstalledApps();
-                refreshUsageState();
-              }}
-            >
-              <Text style={styles.appsHeaderText}>{t("menu.apps")}</Text>
-            </Pressable>
-            <Pressable
-              style={styles.prefaceHeaderButton}
-              onPress={openPrefaceSettings}
-            >
-              <Text style={styles.prefaceHeaderText}>{t("menu.preface")}</Text>
-            </Pressable>
           </View>
-        <View style={styles.headerActions}>
-          <Pressable
-            style={styles.iconButton}
-            onPress={() => setOverallStatsOpen(true)}
-          >
-            <Text style={styles.iconButtonText}>
-              {calendarIcon} {t("label.overallStats")}
-            </Text>
-          </Pressable>
-          <Pressable
-            style={styles.iconButton}
-            onPress={() =>
-              InstaControl?.requestPinWidget?.("overall", t("label.todayScreenTime"))
-            }
-          >
-            <Text style={styles.iconButtonText}>
-              {widgetIcon} {t("label.widgetOverall")}
-            </Text>
-          </Pressable>
         </View>
-        </View>
+        {renderMainNav("home")}
         {showPermissionPrompt ? (
           <View
             style={[
@@ -3528,104 +3951,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             ) : null}
           </View>
         ) : null}
-        <Pressable
-          style={[styles.infoCard, styles.infoCardMain]}
-          onLayout={(event) => setInfoCardWidth(event.nativeEvent.layout.width)}
-          onPress={() => setInfoHint(null)}
-        >
-          <Text style={styles.sectionTitle}>{t("label.screenTime")}</Text>
-          <View style={styles.infoRow}>
-            <Pressable
-              style={styles.infoItem}
-              onLayout={(event) => {
-                const layout = event.nativeEvent.layout;
-                setInfoAnchors((prev) => ({
-                  ...prev,
-                  screenTime: layout,
-                }));
-              }}
-              onPress={() =>
-                showInfoHint(
-                  "screenTime",
-                  "label.screenTime",
-                  "label.screenTimeHint"
-                )
-              }
-            >
-              <Text style={styles.infoIcon}>⏱</Text>
-              <Text style={styles.infoValue}>
-                {formatScreenTime(rollingEarnedSeconds)}
-              </Text>
-              <Text style={styles.infoLabel}>{t("label.screenTime")}</Text>
-            </Pressable>
-            <Pressable
-              style={styles.infoItem}
-              onLayout={(event) => {
-                const layout = event.nativeEvent.layout;
-                setInfoAnchors((prev) => ({
-                  ...prev,
-                  remaining: layout,
-                }));
-              }}
-              onPress={() =>
-                showInfoHint(
-                  "remaining",
-                  "label.remaining",
-                  "label.remainingHint"
-                )
-              }
-            >
-              <Text style={styles.infoIcon}>⏳</Text>
-              <Text style={styles.infoValue}>
-                {formatScreenTime(usageState.remainingSeconds || 0)}
-              </Text>
-              <Text style={styles.infoLabel}>{t("label.remaining")}</Text>
-            </Pressable>
-            <Pressable
-              style={styles.infoItem}
-              onLayout={(event) => {
-                const layout = event.nativeEvent.layout;
-                setInfoAnchors((prev) => ({
-                  ...prev,
-                  carryover: layout,
-                }));
-              }}
-              onPress={() =>
-                showInfoHint(
-                  "carryover",
-                  "label.carryover",
-                  "label.carryoverHint"
-                )
-              }
-            >
-              <Text style={styles.infoIcon}>↺</Text>
-              <Text style={styles.infoValue}>
-                {formatScreenTime(usageState.carryoverSeconds || 0)}
-              </Text>
-              <Text style={styles.infoLabel}>{t("label.carryover")}</Text>
-            </Pressable>
-          </View>
-          {infoHint ? (
-            <Pressable
-              style={[
-                styles.infoTooltip,
-                {
-                  width: tooltipWidth,
-                  left:
-                    infoCardWidth > 0
-                      ? Math.max(12, (infoCardWidth - tooltipWidth) / 2)
-                      : 12,
-                  top: Math.max(8, infoHint.y + infoHint.height / 2 - 24),
-                },
-              ]}
-              onPress={() => setInfoHint(null)}
-            >
-              <Text style={styles.infoTooltipTitle}>{infoHint.title}</Text>
-              <Text style={styles.infoTooltipText}>{infoHint.body}</Text>
-            </Pressable>
-          ) : null}
-        </Pressable>
-        <Text style={styles.sectionTitle}>{t("menu.sports")}</Text>
+        
+<Text style={styles.sectionTitle}>{t("menu.sports")}</Text>
         {activeSports.length === 0 ? (
           <Text style={styles.helperText}>{t("label.noSports")}</Text>
         ) : null}
@@ -3633,6 +3960,15 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           {activeSports.map((sport) => {
             const daily = getRollingStats(logs, sport.id);
             const sportLabel = getSportLabel(sport);
+            const remainingSeconds = usageState.remainingBySport?.[sport.id];
+            const todayBadgeText =
+              sport.type === "reps"
+                ? `${t("label.today")}: ${daily.reps}`
+                : `${t("label.today")}: ${formatSeconds(daily.seconds || 0)}`;
+            const remainingBadgeText =
+              remainingSeconds != null
+                ? `${t("label.remaining")}: ${formatScreenTime(remainingSeconds)}`
+                : null;
             return (
               <View key={sport.id} style={[styles.sportCard, { width: cardWidth }]}>
                 <View style={styles.cardActionsOverlay}>
@@ -3691,6 +4027,18 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                         <Text style={styles.aiBadgeText}>AI</Text>
                       </View>
                     ) : null}
+                    <View style={styles.sportBadges}>
+                      <View style={styles.sportBadge}>
+                        <Text style={styles.sportBadgeText}>{todayBadgeText}</Text>
+                      </View>
+                      {remainingBadgeText ? (
+                        <View style={styles.sportBadge}>
+                          <Text style={styles.sportBadgeText}>
+                            {remainingBadgeText}
+                          </Text>
+                        </View>
+                      ) : null}
+                    </View>
                     </View>
                   </View>
                   <View style={styles.statsInlineCard}>
@@ -3762,6 +4110,15 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             ? hiddenSports.map((sport) => {
                 const daily = getRollingStats(logs, sport.id);
                 const sportLabel = getSportLabel(sport);
+                const remainingSeconds = usageState.remainingBySport?.[sport.id];
+                const todayBadgeText =
+                  sport.type === "reps"
+                    ? `${t("label.today")}: ${daily.reps}`
+                    : `${t("label.today")}: ${formatSeconds(daily.seconds || 0)}`;
+                const remainingBadgeText =
+                  remainingSeconds != null
+                    ? `${t("label.remaining")}: ${formatScreenTime(remainingSeconds)}`
+                    : null;
                 return (
                   <View
                     key={sport.id}
@@ -3828,6 +4185,20 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                               <Text style={styles.aiBadgeText}>AI</Text>
                             </View>
                           ) : null}
+                          <View style={styles.sportBadges}>
+                            <View style={styles.sportBadge}>
+                              <Text style={styles.sportBadgeText}>
+                                {todayBadgeText}
+                              </Text>
+                            </View>
+                            {remainingBadgeText ? (
+                              <View style={styles.sportBadge}>
+                                <Text style={styles.sportBadgeText}>
+                                  {remainingBadgeText}
+                                </Text>
+                              </View>
+                            ) : null}
+                          </View>
                         </View>
                       </View>
                       <View style={styles.statsInlineCard}>
@@ -3877,7 +4248,148 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               })
             : null}
         </View>
+        <View style={styles.infoCard}>
+          <Text style={styles.sectionTitle}>{t("label.recentActivity")}</Text>
+          {recentActivityGroups.length === 0 ? (
+            <Text style={styles.helperText}>{t("label.recentActivityEmpty")}</Text>
+          ) : (
+            recentActivityGroups.map(({ sport, dayKey, groups }) => (
+              <View key={`${sport.id}-${dayKey}`} style={styles.recentGroup}>
+                <Text style={styles.recentGroupTitle}>
+                  {sport.icon || DEFAULT_ICON} {getSportLabel(sport)}
+                </Text>
+                <Text style={styles.cardMeta}>{formatDateLabel(dayKey)}</Text>
+                {groups.length === 0 ? (
+                  <Text style={styles.helperText}>{t("label.noEntries")}</Text>
+                ) : (
+                  groups.map((group, index) => {
+                    const valueText =
+                      sport.type === "reps"
+                        ? `${group.reps} ${repsShort}`
+                        : formatSeconds(group.seconds);
+                    const range =
+                      group.startTs === group.endTs
+                        ? formatTime(group.startTs)
+                        : `${formatTime(group.startTs)}-${formatTime(group.endTs)}`;
+                    return (
+                      <View key={`${group.startTs}-${index}`} style={styles.statRow}>
+                        <Text style={styles.statLabel}>{range}</Text>
+                        <Text style={styles.statValue}>{valueText}</Text>
+                      </View>
+                    );
+                  })
+                )}
+              </View>
+            ))
+          )}
+        </View>
+      
+
     </ScrollView>
+      <View style={styles.fixedTimers}>
+        <Pressable
+          style={[styles.infoCard, styles.infoCardMain]}
+          onLayout={(event) => setInfoCardWidth(event.nativeEvent.layout.width)}
+          onPress={() => setInfoHint(null)}
+        >
+          <Text style={styles.sectionTitle}>{t("label.screenTime")}</Text>
+          <View style={styles.infoRow}>
+            <Pressable
+              style={styles.infoItem}
+              onLayout={(event) => {
+                const layout = event.nativeEvent.layout;
+                setInfoAnchors((prev) => ({
+                  ...prev,
+                  screenTime: layout,
+                }));
+              }}
+              onPress={() =>
+                showInfoHint(
+                  "screenTime",
+                  "label.screenTime",
+                  "label.screenTimeHint"
+                )
+              }
+            >
+              <Text style={styles.infoIcon}>?</Text>
+              <Text style={styles.infoValue}>
+                {formatScreenTime(rollingEarnedSeconds)}
+              </Text>
+              <Text style={styles.infoLabel}>{t("label.screenTime")}</Text>
+            </Pressable>
+            <Pressable
+              style={styles.infoItem}
+              onLayout={(event) => {
+                const layout = event.nativeEvent.layout;
+                setInfoAnchors((prev) => ({
+                  ...prev,
+                  remaining: layout,
+                }));
+              }}
+              onPress={() =>
+                showInfoHint(
+                  "remaining",
+                  "label.remaining",
+                  "label.remainingHint"
+                )
+              }
+            >
+              <Text style={styles.infoIcon}>?</Text>
+              <Text style={styles.infoValue}>
+                {formatScreenTime(usageState.remainingSeconds || 0)}
+              </Text>
+              <Text style={styles.infoLabel}>{t("label.remaining")}</Text>
+            </Pressable>
+            <Pressable
+              style={styles.infoItem}
+              onLayout={(event) => {
+                const layout = event.nativeEvent.layout;
+                setInfoAnchors((prev) => ({
+                  ...prev,
+                  carryover: layout,
+                }));
+              }}
+              onPress={() =>
+                showInfoHint(
+                  "carryover",
+                  "label.carryover",
+                  "label.carryoverHint"
+                )
+              }
+            >
+              <Text style={styles.infoIcon}>?</Text>
+              <Text style={styles.infoValue}>
+                {formatScreenTime(usageState.carryoverSeconds || 0)}
+              </Text>
+              <Text style={styles.infoLabel}>{t("label.carryover")}</Text>
+            </Pressable>
+          </View>
+          {infoHint ? (
+            <Pressable
+              style={[
+                styles.infoTooltip,
+                {
+                  left:
+                    infoCardWidth > 0
+                      ? Math.max(12, (infoCardWidth - tooltipWidth) / 2)
+                      : 12,
+                  top: Math.max(8, infoHint.y + infoHint.height / 2 - 24),
+                },
+              ]}
+              onPress={() => setInfoHint(null)}
+            >
+              <Text style={styles.infoTooltipTitle}>{infoHint.title}</Text>
+              <Text style={styles.infoTooltipText}>{infoHint.body}</Text>
+            </Pressable>
+          ) : null}
+        </Pressable>
+      </View>
+<Pressable
+        style={styles.fabButton}
+        onPress={() => openSportModal()}
+      >
+        <Text style={styles.fabButtonText}>+</Text>
+      </Pressable>
       {isPrefaceSettingsOpen ? (
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
@@ -4007,33 +4519,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           </View>
         </View>
       ) : null}
-      <View style={styles.languageWrap}>
-        {showLanguageMenu ? (
-          <View style={styles.languageMenu}>
-            <Text style={styles.languageTitle}>{t("menu.language")}</Text>
-            {[
-              "de",
-              "en",
-              "es",
-              "fr",
-            ].map((code) => (
-              <Pressable
-                key={code}
-                style={styles.languageOption}
-                onPress={() => setAppLanguage(code)}
-              >
-                <Text style={styles.languageOptionText}>{t(`language.${code}`)}</Text>
-              </Pressable>
-            ))}
-          </View>
-        ) : null}
-        <Pressable
-          style={styles.languageButton}
-          onPress={() => setShowLanguageMenu((prev) => !prev)}
-        >
-          <Text style={styles.languageButtonText}>{t(`language.${language}`)}</Text>
-        </Pressable>
-      </View>
     </SafeAreaView>
   );
 }
@@ -4045,12 +4530,23 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 16,
     paddingTop: 68,
-    paddingBottom: 96,
+    paddingBottom: 220,
   },
   title: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: "700",
     color: COLORS.text,
+    letterSpacing: 0.2,
+  },
+  titleWrap: {
+    alignItems: "flex-start",
+  },
+  titleDecoration: {
+    marginTop: 6,
+    width: 54,
+    height: 4,
+    borderRadius: 999,
+    backgroundColor: COLORS.accent,
   },
   subtitle: {
     fontSize: 16,
@@ -4079,45 +4575,112 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingRight: 12,
   },
-  headerActions: {
-    flexDirection: "column",
-    alignItems: "flex-end",
+  mainNav: {
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 8,
-    marginTop: 6,
+    marginBottom: 12,
   },
-  appsHeaderButton: {
-    alignSelf: "flex-start",
-    marginTop: 10,
-    backgroundColor: COLORS.accent,
-    paddingVertical: 8,
+  mainNavButton: {
+    backgroundColor: COLORS.cardAlt,
+    paddingVertical: 6,
     paddingHorizontal: 12,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.18,
-    shadowRadius: 6,
-    elevation: 4,
+    borderRadius: 999,
   },
-  appsHeaderText: {
-    color: COLORS.ink,
-    fontWeight: "800",
+  mainNavButtonActive: {
+    backgroundColor: COLORS.accent,
+  },
+  mainNavText: {
+    color: COLORS.text,
+    fontWeight: "700",
     fontSize: 12,
+  },
+  mainNavTextActive: {
+    color: COLORS.ink,
+  },
+  settingsSectionTitle: {
+    color: COLORS.muted,
+    fontSize: 12,
+    fontWeight: "700",
+    marginTop: 12,
+    marginBottom: 6,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
-  prefaceHeaderButton: {
-    alignSelf: "flex-start",
-    marginTop: 8,
+  settingsDivider: {
+    height: 1,
+    backgroundColor: COLORS.cardAlt,
+    marginVertical: 8,
+  },
+  filterRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 12,
+  },
+  filterChip: {
+    backgroundColor: COLORS.cardAlt,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 999,
+  },
+  filterChipActive: {
+    backgroundColor: COLORS.accent,
+  },
+  filterChipText: {
+    color: COLORS.text,
+    fontWeight: "700",
+    fontSize: 12,
+  },
+  filterChipTextActive: {
+    color: COLORS.ink,
+  },
+  quickActionsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  quickActionButton: {
     backgroundColor: COLORS.cardAlt,
     paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     borderRadius: 10,
   },
-  prefaceHeaderText: {
+  quickActionText: {
     color: COLORS.text,
     fontWeight: "700",
     fontSize: 11,
     textTransform: "uppercase",
     letterSpacing: 0.4,
+  },
+  recentGroup: {
+    marginTop: 10,
+  },
+  recentGroupTitle: {
+    color: COLORS.text,
+    fontWeight: "700",
+    marginBottom: 6,
+  },
+  fabButton: {
+    position: "absolute",
+    right: 18,
+    bottom: 130,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: COLORS.accent,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.22,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  fabButtonText: {
+    color: COLORS.ink,
+    fontSize: 28,
+    fontWeight: "800",
+    marginTop: -2,
   },
   sportsGrid: {
     flexDirection: "row",
@@ -4272,6 +4835,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     justifyContent: "center",
+  },
+  sportBadges: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+    marginLeft: 6,
+  },
+  sportBadge: {
+    backgroundColor: COLORS.cardAlt,
+    borderRadius: 999,
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+  },
+  sportBadgeText: {
+    color: COLORS.text,
+    fontSize: 10,
+    fontWeight: "700",
   },
   aiBadge: {
     borderWidth: 1,
@@ -4743,7 +5323,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   permissionCardLarge: {
-    backgroundColor: COLORS.card,
+    backgroundColor: "rgba(245, 158, 11, 0.12)",
     borderRadius: 14,
     padding: 24,
     marginBottom: 24,
@@ -4845,6 +5425,14 @@ const styles = StyleSheet.create({
   },
   infoCardMain: {
     position: "relative",
+  },
+  fixedTimers: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 12,
+    paddingHorizontal: 16,
+    zIndex: 10,
   },
   infoRow: {
     flexDirection: "row",
@@ -5025,10 +5613,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   languageWrap: {
-    position: "absolute",
-    right: 16,
-    bottom: 48,
-    alignItems: "flex-end",
+    alignItems: "flex-start",
   },
   languageButton: {
     backgroundColor: COLORS.cardAlt,
