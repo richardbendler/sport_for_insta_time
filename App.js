@@ -465,7 +465,6 @@ const STRINGS = {
     "label.tutorial": "Tutorial",
     "label.tutorialHint": "Kurze Einf\u00fchrung in die wichtigsten Bereiche.",
     "label.tutorialStart": "Tutorial starten",
-    "label.tutorialResumeHint": "Du findest das Tutorial im Hauptmen\u00fc.",
     "tutorial.step.overview.title": "Deine Bildschirmzeit",
     "tutorial.step.overview.body":
       "Hier siehst du erspielte Zeit, Restzeit und den \u00dcbertrag.",
@@ -486,7 +485,7 @@ const STRINGS = {
       "Tippe auf Einstellungen f\u00fcr Apps, Berechtigungen und mehr.",
     "tutorial.step.finish.title": "Fertig",
     "tutorial.step.finish.body":
-      "Das Tutorial kannst du jederzeit in den Einstellungen erneut starten.",
+      "Du kannst das Tutorial jederzeit über den Tutorial-Button oben rechts im Tab 'Einzelne Übungen' im Hauptmenü starten.",
     "tutorial.step.singleExercises.title": "Einzelne Übungen",
     "tutorial.step.singleExercises.body":
       "Im Tab Einzelne Übungen findest du deine Sportarten und kannst sie direkt antippen.",
@@ -678,7 +677,6 @@ const STRINGS = {
     "label.tutorial": "Tutorial",
     "label.tutorialHint": "Short walkthrough of the main areas.",
     "label.tutorialStart": "Start tutorial",
-    "label.tutorialResumeHint": "You can restart the tutorial from the main menu.",
     "tutorial.step.overview.title": "Your screen time",
     "tutorial.step.overview.body":
       "Here you see earned time, remaining time, and carryover.",
@@ -696,7 +694,7 @@ const STRINGS = {
       "Tap Settings to manage apps and permissions.",
     "tutorial.step.finish.title": "All set",
     "tutorial.step.finish.body":
-      "You can restart this tutorial anytime in Settings.",
+      "You can restart this tutorial anytime from the main menu by tapping the Tutorial button in the top-right of Single exercises.",
     "tutorial.step.singleExercises.title": "Single exercises",
     "tutorial.step.singleExercises.body":
       "The Single exercises tab keeps your sports ready for tracking, just tap one to start.",
@@ -892,7 +890,6 @@ const STRINGS = {
     "label.tutorial": "Tutorial",
     "label.tutorialHint": "Guia corta de las secciones principales.",
     "label.tutorialStart": "Iniciar tutorial",
-    "label.tutorialResumeHint": "Puedes reiniciar el tutorial desde el menu principal.",
     "tutorial.step.overview.title": "Tu tiempo de pantalla",
     "tutorial.step.overview.body":
       "Aqui ves el tiempo ganado, el restante y el arrastre.",
@@ -911,7 +908,7 @@ const STRINGS = {
     "tutorial.step.openSettings.body":
       "Toca Ajustes para apps, permisos y mas.",
     "tutorial.step.finish.title": "Listo",
-    "tutorial.step.finish.body": "Puedes reiniciar este tutorial en Ajustes.",
+    "tutorial.step.finish.body": "Puedes reiniciar este tutorial desde el menú principal tocando el botón Tutorial arriba a la derecha en 'Ejercicios individuales'.",
     "tutorial.step.singleExercises.title": "Ejercicios individuales",
     "tutorial.step.singleExercises.body":
       "La pestaña Ejercicios individuales reúne todos tus deportes para tocarlos y seguirlos.",
@@ -1102,7 +1099,6 @@ const STRINGS = {
     "label.tutorial": "Tutoriel",
     "label.tutorialHint": "Courte visite des zones principales.",
     "label.tutorialStart": "Demarrer le tutoriel",
-    "label.tutorialResumeHint": "Tu peux relancer le tutoriel depuis le menu principal.",
     "tutorial.step.overview.title": "Ton temps d'ecran",
     "tutorial.step.overview.body":
       "Ici tu vois le temps gagne, le restant et le report.",
@@ -1122,7 +1118,7 @@ const STRINGS = {
       "Touche Reglages pour apps, permissions et plus.",
     "tutorial.step.finish.title": "Termine",
     "tutorial.step.finish.body":
-      "Tu peux relancer ce tutoriel dans Reglages.",
+      "Tu peux relancer ce tutoriel depuis le menu principal en touchant le bouton Tutoriel en haut à droite de 'Exercices individuels'.",
     "tutorial.step.singleExercises.title": "Exercices individuels",
     "tutorial.step.singleExercises.body":
       "L'onglet Exercices individuels rassemble tes sports ; touche-en un pour activer son suivi.",
@@ -2950,15 +2946,18 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setTutorialStepIndex(0);
   };
 
-  const finishTutorial = async (showHint = false) => {
+  const finishTutorial = async () => {
     setTutorialStepIndex(null);
     setTutorialTarget(null);
     setTutorialSeen(true);
     await AsyncStorage.setItem(STORAGE_KEYS.tutorialSeen, "true");
-    if (showHint) {
-      Alert.alert(t("label.tutorial"), t("label.tutorialResumeHint"));
-    }
   };
+
+  const renderTutorialHeaderButton = () => (
+    <Pressable style={styles.tutorialHeaderButton} onPress={startTutorial}>
+      <Text style={styles.tutorialHeaderText}>{t("label.tutorial")}</Text>
+    </Pressable>
+  );
 
   const renderMainNav = (active) => (
     <View style={styles.mainNav}>
@@ -3559,7 +3558,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
     const nextIndex = (tutorialStepIndex ?? 0) + 1;
     if (nextIndex >= tutorialSteps.length) {
-      finishTutorial(false);
+      finishTutorial();
       return;
     }
     setTutorialStepIndex(nextIndex);
@@ -3574,7 +3573,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
     const nextIndex = (tutorialStepIndex ?? 0) + 1;
     if (nextIndex >= tutorialSteps.length) {
-      finishTutorial(false);
+      finishTutorial();
       return;
     }
     setTutorialStepIndex(nextIndex);
@@ -3671,28 +3670,51 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       Number.isFinite(target.y) &&
       Number.isFinite(target.width) &&
       Number.isFinite(target.height);
-    const padding = 14;
+    const basePadding = 14;
+    const paddingByStep = {
+      "tutorial.step.track.title": 8,
+      "tutorial.step.addSport.title": 10,
+    };
+    const highlightPadding =
+      paddingByStep[tutorialStep.titleKey] ?? basePadding;
     const sizeScaleByStep = {
       "tutorial.step.addSport.title": 0.35,
       "tutorial.step.track.title": 0.15,
     };
     const sizeScale = sizeScaleByStep[tutorialStep.titleKey] ?? 1;
-    const minSize = tutorialStep.titleKey === "tutorial.step.track.title" ? 18 : 24;
-    const size = hasTarget
+    const minSizeByStep = {
+      "tutorial.step.track.title": 18,
+    };
+    const minSize = minSizeByStep[tutorialStep.titleKey] ?? 24;
+    const baseSize = hasTarget
       ? Math.max(
-          minSize,
-          (Math.max(target.width, target.height) + padding * 2) * sizeScale
+          target.width + highlightPadding * 2,
+          target.height + highlightPadding * 2,
+          minSize
         )
-      : 0;
-    const offsetByStep = {
+      : minSize;
+    const size = hasTarget ? Math.max(minSize, baseSize * sizeScale) : 0;
+    const offsetYByStep = {
       "tutorial.step.back.title": 24,
       "tutorial.step.openSettings.title": 24,
     };
-    const offsetY = offsetByStep[tutorialStep.titleKey] ?? 0;
-    const centerX = hasTarget ? target.x + target.width / 2 : width / 2;
+    const offsetXByStep = {
+      // Additional horizontal adjustments can be added here.
+    };
+    const centerX = hasTarget
+      ? target.x + target.width / 2 + (offsetXByStep[tutorialStep.titleKey] ?? 0)
+      : width / 2;
     const centerY = hasTarget
-      ? target.y + target.height / 2 + offsetY
+      ? target.y + target.height / 2 + (offsetYByStep[tutorialStep.titleKey] ?? 0)
       : height / 2;
+    const horizontalMax = Math.max(width - size, 0);
+    const verticalMax = Math.max(height - size, 0);
+    const highlightLeft = hasTarget
+      ? Math.min(Math.max(centerX - size / 2, 0), horizontalMax)
+      : Math.max(0, Math.min(width - size, width / 2 - size / 2));
+    const highlightTop = hasTarget
+      ? Math.min(Math.max(centerY - size / 2, 0), verticalMax)
+      : Math.max(0, Math.min(height - size, height / 2 - size / 2));
     const cardWidth = Math.min(320, width - 32);
     const estimatedCardHeight = tutorialCardHeight || 160;
     const spaceAbove = centerY - size / 2 - 12;
@@ -3719,17 +3741,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 width: size,
                 height: size,
                 borderRadius: size / 2,
-                left: centerX - size / 2,
-                top: centerY - size / 2,
+                left: highlightLeft,
+                top: highlightTop,
               },
             ]}
             pointerEvents="none"
           />
         ) : null}
-        <Pressable
-          style={styles.tutorialExitButton}
-          onPress={() => finishTutorial(true)}
-        >
+        <Pressable style={styles.tutorialExitButton} onPress={finishTutorial}>
           <Text style={styles.tutorialExitText}>{t("tutorial.cta.exit")}</Text>
         </Pressable>
         <View
@@ -3945,13 +3964,21 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         <SafeAreaView style={styles.container}>
           <ScrollView contentContainerStyle={styles.scrollContent}>
             <View style={styles.headerRow}>
-              <Pressable
-                style={styles.backButton}
-                onPress={() => setOverallDayKey(null)}
+              <View
+                style={[
+                  styles.headerTitleBlock,
+                  { flexDirection: "row", alignItems: "center" },
+                ]}
               >
-                <Text style={styles.backText}>{t("label.back")}</Text>
-              </Pressable>
-              <Text style={styles.headerTitle}>{t("label.dayDetails")}</Text>
+                <Pressable
+                  style={styles.backButton}
+                  onPress={() => setOverallDayKey(null)}
+                >
+                  <Text style={styles.backText}>{t("label.back")}</Text>
+                </Pressable>
+                <Text style={styles.headerTitle}>{t("label.dayDetails")}</Text>
+              </View>
+              {renderTutorialHeaderButton()}
             </View>
             {renderMainNav("stats")}
             <View style={styles.infoCard}>
@@ -4030,6 +4057,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               </View>
               <Text style={styles.subtitle}>{t("menu.stats")}</Text>
             </View>
+            {renderTutorialHeaderButton()}
           </View>
           {renderMainNav("stats")}
           <View style={styles.infoCard}>
@@ -4243,13 +4271,21 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         <SafeAreaView style={styles.container}>
           <ScrollView contentContainerStyle={styles.scrollContent}>
             <View style={styles.headerRow}>
-              <Pressable
-                style={styles.backButton}
-                onPress={() => setStatsDayKey(null)}
+              <View
+                style={[
+                  styles.headerTitleBlock,
+                  { flexDirection: "row", alignItems: "center" },
+                ]}
               >
-                <Text style={styles.backText}>{t("label.back")}</Text>
-              </Pressable>
-              <Text style={styles.headerTitle}>{t("label.dayDetails")}</Text>
+                <Pressable
+                  style={styles.backButton}
+                  onPress={() => setStatsDayKey(null)}
+                >
+                  <Text style={styles.backText}>{t("label.back")}</Text>
+                </Pressable>
+                <Text style={styles.headerTitle}>{t("label.dayDetails")}</Text>
+              </View>
+              {renderTutorialHeaderButton()}
             </View>
             <View style={styles.infoCard}>
               <Text style={styles.sectionTitle}>{formatDateLabel(statsDayKey)}</Text>
@@ -4664,6 +4700,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               </View>
               <Text style={styles.subtitle}>{t("menu.workout")}</Text>
             </View>
+            {renderTutorialHeaderButton()}
           </View>
           {renderMainNav("workout")}
           {renderWorkoutBanner()}
@@ -4865,6 +4902,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               </View>
               <Text style={styles.subtitle}>{t("menu.settings")}</Text>
             </View>
+            {renderTutorialHeaderButton()}
           </View>
           {renderMainNav("settings")}
           <Text style={styles.settingsSectionTitle}>{t("menu.language")}</Text>
@@ -5084,9 +5122,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             </View>
             <Text style={styles.subtitle}>{t("menu.sports")}</Text>
           </View>
-          <Pressable style={styles.tutorialHeaderButton} onPress={startTutorial}>
-            <Text style={styles.tutorialHeaderText}>{t("label.tutorial")}</Text>
-          </Pressable>
+          {renderTutorialHeaderButton()}
         </View>
         {renderMainNav("home")}
         {renderWorkoutBanner()}
