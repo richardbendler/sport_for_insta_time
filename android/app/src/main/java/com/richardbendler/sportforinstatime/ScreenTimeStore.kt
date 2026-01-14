@@ -113,40 +113,42 @@ object ScreenTimeStore {
   fun getTotals(prefs: SharedPreferences, now: Long): Totals {
     val entries = ensureLegacyMigration(loadEntries(prefs), prefs, now)
     val changed = applyDecay(entries, now)
-    val cleaned = entries.filter { it.remainingSeconds > 0 }
+    val persisted = entries.filter { shouldKeepEntry(it, now) }
     val remainingBySport = mutableMapOf<String, Int>()
     var total = 0
-    cleaned.forEach { entry ->
+    entries.filter { it.remainingSeconds > 0 }.forEach { entry ->
       total += entry.remainingSeconds
       val sportKey = entry.sportId
       if (!sportKey.isNullOrBlank()) {
         remainingBySport[sportKey] = (remainingBySport[sportKey] ?: 0) + entry.remainingSeconds
       }
     }
-    if (changed || cleaned.size != entries.size) {
-      saveEntries(prefs, cleaned)
+    if (changed || persisted.size != entries.size) {
+      saveEntries(prefs, persisted)
     }
-    return Totals(total, remainingBySport, cleaned.size)
+    return Totals(total, remainingBySport, entries.count { it.remainingSeconds > 0 })
   }
 
   fun getBreakdown(prefs: SharedPreferences, now: Long): Breakdown {
     val entries = ensureLegacyMigration(loadEntries(prefs), prefs, now)
     val changed = applyDecay(entries, now)
-    val cleaned = entries.filter { it.remainingSeconds > 0 }
     val cutoff = now - DAY_MS
     var remainingTotal = 0
     var totalToday = 0
     var carryover = 0
-    cleaned.forEach { entry ->
-      remainingTotal += entry.remainingSeconds
+    entries.forEach { entry ->
+      if (entry.remainingSeconds > 0) {
+        remainingTotal += entry.remainingSeconds
+      }
       if (entry.createdAt >= cutoff) {
         totalToday += entry.originalSeconds
-      } else {
+      } else if (entry.remainingSeconds > 0) {
         carryover += entry.remainingSeconds
       }
     }
-    if (changed || cleaned.size != entries.size) {
-      saveEntries(prefs, cleaned)
+    val persisted = entries.filter { shouldKeepEntry(it, now) }
+    if (changed || persisted.size != entries.size) {
+      saveEntries(prefs, persisted)
     }
     return Breakdown(remainingTotal, totalToday, carryover)
   }
@@ -173,7 +175,7 @@ object ScreenTimeStore {
       remainingToConsume -= used
       changed = true
     }
-    val cleaned = sorted.filter { it.remainingSeconds > 0 }
+    val cleaned = sorted.filter { shouldKeepEntry(it, now) }
     if (changed || cleaned.size != entries.size) {
       saveEntries(prefs, cleaned)
     }
@@ -301,12 +303,19 @@ object ScreenTimeStore {
         entry.lastDecayAt += steps * DAY_MS
         changed = true
       }
-      if (entry.remainingSeconds <= 0) {
+      if (entry.remainingSeconds <= 0 && now - entry.createdAt >= DAY_MS) {
         iterator.remove()
         changed = true
       }
     }
     return changed
+  }
+
+  private fun shouldKeepEntry(entry: Entry, now: Long): Boolean {
+    if (entry.remainingSeconds > 0) {
+      return true
+    }
+    return entry.createdAt >= now - DAY_MS
   }
 
   private fun todayKey(now: Long): String {
