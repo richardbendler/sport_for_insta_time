@@ -1,7 +1,8 @@
-﻿# Sport for Screen Time
+# Sport for Screen Time
 
-Eine einfache React Native App, die Sport gegen Social Media Zeit tauscht. Sportarten und Tageswerte werden lokal gespeichert, und ausgewählte Apps können auf Android blockiert werden, sobald die verdiente Zeit verbraucht ist.
-
+Eine einfache React Native App, die Sport gegen Social-Media-Zeit tauscht.
+Workouts erzeugen erspielte Zeit, alles wird lokal gespeichert, und auf Android
+koennen ausgewaehlte Apps blockiert werden, sobald die erspielte Zeit verbraucht ist.
 
 ## Expo Befehle (wichtig)
 ```bash
@@ -10,7 +11,6 @@ npx expo start --dev-client
 eas build --platform android --local
 npx eas build -p android --profile production
 ```
-
 
 ## Android APK lokal bauen (Windows + WSL / Ubuntu)
 
@@ -66,7 +66,6 @@ eas login
 cd ~/sport_for_insta_time
 printf "sdk.dir=%s\n" "$HOME/Android/Sdk" > android/local.properties
 npm ci --include=dev || (rm -rf node_modules package-lock.json && npm install)
-Old: eas build --platform android --profile preview --local
 eas build --platform android --profile production --local
 ```
 
@@ -75,39 +74,46 @@ eas build --platform android --profile production --local
 cp /pfad/zur/app-release.apk /mnt/c/Users/<DEIN_USER>/Desktop/
 ```
 
-
 ## Features
-- Presets: Liegestütze, Klimmzüge, Situps, Joggen (mit Icons)
-- Eigene Sportarten erstellen, ausblenden oder löschen
-- Tracking: Wiederholungen per Tap, Zeit via Start/Stop
-- Tagesstatistik wird gespeichert und täglich neu gestartet
-- Screen Controller: Apps auswählen, verdiente Zeit berechnen, Blocker bei Zeitende
-- Statistik-Ansicht pro Sportart (Tag & Woche)
-- Icons pro Sportart, Auswahl beim Anlegen
-- Widgets pro Sportart (heutige Werte + Screen Time)
-- Sprache umschaltbar (Deutsch, Englisch, Spanisch, Französisch)
+- Presets: z.B. Liegestuetze, Klimmzuege, Situps, Joggen (mit Icons)
+- Eigene Sportarten erstellen, bearbeiten, ausblenden, loeschen, sortieren
+- Tracking: Wiederholungen per Tap oder Sprache, Zeit via Start/Stop
+- Tagesstatistik, Wochenansicht und Monatskalender (pro Sport und Gesamt)
+- Eintraege bearbeiten in der Tagesansicht (pro Sport und in der Gesamtstatistik)
+- Widgets: pro Sport und ein Gesamtwidget fuer erspielte Zeit
+- Tutorial mit Highlighting, jederzeit in den Einstellungen startbar
+- Mehrsprachig (DE/EN/ES/FR)
+- Optional: Benachrichtigungen (Android 13+), Mikrofon (Sprachzaehlung), Kamera (AI)
 
 ## Zeit-Logik
-- Wiederholungen: Presets haben eigene Umrechnung, eigene Sportarten können es frei setzen
-- Zeitbasiert: Standard 1:1, eigene Sportarten frei definierbar
-- Die Tageszeit wird aus allen Sportarten des aktuellen Tages summiert
+- Wiederholungen: je Sport frei definierbare Umrechnung in Sekunden erspielter Zeit
+- Zeitbasiert: eigene Rate pro Sportart (Minuten erspielte Zeit pro Minute Training)
+- Tageswerte werden sportuebergreifend zur erspielten Zeit summiert
 
 ## Speicherung
 AsyncStorage Keys:
 - `@sports_v1`: Liste der Sportarten
 - `@stats_v1`: Tageswerte je Sportart (`{ sportId: { "YYYY-MM-DD": { reps, seconds } } }`)
-- `@settings_v1`: Controller-Einstellungen (ausgewählte Apps, Sprache)
+- `@logs_v1`: Einzelne Eintraege pro Sport und Tag
+- `@settings_v1`: Controller-Einstellungen (Apps, Sprache, Preface)
+- `@tutorial_seen_v1`: Tutorial-Status
+- `@permissions_prompted_v1`: erster Permissions-Hinweis
+- `@usage_permissions_prompted_v1`: Usage-Access Hinweis
+- `@notifications_permissions_prompted_v1`: Notifications Hinweis
+- `@carryover_seconds_v1`, `@carryover_day_v1`, `@usage_snapshot_v1`: Screen-Time Logik
 
 ## Android Berechtigungen
-Die App nutzt eine Accessibility Service, um Apps im Vordergrund zu erkennen und bei Ablauf der Zeit eine Sperrseite anzuzeigen.
-- Zugriffshilfe (Accessibility Service) muss aktiviert werden
-
-Beim ersten Start wird nach der Zugriffshilfe gefragt. Die Freigabe kann jederzeit im Controller-Menü erneut geöffnet werden.
+Die App nutzt einen Accessibility Service, um Apps im Vordergrund zu erkennen und
+bei Ablauf der erspielten Zeit eine Sperrseite anzuzeigen.
+- Zugriffshilfe (Accessibility) und Usage Access fuer den App-Blocker
+- Benachrichtigungen (Android 13+) optional
+- Mikrofon (Sprachzaehlung) optional
+- Kamera (AI-Tracking) optional
 
 ## Entwicklung (Android)
-Ein Dev Build ist notwendig (Expo Go auf Android 14 hat Einschränkungen).
+Ein Dev Build ist notwendig (Expo Go auf Android 14 hat Einschraenkungen).
 `npm install`
 
 ## Hinweise
-- Die Blocker-Seite führt zurück zum Homescreen, sobald die Zeit aufgebraucht ist.
-- Die App ist aktuell Android-only für die App-Auswahl und den Blocker.
+- Die Blocker-Seite fuehrt zurueck zum Homescreen, sobald die erspielte Zeit aufgebraucht ist.
+- App-Auswahl und Blocker sind aktuell Android-only.
