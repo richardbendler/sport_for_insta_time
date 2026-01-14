@@ -263,6 +263,7 @@ const COLORS = {
   background: "#0f172a",
   surface: "rgba(148, 163, 184, 0.12)",
   card: "rgba(15, 23, 42, 0.72)",
+  cardSolid: "#111827",
   cardAlt: "rgba(148, 163, 184, 0.18)",
   cardDark: "rgba(2, 6, 23, 0.9)",
   sportCard: "rgba(15, 23, 42, 0.9)",
@@ -292,8 +293,8 @@ const STRINGS = {
     "label.today": "Heute",
     "label.week": "Woche",
     "label.month": "Monat",
-    "label.weekScreenTime": "Bildschirmzeit Woche",
-    "label.screenTime": "Bildschirmzeit",
+    "label.weekScreenTime": "Erspeilte Zeit Woche",
+    "label.screenTime": "Erspeilte Zeit",
     "label.screenTimeHint": "Summe der erspielten Bildschirmzeit aus den letzten 24h.",
     "label.remaining": "Übrig",
     "label.remainingHint": "Zeit, die aktuell noch genutzt werden darf.",
@@ -373,7 +374,7 @@ const STRINGS = {
     "label.weekOverview": "Tagesübersicht",
     "label.weekTotal": "Diese Woche",
     "label.noSports": "Keine aktiven Sportarten. Füge neue hinzu.",
-    "label.todayScreenTime": "Bildschirmzeit",
+    "label.todayScreenTime": "Erspeilte Zeit",
     "label.widgets": "Widgets",
     "label.widget": "Widget auf Startbildschirm",
     "label.widgetOverall": "Allgemeines Widget",
@@ -396,6 +397,7 @@ const STRINGS = {
       "Aktiviere die Zugriffshilfe, damit Social Apps gesperrt werden können.",
     "label.settingsHint":
       "Aktiviere die Zugriffshilfe, damit die App Social Apps blockieren kann, wenn die Zeit aufgebraucht ist.",
+    "label.changeLanguage": "Sprache ändern",
     "label.prefaceSettings": "Vorschaltseite",
     "label.prefaceDelay": "Wartezeit (Sekunden)",
     "label.tapAnywhere": "Tippe irgendwo",
@@ -443,6 +445,7 @@ const STRINGS = {
     "label.tutorial": "Tutorial",
     "label.tutorialHint": "Kurze Einf\u00fchrung in die wichtigsten Bereiche.",
     "label.tutorialStart": "Tutorial starten",
+    "label.tutorialResumeHint": "Du findest das Tutorial in den Einstellungen.",
     "tutorial.step.overview.title": "Deine Bildschirmzeit",
     "tutorial.step.overview.body":
       "Hier siehst du verdiente Zeit, Restzeit und den \u00dcbertrag.",
@@ -466,6 +469,7 @@ const STRINGS = {
       "Das Tutorial kannst du jederzeit in den Einstellungen erneut starten.",
     "tutorial.cta.next": "Weiter",
     "tutorial.cta.skip": "\u00dcberspringen",
+    "tutorial.cta.exit": "Tutorial abbrechen",
     "tutorial.cta.done": "Fertig",
   },
   en: {
@@ -480,8 +484,8 @@ const STRINGS = {
     "label.today": "Today",
     "label.week": "Week",
     "label.month": "Month",
-    "label.weekScreenTime": "Screen Time Week",
-    "label.screenTime": "Screen Time",
+    "label.weekScreenTime": "Earned time week",
+    "label.screenTime": "Earned time",
     "label.screenTimeHint": "Total earned screen time from the last 24h.",
     "label.remaining": "Remaining",
     "label.remainingHint": "Time that is still available to use.",
@@ -560,7 +564,7 @@ const STRINGS = {
     "label.weekOverview": "Daily overview",
     "label.weekTotal": "This week",
     "label.noSports": "No active sports. Add new ones.",
-    "label.todayScreenTime": "Screen Time",
+    "label.todayScreenTime": "Earned time",
     "label.widgets": "Widgets",
     "label.widget": "Widget on home screen",
     "label.widgetOverall": "General widget",
@@ -582,6 +586,7 @@ const STRINGS = {
     "label.accessibilityHint": "Enable accessibility to block social apps.",
     "label.settingsHint":
       "Enable accessibility so the app can block social apps when time is up.",
+    "label.changeLanguage": "Change language",
     "label.prefaceSettings": "Preface screen",
     "label.prefaceDelay": "Wait time (seconds)",
     "label.tapAnywhere": "Tap anywhere",
@@ -629,6 +634,7 @@ const STRINGS = {
     "label.tutorial": "Tutorial",
     "label.tutorialHint": "Short walkthrough of the main areas.",
     "label.tutorialStart": "Start tutorial",
+    "label.tutorialResumeHint": "You can restart the tutorial in Settings.",
     "tutorial.step.overview.title": "Your screen time",
     "tutorial.step.overview.body":
       "Here you see earned time, remaining time, and carryover.",
@@ -649,6 +655,7 @@ const STRINGS = {
       "You can restart this tutorial anytime in Settings.",
     "tutorial.cta.next": "Next",
     "tutorial.cta.skip": "Skip",
+    "tutorial.cta.exit": "Exit tutorial",
     "tutorial.cta.done": "Done",
   },
   es: {
@@ -663,8 +670,8 @@ const STRINGS = {
     "label.today": "Hoy",
     "label.week": "Semana",
     "label.month": "Mes",
-    "label.weekScreenTime": "Tiempo de pantalla semanal",
-    "label.screenTime": "Tiempo de pantalla",
+    "label.weekScreenTime": "Tiempo ganado semanal",
+    "label.screenTime": "Tiempo ganado",
     "label.screenTimeHint": "Tiempo total ganado en las ultimas 24h.",
     "label.remaining": "Restante",
     "label.remainingHint": "Tiempo que aun puedes usar.",
@@ -746,7 +753,7 @@ const STRINGS = {
     "label.weekOverview": "Resumen diario",
     "label.weekTotal": "Esta semana",
     "label.noSports": "No hay deportes activos. Añade nuevos.",
-    "label.todayScreenTime": "Tiempo de pantalla",
+    "label.todayScreenTime": "Tiempo ganado",
     "label.widgets": "Widgets",
     "label.widget": "Widget en inicio",
     "label.widgetOverall": "Widget general",
@@ -769,6 +776,7 @@ const STRINGS = {
       "Activa la accesibilidad para bloquear apps sociales.",
     "label.settingsHint":
       "Activa la accesibilidad para que la app bloquee redes sociales cuando se acabe el tiempo.",
+    "label.changeLanguage": "Cambiar idioma",
     "label.prefaceSettings": "Pantalla previa",
     "label.prefaceDelay": "Tiempo de espera (segundos)",
     "label.tapAnywhere": "Toca en cualquier lugar",
@@ -816,6 +824,7 @@ const STRINGS = {
     "label.tutorial": "Tutorial",
     "label.tutorialHint": "Guia corta de las secciones principales.",
     "label.tutorialStart": "Iniciar tutorial",
+    "label.tutorialResumeHint": "Puedes reiniciar el tutorial en Ajustes.",
     "tutorial.step.overview.title": "Tu tiempo de pantalla",
     "tutorial.step.overview.body":
       "Aqui ves el tiempo ganado, el restante y el arrastre.",
@@ -837,6 +846,7 @@ const STRINGS = {
     "tutorial.step.finish.body": "Puedes reiniciar este tutorial en Ajustes.",
     "tutorial.cta.next": "Siguiente",
     "tutorial.cta.skip": "Saltar",
+    "tutorial.cta.exit": "Salir del tutorial",
     "tutorial.cta.done": "Listo",
   },
   fr: {
@@ -851,8 +861,8 @@ const STRINGS = {
     "label.today": "Aujourd'hui",
     "label.week": "Semaine",
     "label.month": "Mois",
-    "label.weekScreenTime": "Temps d’écran hebdo",
-    "label.screenTime": "Temps d’écran",
+    "label.weekScreenTime": "Temps gagné hebdo",
+    "label.screenTime": "Temps gagné",
     "label.screenTimeHint": "Temps total gagne pendant les dernieres 24h.",
     "label.remaining": "Restant",
     "label.remainingHint": "Temps encore disponible a utiliser.",
@@ -929,7 +939,7 @@ const STRINGS = {
     "label.weekOverview": "Aperçu quotidien",
     "label.weekTotal": "Cette semaine",
     "label.noSports": "Aucun sport actif. Ajoutez-en.",
-    "label.todayScreenTime": "Temps d’écran",
+    "label.todayScreenTime": "Temps gagné",
     "label.widgets": "Widgets",
     "label.widget": "Widget sur l’accueil",
     "label.widgetOverall": "Widget general",
@@ -952,6 +962,7 @@ const STRINGS = {
       "Activez l’accessibilité pour bloquer les apps sociales.",
     "label.settingsHint":
       "Activez l’accessibilité pour que l’app bloque les apps sociales quand le temps est écoulé.",
+    "label.changeLanguage": "Changer de langue",
     "label.prefaceSettings": "Ecran preface",
     "label.prefaceDelay": "Delai (secondes)",
     "label.tapAnywhere": "Touchez n’importe où",
@@ -999,6 +1010,7 @@ const STRINGS = {
     "label.tutorial": "Tutoriel",
     "label.tutorialHint": "Courte visite des zones principales.",
     "label.tutorialStart": "Demarrer le tutoriel",
+    "label.tutorialResumeHint": "Tu peux relancer le tutoriel dans les reglages.",
     "tutorial.step.overview.title": "Ton temps d'ecran",
     "tutorial.step.overview.body":
       "Ici tu vois le temps gagne, le restant et le report.",
@@ -1021,6 +1033,7 @@ const STRINGS = {
       "Tu peux relancer ce tutoriel dans Reglages.",
     "tutorial.cta.next": "Suivant",
     "tutorial.cta.skip": "Passer",
+    "tutorial.cta.exit": "Quitter le tutoriel",
     "tutorial.cta.done": "Termine",
   },
 };
@@ -1573,6 +1586,8 @@ export default function App() {
   );
   const [aiSession, setAiSession] = useState(null);
   const intervalRef = useRef(null);
+  const sessionStartRef = useRef(null);
+  const runningRef = useRef(false);
   const lastPermissionPromptAt = useRef(0);
   const notificationsPromptedRef = useRef(false);
   const lastVoiceTokenRef = useRef(null);
@@ -1581,6 +1596,7 @@ export default function App() {
   const voiceListeningRef = useRef(false);
   const languageRef = useRef(language);
   const selectedSportRef = useRef(null);
+  const lastTutorialTargetRef = useRef(null);
   const tutorialScreenTimeRef = useRef(null);
   const tutorialFirstSportRef = useRef(null);
   const tutorialTrackingAreaRef = useRef(null);
@@ -1605,6 +1621,10 @@ export default function App() {
   useEffect(() => {
     languageRef.current = language;
   }, [language]);
+
+  useEffect(() => {
+    runningRef.current = running;
+  }, [running]);
 
   useEffect(() => {
     notificationsPromptedRef.current = notificationsPrompted;
@@ -1717,6 +1737,13 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       const active = nextState === "active";
       setIsAppActive(active);
       if (active) {
+        if (runningRef.current && sessionStartRef.current) {
+          const elapsed = Math.max(
+            0,
+            Math.floor((Date.now() - sessionStartRef.current) / 1000)
+          );
+          setSessionSeconds(elapsed);
+        }
         refreshUsageState();
         checkAccessibility();
         checkUsageAccess();
@@ -1740,9 +1767,18 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       }
       return;
     }
-    intervalRef.current = setInterval(() => {
-      setSessionSeconds((s) => s + 1);
-    }, 1000);
+    const updateElapsed = () => {
+      if (!sessionStartRef.current) {
+        sessionStartRef.current = Date.now();
+      }
+      const elapsed = Math.max(
+        0,
+        Math.floor((Date.now() - sessionStartRef.current) / 1000)
+      );
+      setSessionSeconds(elapsed);
+    };
+    updateElapsed();
+    intervalRef.current = setInterval(updateElapsed, 1000);
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -1851,7 +1887,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     });
     syncScreenTimeEntry(sport, nextEntry);
     refreshUsageState();
-    maybePromptNotifications();
   };
 
   useEffect(() => {
@@ -2431,6 +2466,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     checkAccessibility();
     checkUsageAccess();
     refreshNotificationPermission();
+    if (isSettingsOpen) {
+      maybePromptNotifications();
+    }
   }, [isSettingsOpen, statsSportId]);
 
   useEffect(() => {
@@ -2445,6 +2483,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     if (!selectedSportId) {
       setRunning(false);
       setSessionSeconds(0);
+      sessionStartRef.current = null;
     }
   }, [selectedSportId]);
 
@@ -2616,11 +2655,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setTutorialStepIndex(0);
   };
 
-  const finishTutorial = async () => {
+  const finishTutorial = async (showHint = false) => {
     setTutorialStepIndex(null);
     setTutorialTarget(null);
     setTutorialSeen(true);
     await AsyncStorage.setItem(STORAGE_KEYS.tutorialSeen, "true");
+    if (showHint) {
+      Alert.alert(t("label.tutorial"), t("label.tutorialResumeHint"));
+    }
   };
 
   const renderMainNav = (active) => (
@@ -2688,27 +2730,38 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   };
 
   const handleStart = () => {
+    sessionStartRef.current = Date.now();
     setSessionSeconds(0);
     setRunning(true);
     maybeAdvanceTutorial("trackAction");
   };
 
   const handleStop = () => {
+    const elapsed =
+      sessionStartRef.current != null
+        ? Math.max(
+            0,
+            Math.floor((Date.now() - sessionStartRef.current) / 1000)
+          )
+        : sessionSeconds;
     setRunning(false);
     if (!selectedSport) {
+      setSessionSeconds(0);
+      sessionStartRef.current = null;
       return;
     }
-    if (sessionSeconds > 0) {
+    if (elapsed > 0) {
       addLogEntry(selectedSport, {
         ts: Date.now(),
-        seconds: sessionSeconds,
+        seconds: elapsed,
       });
       updateDayStat(selectedSport.id, (dayStats) => ({
         ...dayStats,
-        seconds: dayStats.seconds + sessionSeconds,
+        seconds: dayStats.seconds + elapsed,
       }));
     }
     setSessionSeconds(0);
+    sessionStartRef.current = null;
   };
 
   const getSpeechLocale = () => SPEECH_LOCALES[language] || "en-US";
@@ -3046,7 +3099,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
     const nextIndex = (tutorialStepIndex ?? 0) + 1;
     if (nextIndex >= tutorialSteps.length) {
-      finishTutorial();
+      finishTutorial(false);
       return;
     }
     setTutorialStepIndex(nextIndex);
@@ -3061,7 +3114,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
     const nextIndex = (tutorialStepIndex ?? 0) + 1;
     if (nextIndex >= tutorialSteps.length) {
-      finishTutorial();
+      finishTutorial(false);
       return;
     }
     setTutorialStepIndex(nextIndex);
@@ -3072,12 +3125,20 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       setTutorialTarget(null);
       return;
     }
-    const ref = tutorialStep.targetRef;
-    if (!ref?.current?.measureInWindow) {
-      setTutorialTarget(null);
-      return;
-    }
-    const raf = requestAnimationFrame(() => {
+    let raf = null;
+    const updateTarget = () => {
+      if (!tutorialActive || !tutorialStep) {
+        return;
+      }
+      const ref = tutorialStep.targetRef;
+      if (!ref?.current?.measureInWindow) {
+        if (lastTutorialTargetRef.current) {
+          lastTutorialTargetRef.current = null;
+          setTutorialTarget(null);
+        }
+        raf = requestAnimationFrame(updateTarget);
+        return;
+      }
       ref.current.measureInWindow((x, y, widthValue, heightValue) => {
         if (
           !Number.isFinite(x) ||
@@ -3085,18 +3146,39 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           !Number.isFinite(widthValue) ||
           !Number.isFinite(heightValue)
         ) {
-          setTutorialTarget(null);
+          if (lastTutorialTargetRef.current) {
+            lastTutorialTargetRef.current = null;
+            setTutorialTarget(null);
+          }
+          raf = requestAnimationFrame(updateTarget);
           return;
         }
-        setTutorialTarget({
+        const next = {
           x,
           y,
           width: widthValue,
           height: heightValue,
-        });
+        };
+        const prev = lastTutorialTargetRef.current;
+        const delta =
+          !prev ||
+          Math.abs(prev.x - next.x) > 0.5 ||
+          Math.abs(prev.y - next.y) > 0.5 ||
+          Math.abs(prev.width - next.width) > 0.5 ||
+          Math.abs(prev.height - next.height) > 0.5;
+        if (delta) {
+          lastTutorialTargetRef.current = next;
+          setTutorialTarget(next);
+        }
+        raf = requestAnimationFrame(updateTarget);
       });
-    });
-    return () => cancelAnimationFrame(raf);
+    };
+    raf = requestAnimationFrame(updateTarget);
+    return () => {
+      if (raf) {
+        cancelAnimationFrame(raf);
+      }
+    };
   }, [
     tutorialActive,
     tutorialStepIndex,
@@ -3120,8 +3202,13 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       Number.isFinite(target.width) &&
       Number.isFinite(target.height);
     const padding = 14;
+    const sizeScaleByStep = {
+      "tutorial.step.addSport.title": 0.35,
+      "tutorial.step.track.title": 0.25,
+    };
+    const sizeScale = sizeScaleByStep[tutorialStep.titleKey] ?? 1;
     const size = hasTarget
-      ? Math.max(target.width, target.height) + padding * 2
+      ? (Math.max(target.width, target.height) + padding * 2) * sizeScale
       : 0;
     const centerX = hasTarget ? target.x + target.width / 2 : width / 2;
     const centerY = hasTarget ? target.y + target.height / 2 : height / 2;
@@ -3152,13 +3239,16 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             pointerEvents="none"
           />
         ) : null}
+        <Pressable
+          style={styles.tutorialExitButton}
+          onPress={() => finishTutorial(true)}
+        >
+          <Text style={styles.tutorialExitText}>{t("tutorial.cta.exit")}</Text>
+        </Pressable>
         <View style={[styles.tutorialCard, { width: cardWidth, left: cardLeft, top: cardTop }]}>
           <Text style={styles.tutorialTitle}>{t(tutorialStep.titleKey)}</Text>
           <Text style={styles.tutorialBody}>{t(tutorialStep.bodyKey)}</Text>
           <View style={styles.tutorialActions}>
-            <Pressable style={styles.tutorialActionButton} onPress={finishTutorial}>
-              <Text style={styles.tutorialActionText}>{t("tutorial.cta.skip")}</Text>
-            </Pressable>
             {!tutorialStep.requiresAction ? (
               <Pressable
                 style={[styles.tutorialActionButton, styles.tutorialActionPrimary]}
@@ -3345,17 +3435,17 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           });
     const months = getMonthsForCalendar(allKeys);
     if (overallDayKey) {
-      const flatEntries = sports.flatMap((sport) => {
-        const dayLogs = (logs[sport.id] || {})[overallDayKey] || [];
-        return dayLogs.map((entry) => ({
-          ts: entry.ts,
-          seconds:
-            sport.type === "reps"
-              ? (entry.reps || 0) * (sport.screenSecondsPerUnit || 0)
-              : (entry.seconds || 0) * (sport.screenSecondsPerUnit || 0),
-        }));
-      });
-      const groups = groupEntriesByWindow(flatEntries, "time");
+      const workoutGroups = sports
+        .flatMap((sport) => {
+          const dayLogs = (logs[sport.id] || {})[overallDayKey] || [];
+          const groups = groupEntriesByWindow(dayLogs, sport.type);
+          return groups.map((group, index) => ({
+            key: `${sport.id}-${group.startTs}-${index}`,
+            sport,
+            group,
+          }));
+        })
+        .sort((a, b) => a.group.startTs - b.group.startTs);
       return (
         <SafeAreaView style={styles.container}>
           <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -3373,19 +3463,49 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               <Text style={styles.sectionTitle}>{formatDateLabel(overallDayKey)}</Text>
               <Text style={styles.cardMeta}>{t("label.overallStats")}</Text>
             </View>
-            {groups.length === 0 ? (
+            {workoutGroups.length === 0 ? (
               <Text style={styles.helperText}>{t("label.noEntries")}</Text>
             ) : (
-              groups.map((group, index) => {
-                const valueText = formatScreenTime(group.seconds || 0);
+              workoutGroups.map(({ key, sport, group }) => {
+                const valueText =
+                  sport.type === "reps"
+                    ? `${group.reps} ${repsShort}`
+                    : formatSeconds(group.seconds);
                 const range =
                   group.startTs === group.endTs
                     ? formatTime(group.startTs)
                     : `${formatTime(group.startTs)}-${formatTime(group.endTs)}`;
                 return (
-                  <View key={`${group.startTs}-${index}`} style={styles.statRow}>
-                    <Text style={styles.statLabel}>{range}</Text>
-                    <Text style={styles.statValue}>{valueText}</Text>
+                  <View key={key} style={styles.statRow}>
+                    <Text style={styles.statLabel}>
+                      {sport.icon || DEFAULT_ICON} {getSportLabel(sport)} · {range}
+                    </Text>
+                    <View style={styles.statRowActions}>
+                      <Text style={styles.statValue}>{valueText}</Text>
+                      <Pressable
+                        style={styles.statMinusButton}
+                        onPress={() =>
+                          decrementLogGroup(sport, overallDayKey, group)
+                        }
+                      >
+                        <Text style={styles.statMinusText}>-</Text>
+                      </Pressable>
+                      <Pressable
+                        style={styles.statDeleteButton}
+                        onPress={() =>
+                          confirmAction(t("label.confirmDelete"), () =>
+                            deleteLogGroup(
+                              sport.id,
+                              overallDayKey,
+                              group,
+                              sport.type
+                            )
+                          )
+                        }
+                      >
+                        <Text style={styles.statDeleteText}>{t("label.delete")}</Text>
+                      </Pressable>
+                    </View>
                   </View>
                 );
               })
@@ -3476,7 +3596,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           ) : null}
           <View style={styles.infoCard}>
             <Text style={styles.sectionTitle}>{t("label.overallStats")}</Text>
-            <Text style={styles.helperText}>{t("label.overallStatsHint")}</Text>
           </View>
           {statsRange === "month"
             ? months.map((monthDate) => {
@@ -3970,6 +4089,67 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             </View>
           </View>
           {renderMainNav("settings")}
+          <Text style={styles.settingsSectionTitle}>{t("menu.language")}</Text>
+          <View style={styles.infoCard}>
+            <View style={styles.languageWrap}>
+              {showLanguageMenu ? (
+                <View style={styles.languageMenu}>
+                  <Text style={styles.languageTitle}>{t("menu.language")}</Text>
+                  {["de", "en", "es", "fr"].map((code) => {
+                    const isActive = code === language;
+                    return (
+                      <Pressable
+                        key={code}
+                        style={[
+                          styles.languageOption,
+                          isActive && styles.languageOptionActive,
+                        ]}
+                        onPress={() => setAppLanguage(code)}
+                      >
+                        <Text
+                          style={[
+                            styles.languageOptionText,
+                            isActive && styles.languageOptionTextActive,
+                          ]}
+                        >
+                          {t(`language.${code}`)}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              ) : null}
+              <Pressable
+                style={styles.languageButton}
+                onPress={() => setShowLanguageMenu((prev) => !prev)}
+              >
+                <Text style={styles.languageButtonText}>
+                  {t("label.changeLanguage")}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+          <View style={styles.settingsDivider} />
+          <Text style={styles.settingsSectionTitle}>
+            {t("label.widgets")}
+          </Text>
+          <View style={styles.infoCard}>
+            <Text style={styles.helperText}>{t("label.widgetOverall")}</Text>
+            <Pressable
+              style={styles.secondaryButton}
+              onPress={() =>
+                InstaControl?.requestPinWidget?.(
+                  "overall",
+                  t("label.todayScreenTime")
+                )
+              }
+            >
+              <Text style={styles.secondaryButtonText}>
+                {widgetIcon} {t("label.widgetOverall")}
+              </Text>
+            </Pressable>
+          </View>
+          <View style={styles.settingsDivider} />
           <Text style={styles.settingsSectionTitle}>{t("label.apps")}</Text>
           <View style={styles.infoCard}>
             {Platform.OS !== "android" ? (
@@ -4093,36 +4273,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             ) : null}
           </View>
           <View style={styles.settingsDivider} />
-          <Text style={styles.settingsSectionTitle}>{t("menu.language")}</Text>
-          <View style={styles.infoCard}>
-            <View style={styles.languageWrap}>
-              {showLanguageMenu ? (
-                <View style={styles.languageMenu}>
-                  <Text style={styles.languageTitle}>{t("menu.language")}</Text>
-                  {["de", "en", "es", "fr"].map((code) => (
-                    <Pressable
-                      key={code}
-                      style={styles.languageOption}
-                      onPress={() => setAppLanguage(code)}
-                    >
-                      <Text style={styles.languageOptionText}>
-                        {t(`language.${code}`)}
-                      </Text>
-                    </Pressable>
-                  ))}
-                </View>
-              ) : null}
-              <Pressable
-                style={styles.languageButton}
-                onPress={() => setShowLanguageMenu((prev) => !prev)}
-              >
-                <Text style={styles.languageButtonText}>
-                  {t(`language.${language}`)}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-          <View style={styles.settingsDivider} />
           <Text style={styles.settingsSectionTitle}>
             {t("label.permissions")}
           </Text>
@@ -4162,26 +4312,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           </View>
           <View style={styles.settingsDivider} />
           <Text style={styles.settingsSectionTitle}>
-            {t("label.widgets")}
-          </Text>
-          <View style={styles.infoCard}>
-            <Text style={styles.helperText}>{t("label.widgetOverall")}</Text>
-            <Pressable
-              style={styles.secondaryButton}
-              onPress={() =>
-                InstaControl?.requestPinWidget?.(
-                  "overall",
-                  t("label.todayScreenTime")
-                )
-              }
-            >
-              <Text style={styles.secondaryButtonText}>
-                {widgetIcon} {t("label.widgetOverall")}
-              </Text>
-            </Pressable>
-          </View>
-          <View style={styles.settingsDivider} />
-          <Text style={styles.settingsSectionTitle}>
             {t("label.tutorial")}
           </Text>
           <View style={styles.infoCard} ref={tutorialSettingsCardRef}>
@@ -4199,7 +4329,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           <View style={styles.infoCard}>
             <Text style={styles.helperText}>{t("label.resetDataHint")}</Text>
             <Pressable
-              style={styles.deleteAllButton}
+              style={styles.resetDataButton}
               onPress={() =>
                 confirmAction(t("label.confirmResetData"), resetAllData)
               }
@@ -4371,8 +4501,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                       style={styles.iconAction}
                       onPress={() => setStatsSportId(sport.id)}
                     >
-                      <Text style={styles.iconActionText}>�
-</Text>
+                      <Text style={styles.iconActionText}>📊</Text>
                     </Pressable>
                     <Pressable
                       style={styles.iconAction}
@@ -4484,6 +4613,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         <View style={styles.addCard}>
           <Pressable
             style={[styles.addSportButton, styles.fullWidthButton]}
+            ref={tutorialAddSportRef}
             onPress={() => openSportModal()}
           >
             <Text style={styles.addSportButtonText}>
@@ -4524,8 +4654,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                           style={styles.iconAction}
                           onPress={() => setStatsSportId(sport.id)}
                         >
-                          <Text style={styles.iconActionText}>�
-</Text>
+                          <Text style={styles.iconActionText}>📊</Text>
                         </Pressable>
                         <Pressable
                           style={styles.iconAction}
@@ -4706,7 +4835,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 )
               }
             >
-              <Text style={styles.infoIcon}>?</Text>
+              <Text style={styles.infoIcon}>⏱</Text>
               <Text style={styles.infoValue}>
                 {formatScreenTime(rollingEarnedSeconds)}
               </Text>
@@ -4729,7 +4858,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 )
               }
             >
-              <Text style={styles.infoIcon}>?</Text>
+              <Text style={styles.infoIcon}>⏳</Text>
               <Text style={styles.infoValue}>
                 {formatScreenTime(usageState.remainingSeconds || 0)}
               </Text>
@@ -4752,7 +4881,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 )
               }
             >
-              <Text style={styles.infoIcon}>?</Text>
+              <Text style={styles.infoIcon}>♻️</Text>
               <Text style={styles.infoValue}>
                 {formatScreenTime(usageState.carryoverSeconds || 0)}
               </Text>
@@ -4779,13 +4908,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           ) : null}
         </Pressable>
       </View>
-<Pressable
-        style={styles.fabButton}
-        ref={tutorialAddSportRef}
-        onPress={() => openSportModal()}
-      >
-        <Text style={styles.fabButtonText}>+</Text>
-      </Pressable>
       {isPrefaceSettingsOpen ? (
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
@@ -4952,7 +5074,7 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 16,
-    paddingTop: 48,
+    paddingTop: 62,
     paddingBottom: 10,
     flexDirection: "row",
     alignItems: "center",
@@ -5363,6 +5485,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     zIndex: 20,
   },
+  resetDataButton: {
+    backgroundColor: COLORS.danger,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 10,
+  },
   deleteAllText: {
     color: COLORS.white,
     fontWeight: "700",
@@ -5602,19 +5732,19 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   addSportButton: {
-    backgroundColor: "rgba(34, 197, 94, 0.18)",
+    backgroundColor: "rgba(245, 158, 11, 0.18)",
     borderRadius: 18,
     paddingVertical: 16,
     paddingHorizontal: 14,
     borderWidth: 1,
-    borderColor: COLORS.olive,
+    borderColor: COLORS.accent,
     shadowColor: "#000",
     shadowOpacity: 0.18,
     shadowRadius: 10,
     elevation: 5,
   },
   addSportButtonText: {
-    color: COLORS.olive,
+    color: COLORS.accent,
     fontWeight: "800",
     fontSize: 16,
     textAlign: "center",
@@ -5822,6 +5952,7 @@ const styles = StyleSheet.create({
   },
   infoCardMain: {
     position: "relative",
+    backgroundColor: COLORS.cardSolid,
   },
   fixedTimers: {
     position: "absolute",
@@ -6045,9 +6176,17 @@ const styles = StyleSheet.create({
   languageOption: {
     paddingVertical: 8,
   },
+  languageOptionActive: {
+    backgroundColor: "rgba(34, 197, 94, 0.18)",
+    borderRadius: 8,
+    paddingHorizontal: 8,
+  },
   languageOptionText: {
     color: COLORS.text,
     fontWeight: "600",
+  },
+  languageOptionTextActive: {
+    color: COLORS.olive,
   },
   aiScreen: {
     flex: 1,
@@ -6117,6 +6256,24 @@ const styles = StyleSheet.create({
   tutorialBackdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(2, 6, 23, 0.72)",
+  },
+  tutorialExitButton: {
+    position: "absolute",
+    left: 24,
+    right: 24,
+    bottom: 24,
+    backgroundColor: COLORS.cardDark,
+    borderRadius: 12,
+    paddingVertical: 10,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(148, 163, 184, 0.35)",
+  },
+  tutorialExitText: {
+    color: COLORS.muted,
+    fontWeight: "700",
+    fontSize: 12,
+    letterSpacing: 0.3,
   },
   tutorialHighlight: {
     position: "absolute",
