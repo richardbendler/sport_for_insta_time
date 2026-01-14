@@ -3126,8 +3126,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       return;
     }
     let raf = null;
+    let cancelled = false;
     const updateTarget = () => {
-      if (!tutorialActive || !tutorialStep) {
+      if (cancelled || !tutorialActive || !tutorialStep) {
         return;
       }
       const ref = tutorialStep.targetRef;
@@ -3140,6 +3141,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         return;
       }
       ref.current.measureInWindow((x, y, widthValue, heightValue) => {
+        if (cancelled) {
+          return;
+        }
         if (
           !Number.isFinite(x) ||
           !Number.isFinite(y) ||
@@ -3175,6 +3179,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     };
     raf = requestAnimationFrame(updateTarget);
     return () => {
+      cancelled = true;
       if (raf) {
         cancelAnimationFrame(raf);
       }
@@ -3189,6 +3194,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     selectedSportId,
     activeSports.length,
   ]);
+  useEffect(() => {
+    lastTutorialTargetRef.current = null;
+    setTutorialTarget(null);
+  }, [tutorialStepIndex]);
 
   const renderTutorialOverlay = () => {
     if (!tutorialActive || !tutorialStep) {
@@ -3204,14 +3213,25 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     const padding = 14;
     const sizeScaleByStep = {
       "tutorial.step.addSport.title": 0.35,
-      "tutorial.step.track.title": 0.25,
+      "tutorial.step.track.title": 0.15,
     };
     const sizeScale = sizeScaleByStep[tutorialStep.titleKey] ?? 1;
+    const minSize = tutorialStep.titleKey === "tutorial.step.track.title" ? 18 : 24;
     const size = hasTarget
-      ? (Math.max(target.width, target.height) + padding * 2) * sizeScale
+      ? Math.max(
+          minSize,
+          (Math.max(target.width, target.height) + padding * 2) * sizeScale
+        )
       : 0;
+    const offsetByStep = {
+      "tutorial.step.back.title": 24,
+      "tutorial.step.openSettings.title": 24,
+    };
+    const offsetY = offsetByStep[tutorialStep.titleKey] ?? 0;
     const centerX = hasTarget ? target.x + target.width / 2 : width / 2;
-    const centerY = hasTarget ? target.y + target.height / 2 : height / 2;
+    const centerY = hasTarget
+      ? target.y + target.height / 2 + offsetY
+      : height / 2;
     const cardWidth = Math.min(300, width - 32);
     const preferBelow = centerY < height * 0.6;
     const cardTop = preferBelow
