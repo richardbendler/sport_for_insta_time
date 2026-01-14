@@ -60,17 +60,11 @@ class InstaBlockerService : AccessibilityService() {
 
   override fun onAccessibilityEvent(event: AccessibilityEvent?) {
     val pkg = event?.packageName?.toString() ?: return
-    val className = event.className?.toString()
     if (event.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
       return
     }
     if (ignoredPackages.contains(pkg) || !isLaunchablePackage(pkg)) {
-      val classLower = className?.lowercase() ?: ""
-      if (
-        isHomePackage(pkg) ||
-        classLower.contains("recents") ||
-        classLower.contains("overview")
-      ) {
+      if (isHomePackage(pkg)) {
         clearForegroundApp(true)
       }
       return
