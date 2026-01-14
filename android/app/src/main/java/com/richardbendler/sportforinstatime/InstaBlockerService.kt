@@ -73,7 +73,10 @@ class InstaBlockerService : AccessibilityService() {
     if (isInputMethodPackage(pkg)) {
       return
     }
-    if (ignoredPackages.contains(pkg) || !isLaunchablePackage(pkg)) {
+    if (ignoredPackages.contains(pkg)) {
+      return
+    }
+    if (!isLaunchablePackage(pkg)) {
       if (isHomePackage(pkg)) {
         clearForegroundApp(true)
       }
