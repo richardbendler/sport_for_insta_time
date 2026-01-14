@@ -34,6 +34,7 @@ const STORAGE_KEYS = {
   carryoverDay: "@carryover_day_v1",
   usageSnapshot: "@usage_snapshot_v1",
   logs: "@logs_v1",
+  tutorialSeen: "@tutorial_seen_v1",
 };
 
 
@@ -439,6 +440,33 @@ const STRINGS = {
     "sport.pullups": "Klimmzüge",
     "sport.situps": "Situps",
     "sport.jogging": "Joggen",
+    "label.tutorial": "Tutorial",
+    "label.tutorialHint": "Kurze Einf\u00fchrung in die wichtigsten Bereiche.",
+    "label.tutorialStart": "Tutorial starten",
+    "tutorial.step.overview.title": "Deine Bildschirmzeit",
+    "tutorial.step.overview.body":
+      "Hier siehst du verdiente Zeit, Restzeit und den \u00dcbertrag.",
+    "tutorial.step.openSport.title": "Sportart \u00f6ffnen",
+    "tutorial.step.openSport.body":
+      "Tippe eine Sportkarte an, um sie zu tracken.",
+    "tutorial.step.addSport.title": "Neue Sportart",
+    "tutorial.step.addSport.body": "Tippe auf +, um eine Sportart hinzuzuf\u00fcgen.",
+    "tutorial.step.track.title": "Training tracken",
+    "tutorial.step.track.body.reps":
+      "Tippe einmal in die gro\u00dfe Fl\u00e4che, um eine Wiederholung zu z\u00e4hlen.",
+    "tutorial.step.track.body.time": "Tippe auf Start, um den Timer zu starten.",
+    "tutorial.step.back.title": "Zur\u00fcck zur \u00dcbersicht",
+    "tutorial.step.back.body":
+      "Mit Zur\u00fcck gelangst du wieder zur Sport-\u00dcbersicht.",
+    "tutorial.step.openSettings.title": "Einstellungen \u00f6ffnen",
+    "tutorial.step.openSettings.body":
+      "Tippe auf Einstellungen f\u00fcr Apps, Berechtigungen und mehr.",
+    "tutorial.step.finish.title": "Fertig",
+    "tutorial.step.finish.body":
+      "Das Tutorial kannst du jederzeit in den Einstellungen erneut starten.",
+    "tutorial.cta.next": "Weiter",
+    "tutorial.cta.skip": "\u00dcberspringen",
+    "tutorial.cta.done": "Fertig",
   },
   en: {
     "app.title": "Sport for Screen Time",
@@ -598,6 +626,30 @@ const STRINGS = {
     "sport.pullups": "Pull-ups",
     "sport.situps": "Situps",
     "sport.jogging": "Jogging",
+    "label.tutorial": "Tutorial",
+    "label.tutorialHint": "Short walkthrough of the main areas.",
+    "label.tutorialStart": "Start tutorial",
+    "tutorial.step.overview.title": "Your screen time",
+    "tutorial.step.overview.body":
+      "Here you see earned time, remaining time, and carryover.",
+    "tutorial.step.openSport.title": "Open a sport",
+    "tutorial.step.openSport.body": "Tap any sport card to track it.",
+    "tutorial.step.addSport.title": "Add a sport",
+    "tutorial.step.addSport.body": "Tap + to add a new sport.",
+    "tutorial.step.track.title": "Track a session",
+    "tutorial.step.track.body.reps": "Tap the big area once to log a rep.",
+    "tutorial.step.track.body.time": "Tap Start to begin a timer.",
+    "tutorial.step.back.title": "Back to overview",
+    "tutorial.step.back.body": "Use Back to return to your sports list.",
+    "tutorial.step.openSettings.title": "Open settings",
+    "tutorial.step.openSettings.body":
+      "Tap Settings to manage apps and permissions.",
+    "tutorial.step.finish.title": "All set",
+    "tutorial.step.finish.body":
+      "You can restart this tutorial anytime in Settings.",
+    "tutorial.cta.next": "Next",
+    "tutorial.cta.skip": "Skip",
+    "tutorial.cta.done": "Done",
   },
   es: {
     "app.title": "Deporte por tiempo de pantalla",
@@ -761,6 +813,31 @@ const STRINGS = {
     "sport.pullups": "Dominadas",
     "sport.situps": "Abdominales",
     "sport.jogging": "Trote",
+    "label.tutorial": "Tutorial",
+    "label.tutorialHint": "Guia corta de las secciones principales.",
+    "label.tutorialStart": "Iniciar tutorial",
+    "tutorial.step.overview.title": "Tu tiempo de pantalla",
+    "tutorial.step.overview.body":
+      "Aqui ves el tiempo ganado, el restante y el arrastre.",
+    "tutorial.step.openSport.title": "Abrir un deporte",
+    "tutorial.step.openSport.body":
+      "Toca una tarjeta de deporte para registrarlo.",
+    "tutorial.step.addSport.title": "Anadir un deporte",
+    "tutorial.step.addSport.body": "Toca + para anadir un deporte.",
+    "tutorial.step.track.title": "Registrar sesion",
+    "tutorial.step.track.body.reps":
+      "Toca una vez el area grande para sumar una repeticion.",
+    "tutorial.step.track.body.time": "Toca Iniciar para empezar el temporizador.",
+    "tutorial.step.back.title": "Volver al inicio",
+    "tutorial.step.back.body": "Usa Atras para volver a la lista.",
+    "tutorial.step.openSettings.title": "Abrir ajustes",
+    "tutorial.step.openSettings.body":
+      "Toca Ajustes para apps, permisos y mas.",
+    "tutorial.step.finish.title": "Listo",
+    "tutorial.step.finish.body": "Puedes reiniciar este tutorial en Ajustes.",
+    "tutorial.cta.next": "Siguiente",
+    "tutorial.cta.skip": "Saltar",
+    "tutorial.cta.done": "Listo",
   },
   fr: {
     "app.title": "Sport pour le temps d’écran",
@@ -919,6 +996,32 @@ const STRINGS = {
     "sport.pullups": "Tractions",
     "sport.situps": "Abdos",
     "sport.jogging": "Jogging",
+    "label.tutorial": "Tutoriel",
+    "label.tutorialHint": "Courte visite des zones principales.",
+    "label.tutorialStart": "Demarrer le tutoriel",
+    "tutorial.step.overview.title": "Ton temps d'ecran",
+    "tutorial.step.overview.body":
+      "Ici tu vois le temps gagne, le restant et le report.",
+    "tutorial.step.openSport.title": "Ouvrir un sport",
+    "tutorial.step.openSport.body":
+      "Touche une carte pour commencer le suivi.",
+    "tutorial.step.addSport.title": "Ajouter un sport",
+    "tutorial.step.addSport.body": "Touche + pour ajouter un sport.",
+    "tutorial.step.track.title": "Suivre une session",
+    "tutorial.step.track.body.reps":
+      "Touche une fois la grande zone pour compter une repetition.",
+    "tutorial.step.track.body.time": "Touche Demarrer pour lancer le minuteur.",
+    "tutorial.step.back.title": "Retour a la liste",
+    "tutorial.step.back.body": "Utilise Retour pour revenir aux sports.",
+    "tutorial.step.openSettings.title": "Ouvrir les reglages",
+    "tutorial.step.openSettings.body":
+      "Touche Reglages pour apps, permissions et plus.",
+    "tutorial.step.finish.title": "Termine",
+    "tutorial.step.finish.body":
+      "Tu peux relancer ce tutoriel dans Reglages.",
+    "tutorial.cta.next": "Suivant",
+    "tutorial.cta.skip": "Passer",
+    "tutorial.cta.done": "Termine",
   },
 };
 
@@ -1403,7 +1506,7 @@ const AiCameraScreen = ({ onClose, repsValue, t }) => (
 );
 
 export default function App() {
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const [sports, setSports] = useState([]);
   const [stats, setStats] = useState({});
   const [logs, setLogs] = useState({});
@@ -1455,6 +1558,10 @@ export default function App() {
   const [infoHint, setInfoHint] = useState(null);
   const [infoAnchors, setInfoAnchors] = useState({});
   const [infoCardWidth, setInfoCardWidth] = useState(0);
+  const [tutorialStepIndex, setTutorialStepIndex] = useState(null);
+  const [tutorialTarget, setTutorialTarget] = useState(null);
+  const [tutorialSeen, setTutorialSeen] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   const [sessionSeconds, setSessionSeconds] = useState(0);
   const [running, setRunning] = useState(false);
@@ -1474,6 +1581,13 @@ export default function App() {
   const voiceListeningRef = useRef(false);
   const languageRef = useRef(language);
   const selectedSportRef = useRef(null);
+  const tutorialScreenTimeRef = useRef(null);
+  const tutorialFirstSportRef = useRef(null);
+  const tutorialTrackingAreaRef = useRef(null);
+  const tutorialBackButtonRef = useRef(null);
+  const tutorialSettingsNavRef = useRef(null);
+  const tutorialAddSportRef = useRef(null);
+  const tutorialSettingsCardRef = useRef(null);
 
   const t = (key) => {
     const dict = STRINGS[language] || STRINGS.de;
@@ -1544,6 +1658,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       const usagePermissionsRaw = await AsyncStorage.getItem(
         STORAGE_KEYS.usagePermissions
       );
+      const tutorialSeenRaw = await AsyncStorage.getItem(
+        STORAGE_KEYS.tutorialSeen
+      );
       const parsedSports = sportsRaw ? JSON.parse(sportsRaw) : [];
       const cleanedSports = parsedSports.length
         ? pruneNonPushupPresets(parsedSports)
@@ -1589,6 +1706,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       setUsagePermissionsPrompted(usagePermissionsRaw === "true");
       setNotificationsPrompted(!!notificationsPermissionsRaw);
       setNotificationsGranted(false);
+      setTutorialSeen(tutorialSeenRaw === "true");
+      setHasLoaded(true);
     };
     load();
   }, []);
@@ -2059,6 +2178,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       STORAGE_KEYS.carryoverDay,
       STORAGE_KEYS.usageSnapshot,
       STORAGE_KEYS.logs,
+      STORAGE_KEYS.tutorialSeen,
     ]);
     await saveSports(nextSports);
     await saveStats({});
@@ -2080,6 +2200,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setInstalledApps([]);
     setAppSearch("");
     setAppUsageMap({});
+    setTutorialSeen(false);
+    setTutorialStepIndex(null);
+    setTutorialTarget(null);
     setUsageState({
       remainingSeconds: 0,
       usedSeconds: 0,
@@ -2115,6 +2238,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       setNewType("reps");
       setNewIcon("");
       setNewRateMinutes(String(getDefaultRateMinutes("reps")));
+      maybeAdvanceTutorial("openAddSport");
     }
     setShowIconInput(false);
     setIsSportModalOpen(true);
@@ -2473,6 +2597,30 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setIsSettingsOpen(true);
     loadInstalledApps();
     refreshUsageState();
+    maybeAdvanceTutorial("openSettings");
+  };
+
+  const handleSelectSport = (sportId) => {
+    setSelectedSportId(sportId);
+    maybeAdvanceTutorial("openSport");
+  };
+
+  const handleBackFromSport = () => {
+    setSelectedSportId(null);
+    maybeAdvanceTutorial("backHome");
+  };
+
+  const startTutorial = () => {
+    openHome();
+    setTutorialTarget(null);
+    setTutorialStepIndex(0);
+  };
+
+  const finishTutorial = async () => {
+    setTutorialStepIndex(null);
+    setTutorialTarget(null);
+    setTutorialSeen(true);
+    await AsyncStorage.setItem(STORAGE_KEYS.tutorialSeen, "true");
   };
 
   const renderMainNav = (active) => (
@@ -2514,6 +2662,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           styles.mainNavButton,
           active === "settings" && styles.mainNavButtonActive,
         ]}
+        ref={tutorialSettingsNavRef}
         onPress={openSettings}
       >
         <Text
@@ -2541,6 +2690,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   const handleStart = () => {
     setSessionSeconds(0);
     setRunning(true);
+    maybeAdvanceTutorial("trackAction");
   };
 
   const handleStop = () => {
@@ -2576,6 +2726,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       ...dayStats,
       reps: dayStats.reps + 1,
     }));
+    maybeAdvanceTutorial("trackAction");
   };
 
   const startAiSession = (sport) => {
@@ -2757,6 +2908,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   const activeSports = sports.filter((sport) => !sport.hidden);
   const hiddenSports = sports.filter((sport) => sport.hidden);
   const selectedSport = sports.find((sport) => sport.id === selectedSportId);
+  const tutorialSportId = activeSports[0]?.id;
   const statsSport = sports.find((sport) => sport.id === statsSportId);
   const aiSport = aiSession
     ? sports.find((sport) => sport.id === aiSession.sportId)
@@ -2765,6 +2917,75 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     () => rollingScreenSecondsTotal(logs, sports),
     [logs, sports]
   );
+  const trackBodyKey =
+    selectedSport && selectedSport.type === "time"
+      ? "tutorial.step.track.body.time"
+      : "tutorial.step.track.body.reps";
+  const tutorialSteps = useMemo(() => {
+    const steps = [
+      {
+        id: "overview",
+        titleKey: "tutorial.step.overview.title",
+        bodyKey: "tutorial.step.overview.body",
+        targetRef: tutorialScreenTimeRef,
+      },
+    ];
+    if (activeSports.length > 0) {
+      steps.push({
+        id: "openSport",
+        titleKey: "tutorial.step.openSport.title",
+        bodyKey: "tutorial.step.openSport.body",
+        targetRef: tutorialFirstSportRef,
+        actionId: "openSport",
+        requiresAction: true,
+      });
+      steps.push({
+        id: "track",
+        titleKey: "tutorial.step.track.title",
+        bodyKey: trackBodyKey,
+        targetRef: tutorialTrackingAreaRef,
+        actionId: "trackAction",
+        requiresAction: true,
+      });
+      steps.push({
+        id: "back",
+        titleKey: "tutorial.step.back.title",
+        bodyKey: "tutorial.step.back.body",
+        targetRef: tutorialBackButtonRef,
+        actionId: "backHome",
+        requiresAction: true,
+      });
+    } else {
+      steps.push({
+        id: "addSport",
+        titleKey: "tutorial.step.addSport.title",
+        bodyKey: "tutorial.step.addSport.body",
+        targetRef: tutorialAddSportRef,
+        actionId: "openAddSport",
+        requiresAction: true,
+      });
+    }
+    steps.push({
+      id: "openSettings",
+      titleKey: "tutorial.step.openSettings.title",
+      bodyKey: "tutorial.step.openSettings.body",
+      targetRef: tutorialSettingsNavRef,
+      actionId: "openSettings",
+      requiresAction: true,
+    });
+    steps.push({
+      id: "finish",
+      titleKey: "tutorial.step.finish.title",
+      bodyKey: "tutorial.step.finish.body",
+      targetRef: tutorialSettingsCardRef,
+    });
+    return steps;
+  }, [activeSports.length, trackBodyKey]);
+  const tutorialActive = tutorialStepIndex !== null;
+  const tutorialStep = tutorialActive ? tutorialSteps[tutorialStepIndex] : null;
+  const isTutorialLastStep =
+    tutorialStepIndex !== null &&
+    tutorialStepIndex === tutorialSteps.length - 1;
   const recentActivityGroups = useMemo(() => {
     const groups = [];
     sports.forEach((sport) => {
@@ -2819,6 +3040,141 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     });
   };
 
+  const advanceTutorial = () => {
+    if (!tutorialActive) {
+      return;
+    }
+    const nextIndex = (tutorialStepIndex ?? 0) + 1;
+    if (nextIndex >= tutorialSteps.length) {
+      finishTutorial();
+      return;
+    }
+    setTutorialStepIndex(nextIndex);
+  };
+
+  const maybeAdvanceTutorial = (actionId) => {
+    if (!tutorialActive) {
+      return;
+    }
+    if (tutorialStep?.actionId !== actionId) {
+      return;
+    }
+    const nextIndex = (tutorialStepIndex ?? 0) + 1;
+    if (nextIndex >= tutorialSteps.length) {
+      finishTutorial();
+      return;
+    }
+    setTutorialStepIndex(nextIndex);
+  };
+
+  useEffect(() => {
+    if (!tutorialActive || !tutorialStep) {
+      setTutorialTarget(null);
+      return;
+    }
+    const ref = tutorialStep.targetRef;
+    if (!ref?.current?.measureInWindow) {
+      setTutorialTarget(null);
+      return;
+    }
+    const raf = requestAnimationFrame(() => {
+      ref.current.measureInWindow((x, y, widthValue, heightValue) => {
+        if (
+          !Number.isFinite(x) ||
+          !Number.isFinite(y) ||
+          !Number.isFinite(widthValue) ||
+          !Number.isFinite(heightValue)
+        ) {
+          setTutorialTarget(null);
+          return;
+        }
+        setTutorialTarget({
+          x,
+          y,
+          width: widthValue,
+          height: heightValue,
+        });
+      });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [
+    tutorialActive,
+    tutorialStepIndex,
+    tutorialStep,
+    width,
+    height,
+    isSettingsOpen,
+    selectedSportId,
+    activeSports.length,
+  ]);
+
+  const renderTutorialOverlay = () => {
+    if (!tutorialActive || !tutorialStep) {
+      return null;
+    }
+    const target = tutorialTarget;
+    const hasTarget =
+      target &&
+      Number.isFinite(target.x) &&
+      Number.isFinite(target.y) &&
+      Number.isFinite(target.width) &&
+      Number.isFinite(target.height);
+    const padding = 14;
+    const size = hasTarget
+      ? Math.max(target.width, target.height) + padding * 2
+      : 0;
+    const centerX = hasTarget ? target.x + target.width / 2 : width / 2;
+    const centerY = hasTarget ? target.y + target.height / 2 : height / 2;
+    const cardWidth = Math.min(300, width - 32);
+    const preferBelow = centerY < height * 0.6;
+    const cardTop = preferBelow
+      ? centerY + (hasTarget ? size / 2 + 12 : 0)
+      : Math.max(16, centerY - 160);
+    const cardLeft = Math.min(
+      width - cardWidth - 16,
+      Math.max(16, centerX - cardWidth / 2)
+    );
+    return (
+      <View style={styles.tutorialOverlay} pointerEvents="box-none">
+        <View style={styles.tutorialBackdrop} pointerEvents="none" />
+        {hasTarget ? (
+          <View
+            style={[
+              styles.tutorialHighlight,
+              {
+                width: size,
+                height: size,
+                borderRadius: size / 2,
+                left: centerX - size / 2,
+                top: centerY - size / 2,
+              },
+            ]}
+            pointerEvents="none"
+          />
+        ) : null}
+        <View style={[styles.tutorialCard, { width: cardWidth, left: cardLeft, top: cardTop }]}>
+          <Text style={styles.tutorialTitle}>{t(tutorialStep.titleKey)}</Text>
+          <Text style={styles.tutorialBody}>{t(tutorialStep.bodyKey)}</Text>
+          <View style={styles.tutorialActions}>
+            <Pressable style={styles.tutorialActionButton} onPress={finishTutorial}>
+              <Text style={styles.tutorialActionText}>{t("tutorial.cta.skip")}</Text>
+            </Pressable>
+            {!tutorialStep.requiresAction ? (
+              <Pressable
+                style={[styles.tutorialActionButton, styles.tutorialActionPrimary]}
+                onPress={isTutorialLastStep ? finishTutorial : advanceTutorial}
+              >
+                <Text style={styles.tutorialActionPrimaryText}>
+                  {isTutorialLastStep ? t("tutorial.cta.done") : t("tutorial.cta.next")}
+                </Text>
+              </Pressable>
+            ) : null}
+          </View>
+        </View>
+      </View>
+    );
+  };
+
   const todayStats = useMemo(() => {
     if (!selectedSport) {
       return { reps: 0, seconds: 0 };
@@ -2851,6 +3207,24 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   const showPermissionPrompt =
     Platform.OS === "android" && (needsAccessibility || !usageAccessGranted);
   const missingPermissions = needsAccessibility || !usageAccessGranted;
+  const completedGettingStarted =
+    !missingPermissions &&
+    (permissionsPrompted ||
+      usagePermissionsPrompted ||
+      accessibilityDisclosureAccepted);
+
+  useEffect(() => {
+    if (!hasLoaded) {
+      return;
+    }
+    if (tutorialSeen || tutorialActive) {
+      return;
+    }
+    if (!completedGettingStarted) {
+      return;
+    }
+    startTutorial();
+  }, [hasLoaded, tutorialSeen, tutorialActive, completedGettingStarted]);
   const appSearchTerm = appSearch.trim().toLowerCase();
   const filteredApps = installedApps.filter((app) => {
     if (!appSearchTerm) {
@@ -3454,7 +3828,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           <View style={styles.headerLeft}>
             <Pressable
               style={styles.backButton}
-              onPress={() => setSelectedSportId(null)}
+              ref={tutorialBackButtonRef}
+              onPress={handleBackFromSport}
             >
               <Text style={styles.backText}>{t("label.back")}</Text>
             </Pressable>
@@ -3491,6 +3866,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         {isReps ? (
           <Pressable
             style={styles.trackingArea}
+            ref={tutorialTrackingAreaRef}
             onPress={incrementReps}
           >
             <Text style={styles.counterValue}>{todayStats.reps}</Text>
@@ -3552,7 +3928,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             ) : null}
           </Pressable>
         ) : (
-          <View style={styles.trackingArea}>
+          <View style={styles.trackingArea} ref={tutorialTrackingAreaRef}>
             <Text style={styles.counterValue}>
               {formatSeconds(todayStats.seconds + sessionSeconds)}
             </Text>
@@ -3575,6 +3951,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             ) : null}
           </View>
         )}
+        {tutorialActive ? renderTutorialOverlay() : null}
       </SafeAreaView>
     );
   }
@@ -3805,6 +4182,18 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           </View>
           <View style={styles.settingsDivider} />
           <Text style={styles.settingsSectionTitle}>
+            {t("label.tutorial")}
+          </Text>
+          <View style={styles.infoCard} ref={tutorialSettingsCardRef}>
+            <Text style={styles.helperText}>{t("label.tutorialHint")}</Text>
+            <Pressable style={styles.secondaryButton} onPress={startTutorial}>
+              <Text style={styles.secondaryButtonText}>
+                {t("label.tutorialStart")}
+              </Text>
+            </Pressable>
+          </View>
+          <View style={styles.settingsDivider} />
+          <Text style={styles.settingsSectionTitle}>
             {t("label.sectionData")}
           </Text>
           <View style={styles.infoCard}>
@@ -3832,6 +4221,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             </Text>
           </View>
         </ScrollView>
+        {tutorialActive ? renderTutorialOverlay() : null}
       </SafeAreaView>
     );
   }
@@ -3970,7 +4360,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 ? `${t("label.remaining")}: ${formatScreenTime(remainingSeconds)}`
                 : null;
             return (
-              <View key={sport.id} style={[styles.sportCard, { width: cardWidth }]}>
+              <View
+                key={sport.id}
+                style={[styles.sportCard, { width: cardWidth }]}
+                ref={sport.id === tutorialSportId ? tutorialFirstSportRef : undefined}
+              >
                 <View style={styles.cardActionsOverlay}>
                   <View style={styles.cardActionsLeft}>
                     <Pressable
@@ -4014,7 +4408,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 </View>
                 <Pressable
                   style={styles.sportBodyPressable}
-                  onPress={() => setSelectedSportId(sport.id)}
+                  onPress={() => handleSelectSport(sport.id)}
                 >
                   <View style={styles.sportInfo}>
                     <View style={styles.sportTitleRow}>
@@ -4170,7 +4564,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                     </View>
                     <Pressable
                       style={styles.sportBodyPressable}
-                      onPress={() => setSelectedSportId(sport.id)}
+                      onPress={() => handleSelectSport(sport.id)}
                     >
                       <View style={styles.sportInfo}>
                         <View style={styles.sportTitleRow}>
@@ -4289,6 +4683,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       <View style={styles.fixedTimers}>
         <Pressable
           style={[styles.infoCard, styles.infoCardMain]}
+          ref={tutorialScreenTimeRef}
           onLayout={(event) => setInfoCardWidth(event.nativeEvent.layout.width)}
           onPress={() => setInfoHint(null)}
         >
@@ -4386,6 +4781,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       </View>
 <Pressable
         style={styles.fabButton}
+        ref={tutorialAddSportRef}
         onPress={() => openSportModal()}
       >
         <Text style={styles.fabButtonText}>+</Text>
@@ -4519,6 +4915,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           </View>
         </View>
       ) : null}
+      {tutorialActive ? renderTutorialOverlay() : null}
     </SafeAreaView>
   );
 }
@@ -5712,5 +6109,63 @@ const styles = StyleSheet.create({
   aiPermissionText: {
     color: COLORS.muted,
     textAlign: "center",
+  },
+  tutorialOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 40,
+  },
+  tutorialBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(2, 6, 23, 0.72)",
+  },
+  tutorialHighlight: {
+    position: "absolute",
+    borderWidth: 2,
+    borderColor: COLORS.accent,
+    backgroundColor: "rgba(245, 158, 11, 0.12)",
+  },
+  tutorialCard: {
+    position: "absolute",
+    backgroundColor: COLORS.cardDark,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "rgba(148, 163, 184, 0.35)",
+  },
+  tutorialTitle: {
+    color: COLORS.text,
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 6,
+  },
+  tutorialBody: {
+    color: COLORS.muted,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  tutorialActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 8,
+    marginTop: 12,
+  },
+  tutorialActionButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: COLORS.cardAlt,
+  },
+  tutorialActionPrimary: {
+    backgroundColor: COLORS.accent,
+  },
+  tutorialActionText: {
+    color: COLORS.text,
+    fontWeight: "600",
+    fontSize: 12,
+  },
+  tutorialActionPrimaryText: {
+    color: COLORS.ink,
+    fontWeight: "700",
+    fontSize: 12,
   },
 });
