@@ -40,6 +40,7 @@ const STORAGE_KEYS = {
 const DEFAULT_SETTINGS = {
   controlledApps: [],
   language: "en",
+  prefaceDelaySeconds: 10,
 };
 
 const SPEECH_LOCALES = {
@@ -285,6 +286,7 @@ const STRINGS = {
     "menu.settings": "Screen Controller",
     "menu.stats": "Statistik",
     "menu.language": "Sprache",
+    "menu.preface": "Vorschaltseite",
     "label.today": "Heute",
     "label.week": "Woche",
     "label.weekScreenTime": "Bildschirmzeit Woche",
@@ -374,6 +376,8 @@ const STRINGS = {
       "Aktiviere die Zugriffshilfe, damit Social Apps gesperrt werden können.",
     "label.settingsHint":
       "Aktiviere die Zugriffshilfe, damit die App Social Apps blockieren kann, wenn die Zeit aufgebraucht ist.",
+    "label.prefaceSettings": "Vorschaltseite",
+    "label.prefaceDelay": "Wartezeit (Sekunden)",
     "label.tapAnywhere": "Tippe irgendwo",
     "label.voiceOn": "Mikrofon an",
     "label.voiceOff": "Mikrofon aus",
@@ -424,6 +428,7 @@ const STRINGS = {
     "menu.settings": "Screen Controller",
     "menu.stats": "Stats",
     "menu.language": "Language",
+    "menu.preface": "Preface screen",
     "label.today": "Today",
     "label.week": "Week",
     "label.weekScreenTime": "Screen Time Week",
@@ -517,6 +522,8 @@ const STRINGS = {
     "label.accessibilityHint": "Enable accessibility to block social apps.",
     "label.settingsHint":
       "Enable accessibility so the app can block social apps when time is up.",
+    "label.prefaceSettings": "Preface screen",
+    "label.prefaceDelay": "Wait time (seconds)",
     "label.tapAnywhere": "Tap anywhere",
     "label.voiceOn": "Mic on",
     "label.voiceOff": "Mic off",
@@ -567,6 +574,7 @@ const STRINGS = {
     "menu.settings": "Control de pantalla",
     "menu.stats": "Estadísticas",
     "menu.language": "Idioma",
+    "menu.preface": "Pantalla previa",
     "label.today": "Hoy",
     "label.week": "Semana",
     "label.weekScreenTime": "Tiempo de pantalla semanal",
@@ -661,6 +669,8 @@ const STRINGS = {
       "Activa la accesibilidad para bloquear apps sociales.",
     "label.settingsHint":
       "Activa la accesibilidad para que la app bloquee redes sociales cuando se acabe el tiempo.",
+    "label.prefaceSettings": "Pantalla previa",
+    "label.prefaceDelay": "Tiempo de espera (segundos)",
     "label.tapAnywhere": "Toca en cualquier lugar",
     "label.voiceOn": "Microfono activado",
     "label.voiceOff": "Microfono desactivado",
@@ -711,6 +721,7 @@ const STRINGS = {
     "menu.settings": "Contrôle écran",
     "menu.stats": "Statistiques",
     "menu.language": "Langue",
+    "menu.preface": "Ecran preface",
     "label.today": "Aujourd'hui",
     "label.week": "Semaine",
     "label.weekScreenTime": "Temps d’écran hebdo",
@@ -800,6 +811,8 @@ const STRINGS = {
       "Activez l’accessibilité pour bloquer les apps sociales.",
     "label.settingsHint":
       "Activez l’accessibilité pour que l’app bloque les apps sociales quand le temps est écoulé.",
+    "label.prefaceSettings": "Ecran preface",
+    "label.prefaceDelay": "Delai (secondes)",
     "label.tapAnywhere": "Touchez n’importe où",
     "label.voiceOn": "Micro actif",
     "label.voiceOff": "Micro inactif",
@@ -1343,6 +1356,8 @@ export default function App() {
   const [editingSportId, setEditingSportId] = useState(null);
   const [isSportModalOpen, setIsSportModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isPrefaceSettingsOpen, setIsPrefaceSettingsOpen] = useState(false);
+  const [prefaceDelayInput, setPrefaceDelayInput] = useState("");
   const [showHidden, setShowHidden] = useState(false);
   const [newName, setNewName] = useState("");
   const [newType, setNewType] = useState("reps");
@@ -2157,11 +2172,16 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   };
 
   useEffect(() => {
-    if (!InstaControl?.setControlledApps) {
-      return;
+    if (InstaControl?.setControlledApps) {
+      InstaControl.setControlledApps(settings.controlledApps || []);
+      refreshUsageState();
     }
-    InstaControl.setControlledApps(settings.controlledApps || []);
-    refreshUsageState();
+    if (InstaControl?.setPrefaceDelaySeconds) {
+      const delay = Number.isFinite(settings.prefaceDelaySeconds)
+        ? settings.prefaceDelaySeconds
+        : DEFAULT_SETTINGS.prefaceDelaySeconds;
+      InstaControl.setPrefaceDelaySeconds(delay);
+    }
   }, [settings]);
 
   useEffect(() => {
@@ -2211,6 +2231,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         setIsSettingsOpen(false);
         return true;
       }
+      if (isPrefaceSettingsOpen) {
+        setIsPrefaceSettingsOpen(false);
+        return true;
+      }
       return false;
     };
     const subscription = BackHandler.addEventListener(
@@ -2225,6 +2249,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     overallStatsOpen,
     selectedSportId,
     isSettingsOpen,
+    isPrefaceSettingsOpen,
   ]);
 
   useEffect(() => {
@@ -2275,6 +2300,24 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     if (InstaControl?.setControlledApps) {
       InstaControl.setControlledApps(nextApps);
     }
+  };
+
+  const openPrefaceSettings = () => {
+    const delay = Number.isFinite(settings.prefaceDelaySeconds)
+      ? settings.prefaceDelaySeconds
+      : DEFAULT_SETTINGS.prefaceDelaySeconds;
+    setPrefaceDelayInput(String(delay));
+    setIsPrefaceSettingsOpen(true);
+  };
+
+  const savePrefaceSettings = async () => {
+    const parsed = Math.max(0, Number.parseInt(prefaceDelayInput, 10) || 0);
+    const nextSettings = { ...settings, prefaceDelaySeconds: parsed };
+    await saveSettings(nextSettings);
+    if (InstaControl?.setPrefaceDelaySeconds) {
+      InstaControl.setPrefaceDelaySeconds(parsed);
+    }
+    setIsPrefaceSettingsOpen(false);
   };
 
   const handleStart = () => {
@@ -2504,7 +2547,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     () => rollingScreenSecondsTotal(logs, sports),
     [logs, sports]
   );
-  const calendarIcon = "📅";
+  const calendarIcon = "�
+";
   const widgetIcon = "📌";
   const tooltipWidth =
     infoCardWidth > 0 ? Math.min(220, Math.max(180, infoCardWidth - 24)) : 200;
@@ -3369,6 +3413,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             >
               <Text style={styles.appsHeaderText}>{t("menu.apps")}</Text>
             </Pressable>
+            <Pressable
+              style={styles.prefaceHeaderButton}
+              onPress={openPrefaceSettings}
+            >
+              <Text style={styles.prefaceHeaderText}>{t("menu.preface")}</Text>
+            </Pressable>
           </View>
         <View style={styles.headerActions}>
           <Pressable
@@ -3592,7 +3642,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                       style={styles.iconAction}
                       onPress={() => setStatsSportId(sport.id)}
                     >
-                      <Text style={styles.iconActionText}>📅</Text>
+                      <Text style={styles.iconActionText}>�
+</Text>
                     </Pressable>
                     <Pressable
                       style={styles.iconAction}
@@ -3723,7 +3774,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                           style={styles.iconAction}
                           onPress={() => setStatsSportId(sport.id)}
                         >
-                          <Text style={styles.iconActionText}>📅</Text>
+                          <Text style={styles.iconActionText}>�
+</Text>
                         </Pressable>
                         <Pressable
                           style={styles.iconAction}
@@ -3827,6 +3879,33 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             : null}
         </View>
     </ScrollView>
+      {isPrefaceSettingsOpen ? (
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>{t("label.prefaceSettings")}</Text>
+            <Text style={styles.rateLabel}>{t("label.prefaceDelay")}</Text>
+            <TextInput
+              style={styles.input}
+              value={prefaceDelayInput}
+              onChangeText={setPrefaceDelayInput}
+              keyboardType="number-pad"
+              placeholder="10"
+              placeholderTextColor="#7a7a7a"
+            />
+            <View style={styles.modalActions}>
+              <Pressable
+                style={styles.secondaryButton}
+                onPress={() => setIsPrefaceSettingsOpen(false)}
+              >
+                <Text style={styles.secondaryButtonText}>{t("label.cancel")}</Text>
+              </Pressable>
+              <Pressable style={styles.primaryButton} onPress={savePrefaceSettings}>
+                <Text style={styles.primaryButtonText}>{t("label.save")}</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      ) : null}
       {isSportModalOpen ? (
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
@@ -4025,6 +4104,21 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textTransform: "uppercase",
     letterSpacing: 0.5,
+  },
+  prefaceHeaderButton: {
+    alignSelf: "flex-start",
+    marginTop: 8,
+    backgroundColor: COLORS.cardAlt,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+  },
+  prefaceHeaderText: {
+    color: COLORS.text,
+    fontWeight: "700",
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
   },
   sportsGrid: {
     flexDirection: "row",

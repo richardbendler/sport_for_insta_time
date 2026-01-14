@@ -38,6 +38,9 @@ class InstaPrefaceActivity : AppCompatActivity() {
     setContentView(R.layout.activity_insta_preface)
     window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
 
+    val prefs = getSharedPreferences("insta_control", MODE_PRIVATE)
+    delaySeconds = prefs.getInt("preface_delay_seconds", delaySeconds).coerceAtLeast(0)
+
     remainingSeconds = intent.getIntExtra("remaining_seconds", 0)
     targetPackage = intent.getStringExtra("target_package")
 

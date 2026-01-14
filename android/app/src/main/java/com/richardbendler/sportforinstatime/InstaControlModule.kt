@@ -186,6 +186,13 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
+  fun setPrefaceDelaySeconds(seconds: Int) {
+    val prefs = getPrefs()
+    val safeSeconds = if (seconds < 0) 0 else seconds
+    prefs.edit().putInt("preface_delay_seconds", safeSeconds).apply()
+  }
+
+  @ReactMethod
   fun upsertScreenTimeEntry(
     entryId: String,
     sportId: String?,
