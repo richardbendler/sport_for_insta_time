@@ -2547,9 +2547,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     () => rollingScreenSecondsTotal(logs, sports),
     [logs, sports]
   );
-  const calendarIcon = "ðŸ“
-";
-  const widgetIcon = "ðŸ“Œ";
+  const calendarIcon = "\uD83D\uDCC5";
+  const widgetIcon = "\uD83D\uDCCC";
   const tooltipWidth =
     infoCardWidth > 0 ? Math.min(220, Math.max(180, infoCardWidth - 24)) : 200;
 
@@ -3642,7 +3641,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                       style={styles.iconAction}
                       onPress={() => setStatsSportId(sport.id)}
                     >
-                      <Text style={styles.iconActionText}>ðŸ“
+                      <Text style={styles.iconActionText}>ï¿½
 </Text>
                     </Pressable>
                     <Pressable
@@ -3774,7 +3773,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                           style={styles.iconAction}
                           onPress={() => setStatsSportId(sport.id)}
                         >
-                          <Text style={styles.iconActionText}>ðŸ“
+                          <Text style={styles.iconActionText}>ï¿½
 </Text>
                         </Pressable>
                         <Pressable
