@@ -1868,6 +1868,8 @@ export default function App() {
   const tutorialWorkoutNavRef = useRef(null);
   const tutorialAddSportRef = useRef(null);
   const tutorialSettingsCardRef = useRef(null);
+  const tutorialOverlayRef = useRef(null);
+  const [overlayOffset, setOverlayOffset] = useState({ x: 0, y: 0 });
   const tutorialAppsButtonRef = useRef(null);
 
   const t = (key) => {
@@ -3797,6 +3799,42 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setTutorialCardHeight(0);
   }, [tutorialStepIndex]);
 
+  useEffect(() => {
+    if (!tutorialActive) {
+      setOverlayOffset((prev) =>
+        prev.x === 0 && prev.y === 0 ? prev : { x: 0, y: 0 }
+      );
+      return;
+    }
+    let raf = null;
+    let cancelled = false;
+    const measureOverlay = () => {
+      if (cancelled) {
+        return;
+      }
+      const node = tutorialOverlayRef.current;
+      if (!node?.measureInWindow) {
+        raf = requestAnimationFrame(measureOverlay);
+        return;
+      }
+      node.measureInWindow((x, y) => {
+        if (cancelled) {
+          return;
+        }
+        setOverlayOffset((prev) =>
+          prev.x === x && prev.y === y ? prev : { x, y }
+        );
+      });
+    };
+    raf = requestAnimationFrame(measureOverlay);
+    return () => {
+      cancelled = true;
+      if (raf) {
+        cancelAnimationFrame(raf);
+      }
+    };
+  }, [tutorialActive, tutorialStepIndex, width, height]);
+
   const renderTutorialOverlay = () => {
     if (!tutorialActive || !tutorialStep) {
       return null;
@@ -3836,20 +3874,28 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     const offsetXByStep = {
       // Additional horizontal adjustments can be added here.
     };
-    const rawCenterX = hasTarget
-      ? target.x + target.width / 2 + (offsetXByStep[tutorialStep.titleKey] ?? 0)
-      : width / 2;
-    const rawCenterY = hasTarget
-      ? target.y + target.height / 2 + (offsetYByStep[tutorialStep.titleKey] ?? 0)
-      : height / 2;
+    const overlayX = overlayOffset?.x ?? 0;
+    const overlayY = overlayOffset?.y ?? 0;
+    const desiredLeft = hasTarget
+      ? target.x -
+        highlightPadding -
+        overlayX +
+        (offsetXByStep[tutorialStep.titleKey] ?? 0)
+      : (width - highlightWidth) / 2;
+    const desiredTop = hasTarget
+      ? target.y -
+        highlightPadding -
+        overlayY +
+        (offsetYByStep[tutorialStep.titleKey] ?? 0)
+      : (height - highlightHeight) / 2;
     const horizontalMax = Math.max(width - highlightWidth, 0);
     const verticalMax = Math.max(height - highlightHeight, 0);
     const highlightLeft = Math.min(
-      Math.max(rawCenterX - highlightWidth / 2, 0),
+      Math.max(desiredLeft, 0),
       horizontalMax
     );
     const highlightTop = Math.min(
-      Math.max(rawCenterY - highlightHeight / 2, 0),
+      Math.max(desiredTop, 0),
       verticalMax
     );
     const centerX = highlightLeft + highlightWidth / 2;
@@ -3871,12 +3917,13 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     );
     const highlightBottom = highlightTop + highlightHeight;
     const highlightRight = highlightLeft + highlightWidth;
+    const maskColor = "rgba(2, 6, 23, 0.72)";
     const blockingResponder = { onStartShouldSetResponder: () => true };
     const renderBlockingAreas = () => {
       if (!hasTarget) {
         return (
           <View
-            style={[styles.tutorialBlockingLayer, StyleSheet.absoluteFillObject]}
+            style={[styles.tutorialBackdrop, StyleSheet.absoluteFillObject]}
             {...blockingResponder}
           />
         );
@@ -3886,14 +3933,26 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           <View
             style={[
               styles.tutorialBlockingLayer,
-              { left: 0, right: 0, top: 0, height: highlightTop },
+              {
+                left: 0,
+                right: 0,
+                top: 0,
+                height: highlightTop,
+                backgroundColor: maskColor,
+              },
             ]}
             {...blockingResponder}
           />
           <View
             style={[
               styles.tutorialBlockingLayer,
-              { left: 0, right: 0, top: highlightBottom, bottom: 0 },
+              {
+                left: 0,
+                right: 0,
+                top: highlightBottom,
+                bottom: 0,
+                backgroundColor: maskColor,
+              },
             ]}
             {...blockingResponder}
           />
@@ -3905,6 +3964,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 top: highlightTop,
                 width: highlightLeft,
                 height: highlightHeight,
+                backgroundColor: maskColor,
               },
             ]}
             {...blockingResponder}
@@ -3917,6 +3977,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 left: highlightRight,
                 right: 0,
                 height: highlightHeight,
+                backgroundColor: maskColor,
               },
             ]}
             {...blockingResponder}
@@ -3926,9 +3987,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     };
 
     return (
-      <View style={styles.tutorialOverlay} pointerEvents="auto">
+      <View
+        style={styles.tutorialOverlay}
+        pointerEvents="box-none"
+        ref={tutorialOverlayRef}
+      >
         {renderBlockingAreas()}
-        <View style={styles.tutorialBackdrop} pointerEvents="none" />
         {hasTarget ? (
           <View
             style={[
@@ -7724,7 +7788,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     borderWidth: 2,
     borderColor: COLORS.accent,
-    backgroundColor: "rgba(245, 158, 11, 0.12)",
+    backgroundColor: "transparent",
     borderRadius: 8,
   },
   tutorialCard: {
