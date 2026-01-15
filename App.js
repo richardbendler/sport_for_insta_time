@@ -236,7 +236,7 @@ const interpolateTemplate = (template = "", values = {}) =>
 const PRESET_KEYS = {
   pushups: "pushups",
 };
-const STANDARD_SPORTS = [
+const RAW_STANDARD_SPORTS = [
 
 ﻿  {
     id: "barbell_bench_press",
@@ -3750,6 +3750,127 @@ const STANDARD_SPORTS = [
   },
 
 ];
+
+const TEMPLATE_ICON_KEYWORDS = [
+  {
+    icon: "🏋️",
+    keywords: [
+      "bench",
+      "press",
+      "squat",
+      "deadlift",
+      "row",
+      "curl",
+      "dip",
+      "fly",
+      "extension",
+      "shrug",
+      "tricep",
+      "bicep",
+      "good morning",
+      "pressdown",
+      "kickback",
+      "pull",
+    ],
+  },
+  {
+    icon: "🤸",
+    keywords: [
+      "push-up",
+      "push up",
+      "jump",
+      "burpee",
+      "clap",
+      "pike",
+      "planche",
+      "force",
+      "plyo",
+      "skater",
+      "bear",
+      "crab",
+      "craw",
+      "wheel",
+    ],
+  },
+  {
+    icon: "🏃",
+    keywords: [
+      "run",
+      "sprint",
+      "jog",
+      "hill",
+      "treadmill",
+      "cycling",
+      "bike",
+      "row",
+      "assault",
+      "climb",
+      "stair",
+      "rope",
+      "agility",
+      "shuttle",
+      "cone",
+      "interval",
+      "sled",
+    ],
+  },
+  {
+    icon: "🧘",
+    keywords: [
+      "plank",
+      "yoga",
+      "pilates",
+      "stretch",
+      "pose",
+      "thread",
+      "boat",
+      "sun",
+      "cat",
+      "cow",
+      "hollow",
+      "dragon",
+    ],
+  },
+  {
+    icon: "🚴",
+    keywords: ["cycle", "bike", "stationary", "assault", "spin"],
+  },
+  {
+    icon: "⚡",
+    keywords: ["agility", "speed", "explosive", "power"],
+  },
+  {
+    icon: "🏊",
+    keywords: ["swim", "water", "stroke"],
+  },
+  {
+    icon: "🥊",
+    keywords: ["battle rope", "boxing", "punch", "slug", "slam"],
+  },
+];
+
+const isPlaceholderIcon = (icon) =>
+  !icon || icon.includes("?") || icon === DEFAULT_ICON;
+
+const deriveTemplateIcon = (entry) => {
+  if (!isPlaceholderIcon(entry.icon)) {
+    return entry.icon;
+  }
+  const candidate = (entry.labels?.en || entry.id || "")
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+  for (const { icon, keywords } of TEMPLATE_ICON_KEYWORDS) {
+    if (keywords.some((keyword) => candidate.includes(keyword))) {
+      return icon;
+    }
+  }
+  return DEFAULT_ICON;
+};
+
+const STANDARD_SPORTS = RAW_STANDARD_SPORTS.map((sport) => ({
+  ...sport,
+  icon: deriveTemplateIcon(sport),
+}));
 const getStandardSportLabel = (entry, language) =>
   entry.labels?.[language] || entry.labels?.en || entry.id;
 const doesSportMatchSearchTerm = (entry, searchLower) => {
