@@ -5596,7 +5596,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                                 styles.widgetButtonText,
                               ]}
                             >
-                              {t("label.widget")}
+                              {widgetIcon} {t("label.widget")}
                             </Text>
                           </Pressable>
                         </View>
@@ -5759,14 +5759,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                                 InstaControl?.requestPinWidget?.(sport.id, sportLabel)
                               }
                             >
-                              <Text
-                                style={[
-                                  styles.secondaryButtonText,
-                                  styles.widgetButtonText,
-                                ]}
-                              >
-                                {t("label.widget")}
-                              </Text>
+                            <Text
+                              style={[
+                                styles.secondaryButtonText,
+                                styles.widgetButtonText,
+                              ]}
+                            >
+                              {widgetIcon} {t("label.widget")}
+                            </Text>
                             </Pressable>
                           </View>
                           <View style={styles.sportGridColumnCenter} />
