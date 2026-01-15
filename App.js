@@ -5952,6 +5952,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                       ? Math.max(12, (infoCardWidth - tooltipWidth) / 2)
                       : 12,
                   top: Math.max(8, infoHint.y + infoHint.height / 2 - 24),
+                  width: tooltipWidth,
                 },
               ]}
               onPress={() => setInfoHint(null)}
@@ -7384,9 +7385,14 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     right: 0,
-    bottom: 12,
+    bottom: 0,
     paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 20,
     zIndex: 10,
+    backgroundColor: COLORS.surface,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.cardAlt,
   },
   infoRow: {
     flexDirection: "row",
@@ -7438,6 +7444,9 @@ const styles = StyleSheet.create({
   infoTooltipText: {
     color: COLORS.muted,
     fontSize: 11,
+    lineHeight: 16,
+    textAlign: "center",
+    flexWrap: "wrap",
   },
   cardTitle: {
     color: COLORS.muted,
