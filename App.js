@@ -6842,14 +6842,14 @@ const styles = StyleSheet.create({
   sportTitleCenterRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 4,
     justifyContent: "center",
     flex: 1,
   },
   titleSideSlot: {
     alignItems: "center",
     justifyContent: "center",
-    minWidth: 28,
+    minWidth: 20,
   },
   iconAction: {
     backgroundColor: COLORS.cardAlt,
