@@ -3750,6 +3750,12 @@ const STANDARD_SPORTS = [
 ];
 const getStandardSportLabel = (entry, language) =>
   entry.labels?.[language] || entry.labels?.en || entry.id;
+const doesSportMatchSearchTerm = (entry, searchLower) => {
+  const labels = entry.labels || {};
+  return Object.values(labels).some(
+    (label) => label && label.toLowerCase().includes(searchLower)
+  );
+};
 
 const createDefaultPresetSports = () => {
   const now = Date.now();
@@ -5500,9 +5506,7 @@ export default function App() {
       return STANDARD_SPORTS;
     }
     return STANDARD_SPORTS.filter((entry) =>
-      getStandardSportLabel(entry, language)
-        .toLowerCase()
-        .includes(normalizedSportSearch)
+      doesSportMatchSearchTerm(entry, normalizedSportSearch)
     ).slice(0, 6);
   }, [language, normalizedSportSearch]);
   const showCustomSuggestionButton =
