@@ -15,6 +15,7 @@ import {
   AppState,
   BackHandler,
   Alert,
+  Modal,
   useWindowDimensions,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -1731,6 +1732,8 @@ export default function App() {
     carryoverSeconds: 0,
   });
   const [needsAccessibility, setNeedsAccessibility] = useState(false);
+  const [accessibilityDisclosureVisible, setAccessibilityDisclosureVisible] =
+    useState(false);
   const [permissionsPrompted, setPermissionsPrompted] = useState(false);
   const [accessibilityDisclosureAccepted, setAccessibilityDisclosureAccepted] =
     useState(false);
@@ -2681,12 +2684,28 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
   };
 
-  const requestAccessibilityAccess = async () => {
+  const requestAccessibilityAccess = () => {
+    if (accessibilityDisclosureAccepted) {
+      openAccessibilitySettings();
+      return;
+    }
+    setAccessibilityDisclosureVisible(true);
+  };
+
+  const confirmAccessibilityDisclosure = async () => {
+    setAccessibilityDisclosureVisible(false);
     if (!accessibilityDisclosureAccepted) {
       setAccessibilityDisclosureAccepted(true);
-      await AsyncStorage.setItem(STORAGE_KEYS.accessibilityDisclosure, "true");
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.accessibilityDisclosure,
+        "true"
+      );
     }
     openAccessibilitySettings();
+  };
+
+  const cancelAccessibilityDisclosure = () => {
+    setAccessibilityDisclosureVisible(false);
   };
 
   const openUsageAccessSettings = async () => {
@@ -2734,6 +2753,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       refreshNotificationPermission();
     }
   }, [permissionsPanelOpen]);
+
+  useEffect(() => {
+    if (!needsAccessibility && accessibilityDisclosureVisible) {
+      setAccessibilityDisclosureVisible(false);
+    }
+  }, [needsAccessibility, accessibilityDisclosureVisible]);
 
   useEffect(() => {
     if (!selectedSportId) {
@@ -5214,8 +5239,59 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             ) : null}
           </View>
         ) : null}
+        <Modal
+          visible={accessibilityDisclosureVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={cancelAccessibilityDisclosure}
+        >
+          <View style={styles.accessibilityDisclosureOverlay}>
+            <View style={styles.accessibilityDisclosureModal}>
+              <Text style={styles.accessibilityDisclosureTitle}>
+                {t("label.accessibilityDisclosureTitle")}
+              </Text>
+              <Text style={styles.accessibilityDisclosureBody}>
+                {t("label.accessibilityDisclosureBody")}
+              </Text>
+              <View style={styles.accessibilityDisclosureActions}>
+                <Pressable
+                  style={[
+                    styles.accessibilityDisclosureButton,
+                    styles.accessibilityDisclosurePrimary,
+                  ]}
+                  onPress={confirmAccessibilityDisclosure}
+                >
+                  <Text
+                    style={[
+                      styles.accessibilityDisclosureButtonText,
+                      styles.accessibilityDisclosurePrimaryText,
+                    ]}
+                  >
+                    {t("label.accessibilityDisclosureConfirm")}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  style={[
+                    styles.accessibilityDisclosureButton,
+                    styles.accessibilityDisclosureSecondary,
+                  ]}
+                  onPress={cancelAccessibilityDisclosure}
+                >
+                  <Text
+                    style={[
+                      styles.accessibilityDisclosureButtonText,
+                      styles.accessibilityDisclosureSecondaryText,
+                    ]}
+                  >
+                    {t("label.accessibilityDisclosureCancel")}
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </Modal>
         
-<Text style={styles.sectionTitle}>{t("menu.sports")}</Text>
+        <Text style={styles.sectionTitle}>{t("menu.sports")}</Text>
         {activeSports.length === 0 ? (
           <Text style={styles.helperText}>{t("label.noSports")}</Text>
         ) : null}
@@ -6815,6 +6891,67 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontWeight: "700",
     fontSize: 12,
+  },
+  accessibilityDisclosureOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  accessibilityDisclosureModal: {
+    width: "100%",
+    maxWidth: 420,
+    backgroundColor: COLORS.card,
+    borderRadius: 18,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: COLORS.cardAlt,
+  },
+  accessibilityDisclosureTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: COLORS.text,
+    marginBottom: 12,
+  },
+  accessibilityDisclosureBody: {
+    color: COLORS.muted,
+    lineHeight: 20,
+    marginBottom: 20,
+  },
+  accessibilityDisclosureActions: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  accessibilityDisclosureButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+  },
+  accessibilityDisclosurePrimary: {
+    backgroundColor: COLORS.accent,
+    borderColor: COLORS.accent,
+  },
+  accessibilityDisclosureSecondary: {
+    backgroundColor: "transparent",
+    borderColor: COLORS.cardAlt,
+  },
+  accessibilityDisclosureButtonText: {
+    fontWeight: "700",
+    fontSize: 14,
+  },
+  accessibilityDisclosurePrimaryText: {
+    color: COLORS.ink,
+  },
+  accessibilityDisclosureSecondaryText: {
+    color: COLORS.text,
   },
   infoCard: {
     backgroundColor: COLORS.card,
