@@ -36,6 +36,8 @@ class InstaBlockerService : AccessibilityService() {
 
   private val notificationChannelId = "restricted_timer"
   private val notificationId = 1001
+  private var pendingHomeClear: Runnable? = null
+  private val homeClearDelayMillis = 600L
 
   private val ignoredPackagePrefixes = setOf(
     "com.android.systemui",
@@ -76,15 +78,15 @@ class InstaBlockerService : AccessibilityService() {
     if (ignoredPackagePrefixes.any { pkg.startsWith(it) }) {
       return
     }
-    if (!isLaunchablePackage(pkg)) {
-      if (isHomePackage(pkg)) {
-        clearForegroundApp(true)
+      if (!isLaunchablePackage(pkg)) {
+        if (isHomePackage(pkg)) {
+          scheduleForegroundClear()
+        }
+        return
       }
-      return
-    }
-    if (pkg == applicationContext.packageName && !appActivities.contains(className)) {
-      return
-    }
+      if (pkg == applicationContext.packageName && !appActivities.contains(className)) {
+        return
+      }
     val now = System.currentTimeMillis()
     if (pkg == applicationContext.packageName) {
       currentPackage = pkg
@@ -95,7 +97,7 @@ class InstaBlockerService : AccessibilityService() {
     val controlled = getControlledApps()
     if (!controlled.contains(pkg)) {
       if (isHomePackage(pkg)) {
-        clearForegroundApp(true)
+        scheduleForegroundClear()
         return
       }
       currentPackage = pkg
@@ -104,6 +106,7 @@ class InstaBlockerService : AccessibilityService() {
       updateCountdownNotification(0, false, null)
       return
     }
+    cancelForegroundClear()
     if (currentPackage != null && currentPackage != pkg) {
       updateCountdownOverlay(0, false)
       updateCountdownNotification(0, false, null)
@@ -169,6 +172,7 @@ class InstaBlockerService : AccessibilityService() {
   }
 
   private fun clearForegroundApp(fromHome: Boolean) {
+    cancelForegroundClear()
     currentPackage = null
     if (fromHome) {
       lastForegroundWasHome = true
@@ -405,6 +409,23 @@ class InstaBlockerService : AccessibilityService() {
     lastWidgetUpdateAt = now
     SportWidgetProvider.refreshAll(applicationContext)
     OverallWidgetProvider.refreshAll(applicationContext)
+  }
+
+  private fun scheduleForegroundClear() {
+    cancelForegroundClear()
+    val runnable = Runnable {
+      pendingHomeClear = null
+      clearForegroundApp(true)
+    }
+    pendingHomeClear = runnable
+    handler.postDelayed(runnable, homeClearDelayMillis)
+  }
+
+  private fun cancelForegroundClear() {
+    pendingHomeClear?.let {
+      handler.removeCallbacks(it)
+      pendingHomeClear = null
+    }
   }
 
   private fun openApp() {
