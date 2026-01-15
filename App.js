@@ -6865,6 +6865,9 @@ const styles = StyleSheet.create({
   sportTopIconsLeft: {
     flexDirection: "row",
     gap: 6,
+    width: 64,
+    justifyContent: "flex-start",
+    alignItems: "center",
   },
   sportTopTitleCenter: {
     flex: 1,
@@ -6873,6 +6876,9 @@ const styles = StyleSheet.create({
   sportTopIconsRight: {
     flexDirection: "row",
     gap: 6,
+    width: 64,
+    justifyContent: "flex-end",
+    alignItems: "center",
   },
   sportTitleCenterRow: {
     flexDirection: "row",
