@@ -5596,8 +5596,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                                 styles.widgetButtonText,
                               ]}
                             >
-                              {widgetIcon}
-                              {"\n"}
                               {t("label.widget")}
                             </Text>
                           </Pressable>
@@ -5778,16 +5776,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                                   InstaControl?.requestPinWidget?.(sport.id, sportLabel)
                                 }
                               >
-                                <Text
-                                  style={[
-                                    styles.secondaryButtonText,
-                                    styles.widgetButtonText,
-                                  ]}
-                                >
-                                  {widgetIcon}
-                                  {"\n"}
-                                  {t("label.widget")}
-                                </Text>
+                              <Text
+                                style={[
+                                  styles.secondaryButtonText,
+                                  styles.widgetButtonText,
+                                ]}
+                              >
+                                {t("label.widget")}
+                              </Text>
                               </Pressable>
                             </View>
                             <View style={styles.sportGridColumnCenter}>
@@ -6897,9 +6893,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   widgetButton: {
-    minWidth: 130,
+    minWidth: 100,
     borderRadius: 999,
-    paddingVertical: 10,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
     marginBottom: 6,
   },
   moveButtonColumn: {
@@ -6967,6 +6964,7 @@ const styles = StyleSheet.create({
   },
   widgetButtonText: {
     textAlign: "center",
+    fontSize: 10,
   },
   dangerButton: {
     backgroundColor: COLORS.danger,
