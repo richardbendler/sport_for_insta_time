@@ -5643,23 +5643,25 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                           </View>
                         </View>
                         <View style={styles.sportGridColumnRight}>
-                          <View style={styles.moveButtonColumn}>
-                            <Pressable
-                              style={styles.iconAction}
-                              onPress={() => moveSport(sport.id, -1)}
-                            >
-                            <Text style={styles.iconActionText}>▲</Text>
-                            </Pressable>
-                            <Pressable
-                              style={[styles.iconAction, styles.moveButtonArrow]}
-                              onPress={() => moveSport(sport.id, 1)}
-                            >
-                            <Text style={styles.iconActionText}>▼</Text>
-                            </Pressable>
+                          <View style={styles.moveActionsRow}>
+                            <Text style={styles.earnedTimeTextRight}>
+                              {t("label.screenTime")}: {formatScreenTime(daily.screenSeconds || 0)}
+                            </Text>
+                            <View style={styles.moveButtonColumn}>
+                              <Pressable
+                                style={styles.iconAction}
+                                onPress={() => moveSport(sport.id, -1)}
+                              >
+                                <Text style={styles.iconActionText}>▲</Text>
+                              </Pressable>
+                              <Pressable
+                                style={[styles.iconAction, styles.moveButtonArrow]}
+                                onPress={() => moveSport(sport.id, 1)}
+                              >
+                                <Text style={styles.iconActionText}>▼</Text>
+                              </Pressable>
+                            </View>
                           </View>
-                          <Text style={styles.earnedTimeTextRight}>
-                            {t("label.screenTime")}: {formatScreenTime(daily.screenSeconds || 0)}
-                          </Text>
                         </View>
                       </View>
                       <View style={styles.sportGridRow}>
@@ -5820,23 +5822,25 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                             </View>
                           </View>
                           <View style={styles.sportGridColumnRight}>
-                            <View style={styles.moveButtonColumn}>
-                              <Pressable
-                                style={styles.iconAction}
-                                onPress={() => moveSport(sport.id, -1)}
-                              >
-                                <Text style={styles.iconActionText}>▲</Text>
-                              </Pressable>
-                              <Pressable
-                                style={[styles.iconAction, styles.moveButtonArrow]}
-                                onPress={() => moveSport(sport.id, 1)}
-                              >
-                                <Text style={styles.iconActionText}>▼</Text>
-                              </Pressable>
+                            <View style={styles.moveActionsRow}>
+                              <Text style={styles.earnedTimeTextRight}>
+                                {t("label.screenTime")}: {formatScreenTime(daily.screenSeconds || 0)}
+                              </Text>
+                              <View style={styles.moveButtonColumn}>
+                                <Pressable
+                                  style={styles.iconAction}
+                                  onPress={() => moveSport(sport.id, -1)}
+                                >
+                                  <Text style={styles.iconActionText}>▲</Text>
+                                </Pressable>
+                                <Pressable
+                                  style={[styles.iconAction, styles.moveButtonArrow]}
+                                  onPress={() => moveSport(sport.id, 1)}
+                                >
+                                  <Text style={styles.iconActionText}>▼</Text>
+                                </Pressable>
+                              </View>
                             </View>
-                            <Text style={styles.earnedTimeTextRight}>
-                              {t("label.screenTime")}: {formatScreenTime(daily.screenSeconds || 0)}
-                            </Text>
                           </View>
                         </View>
                         <View style={styles.sportGridRow}>
@@ -6923,6 +6927,12 @@ const styles = StyleSheet.create({
   },
   moveButtonArrow: {
     marginTop: 4,
+  },
+  moveActionsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
   },
   earnedTimeTextRight: {
     color: COLORS.muted,
