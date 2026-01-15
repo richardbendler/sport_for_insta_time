@@ -5621,7 +5621,27 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                             </Text>
                           </Pressable>
                         </View>
-                        <View style={styles.sportGridColumnCenter} />
+                        <View style={styles.sportGridColumnCenter}>
+                          <View style={styles.sportCounterCenter}>
+                            <View
+                              style={[styles.counterBlock, styles.sportCounterBlock]}
+                            >
+                              <Text style={styles.counterLabel}>
+                                {t("label.today")}
+                              </Text>
+                              <Text style={styles.counterValueSmall}>
+                                {sport.type === "reps"
+                                  ? `${daily.reps}`
+                                  : formatSeconds(daily.seconds || 0)}
+                              </Text>
+                              <Text style={styles.counterUnit}>
+                                {sport.type === "reps"
+                                  ? repsShort
+                                  : t("label.timeUnit")}
+                              </Text>
+                            </View>
+                          </View>
+                        </View>
                         <View style={styles.sportGridColumnRight}>
                           <View style={styles.moveButtonColumn}>
                             <Pressable
@@ -5778,7 +5798,27 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                             </Text>
                             </Pressable>
                           </View>
-                          <View style={styles.sportGridColumnCenter} />
+                          <View style={styles.sportGridColumnCenter}>
+                            <View style={styles.sportCounterCenter}>
+                              <View
+                                style={[styles.counterBlock, styles.sportCounterBlock]}
+                              >
+                                <Text style={styles.counterLabel}>
+                                  {t("label.today")}
+                                </Text>
+                                <Text style={styles.counterValueSmall}>
+                                  {sport.type === "reps"
+                                    ? `${daily.reps}`
+                                    : formatSeconds(daily.seconds || 0)}
+                                </Text>
+                                <Text style={styles.counterUnit}>
+                                  {sport.type === "reps"
+                                    ? repsShort
+                                    : t("label.timeUnit")}
+                                </Text>
+                              </View>
+                            </View>
+                          </View>
                           <View style={styles.sportGridColumnRight}>
                             <View style={styles.moveButtonColumn}>
                               <Pressable
