@@ -229,9 +229,147 @@ const MONTH_LABELS = {
 };
 const DEFAULT_ICON = "⭐";
 const DEFAULT_DIFFICULTY = 5;
+const interpolateTemplate = (template = "", values = {}) =>
+  template.replace(/\{\{(\w+)\}\}/g, (_, key) =>
+    Object.prototype.hasOwnProperty.call(values, key) ? values[key] : ""
+  );
 const PRESET_KEYS = {
   pushups: "pushups",
 };
+const STANDARD_SPORTS = [
+  {
+    id: "pushups",
+    labels: {
+      de: "Liegestütze",
+      en: "Push-ups",
+      es: "Flexiones",
+      fr: "Pompes",
+    },
+    icon: "💪",
+    type: "reps",
+    defaultRateMinutes: 1,
+    difficultyLevel: 6,
+  },
+  {
+    id: "pullups",
+    labels: {
+      de: "Klimmzüge",
+      en: "Pull-ups",
+      es: "Dominadas",
+      fr: "Tractions",
+    },
+    icon: "🧗",
+    type: "reps",
+    defaultRateMinutes: 1,
+    difficultyLevel: 7,
+  },
+  {
+    id: "squats",
+    labels: {
+      de: "Kniebeugen",
+      en: "Squats",
+      es: "Sentadillas",
+      fr: "Squats",
+    },
+    icon: "🏋️",
+    type: "reps",
+    defaultRateMinutes: 1,
+    difficultyLevel: 5,
+  },
+  {
+    id: "lunges",
+    labels: {
+      de: "Ausfallschritte",
+      en: "Lunges",
+      es: "Zancadas",
+      fr: "Fentes",
+    },
+    icon: "🦵",
+    type: "reps",
+    defaultRateMinutes: 1,
+    difficultyLevel: 5,
+  },
+  {
+    id: "burpees",
+    labels: {
+      de: "Burpees",
+      en: "Burpees",
+      es: "Burpees",
+      fr: "Burpees",
+    },
+    icon: "🤸",
+    type: "reps",
+    defaultRateMinutes: 1,
+    difficultyLevel: 8,
+  },
+  {
+    id: "plank",
+    labels: {
+      de: "Plank",
+      en: "Plank",
+      es: "Plancha",
+      fr: "Planche",
+    },
+    icon: "🧘",
+    type: "time",
+    defaultRateMinutes: 1,
+    difficultyLevel: 4,
+  },
+  {
+    id: "jumping_jacks",
+    labels: {
+      de: "Jumping Jacks",
+      en: "Jumping Jacks",
+      es: "Saltos de tijera",
+      fr: "Jumping jacks",
+    },
+    icon: "🤾",
+    type: "time",
+    defaultRateMinutes: 5,
+    difficultyLevel: 4,
+  },
+  {
+    id: "mountain_climbers",
+    labels: {
+      de: "Bergsteiger",
+      en: "Mountain climbers",
+      es: "Escaladores",
+      fr: "Montées de genoux",
+    },
+    icon: "⛰️",
+    type: "reps",
+    defaultRateMinutes: 1,
+    difficultyLevel: 7,
+  },
+  {
+    id: "cycling",
+    labels: {
+      de: "Radfahren",
+      en: "Cycling",
+      es: "Ciclismo",
+      fr: "Cyclisme",
+    },
+    icon: "🚴",
+    type: "time",
+    defaultRateMinutes: 20,
+    difficultyLevel: 5,
+  },
+  {
+    id: "running",
+    labels: {
+      de: "Laufen",
+      en: "Running",
+      es: "Carrera",
+      fr: "Course",
+    },
+    icon: "🏃",
+    type: "time",
+    defaultRateMinutes: 20,
+    difficultyLevel: 5,
+  },
+];
+const getStandardSportLabel = (entry, language) =>
+  entry.labels?.[language] || entry.labels?.en || entry.id;
 
 const createDefaultPresetSports = () => {
   const now = Date.now();
@@ -437,6 +575,10 @@ const STRINGS = {
     "label.weekOverview": "Tagesübersicht",
     "label.weekTotal": "Diese Woche",
     "label.noSports": "Keine aktiven Sportarten. Füge neue hinzu.",
+    "label.searchSports": "Sportarten durchsuchen",
+    "label.sportSuggestions": "Vorschläge",
+    "label.noSportSuggestions": "Keine Vorschläge gefunden.",
+    "label.useAsCustomSport": "Nutze \"{{term}}\" als neue Sportart",
     "label.todayScreenTime": "Erspielte Zeit",
     "label.widgets": "Widgets",
     "label.widget": "Widget",
@@ -663,6 +805,10 @@ const STRINGS = {
     "label.weekOverview": "Daily overview",
     "label.weekTotal": "This week",
     "label.noSports": "No active sports. Add new ones.",
+    "label.searchSports": "Search sports",
+    "label.sportSuggestions": "Suggested sports",
+    "label.noSportSuggestions": "No suggestions found.",
+    "label.useAsCustomSport": "Use \"{{term}}\" as custom sport",
     "label.todayScreenTime": "Earned time",
     "label.widgets": "Widgets",
     "label.widget": "Widget",
@@ -891,6 +1037,10 @@ const STRINGS = {
     "label.weekOverview": "Resumen diario",
     "label.weekTotal": "Esta semana",
     "label.noSports": "No hay deportes activos. Añade nuevos.",
+    "label.searchSports": "Buscar deportes",
+    "label.sportSuggestions": "Deportes sugeridos",
+    "label.noSportSuggestions": "No se encontraron sugerencias.",
+    "label.useAsCustomSport": "Usar \"{{term}}\" como deporte personalizado",
     "label.todayScreenTime": "Tiempo ganado",
     "label.widgets": "Widgets",
     "label.widget": "Widget",
@@ -1114,6 +1264,10 @@ const STRINGS = {
     "label.weekOverview": "Aperçu quotidien",
     "label.weekTotal": "Cette semaine",
     "label.noSports": "Aucun sport actif. Ajoutez-en.",
+    "label.searchSports": "Rechercher un sport",
+    "label.sportSuggestions": "Sports suggérés",
+    "label.noSportSuggestions": "Aucune suggestion trouvée.",
+    "label.useAsCustomSport": "Utiliser \"{{term}}\" comme sport personnalisé",
     "label.todayScreenTime": "Temps gagné",
     "label.widgets": "Widgets",
     "label.widget": "Widget",
@@ -1866,6 +2020,8 @@ export default function App() {
   const [newDifficultyLevel, setNewDifficultyLevel] = useState(
     DEFAULT_DIFFICULTY
   );
+  const [selectedStandardSportId, setSelectedStandardSportId] = useState(null);
+  const [isCustomSportMode, setIsCustomSportMode] = useState(true);
   const adjustDifficultyLevel = useCallback((delta) => {
     setNewDifficultyLevel((current) => {
       const next = Math.max(1, Math.min(10, current + delta));
@@ -1957,6 +2113,51 @@ export default function App() {
       ? t("label.voiceListening")
       : t("label.voiceIdle")
     : "";
+  const trimmedSportSearch = newName.trim();
+  const normalizedSportSearch = trimmedSportSearch.toLowerCase();
+  const standardSportSuggestions = useMemo(() => {
+    if (!normalizedSportSearch) {
+      return STANDARD_SPORTS.slice(0, 6);
+    }
+    return STANDARD_SPORTS.filter((entry) =>
+      getStandardSportLabel(entry, language)
+        .toLowerCase()
+        .includes(normalizedSportSearch)
+    ).slice(0, 6);
+  }, [language, normalizedSportSearch]);
+  const showCustomSuggestionButton =
+    trimmedSportSearch.length > 0 && standardSportSuggestions.length === 0;
+  const customSuggestionLabel = interpolateTemplate(
+    t("label.useAsCustomSport"),
+    { term: trimmedSportSearch }
+  );
+  const handleSportNameChange = (value) => {
+    setNewName(value);
+    setSelectedStandardSportId(null);
+    setIsCustomSportMode(true);
+  };
+  const applyStandardSport = (entry) => {
+    const label = getStandardSportLabel(entry, language);
+    setNewName(label);
+    setNewType(entry.type);
+    setNewRateMinutes(
+      String(
+        entry.defaultRateMinutes ?? getDefaultRateMinutes(entry.type)
+      )
+    );
+    setNewIcon(entry.icon || DEFAULT_ICON);
+    setNewWeightExercise(!!entry.weightExercise);
+    setNewDifficultyLevel(entry.difficultyLevel ?? DEFAULT_DIFFICULTY);
+    setShowIconInput(false);
+    setSelectedStandardSportId(entry.id);
+    setIsCustomSportMode(false);
+  };
+  const handleUseSearchAsCustom = () => {
+    setIsCustomSportMode(true);
+    setSelectedStandardSportId(null);
+    setShowIconInput(false);
+    setNewName(trimmedSportSearch);
+  };
 
   useEffect(() => {
     languageRef.current = language;
@@ -2659,6 +2860,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       setNewRateMinutes(String(rateMinutes || getDefaultRateMinutes(sport.type)));
       setNewWeightExercise(!!sport.weightExercise);
       setNewDifficultyLevel(difficultyLevelForSport(sport));
+      setSelectedStandardSportId(sport.standardSportId ?? null);
+      setIsCustomSportMode(!sport.standardSportId);
     } else {
       setEditingSportId(null);
       setNewName("");
@@ -2667,6 +2870,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       setNewRateMinutes(String(getDefaultRateMinutes("reps")));
       setNewWeightExercise(false);
       setNewDifficultyLevel(DEFAULT_DIFFICULTY);
+      setSelectedStandardSportId(null);
+      setIsCustomSportMode(true);
       maybeAdvanceTutorial("openAddSport");
     }
     setShowIconInput(false);
@@ -2712,6 +2917,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           supportsAi: sport.supportsAi,
           weightExercise: weightMode,
           difficultyLevel: parsedDifficulty,
+          standardSportId: selectedStandardSportId ?? sport.standardSportId,
         };
       });
       await saveSports(nextSports);
@@ -2726,6 +2932,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         createdAt: Date.now(),
         weightExercise: weightMode,
         difficultyLevel: parsedDifficulty,
+        standardSportId: selectedStandardSportId ?? undefined,
       };
       await saveSports([newSport, ...sports]);
     }
@@ -6166,33 +6373,96 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               {editingSportId ? t("label.editSport") : t("label.addSport")}
             </Text>
             <TextInput
-              style={styles.input}
+              style={styles.searchInput}
               value={newName}
-              onChangeText={setNewName}
-              placeholder={t("placeholder.sportName")}
+              onChangeText={handleSportNameChange}
+              placeholder={t("label.searchSports")}
               placeholderTextColor="#7a7a7a"
             />
-            <View style={styles.iconRow}>
-              <Pressable
-                style={styles.secondaryButton}
-                onPress={() => setShowIconInput((prev) => !prev)}
-              >
-                <Text style={styles.secondaryButtonText}>
-                  {t("label.iconChoose")}
+            {!editingSportId ? (
+              <View style={styles.standardSportSuggestions}>
+                <Text style={styles.suggestionsHeader}>
+                  {t("label.sportSuggestions")}
                 </Text>
-              </Pressable>
-              <Text style={styles.iconPreview}>{newIcon || DEFAULT_ICON}</Text>
-            </View>
-            {showIconInput ? (
-              <TextInput
-                style={styles.input}
-                value={newIcon}
-                onChangeText={(text) => setNewIcon(normalizeIcon(text))}
-                placeholder={t("label.iconPlaceholder")}
-                placeholderTextColor="#7a7a7a"
-                maxLength={2}
-              />
+                <View style={styles.suggestionList}>
+                  {standardSportSuggestions.length > 0 ? (
+                    standardSportSuggestions.map((entry) => {
+                      const label = getStandardSportLabel(entry, language);
+                      const isActive = entry.id === selectedStandardSportId;
+                      return (
+                        <Pressable
+                          key={entry.id}
+                          style={[
+                            styles.suggestionItem,
+                            isActive && styles.suggestionItemActive,
+                          ]}
+                          onPress={() => applyStandardSport(entry)}
+                        >
+                          <View style={styles.suggestionMain}>
+                            <Text style={styles.suggestionIcon}>
+                              {entry.icon || DEFAULT_ICON}
+                            </Text>
+                            <View>
+                              <Text style={styles.suggestionLabel}>{label}</Text>
+                              <Text style={styles.suggestionMeta}>
+                                {entry.type === "reps"
+                                  ? t("label.reps")
+                                  : t("label.timeBased")}
+                              </Text>
+                            </View>
+                          </View>
+                        </Pressable>
+                      );
+                    })
+                  ) : (
+                    <Text style={styles.helperText}>
+                      {t("label.noSportSuggestions")}
+                    </Text>
+                  )}
+                </View>
+                {showCustomSuggestionButton ? (
+                  <Pressable
+                    style={styles.customSuggestionButton}
+                    onPress={handleUseSearchAsCustom}
+                  >
+                    <Text style={styles.customSuggestionButtonText}>
+                      {customSuggestionLabel}
+                    </Text>
+                  </Pressable>
+                ) : null}
+              </View>
             ) : null}
+            {isCustomSportMode ? (
+              <>
+                <View style={styles.iconRow}>
+                  <Pressable
+                    style={styles.secondaryButton}
+                    onPress={() => setShowIconInput((prev) => !prev)}
+                  >
+                    <Text style={styles.secondaryButtonText}>
+                      {t("label.iconChoose")}
+                    </Text>
+                  </Pressable>
+                  <Text style={styles.iconPreview}>{newIcon || DEFAULT_ICON}</Text>
+                </View>
+                {showIconInput ? (
+                  <TextInput
+                    style={styles.input}
+                    value={newIcon}
+                    onChangeText={(text) => setNewIcon(normalizeIcon(text))}
+                    placeholder={t("label.iconPlaceholder")}
+                    placeholderTextColor="#7a7a7a"
+                    maxLength={2}
+                  />
+                ) : null}
+              </>
+            ) : (
+              <View style={styles.iconRow}>
+                <Text style={styles.helperText}>
+                  {t("label.iconPlaceholder")}: {newIcon || DEFAULT_ICON}
+                </Text>
+              </View>
+            )}
             <Text style={styles.rateLabel}>
               {newType === "reps"
                 ? t("label.screenRateReps")
@@ -6265,9 +6535,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                       },
                     ]}
                   />
-                </View>
-                <View style={styles.difficultyValuePill}>
-                  <Text style={styles.sliderValue}>{newDifficultyLevel}</Text>
                 </View>
               </View>
               <View style={styles.difficultyButtonsRow}>
@@ -7225,6 +7492,55 @@ const styles = StyleSheet.create({
   iconPreview: {
     fontSize: 20,
   },
+  standardSportSuggestions: {
+    marginBottom: 12,
+  },
+  suggestionsHeader: {
+    marginBottom: 6,
+    color: COLORS.muted,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  suggestionList: {
+    gap: 6,
+  },
+  suggestionItem: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 10,
+    padding: 10,
+  },
+  suggestionItemActive: {
+    borderWidth: 1,
+    borderColor: COLORS.accent,
+  },
+  suggestionMain: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  suggestionIcon: {
+    fontSize: 18,
+  },
+  suggestionLabel: {
+    color: COLORS.text,
+    fontWeight: "600",
+  },
+  suggestionMeta: {
+    color: COLORS.muted,
+    fontSize: 11,
+  },
+  customSuggestionButton: {
+    marginTop: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.cardAlt,
+    paddingVertical: 8,
+    alignItems: "center",
+  },
+  customSuggestionButtonText: {
+    color: COLORS.accent,
+    fontWeight: "700",
+  },
   typeRow: {
     flexDirection: "row",
     gap: 8,
@@ -7315,19 +7631,6 @@ const styles = StyleSheet.create({
     height: "100%",
     borderRadius: 999,
     backgroundColor: COLORS.accent,
-  },
-  difficultyValuePill: {
-    marginTop: 6,
-    alignSelf: "flex-end",
-    backgroundColor: COLORS.cardAlt,
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-  },
-  sliderValue: {
-    color: COLORS.text,
-    fontWeight: "700",
-    textAlign: "center",
   },
   difficultyButtonsRow: {
     flexDirection: "row",
