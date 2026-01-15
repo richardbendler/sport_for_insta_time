@@ -5,6 +5,7 @@ import {
   View,
   Text,
   Pressable,
+  Switch,
   TextInput,
   ScrollView,
   StyleSheet,
@@ -45,6 +46,7 @@ const DEFAULT_SETTINGS = {
   controlledApps: [],
   language: "en",
   prefaceDelaySeconds: 10,
+  grayscaleRestrictedApps: false,
 };
 
 const SPEECH_LOCALES = {
@@ -374,12 +376,20 @@ const STRINGS = {
     "label.later": "Später",
     "label.apps": "Apps auswählen",
     "label.openApps": "Apps verwalten",
+    "label.grayscaleRestrictedApps": "Eingeschränkte Apps in Schwarz-Weiß",
+    "label.grayscaleRestrictedAppsHint":
+      "Zeigt blockierte Apps in der Liste mit einem Schwarz-Weiß-Stil an.",
     "label.closeApps": "Apps schließen",
     "label.searchApps": "Apps suchen",
     "label.noApps": "Keine Apps gefunden.",
     "label.accessibilityMissing": "Zugriffshilfe fehlt",
     "label.accessibilityActive": "Zugriffshilfe aktiv",
     "label.permissionNeeded": "Zugriffshilfe nötig",
+    "label.accessibilityDisclosureTitle": "Zugriffshilfe erforderlich",
+    "label.accessibilityDisclosureBody":
+      "Wir nutzen die Zugriffshilfe, um die Vordergrund-App zu erkennen und gesperrte Apps zu blockieren. Wir lesen oder teilen keine Inhalte aus deinen Apps.",
+    "label.accessibilityDisclosureConfirm": "Zugriff erlauben",
+    "label.accessibilityDisclosureCancel": "Später",
     "label.hiddenShow": "Versteckte Sportarten anzeigen",
     "label.hiddenHide": "Versteckte Sportarten verbergen",
     "label.screenRateReps": "Screen Time pro Wiederholung (Minuten)",
@@ -404,6 +414,8 @@ const STRINGS = {
     "label.weightFactor": "Faktor (1-10)",
     "label.weightFactorHint":
       "Screen Time = Gewicht × Wdh. × Faktor ÷ 50 (Sekunden).",
+    "label.weightFactorGuide":
+      "Wähle 1–10: nah an 1 für leichte Sets, nah an 10 für schwere oder langsame Wiederholungen.",
     "label.weightEntryButton": "Satz eintragen",
     "label.weightEntryPreview": "Screen Time (Vorschau)",
     "label.weightEntryWeight": "Gewicht (kg)",
@@ -484,6 +496,9 @@ const STRINGS = {
     "tutorial.step.openSettings.title": "Einstellungen \u00f6ffnen",
     "tutorial.step.openSettings.body":
       "Tippe auf Einstellungen f\u00fcr Apps, Berechtigungen und mehr.",
+    "tutorial.step.openApps.title": "Eingeschr\u00e4nkte Apps",
+    "tutorial.step.openApps.body":
+      "Tippe auf Apps, um auszuw\u00e4hlen, welche Anwendungen eingeschr\u00e4nkt bleiben.",
     "tutorial.step.finish.title": "Fertig",
     "tutorial.step.finish.body":
       "Du kannst das Tutorial jederzeit über den Tutorial-Button oben rechts im Tab 'Einzelne Übungen' im Hauptmenü starten.",
@@ -582,6 +597,9 @@ const STRINGS = {
     "label.later": "Later",
     "label.apps": "Choose apps",
     "label.openApps": "Manage apps",
+    "label.grayscaleRestrictedApps": "Show restricted apps in monochrome",
+    "label.grayscaleRestrictedAppsHint":
+      "Render restricted apps in the list with a black-and-white style.",
     "label.closeApps": "Close apps",
     "label.searchApps": "Search apps",
     "label.noApps": "No apps found.",
@@ -617,6 +635,8 @@ const STRINGS = {
     "label.weightFactor": "Factor (1-10)",
     "label.weightFactorHint":
       "Screen time = weight × reps × factor ÷ 50 (seconds).",
+    "label.weightFactorGuide":
+      "Pick 1–10: lower for light sets, higher for slow heavy efforts.",
     "label.weightEntryButton": "Log set",
     "label.weightEntryPreview": "Screen time preview",
     "label.weightEntryWeight": "Weight (kg)",
@@ -693,6 +713,9 @@ const STRINGS = {
     "tutorial.step.openSettings.title": "Open settings",
     "tutorial.step.openSettings.body":
       "Tap Settings to manage apps and permissions.",
+    "tutorial.step.openApps.title": "Restricted apps",
+    "tutorial.step.openApps.body":
+      "Tap Apps to pick which applications you want to restrict.",
     "tutorial.step.finish.title": "All set",
     "tutorial.step.finish.body":
       "You can restart this tutorial anytime from the main menu by tapping the Tutorial button in the top-right of Single exercises.",
@@ -794,6 +817,9 @@ const STRINGS = {
     "label.later": "Más tarde",
     "label.apps": "Elegir apps",
     "label.openApps": "Gestionar apps",
+    "label.grayscaleRestrictedApps": "Mostrar apps restringidas en escala de grises",
+    "label.grayscaleRestrictedAppsHint":
+      "Aplica un estilo en blanco y negro a las apps restringidas en la lista.",
     "label.closeApps": "Cerrar apps",
     "label.searchApps": "Buscar apps",
     "label.noApps": "No se encontraron apps.",
@@ -829,6 +855,8 @@ const STRINGS = {
     "label.weightFactor": "Factor (1-10)",
     "label.weightFactorHint":
       "Tiempo de pantalla = peso × repeticiones × factor ÷ 50 (segundos).",
+    "label.weightFactorGuide":
+      "Elige 1–10: valores bajos para ejercicios ligeros, altos para los más pesados o lentos.",
     "label.weightEntryButton": "Registrar serie",
     "label.weightEntryPreview": "Tiempo de pantalla (vista previa)",
     "label.weightEntryWeight": "Peso (kg)",
@@ -908,6 +936,9 @@ const STRINGS = {
     "tutorial.step.openSettings.title": "Abrir ajustes",
     "tutorial.step.openSettings.body":
       "Toca Ajustes para apps, permisos y mas.",
+    "tutorial.step.openApps.title": "Apps restringidas",
+    "tutorial.step.openApps.body":
+      "Toca Apps para elegir qué aplicaciones quieres restringir.",
     "tutorial.step.finish.title": "Listo",
     "tutorial.step.finish.body": "Puedes reiniciar este tutorial desde el menú principal tocando el botón Tutorial arriba a la derecha en 'Ejercicios individuales'.",
     "tutorial.step.singleExercises.title": "Ejercicios individuales",
@@ -1008,6 +1039,9 @@ const STRINGS = {
     "label.later": "Plus tard",
     "label.apps": "Choisir les apps",
     "label.openApps": "Gerer les apps",
+    "label.grayscaleRestrictedApps": "Afficher les apps restreintes en niveaux de gris",
+    "label.grayscaleRestrictedAppsHint":
+      "Applique un style noir et blanc aux apps restreintes dans la liste.",
     "label.closeApps": "Fermer les apps",
     "label.searchApps": "Rechercher des apps",
     "label.noApps": "Aucune app trouvee.",
@@ -1038,6 +1072,8 @@ const STRINGS = {
     "label.weightFactor": "Facteur (1-10)",
     "label.weightFactorHint":
       "Temps écran = poids × répétitions × facteur ÷ 50 (secondes).",
+    "label.weightFactorGuide":
+      "Choisis 1–10 : bas pour les séries légères, haut pour les efforts lourds ou lents.",
     "label.weightEntryButton": "Enregistrer la série",
     "label.weightEntryPreview": "Aperçu du temps écran",
     "label.weightEntryWeight": "Poids (kg)",
@@ -1117,6 +1153,9 @@ const STRINGS = {
     "tutorial.step.openSettings.title": "Ouvrir les reglages",
     "tutorial.step.openSettings.body":
       "Touche Reglages pour apps, permissions et plus.",
+    "tutorial.step.openApps.title": "Apps restreintes",
+    "tutorial.step.openApps.body":
+      "Touche Apps pour choisir quelles applications restreindre.",
     "tutorial.step.finish.title": "Termine",
     "tutorial.step.finish.body":
       "Tu peux relancer ce tutoriel depuis le menu principal en touchant le bouton Tutoriel en haut à droite de 'Exercices individuels'.",
@@ -1712,6 +1751,8 @@ export default function App() {
   const [workoutDetailId, setWorkoutDetailId] = useState(null);
   const [workoutRunning, setWorkoutRunning] = useState(false);
   const [workoutSeconds, setWorkoutSeconds] = useState(0);
+  const [workoutSessionCount, setWorkoutSessionCount] = useState(0);
+  const workoutTrackingMode = workoutRunning && isWorkoutOpen;
   const [showHidden, setShowHidden] = useState(false);
   const [newName, setNewName] = useState("");
   const [newType, setNewType] = useState("reps");
@@ -1788,6 +1829,7 @@ export default function App() {
   const tutorialWorkoutNavRef = useRef(null);
   const tutorialAddSportRef = useRef(null);
   const tutorialSettingsCardRef = useRef(null);
+  const tutorialAppsButtonRef = useRef(null);
 
   const t = (key) => {
     const dict = STRINGS[language] || STRINGS.de;
@@ -2734,9 +2776,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     checkAccessibility();
     checkUsageAccess();
     refreshNotificationPermission();
-    if (isSettingsOpen) {
-      maybePromptNotifications();
-    }
   }, [isSettingsOpen, statsSportId]);
 
   useEffect(() => {
@@ -2884,6 +2923,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
   };
 
+  const toggleGrayscaleRestrictedApps = async () => {
+    const nextSettings = {
+      ...settings,
+      grayscaleRestrictedApps: !settings.grayscaleRestrictedApps,
+    };
+    await saveSettings(nextSettings);
+  };
+
   const openPrefaceSettings = () => {
     const delay = Number.isFinite(settings.prefaceDelaySeconds)
       ? settings.prefaceDelaySeconds
@@ -2962,7 +3009,13 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
 
   const handleBackFromSport = () => {
     setSelectedSportId(null);
+    setWorkoutSessionCount(0);
     maybeAdvanceTutorial("backHome");
+  };
+
+  const openAppsSettings = () => {
+    setIsAppsSettingsOpen(true);
+    maybeAdvanceTutorial("openApps");
   };
 
   const startTutorial = () => {
@@ -2972,10 +3025,16 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   };
 
   const finishTutorial = async () => {
+    openHome();
     setTutorialStepIndex(null);
     setTutorialTarget(null);
     setTutorialSeen(true);
     await AsyncStorage.setItem(STORAGE_KEYS.tutorialSeen, "true");
+  };
+
+  const completeTutorial = async () => {
+    await finishTutorial();
+    await maybePromptNotifications();
   };
 
   const renderTutorialHeaderButton = () => (
@@ -3129,6 +3188,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     });
     workoutStartRef.current = now;
     setWorkoutSeconds(0);
+    setWorkoutSessionCount(0);
     setWorkoutRunning(true);
     setWorkoutDetailId(null);
   };
@@ -3229,6 +3289,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     const currentSport = selectedSportRef.current;
     if (!currentSport || currentSport.type !== "reps") {
       return;
+    }
+    if (workoutTrackingMode) {
+      recordWorkoutExercise(currentSport);
+      setWorkoutSessionCount((prev) => prev + 1);
     }
     addLogEntry(currentSport, {
       ts: Date.now(),
@@ -3509,6 +3573,16 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       actionId: "openSettings",
       requiresAction: true,
     });
+    if (Platform.OS === "android") {
+      steps.push({
+        id: "openApps",
+        titleKey: "tutorial.step.openApps.title",
+        bodyKey: "tutorial.step.openApps.body",
+        targetRef: tutorialAppsButtonRef,
+        actionId: "openApps",
+        requiresAction: true,
+      });
+    }
     steps.push({
       id: "finish",
       titleKey: "tutorial.step.finish.title",
@@ -3583,7 +3657,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
     const nextIndex = (tutorialStepIndex ?? 0) + 1;
     if (nextIndex >= tutorialSteps.length) {
-      finishTutorial();
+      completeTutorial();
       return;
     }
     setTutorialStepIndex(nextIndex);
@@ -3598,7 +3672,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
     const nextIndex = (tutorialStepIndex ?? 0) + 1;
     if (nextIndex >= tutorialSteps.length) {
-      finishTutorial();
+      completeTutorial();
       return;
     }
     setTutorialStepIndex(nextIndex);
@@ -3702,23 +3776,20 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     };
     const highlightPadding =
       paddingByStep[tutorialStep.titleKey] ?? basePadding;
-    const sizeScaleByStep = {
-      "tutorial.step.addSport.title": 0.35,
-      "tutorial.step.track.title": 0.15,
+    const minWidthByStep = {
+      "tutorial.step.track.title": 48,
     };
-    const sizeScale = sizeScaleByStep[tutorialStep.titleKey] ?? 1;
-    const minSizeByStep = {
-      "tutorial.step.track.title": 18,
+    const minHeightByStep = {
+      "tutorial.step.track.title": 32,
     };
-    const minSize = minSizeByStep[tutorialStep.titleKey] ?? 24;
-    const baseSize = hasTarget
-      ? Math.max(
-          target.width + highlightPadding * 2,
-          target.height + highlightPadding * 2,
-          minSize
-        )
-      : minSize;
-    const size = hasTarget ? Math.max(minSize, baseSize * sizeScale) : 0;
+    const minHighlightWidth = minWidthByStep[tutorialStep.titleKey] ?? 56;
+    const minHighlightHeight = minHeightByStep[tutorialStep.titleKey] ?? 40;
+    const highlightWidth = hasTarget
+      ? Math.max(target.width + highlightPadding * 2, minHighlightWidth)
+      : 64;
+    const highlightHeight = hasTarget
+      ? Math.max(target.height + highlightPadding * 2, minHighlightHeight)
+      : 64;
     const offsetYByStep = {
       "tutorial.step.back.title": 24,
       "tutorial.step.openSettings.title": 24,
@@ -3726,46 +3797,106 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     const offsetXByStep = {
       // Additional horizontal adjustments can be added here.
     };
-    const centerX = hasTarget
+    const rawCenterX = hasTarget
       ? target.x + target.width / 2 + (offsetXByStep[tutorialStep.titleKey] ?? 0)
       : width / 2;
-    const centerY = hasTarget
+    const rawCenterY = hasTarget
       ? target.y + target.height / 2 + (offsetYByStep[tutorialStep.titleKey] ?? 0)
       : height / 2;
-    const horizontalMax = Math.max(width - size, 0);
-    const verticalMax = Math.max(height - size, 0);
-    const highlightLeft = hasTarget
-      ? Math.min(Math.max(centerX - size / 2, 0), horizontalMax)
-      : Math.max(0, Math.min(width - size, width / 2 - size / 2));
-    const highlightTop = hasTarget
-      ? Math.min(Math.max(centerY - size / 2, 0), verticalMax)
-      : Math.max(0, Math.min(height - size, height / 2 - size / 2));
+    const horizontalMax = Math.max(width - highlightWidth, 0);
+    const verticalMax = Math.max(height - highlightHeight, 0);
+    const highlightLeft = Math.min(
+      Math.max(rawCenterX - highlightWidth / 2, 0),
+      horizontalMax
+    );
+    const highlightTop = Math.min(
+      Math.max(rawCenterY - highlightHeight / 2, 0),
+      verticalMax
+    );
+    const centerX = highlightLeft + highlightWidth / 2;
+    const centerY = highlightTop + highlightHeight / 2;
     const cardWidth = Math.min(320, width - 32);
     const estimatedCardHeight = tutorialCardHeight || 160;
-    const spaceAbove = centerY - size / 2 - 12;
-    const spaceBelow = height - (centerY + size / 2) - 12;
+    const spaceAbove = centerY - highlightHeight / 2 - 12;
+    const spaceBelow = height - (centerY + highlightHeight / 2) - 12;
     const preferBelow = spaceBelow >= estimatedCardHeight || spaceBelow >= spaceAbove;
     const exitButtonSafe = 72;
     const maxTop = Math.max(16, height - estimatedCardHeight - exitButtonSafe);
     let cardTop = preferBelow
-      ? centerY + (hasTarget ? size / 2 + 12 : 0)
-      : centerY - (hasTarget ? size / 2 + 12 : 0) - estimatedCardHeight;
+      ? centerY + highlightHeight / 2 + 12
+      : centerY - highlightHeight / 2 - 12 - estimatedCardHeight;
     cardTop = Math.min(maxTop, Math.max(16, cardTop));
     const cardLeft = Math.min(
       width - cardWidth - 16,
       Math.max(16, centerX - cardWidth / 2)
     );
+    const highlightBottom = highlightTop + highlightHeight;
+    const highlightRight = highlightLeft + highlightWidth;
+    const blockingResponder = { onStartShouldSetResponder: () => true };
+    const renderBlockingAreas = () => {
+      if (!hasTarget) {
+        return (
+          <View
+            style={[styles.tutorialBlockingLayer, StyleSheet.absoluteFillObject]}
+            {...blockingResponder}
+          />
+        );
+      }
+      return (
+        <>
+          <View
+            style={[
+              styles.tutorialBlockingLayer,
+              { left: 0, right: 0, top: 0, height: highlightTop },
+            ]}
+            {...blockingResponder}
+          />
+          <View
+            style={[
+              styles.tutorialBlockingLayer,
+              { left: 0, right: 0, top: highlightBottom, bottom: 0 },
+            ]}
+            {...blockingResponder}
+          />
+          <View
+            style={[
+              styles.tutorialBlockingLayer,
+              {
+                left: 0,
+                top: highlightTop,
+                width: highlightLeft,
+                height: highlightHeight,
+              },
+            ]}
+            {...blockingResponder}
+          />
+          <View
+            style={[
+              styles.tutorialBlockingLayer,
+              {
+                top: highlightTop,
+                left: highlightRight,
+                right: 0,
+                height: highlightHeight,
+              },
+            ]}
+            {...blockingResponder}
+          />
+        </>
+      );
+    };
+
     return (
-      <View style={styles.tutorialOverlay} pointerEvents="box-none">
+      <View style={styles.tutorialOverlay} pointerEvents="auto">
+        {renderBlockingAreas()}
         <View style={styles.tutorialBackdrop} pointerEvents="none" />
         {hasTarget ? (
           <View
             style={[
               styles.tutorialHighlight,
               {
-                width: size,
-                height: size,
-                borderRadius: size / 2,
+                width: highlightWidth,
+                height: highlightHeight,
                 left: highlightLeft,
                 top: highlightTop,
               },
@@ -3791,7 +3922,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             {!tutorialStep.requiresAction ? (
               <Pressable
                 style={[styles.tutorialActionButton, styles.tutorialActionPrimary]}
-                onPress={isTutorialLastStep ? finishTutorial : advanceTutorial}
+                onPress={isTutorialLastStep ? completeTutorial : advanceTutorial}
               >
                 <Text style={styles.tutorialActionPrimaryText}>
                   {isTutorialLastStep ? t("tutorial.cta.done") : t("tutorial.cta.next")}
@@ -3810,6 +3941,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
     return getRollingStats(logs, selectedSport.id);
   }, [logs, selectedSport]);
+
+  const workoutDisplayReps = workoutTrackingMode ? workoutSessionCount : todayStats.reps;
 
   const aiTodayStats = useMemo(() => {
     if (!aiSport) {
@@ -3894,6 +4027,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       }
     }
   }, [selectedSport, voiceEnabled]);
+
+  useEffect(() => {
+    if (selectedSportId === null) {
+      setWorkoutSessionCount(0);
+    }
+  }, [selectedSportId]);
 
   useEffect(() => {
     return () => {
@@ -4547,7 +4686,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             </Pressable>
             <View style={styles.headerTitleRow}>
               <Text style={styles.headerIcon}>{selectedSport.icon || DEFAULT_ICON}</Text>
-              <Text style={styles.headerTitle}>{getSportLabel(selectedSport)}</Text>
+              <Text
+                style={styles.headerTitle}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.75}
+              >
+                {getSportLabel(selectedSport)}
+              </Text>
             </View>
           </View>
           <Pressable
@@ -4581,7 +4727,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             ref={tutorialTrackingAreaRef}
             onPress={incrementReps}
           >
-            <Text style={styles.counterValue}>{todayStats.reps}</Text>
+            <Text style={styles.counterValue}>{workoutDisplayReps}</Text>
             <Text style={styles.plusSign}>+</Text>
             <Text style={styles.helperText}>{t("label.tapAnywhere")}</Text>
             <View style={styles.voiceRow}>
@@ -4685,7 +4831,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             <Text style={styles.counterValue}>
               {formatSeconds(todayStats.seconds + sessionSeconds)}
             </Text>
-            <Text style={styles.helperText}>{t("label.today")}</Text>
+            <Text style={[styles.helperText, styles.trackingHelperText]}>
+              {t("label.today")}
+            </Text>
             <View style={styles.timerRow}>
               {!running ? (
                 <Pressable style={styles.primaryButton} onPress={handleStart}>
@@ -4698,7 +4846,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               )}
             </View>
             {running ? (
-              <Text style={styles.helperText}>
+              <Text style={[styles.helperText, styles.trackingHelperText]}>
                 {t("label.runningSession")}: {formatSeconds(sessionSeconds)}
               </Text>
             ) : null}
@@ -4891,17 +5039,47 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 const enabled = settings.controlledApps.includes(app.packageName);
                 const usageMs = appUsageMap[app.packageName] || 0;
                 const usageMinutes = Math.floor(usageMs / 60000);
+                const grayscaleActive = settings.grayscaleRestrictedApps && enabled;
                 return (
                   <Pressable
                     key={app.packageName}
-                    style={[styles.appRow, enabled && styles.appRowActive]}
+                    style={[
+                      styles.appRow,
+                      enabled && styles.appRowActive,
+                      grayscaleActive && styles.appRowGrayscale,
+                    ]}
                     onPress={() => toggleControlledApp(app.packageName)}
                   >
-                    <Text style={styles.appLabel}>{app.label}</Text>
-                    <Text style={styles.appPackage}>{app.packageName}</Text>
-                    <Text style={styles.appUsageText}>{usageMinutes} min</Text>
                     <Text
-                      style={[styles.appToggle, enabled && styles.appToggleActive]}
+                      style={[
+                        styles.appLabel,
+                        grayscaleActive && styles.grayscaleText,
+                      ]}
+                    >
+                      {app.label}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.appPackage,
+                        grayscaleActive && styles.grayscaleText,
+                      ]}
+                    >
+                      {app.packageName}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.appUsageText,
+                        grayscaleActive && styles.grayscaleText,
+                      ]}
+                    >
+                      {usageMinutes} min
+                    </Text>
+                    <Text
+                      style={[
+                        styles.appToggle,
+                        enabled && styles.appToggleActive,
+                        grayscaleActive && styles.grayscaleText,
+                      ]}
                     >
                       {enabled ? t("label.active") : t("label.off")}
                     </Text>
@@ -4997,15 +5175,35 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               <Text style={styles.helperText}>{t("label.androidOnly")}</Text>
             ) : (
                 <Pressable
+                  ref={tutorialAppsButtonRef}
                   style={styles.secondaryButton}
-                  onPress={() => setIsAppsSettingsOpen(true)}
+                  onPress={openAppsSettings}
                 >
-                  <Text style={styles.secondaryButtonText}>
-                    {t("label.openApps")}
-                  </Text>
-                </Pressable>
-              )}
+                <Text style={styles.secondaryButtonText}>
+                  {t("label.openApps")}
+                </Text>
+              </Pressable>
+            )}
+            <View style={styles.settingsSwitchRow}>
+              <Text style={styles.settingsSwitchLabel}>
+                {t("label.grayscaleRestrictedApps")}
+              </Text>
+              <Switch
+                value={!!settings.grayscaleRestrictedApps}
+                onValueChange={toggleGrayscaleRestrictedApps}
+                trackColor={{
+                  true: "rgba(245, 158, 11, 0.4)",
+                  false: "rgba(148, 163, 184, 0.2)",
+                }}
+                thumbColor={
+                  settings.grayscaleRestrictedApps ? COLORS.ember : "#f4f3f4"
+                }
+              />
             </View>
+            <Text style={styles.helperText}>
+              {t("label.grayscaleRestrictedAppsHint")}
+            </Text>
+          </View>
           <View style={styles.settingsDivider} />
           <Text style={styles.settingsSectionTitle}>
             {t("label.prefaceSettings")}
@@ -5314,8 +5512,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 style={[styles.sportCard, { width: cardWidth }]}
                 ref={sport.id === tutorialSportId ? tutorialFirstSportRef : undefined}
               >
-                <View style={styles.cardActionsOverlay}>
-                  <View style={styles.cardActionsLeft}>
+                <View style={styles.sportTopRow}>
+                  <View style={styles.sportTopIconsLeft}>
                     <Pressable
                       style={styles.iconAction}
                       onPress={() => setStatsSportId(sport.id)}
@@ -5329,7 +5527,22 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                       <Text style={styles.iconActionText}>🛠</Text>
                     </Pressable>
                   </View>
-                  <View style={styles.cardActionsRight}>
+                  <View style={styles.sportTopTitleCenter}>
+                    <View style={styles.sportTitleCenterRow}>
+                      <Text style={styles.sportIcon}>
+                        {sport.icon || DEFAULT_ICON}
+                      </Text>
+                      <Text style={styles.sportName} numberOfLines={1}>
+                        {sportLabel}
+                      </Text>
+                      {sport.supportsAi ? (
+                        <View style={styles.aiBadge}>
+                          <Text style={styles.aiBadgeText}>AI</Text>
+                        </View>
+                      ) : null}
+                    </View>
+                  </View>
+                  <View style={styles.sportTopIconsRight}>
                     <Pressable
                       style={styles.iconAction}
                       onPress={() =>
@@ -5359,40 +5572,23 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                   onPress={() => handleSelectSport(sport.id)}
                 >
                   <View style={styles.sportInfo}>
-                    <View style={styles.sportTitleRow}>
-                      <View style={styles.sportTitleLeft}>
-                        <View style={styles.sportTitleMainRow}>
-                          <Text style={styles.sportIcon}>
-                            {sport.icon || DEFAULT_ICON}
-                          </Text>
-                          <Text style={styles.sportName} numberOfLines={1}>
-                            {sportLabel}
-                          </Text>
-                          {sport.supportsAi ? (
-                            <View style={styles.aiBadge}>
-                              <Text style={styles.aiBadgeText}>AI</Text>
-                            </View>
-                          ) : null}
-                        </View>
-                        <Text style={styles.screenTimeLabel}>
-                          {t("label.screenTime")}:{" "}
-                          {formatScreenTime(daily.screenSeconds || 0)}
+                    <View style={styles.sportCounterRow}>
+                      <Pressable
+                        style={[styles.secondaryButton, styles.widgetButton]}
+                        onPress={() =>
+                          InstaControl?.requestPinWidget?.(sport.id, sportLabel)
+                        }
+                      >
+                        <Text
+                          style={[styles.secondaryButtonText, styles.widgetButtonText]}
+                        >
+                          {widgetIcon}
+                          {"\n"}
+                          {t("label.widget")}
                         </Text>
-                        <View style={styles.sportBadges}>
-                          <View style={styles.sportBadge}>
-                            <Text style={styles.sportBadgeText}>{todayBadgeText}</Text>
-                          </View>
-                          {remainingBadgeText ? (
-                            <View style={styles.sportBadge}>
-                              <Text style={styles.sportBadgeText}>
-                                {remainingBadgeText}
-                              </Text>
-                            </View>
-                          ) : null}
-                        </View>
-                      </View>
-                      <View style={styles.sportCounterColumn}>
-                        <View style={styles.counterBlock}>
+                      </Pressable>
+                      <View style={styles.sportCounterCenter}>
+                        <View style={[styles.counterBlock, styles.sportCounterBlock]}>
                           <Text style={styles.counterLabel}>{t("label.today")}</Text>
                           <Text style={styles.counterValueSmall}>
                             {sport.type === "reps"
@@ -5404,35 +5600,41 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                           </Text>
                         </View>
                       </View>
+                      <View style={styles.moveButtonColumn}>
+                        <Pressable
+                          style={styles.iconAction}
+                          onPress={() => moveSport(sport.id, -1)}
+                        >
+                          <Text style={styles.iconActionText}>↑</Text>
+                        </Pressable>
+                        <Pressable
+                          style={[styles.iconAction, styles.moveButtonArrow]}
+                          onPress={() => moveSport(sport.id, 1)}
+                        >
+                          <Text style={styles.iconActionText}>↓</Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                    <View style={styles.earnedTimeRow}>
+                      <Text style={styles.earnedTimeText}>
+                        {t("label.screenTime")}:{" "}
+                        {formatScreenTime(daily.screenSeconds || 0)}
+                      </Text>
+                    </View>
+                    <View style={styles.sportBadges}>
+                      <View style={styles.sportBadge}>
+                        <Text style={styles.sportBadgeText}>{todayBadgeText}</Text>
+                      </View>
+                      {remainingBadgeText ? (
+                        <View style={styles.sportBadge}>
+                          <Text style={styles.sportBadgeText}>
+                            {remainingBadgeText}
+                          </Text>
+                        </View>
+                      ) : null}
                     </View>
                   </View>
                 </Pressable>
-                <View style={styles.cardActions}>
-                  <Pressable
-                    style={[styles.secondaryButton, styles.fullWidthButton]}
-                    onPress={() =>
-                      InstaControl?.requestPinWidget?.(sport.id, sportLabel)
-                    }
-                  >
-                    <Text style={styles.secondaryButtonText}>
-                      {widgetIcon} {t("label.widget")}
-                    </Text>
-                  </Pressable>
-                  <View style={styles.cardActionsBottom}>
-                    <Pressable
-                      style={styles.iconAction}
-                      onPress={() => moveSport(sport.id, -1)}
-                    >
-                      <Text style={styles.iconActionText}>↑</Text>
-                    </Pressable>
-                    <Pressable
-                      style={styles.iconAction}
-                      onPress={() => moveSport(sport.id, 1)}
-                    >
-                      <Text style={styles.iconActionText}>↓</Text>
-                    </Pressable>
-                  </View>
-                </View>
               </View>
             );
           })}
@@ -5476,8 +5678,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                     key={sport.id}
                     style={[styles.sportCard, styles.hiddenCard, { width: cardWidth }]}
                   >
-                    <View style={styles.cardActionsOverlay}>
-                      <View style={styles.cardActionsLeft}>
+                    <View style={styles.sportTopRow}>
+                      <View style={styles.sportTopIconsLeft}>
                         <Pressable
                           style={styles.iconAction}
                           onPress={() => setStatsSportId(sport.id)}
@@ -5491,7 +5693,22 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                           <Text style={styles.iconActionText}>🛠</Text>
                         </Pressable>
                       </View>
-                      <View style={styles.cardActionsRight}>
+                      <View style={styles.sportTopTitleCenter}>
+                        <View style={styles.sportTitleCenterRow}>
+                          <Text style={styles.sportIcon}>
+                            {sport.icon || DEFAULT_ICON}
+                          </Text>
+                          <Text style={styles.sportName} numberOfLines={1}>
+                            {sportLabel}
+                          </Text>
+                          {sport.supportsAi ? (
+                            <View style={styles.aiBadge}>
+                              <Text style={styles.aiBadgeText}>AI</Text>
+                            </View>
+                          ) : null}
+                        </View>
+                      </View>
+                      <View style={styles.sportTopIconsRight}>
                         <Pressable
                           style={[styles.iconAction, styles.iconActionWithLabel]}
                           onPress={() =>
@@ -5524,86 +5741,71 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                       onPress={() => handleSelectSport(sport.id)}
                     >
                       <View style={styles.sportInfo}>
-                        <View style={styles.sportTitleRow}>
-                          <View style={styles.sportTitleLeft}>
-                            <View style={styles.sportTitleMainRow}>
-                              <Text style={styles.sportIcon}>
-                                {sport.icon || DEFAULT_ICON}
-                              </Text>
-                              <Text style={styles.sportName} numberOfLines={1}>
-                                {sportLabel}
-                              </Text>
-                              {sport.supportsAi ? (
-                                <View style={styles.aiBadge}>
-                                  <Text style={styles.aiBadgeText}>AI</Text>
-                                </View>
-                              ) : null}
-                            </View>
-                            <Text style={styles.screenTimeLabel}>
-                              {t("label.screenTime")}:{" "}
-                              {formatScreenTime(daily.screenSeconds || 0)}
-                            </Text>
-                            <View style={styles.sportBadges}>
-                              <View style={styles.sportBadge}>
-                                <Text style={styles.sportBadgeText}>
-                                  {todayBadgeText}
-                                </Text>
-                              </View>
-                              {remainingBadgeText ? (
-                                <View style={styles.sportBadge}>
-                                  <Text style={styles.sportBadgeText}>
-                                    {remainingBadgeText}
-                                  </Text>
-                                </View>
-                              ) : null}
-                            </View>
-                          </View>
-                          <View style={styles.sportCounterColumn}>
-                            <View style={styles.counterBlock}>
-                              <Text style={styles.counterLabel}>
-                                {t("label.today")}
-                              </Text>
+                        <View style={styles.sportCounterRow}>
+                    <Pressable
+                      style={[styles.secondaryButton, styles.widgetButton]}
+                      onPress={() =>
+                        InstaControl?.requestPinWidget?.(sport.id, sportLabel)
+                      }
+                    >
+                      <Text
+                        style={[styles.secondaryButtonText, styles.widgetButtonText]}
+                      >
+                        {widgetIcon}
+                        {"\n"}
+                        {t("label.widget")}
+                      </Text>
+                    </Pressable>
+                          <View style={styles.sportCounterCenter}>
+                            <View style={[styles.counterBlock, styles.sportCounterBlock]}>
+                              <Text style={styles.counterLabel}>{t("label.today")}</Text>
                               <Text style={styles.counterValueSmall}>
                                 {sport.type === "reps"
                                   ? `${daily.reps}`
                                   : formatSeconds(daily.seconds || 0)}
                               </Text>
                               <Text style={styles.counterUnit}>
-                                {sport.type === "reps"
-                                  ? repsShort
-                                  : t("label.timeUnit")}
+                                {sport.type === "reps" ? repsShort : t("label.timeUnit")}
                               </Text>
                             </View>
                           </View>
+                          <View style={styles.moveButtonColumn}>
+                            <Pressable
+                              style={styles.iconAction}
+                              onPress={() => moveSport(sport.id, -1)}
+                            >
+                              <Text style={styles.iconActionText}>↑</Text>
+                            </Pressable>
+                            <Pressable
+                              style={[styles.iconAction, styles.moveButtonArrow]}
+                              onPress={() => moveSport(sport.id, 1)}
+                            >
+                              <Text style={styles.iconActionText}>↓</Text>
+                            </Pressable>
+                          </View>
+                        </View>
+                        <View style={styles.earnedTimeRow}>
+                          <Text style={styles.earnedTimeText}>
+                            {t("label.screenTime")}:{" "}
+                            {formatScreenTime(daily.screenSeconds || 0)}
+                          </Text>
+                        </View>
+                        <View style={styles.sportBadges}>
+                          <View style={styles.sportBadge}>
+                            <Text style={styles.sportBadgeText}>
+                              {todayBadgeText}
+                            </Text>
+                          </View>
+                          {remainingBadgeText ? (
+                            <View style={styles.sportBadge}>
+                              <Text style={styles.sportBadgeText}>
+                                {remainingBadgeText}
+                              </Text>
+                            </View>
+                          ) : null}
                         </View>
                       </View>
                     </Pressable>
-                    <View style={styles.cardActions}>
-                      <Pressable
-                        style={[styles.secondaryButton, styles.fullWidthButton]}
-                        onPress={() =>
-                          InstaControl?.requestPinWidget?.(sport.id, sportLabel)
-                        }
-                      >
-                        <Text style={styles.secondaryButtonText}>
-                          {widgetIcon} {t("label.widget")}
-                        </Text>
-                      </Pressable>
-                      <View style={styles.cardActionsBottom}>
-                        <Pressable
-                          style={styles.iconAction}
-                          onPress={() => moveSport(sport.id, -1)}
-                        >
-                          <Text style={styles.iconActionText}>↑</Text>
-                        </Pressable>
-                        <Pressable
-                          style={styles.iconAction}
-                          onPress={() => moveSport(sport.id, 1)}
-                        >
-                          <Text style={styles.iconActionText}>↓</Text>
-                        </Pressable>
-                      </View>
-                    </View>
                   </View>
                 );
               })
@@ -5898,6 +6100,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                     <Text style={styles.weightHintText}>
                       {t("label.weightFactorHint")}
                     </Text>
+                    <Text style={styles.weightGuideText}>
+                      {t("label.weightFactorGuide")}
+                    </Text>
                   </>
                 ) : null}
               </>
@@ -6016,6 +6221,18 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     textTransform: "uppercase",
     letterSpacing: 0.5,
+  },
+  settingsSwitchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 12,
+  },
+  settingsSwitchLabel: {
+    color: COLORS.text,
+    fontWeight: "600",
+    flex: 1,
+    marginRight: 8,
   },
   settingsDivider: {
     height: 1,
@@ -6173,6 +6390,7 @@ const styles = StyleSheet.create({
     fontSize: 56,
     color: COLORS.text,
     fontWeight: "700",
+    textAlign: "center",
   },
   plusSign: {
     fontSize: 72,
@@ -6182,6 +6400,9 @@ const styles = StyleSheet.create({
   helperText: {
     marginTop: 12,
     color: COLORS.muted,
+  },
+  trackingHelperText: {
+    textAlign: "center",
   },
   voiceRow: {
     marginTop: 16,
@@ -6266,20 +6487,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: COLORS.text,
   },
-  sportTitleRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  sportTitleLeft: {
-    flex: 1,
-  },
-  sportTitleMainRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
   sportBadges: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -6344,15 +6551,6 @@ const styles = StyleSheet.create({
     color: "#3a332a",
     fontSize: 10,
     marginTop: 2,
-  },
-  sportCounterColumn: {
-    minWidth: 110,
-    alignItems: "flex-end",
-  },
-  screenTimeLabel: {
-    color: COLORS.muted,
-    fontSize: 12,
-    marginTop: 6,
   },
   rateLabel: {
     color: COLORS.muted,
@@ -6569,32 +6767,28 @@ const styles = StyleSheet.create({
     marginTop: 6,
     color: COLORS.muted,
   },
-  cardActions: {
-    flexDirection: "column",
-    flexWrap: "wrap",
-    gap: 6,
-    alignItems: "stretch",
-  },
-  cardActionsOverlay: {
+  sportTopRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 8,
-    paddingHorizontal: 4,
   },
-  cardActionsLeft: {
+  sportTopIconsLeft: {
     flexDirection: "row",
     gap: 6,
   },
-  cardActionsRight: {
+  sportTopTitleCenter: {
+    flex: 1,
+    alignItems: "center",
+  },
+  sportTopIconsRight: {
     flexDirection: "row",
     gap: 6,
   },
-  cardActionsBottom: {
+  sportTitleCenterRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    justifyContent: "center",
   },
   iconAction: {
     backgroundColor: COLORS.cardAlt,
@@ -6618,6 +6812,55 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     fontSize: 10,
     fontWeight: "700",
+  },
+  sportCounterRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    gap: 12,
+    marginBottom: 8,
+  },
+  sportCounterBlock: {
+    flex: 0,
+    minWidth: 100,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    backgroundColor: COLORS.white,
+  },
+  sportCounterCenter: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sportActionRow: {
+    flex: 1,
+    alignItems: "flex-end",
+  },
+  widgetButton: {
+    minWidth: 130,
+    borderRadius: 999,
+    paddingVertical: 10,
+    marginBottom: 6,
+  },
+  moveButtonRow: {
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "flex-end",
+  },
+  moveButtonColumn: {
+    justifyContent: "flex-end",
+    alignItems: "flex-end",
+  },
+  moveButtonArrow: {
+    marginTop: 4,
+  },
+  earnedTimeRow: {
+    marginBottom: 6,
+  },
+  earnedTimeText: {
+    color: COLORS.muted,
+    fontSize: 12,
   },
   primaryButton: {
     backgroundColor: COLORS.ember,
@@ -6670,6 +6913,9 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     fontWeight: "600",
     fontSize: 11,
+  },
+  widgetButtonText: {
+    textAlign: "center",
   },
   dangerButton: {
     backgroundColor: COLORS.danger,
@@ -6771,6 +7017,11 @@ const styles = StyleSheet.create({
     color: COLORS.muted,
     fontSize: 11,
     marginTop: 4,
+    marginBottom: 8,
+  },
+  weightGuideText: {
+    color: COLORS.muted,
+    fontSize: 11,
     marginBottom: 8,
   },
   hiddenSection: {
@@ -7182,6 +7433,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.accentDark,
   },
+  appRowGrayscale: {
+    backgroundColor: "rgba(148, 163, 184, 0.06)",
+  },
+  grayscaleText: {
+    color: COLORS.muted,
+  },
   appLabel: {
     color: COLORS.text,
     fontWeight: "600",
@@ -7368,6 +7625,10 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(2, 6, 23, 0.72)",
   },
+  tutorialBlockingLayer: {
+    position: "absolute",
+    backgroundColor: "transparent",
+  },
   tutorialExitButton: {
     position: "absolute",
     left: 24,
@@ -7391,6 +7652,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: COLORS.accent,
     backgroundColor: "rgba(245, 158, 11, 0.12)",
+    borderRadius: 8,
   },
   tutorialCard: {
     position: "absolute",
