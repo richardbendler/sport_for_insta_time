@@ -9862,19 +9862,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 </Text>
               </View>
             )}
-            <Text style={styles.rateLabel}>
-              {newType === "reps"
-                ? t("label.screenRateReps")
-                : t("label.screenRateTime")}
-            </Text>
-            <TextInput
-              style={styles.input}
-              value={newRateMinutes}
-              onChangeText={setNewRateMinutes}
-              placeholder="1"
-              keyboardType="decimal-pad"
-              placeholderTextColor="#7a7a7a"
-            />
             <Text style={styles.typeHelpText}>{t("label.typeHelp")}</Text>
             <View style={styles.typeRow}>
               <Pressable
