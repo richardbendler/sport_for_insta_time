@@ -237,6 +237,7 @@ const PRESET_KEYS = {
   pushups: "pushups",
 };
 const STANDARD_SPORTS = [
+
 ﻿  {
     id: "barbell_bench_press",
     labels: {
@@ -3072,7 +3073,7 @@ const STANDARD_SPORTS = [
     difficultyLevel: 4,
   },
   {
-    id: "kettlebell_deadlift",
+    id: "kettlebell_deadlift_2",
     labels: {
       de: "Kettlebell Deadlift",
       en: "Kettlebell Deadlift",
@@ -3358,7 +3359,7 @@ const STANDARD_SPORTS = [
     difficultyLevel: 10,
   },
   {
-    id: "dumbbell_tricep_kickback",
+    id: "dumbbell_tricep_kickback_2",
     labels: {
       de: "Dumbbell Tricep Kickback",
       en: "Dumbbell Tricep Kickback",
@@ -3747,6 +3748,7 @@ const STANDARD_SPORTS = [
     defaultRateMinutes: 5,
     difficultyLevel: 8,
   },
+
 ];
 const getStandardSportLabel = (entry, language) =>
   entry.labels?.[language] || entry.labels?.en || entry.id;
