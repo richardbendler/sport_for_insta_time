@@ -285,6 +285,39 @@ const COLORS = {
   white: "#f8fafc",
 };
 
+const SportTitleSlots = ({ sport, sportLabel }) => {
+  const [slotWidth, setSlotWidth] = useState(0);
+  const updateSlotWidth = useCallback((width) => {
+    setSlotWidth((prev) => Math.max(prev, width));
+  }, []);
+  const slotStyle = slotWidth ? { width: slotWidth } : undefined;
+  return (
+    <View style={styles.sportTitleCenterRow}>
+      <View
+        style={[styles.titleSideSlot, slotStyle]}
+        onLayout={(event) => updateSlotWidth(event.nativeEvent.layout.width)}
+      >
+        <Text style={styles.sportIcon}>{sport.icon || DEFAULT_ICON}</Text>
+      </View>
+      <Text style={styles.sportName} numberOfLines={1}>
+        {sportLabel}
+      </Text>
+      <View
+        style={[styles.titleSideSlot, slotStyle]}
+        onLayout={(event) => updateSlotWidth(event.nativeEvent.layout.width)}
+      >
+        {sport.supportsAi ? (
+          <View style={styles.aiBadge}>
+            <Text style={styles.aiBadgeText}>AI</Text>
+          </View>
+        ) : (
+          <View style={styles.aiBadgePlaceholder} />
+        )}
+      </View>
+    </View>
+  );
+};
+
 const STRINGS = {
   de: {
     "app.title": "Sport für Screen Time",
@@ -5537,19 +5570,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                     </Pressable>
                   </View>
                   <View style={styles.sportTopTitleCenter}>
-                    <View style={styles.sportTitleCenterRow}>
-                      <Text style={styles.sportIcon}>
-                        {sport.icon || DEFAULT_ICON}
-                      </Text>
-                      <Text style={styles.sportName} numberOfLines={1}>
-                        {sportLabel}
-                      </Text>
-                      {sport.supportsAi ? (
-                        <View style={styles.aiBadge}>
-                          <Text style={styles.aiBadgeText}>AI</Text>
-                        </View>
-                      ) : null}
-                    </View>
+                    <SportTitleSlots sport={sport} sportLabel={sportLabel} />
                   </View>
                   <View style={styles.sportTopIconsRight}>
                     <Pressable
@@ -5703,19 +5724,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                         </Pressable>
                       </View>
                       <View style={styles.sportTopTitleCenter}>
-                        <View style={styles.sportTitleCenterRow}>
-                          <Text style={styles.sportIcon}>
-                            {sport.icon || DEFAULT_ICON}
-                          </Text>
-                          <Text style={styles.sportName} numberOfLines={1}>
-                            {sportLabel}
-                          </Text>
-                          {sport.supportsAi ? (
-                            <View style={styles.aiBadge}>
-                              <Text style={styles.aiBadgeText}>AI</Text>
-                            </View>
-                          ) : null}
-                        </View>
+                        <SportTitleSlots sport={sport} sportLabel={sportLabel} />
                       </View>
                       <View style={styles.sportTopIconsRight}>
                         <Pressable
@@ -6548,6 +6557,10 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     letterSpacing: 0.6,
   },
+  aiBadgePlaceholder: {
+    width: 0,
+    height: 0,
+  },
   sportIcon: {
     fontSize: 18,
   },
@@ -6821,6 +6834,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
+  },
+  titleSideSlot: {
+    alignItems: "center",
+    justifyContent: "center",
   },
   iconAction: {
     backgroundColor: COLORS.cardAlt,
