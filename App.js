@@ -576,7 +576,7 @@ const STRINGS = {
     "label.weekTotal": "Diese Woche",
     "label.noSports": "Keine aktiven Sportarten. Füge neue hinzu.",
     "label.searchSports": "Sportarten durchsuchen",
-    "label.sportSuggestions": "Vorschläge",
+    "label.sportSuggestions": "Sportvorlagen",
     "label.noSportSuggestions": "Keine Vorschläge gefunden.",
     "label.useAsCustomSport": "Nutze \"{{term}}\" als neue Sportart",
     "label.todayScreenTime": "Erspielte Zeit",
@@ -806,7 +806,7 @@ const STRINGS = {
     "label.weekTotal": "This week",
     "label.noSports": "No active sports. Add new ones.",
     "label.searchSports": "Search sports",
-    "label.sportSuggestions": "Suggested sports",
+    "label.sportSuggestions": "Sport templates",
     "label.noSportSuggestions": "No suggestions found.",
     "label.useAsCustomSport": "Use \"{{term}}\" as custom sport",
     "label.todayScreenTime": "Earned time",
@@ -1038,7 +1038,7 @@ const STRINGS = {
     "label.weekTotal": "Esta semana",
     "label.noSports": "No hay deportes activos. Añade nuevos.",
     "label.searchSports": "Buscar deportes",
-    "label.sportSuggestions": "Deportes sugeridos",
+    "label.sportSuggestions": "Plantillas deportivas",
     "label.noSportSuggestions": "No se encontraron sugerencias.",
     "label.useAsCustomSport": "Usar \"{{term}}\" como deporte personalizado",
     "label.todayScreenTime": "Tiempo ganado",
@@ -1265,7 +1265,7 @@ const STRINGS = {
     "label.weekTotal": "Cette semaine",
     "label.noSports": "Aucun sport actif. Ajoutez-en.",
     "label.searchSports": "Rechercher un sport",
-    "label.sportSuggestions": "Sports suggérés",
+    "label.sportSuggestions": "Modèles sportifs",
     "label.noSportSuggestions": "Aucune suggestion trouvée.",
     "label.useAsCustomSport": "Utiliser \"{{term}}\" comme sport personnalisé",
     "label.todayScreenTime": "Temps gagné",
@@ -6426,13 +6426,23 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                   </ScrollView>
                 </View>
                 {showCustomSuggestionButton ? (
-                  <Pressable
-                    style={styles.customSuggestionButton}
+                <Pressable
+                    style={({ pressed }) => [
+                      styles.customSuggestionButton,
+                      pressed && styles.customSuggestionButtonActive,
+                    ]}
                     onPress={handleUseSearchAsCustom}
                   >
-                    <Text style={styles.customSuggestionButtonText}>
-                      {customSuggestionLabel}
-                    </Text>
+                    {({ pressed }) => (
+                      <Text
+                        style={[
+                          styles.customSuggestionButtonText,
+                          pressed && styles.customSuggestionButtonTextActive,
+                        ]}
+                      >
+                        {customSuggestionLabel}
+                      </Text>
+                    )}
                   </Pressable>
                 ) : null}
               </View>
@@ -7554,6 +7564,14 @@ const styles = StyleSheet.create({
   customSuggestionButtonText: {
     color: COLORS.accent,
     fontWeight: "700",
+    letterSpacing: 0.3,
+  },
+  customSuggestionButtonActive: {
+    backgroundColor: COLORS.success,
+    borderColor: COLORS.success,
+  },
+  customSuggestionButtonTextActive: {
+    color: COLORS.background,
   },
   typeRow: {
     flexDirection: "row",
