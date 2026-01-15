@@ -2117,7 +2117,7 @@ export default function App() {
   const normalizedSportSearch = trimmedSportSearch.toLowerCase();
   const standardSportSuggestions = useMemo(() => {
     if (!normalizedSportSearch) {
-      return STANDARD_SPORTS.slice(0, 6);
+      return STANDARD_SPORTS;
     }
     return STANDARD_SPORTS.filter((entry) =>
       getStandardSportLabel(entry, language)
