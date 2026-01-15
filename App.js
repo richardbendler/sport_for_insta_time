@@ -4878,17 +4878,19 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           {renderMainNav("workout")}
           {renderWorkoutBanner()}
           <View style={[styles.infoCard, styles.workoutTimerCard]}>
-            <Text
-              style={[styles.sectionTitle, styles.workoutTimerTitle]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.75}
-            >
-              {t("label.workoutTimer")}
-            </Text>
-            <Text style={styles.workoutTimerValue}>
-              {formatSeconds(workoutSeconds)}
-            </Text>
+            <View style={styles.workoutTimerContent}>
+              <Text
+                style={[styles.sectionTitle, styles.workoutTimerTitle]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.75}
+              >
+                {t("label.workoutTimer")}
+              </Text>
+              <Text style={styles.workoutTimerValue}>
+                {formatSeconds(workoutSeconds)}
+              </Text>
+            </View>
             <Pressable
               style={[
                 workoutRunning ? styles.dangerButton : styles.primaryButton,
@@ -7247,6 +7249,11 @@ const styles = StyleSheet.create({
   },
   workoutTimerTitle: {
     textAlign: "center",
+  },
+  workoutTimerContent: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
   },
   workoutTimerButton: {
     alignSelf: "stretch",
