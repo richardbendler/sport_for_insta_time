@@ -37,7 +37,7 @@ class InstaBlockerService : AccessibilityService() {
   private val notificationChannelId = "restricted_timer"
   private val notificationId = 1001
 
-  private val ignoredPackages = setOf(
+  private val ignoredPackagePrefixes = setOf(
     "com.android.systemui",
     "android",
     "com.android.permissioncontroller",
@@ -73,7 +73,7 @@ class InstaBlockerService : AccessibilityService() {
     if (isInputMethodPackage(pkg)) {
       return
     }
-    if (ignoredPackages.contains(pkg)) {
+    if (ignoredPackagePrefixes.any { pkg.startsWith(it) }) {
       return
     }
     if (!isLaunchablePackage(pkg)) {
