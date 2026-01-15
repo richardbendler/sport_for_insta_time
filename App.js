@@ -5600,23 +5600,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                             </Text>
                           </Pressable>
                         </View>
-                        <View style={styles.sportGridColumnCenter}>
-                          <View style={styles.sportCounterCenter}>
-                            <View
-                              style={[styles.counterBlock, styles.sportCounterBlock]}
-                            >
-                              <Text style={styles.counterLabel}>
-                                {t("label.today")}
-                              </Text>
-                              <Text style={styles.counterValueSmall}>
-                                {sport.type === "reps" ? `${daily.reps}` : formatSeconds(daily.seconds || 0)}
-                              </Text>
-                              <Text style={styles.counterUnit}>
-                                {sport.type === "reps" ? repsShort : t("label.timeUnit")}
-                              </Text>
-                            </View>
-                          </View>
-                        </View>
+                        <View style={styles.sportGridColumnCenter} />
                         <View style={styles.sportGridColumnRight}>
                           <View style={styles.moveButtonColumn}>
                             <Pressable
@@ -5632,15 +5616,13 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                               <Text style={styles.iconActionText}>?</Text>
                             </Pressable>
                           </View>
+                          <Text style={styles.earnedTimeTextRight}>
+                            {t("label.screenTime")}: {formatScreenTime(daily.screenSeconds || 0)}
+                          </Text>
                         </View>
                       </View>
                       <View style={styles.sportGridRow}>
                         <View style={styles.sportGridColumnLeft}>
-                          <Text style={styles.earnedTimeText}>
-                            {t("label.screenTime")}: {formatScreenTime(daily.screenSeconds || 0)}
-                          </Text>
-                        </View>
-                        <View style={styles.sportGridColumnCenter}>
                           <View style={styles.sportBadges}>
                             <View style={styles.sportBadge}>
                               <Text style={styles.sportBadgeText}>
@@ -5656,6 +5638,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                             ) : null}
                           </View>
                         </View>
+                        <View style={styles.sportGridColumnCenter} />
                         <View style={styles.sportGridColumnRight} />
                       </View>
                     </View>
@@ -5768,14 +5751,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                     >
                       <View style={styles.sportInfo}>
                         <View style={styles.sportGridContent}>
-                          <View style={styles.sportGridRow}>
-                            <View style={styles.sportGridColumnLeft}>
-                              <Pressable
-                                style={[styles.secondaryButton, styles.widgetButton]}
-                                onPress={() =>
-                                  InstaControl?.requestPinWidget?.(sport.id, sportLabel)
-                                }
-                              >
+                        <View style={styles.sportGridRow}>
+                          <View style={styles.sportGridColumnLeft}>
+                            <Pressable
+                              style={[styles.secondaryButton, styles.widgetButton]}
+                              onPress={() =>
+                                InstaControl?.requestPinWidget?.(sport.id, sportLabel)
+                              }
+                            >
                               <Text
                                 style={[
                                   styles.secondaryButtonText,
@@ -5784,66 +5767,49 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                               >
                                 {t("label.widget")}
                               </Text>
+                            </Pressable>
+                          </View>
+                          <View style={styles.sportGridColumnCenter} />
+                          <View style={styles.sportGridColumnRight}>
+                            <View style={styles.moveButtonColumn}>
+                              <Pressable
+                                style={styles.iconAction}
+                                onPress={() => moveSport(sport.id, -1)}
+                              >
+                                <Text style={styles.iconActionText}>?</Text>
+                              </Pressable>
+                              <Pressable
+                                style={[styles.iconAction, styles.moveButtonArrow]}
+                                onPress={() => moveSport(sport.id, 1)}
+                              >
+                                <Text style={styles.iconActionText}>?</Text>
                               </Pressable>
                             </View>
-                            <View style={styles.sportGridColumnCenter}>
-                              <View style={styles.sportCounterCenter}>
-                                <View
-                                  style={[styles.counterBlock, styles.sportCounterBlock]}
-                                >
-                                  <Text style={styles.counterLabel}>
-                                    {t("label.today")}
-                                  </Text>
-                                  <Text style={styles.counterValueSmall}>
-                                    {sport.type === "reps" ? `${daily.reps}` : formatSeconds(daily.seconds || 0)}
-                                  </Text>
-                                  <Text style={styles.counterUnit}>
-                                    {sport.type === "reps" ? repsShort : t("label.timeUnit")}
-                                  </Text>
-                                </View>
-                              </View>
-                            </View>
-                            <View style={styles.sportGridColumnRight}>
-                              <View style={styles.moveButtonColumn}>
-                                <Pressable
-                                  style={styles.iconAction}
-                                  onPress={() => moveSport(sport.id, -1)}
-                                >
-                                  <Text style={styles.iconActionText}>?</Text>
-                                </Pressable>
-                                <Pressable
-                                  style={[styles.iconAction, styles.moveButtonArrow]}
-                                  onPress={() => moveSport(sport.id, 1)}
-                                >
-                                  <Text style={styles.iconActionText}>?</Text>
-                                </Pressable>
-                              </View>
-                            </View>
+                            <Text style={styles.earnedTimeTextRight}>
+                              {t("label.screenTime")}: {formatScreenTime(daily.screenSeconds || 0)}
+                            </Text>
                           </View>
-                          <View style={styles.sportGridRow}>
-                            <View style={styles.sportGridColumnLeft}>
-                              <Text style={styles.earnedTimeText}>
-                                {t("label.screenTime")}: {formatScreenTime(daily.screenSeconds || 0)}
-                              </Text>
-                            </View>
-                            <View style={styles.sportGridColumnCenter}>
-                              <View style={styles.sportBadges}>
+                        </View>
+                        <View style={styles.sportGridRow}>
+                          <View style={styles.sportGridColumnLeft}>
+                            <View style={styles.sportBadges}>
+                              <View style={styles.sportBadge}>
+                                <Text style={styles.sportBadgeText}>
+                                  {todayBadgeText}
+                                </Text>
+                              </View>
+                              {remainingBadgeText ? (
                                 <View style={styles.sportBadge}>
                                   <Text style={styles.sportBadgeText}>
-                                    {todayBadgeText}
+                                    {remainingBadgeText}
                                   </Text>
                                 </View>
-                                {remainingBadgeText ? (
-                                  <View style={styles.sportBadge}>
-                                    <Text style={styles.sportBadgeText}>
-                                      {remainingBadgeText}
-                                    </Text>
-                                  </View>
-                                ) : null}
-                              </View>
+                              ) : null}
                             </View>
-                            <View style={styles.sportGridColumnRight} />
                           </View>
+                          <View style={styles.sportGridColumnCenter} />
+                          <View style={styles.sportGridColumnRight} />
+                        </View>
                         </View>
                       </View>
                     </Pressable>
@@ -6887,11 +6853,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: COLORS.white,
   },
-  sportCounterCenter: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   widgetButton: {
     minWidth: 100,
     borderRadius: 999,
@@ -6906,9 +6867,10 @@ const styles = StyleSheet.create({
   moveButtonArrow: {
     marginTop: 4,
   },
-  earnedTimeText: {
+  earnedTimeTextRight: {
     color: COLORS.muted,
     fontSize: 12,
+    marginTop: 8,
   },
   primaryButton: {
     backgroundColor: COLORS.ember,
