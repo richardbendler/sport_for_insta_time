@@ -286,17 +286,23 @@ const COLORS = {
 };
 
 const SportTitleSlots = ({ sport, sportLabel }) => {
-  const [slotWidth, setSlotWidth] = useState(0);
-  const updateSlotWidth = useCallback((width) => {
-    setSlotWidth((prev) => Math.max(prev, width));
-  }, []);
+  const [leftWidth, setLeftWidth] = useState(0);
+  const [rightWidth, setRightWidth] = useState(0);
+  const slotWidth = Math.max(leftWidth, rightWidth);
   const slotStyle = slotWidth ? { width: slotWidth } : undefined;
+
+  const handleLeftLayout = useCallback(
+    (event) => setLeftWidth(event.nativeEvent.layout.width),
+    []
+  );
+  const handleRightLayout = useCallback(
+    (event) => setRightWidth(event.nativeEvent.layout.width),
+    []
+  );
+
   return (
     <View style={styles.sportTitleCenterRow}>
-      <View
-        style={[styles.titleSideSlot, slotStyle]}
-        onLayout={(event) => updateSlotWidth(event.nativeEvent.layout.width)}
-      >
+      <View style={[styles.titleSideSlot, slotStyle]} onLayout={handleLeftLayout}>
         <Text style={styles.sportIcon}>{sport.icon || DEFAULT_ICON}</Text>
       </View>
       <Text style={styles.sportName} numberOfLines={1}>
@@ -304,7 +310,7 @@ const SportTitleSlots = ({ sport, sportLabel }) => {
       </Text>
       <View
         style={[styles.titleSideSlot, slotStyle]}
-        onLayout={(event) => updateSlotWidth(event.nativeEvent.layout.width)}
+        onLayout={handleRightLayout}
       >
         {sport.supportsAi ? (
           <View style={styles.aiBadge}>
@@ -432,7 +438,7 @@ const STRINGS = {
     "label.noSports": "Keine aktiven Sportarten. Füge neue hinzu.",
     "label.todayScreenTime": "Erspielte Zeit",
     "label.widgets": "Widgets",
-    "label.widget": "Widget auf Startbildschirm",
+    "label.widget": "Widget",
     "label.widgetOverall": "Allgemeines Widget",
     "label.recentActivity": "Letzte Aktivit\u00e4t",
     "label.recentActivityEmpty": "Keine Eintr\u00e4ge vorhanden.",
@@ -653,7 +659,7 @@ const STRINGS = {
     "label.noSports": "No active sports. Add new ones.",
     "label.todayScreenTime": "Earned time",
     "label.widgets": "Widgets",
-    "label.widget": "Widget on home screen",
+    "label.widget": "Widget",
     "label.widgetOverall": "General widget",
     "label.recentActivity": "Recent activity",
     "label.recentActivityEmpty": "No recent entries yet.",
@@ -873,7 +879,7 @@ const STRINGS = {
     "label.noSports": "No hay deportes activos. Añade nuevos.",
     "label.todayScreenTime": "Tiempo ganado",
     "label.widgets": "Widgets",
-    "label.widget": "Widget en inicio",
+    "label.widget": "Widget",
     "label.widgetOverall": "Widget general",
     "label.recentActivity": "Actividad reciente",
     "label.recentActivityEmpty": "No hay registros recientes.",
@@ -1090,7 +1096,7 @@ const STRINGS = {
     "label.noSports": "Aucun sport actif. Ajoutez-en.",
     "label.todayScreenTime": "Temps gagné",
     "label.widgets": "Widgets",
-    "label.widget": "Widget sur l’accueil",
+    "label.widget": "Widget",
     "label.widgetOverall": "Widget general",
     "label.recentActivity": "Activite recente",
     "label.recentActivityEmpty": "Aucune entree recente.",
@@ -5539,15 +5545,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           {activeSports.map((sport) => {
             const daily = getRollingStats(logs, sport.id);
             const sportLabel = getSportLabel(sport);
-            const remainingSeconds = usageState.remainingBySport?.[sport.id];
-            const todayBadgeText =
-              sport.type === "reps"
-                ? `${t("label.today")}: ${daily.reps}`
-                : `${t("label.today")}: ${formatSeconds(daily.seconds || 0)}`;
-            const remainingBadgeText =
-              remainingSeconds != null
-                ? `${t("label.remaining")}: ${formatScreenTime(remainingSeconds)}`
-                : null;
             return (
               <View
                 key={sport.id}
@@ -5617,7 +5614,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                                 styles.widgetButtonText,
                               ]}
                             >
-                              {widgetIcon} {t("label.widget")}
+                              {widgetIcon}
+                              {"\n"}
+                              {t("label.widget")}
                             </Text>
                           </Pressable>
                         </View>
@@ -5652,37 +5651,17 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                                 style={styles.iconAction}
                                 onPress={() => moveSport(sport.id, -1)}
                               >
-                                <Text style={styles.iconActionText}>▲</Text>
+                                <Text style={styles.iconActionText}>↑</Text>
                               </Pressable>
                               <Pressable
                                 style={[styles.iconAction, styles.moveButtonArrow]}
                                 onPress={() => moveSport(sport.id, 1)}
                               >
-                                <Text style={styles.iconActionText}>▼</Text>
+                                <Text style={styles.iconActionText}>↓</Text>
                               </Pressable>
                             </View>
                           </View>
                         </View>
-                      </View>
-                      <View style={styles.sportGridRow}>
-                        <View style={styles.sportGridColumnLeft}>
-                          <View style={styles.sportBadges}>
-                            <View style={styles.sportBadge}>
-                              <Text style={styles.sportBadgeText}>
-                                {todayBadgeText}
-                              </Text>
-                            </View>
-                            {remainingBadgeText ? (
-                              <View style={styles.sportBadge}>
-                                <Text style={styles.sportBadgeText}>
-                                  {remainingBadgeText}
-                                </Text>
-                              </View>
-                            ) : null}
-                          </View>
-                        </View>
-                        <View style={styles.sportGridColumnCenter} />
-                        <View style={styles.sportGridColumnRight} />
                       </View>
                     </View>
                   </View>
@@ -5716,15 +5695,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             ? hiddenSports.map((sport) => {
                 const daily = getRollingStats(logs, sport.id);
                 const sportLabel = getSportLabel(sport);
-                const remainingSeconds = usageState.remainingBySport?.[sport.id];
-                const todayBadgeText =
-                  sport.type === "reps"
-                    ? `${t("label.today")}: ${daily.reps}`
-                    : `${t("label.today")}: ${formatSeconds(daily.seconds || 0)}`;
-                const remainingBadgeText =
-                  remainingSeconds != null
-                    ? `${t("label.remaining")}: ${formatScreenTime(remainingSeconds)}`
-                    : null;
                 return (
                   <View
                     key={sport.id}
@@ -5796,7 +5766,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                                 styles.widgetButtonText,
                               ]}
                             >
-                              {widgetIcon} {t("label.widget")}
+                              {widgetIcon}
+                              {"\n"}
+                              {t("label.widget")}
                             </Text>
                             </Pressable>
                           </View>
@@ -5831,37 +5803,17 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                                   style={styles.iconAction}
                                   onPress={() => moveSport(sport.id, -1)}
                                 >
-                                  <Text style={styles.iconActionText}>▲</Text>
+                                <Text style={styles.iconActionText}>↑</Text>
                                 </Pressable>
                                 <Pressable
                                   style={[styles.iconAction, styles.moveButtonArrow]}
                                   onPress={() => moveSport(sport.id, 1)}
                                 >
-                                  <Text style={styles.iconActionText}>▼</Text>
+                                <Text style={styles.iconActionText}>↓</Text>
                                 </Pressable>
                               </View>
                             </View>
                           </View>
-                        </View>
-                        <View style={styles.sportGridRow}>
-                          <View style={styles.sportGridColumnLeft}>
-                            <View style={styles.sportBadges}>
-                              <View style={styles.sportBadge}>
-                                <Text style={styles.sportBadgeText}>
-                                  {todayBadgeText}
-                                </Text>
-                              </View>
-                              {remainingBadgeText ? (
-                                <View style={styles.sportBadge}>
-                                  <Text style={styles.sportBadgeText}>
-                                    {remainingBadgeText}
-                                  </Text>
-                                </View>
-                              ) : null}
-                            </View>
-                          </View>
-                          <View style={styles.sportGridColumnCenter} />
-                          <View style={styles.sportGridColumnRight} />
                         </View>
                         </View>
                       </View>
@@ -6516,8 +6468,8 @@ const styles = StyleSheet.create({
   sportCard: {
     backgroundColor: "rgba(30, 41, 59, 0.9)",
     borderRadius: 12,
-    padding: 10,
-    marginBottom: 6,
+    padding: 8,
+    marginBottom: 4,
     position: "relative",
     borderWidth: 1,
     borderColor: "rgba(148, 163, 184, 0.35)",
@@ -6536,7 +6488,7 @@ const styles = StyleSheet.create({
     opacity: 0.9,
   },
   sportInfo: {
-    marginBottom: 8,
+    marginBottom: 6,
     alignItems: "stretch",
   },
   sportBodyPressable: {
@@ -6546,6 +6498,9 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "700",
     color: COLORS.text,
+    textAlign: "center",
+    flex: 1,
+    flexShrink: 1,
   },
   sportBadges: {
     flexDirection: "row",
@@ -6565,13 +6520,13 @@ const styles = StyleSheet.create({
   },
   sportGridContent: {
     width: "100%",
-    gap: 8,
+    gap: 6,
   },
   sportGridRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 4,
+    marginBottom: 2,
   },
   sportGridColumnLeft: {
     width: "25%",
@@ -6586,6 +6541,10 @@ const styles = StyleSheet.create({
   sportGridColumnRight: {
     width: "25%",
     alignItems: "flex-end",
+    justifyContent: "center",
+  },
+  sportCounterCenter: {
+    alignItems: "center",
     justifyContent: "center",
   },
   aiBadge: {
@@ -6884,10 +6843,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
+    justifyContent: "center",
+    flex: 1,
   },
   titleSideSlot: {
     alignItems: "center",
     justifyContent: "center",
+    minWidth: 28,
   },
   iconAction: {
     backgroundColor: COLORS.cardAlt,
@@ -6914,36 +6876,43 @@ const styles = StyleSheet.create({
   },
   sportCounterBlock: {
     flex: 0,
-    minWidth: 100,
+    minWidth: 90,
     paddingVertical: 6,
     paddingHorizontal: 10,
     borderRadius: 12,
     backgroundColor: COLORS.white,
   },
   widgetButton: {
-    minWidth: 100,
+    minWidth: 70,
     borderRadius: 999,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    marginBottom: 6,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    marginBottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
   },
   moveButtonColumn: {
     justifyContent: "flex-end",
     alignItems: "flex-end",
+    gap: 2,
   },
   moveButtonArrow: {
-    marginTop: 4,
+    marginTop: 2,
   },
   moveActionsRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: 8,
+    gap: 6,
+    width: "100%",
   },
   earnedTimeTextRight: {
     color: COLORS.muted,
     fontSize: 12,
-    marginTop: 8,
+    marginTop: 0,
+    textAlign: "left",
+    flex: 1,
+    flexShrink: 1,
   },
   primaryButton: {
     backgroundColor: COLORS.ember,
@@ -6999,7 +6968,8 @@ const styles = StyleSheet.create({
   },
   widgetButtonText: {
     textAlign: "center",
-    fontSize: 10,
+    fontSize: 11,
+    lineHeight: 14,
   },
   dangerButton: {
     backgroundColor: COLORS.danger,
