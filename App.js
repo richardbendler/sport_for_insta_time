@@ -5628,13 +5628,13 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                               style={styles.iconAction}
                               onPress={() => moveSport(sport.id, -1)}
                             >
-                              <Text style={styles.iconActionText}>?</Text>
+                            <Text style={styles.iconActionText}>▲</Text>
                             </Pressable>
                             <Pressable
                               style={[styles.iconAction, styles.moveButtonArrow]}
                               onPress={() => moveSport(sport.id, 1)}
                             >
-                              <Text style={styles.iconActionText}>?</Text>
+                            <Text style={styles.iconActionText}>▼</Text>
                             </Pressable>
                           </View>
                           <Text style={styles.earnedTimeTextRight}>
@@ -5785,13 +5785,13 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                                 style={styles.iconAction}
                                 onPress={() => moveSport(sport.id, -1)}
                               >
-                                <Text style={styles.iconActionText}>?</Text>
+                                <Text style={styles.iconActionText}>▲</Text>
                               </Pressable>
                               <Pressable
                                 style={[styles.iconAction, styles.moveButtonArrow]}
                                 onPress={() => moveSport(sport.id, 1)}
                               >
-                                <Text style={styles.iconActionText}>?</Text>
+                                <Text style={styles.iconActionText}>▼</Text>
                               </Pressable>
                             </View>
                             <Text style={styles.earnedTimeTextRight}>
