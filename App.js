@@ -6499,8 +6499,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: COLORS.text,
     textAlign: "center",
-    flex: 1,
-    flexShrink: 1,
+    paddingHorizontal: 6,
   },
   sportBadges: {
     flexDirection: "row",
@@ -6844,12 +6843,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 4,
     justifyContent: "center",
-    flex: 1,
   },
   titleSideSlot: {
     alignItems: "center",
     justifyContent: "center",
-    minWidth: 20,
+    minWidth: 0,
   },
   iconAction: {
     backgroundColor: COLORS.cardAlt,
