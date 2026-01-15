@@ -6516,8 +6516,8 @@ const styles = StyleSheet.create({
   sportCard: {
     backgroundColor: "rgba(30, 41, 59, 0.9)",
     borderRadius: 12,
-    padding: 14,
-    marginBottom: 8,
+    padding: 10,
+    marginBottom: 6,
     position: "relative",
     borderWidth: 1,
     borderColor: "rgba(148, 163, 184, 0.35)",
@@ -6536,7 +6536,7 @@ const styles = StyleSheet.create({
     opacity: 0.9,
   },
   sportInfo: {
-    marginBottom: 12,
+    marginBottom: 8,
     alignItems: "stretch",
   },
   sportBodyPressable: {
@@ -6571,7 +6571,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 6,
+    marginBottom: 4,
   },
   sportGridColumnLeft: {
     width: "25%",
