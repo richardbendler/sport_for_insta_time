@@ -6380,45 +6380,50 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               placeholderTextColor="#7a7a7a"
             />
             {!editingSportId ? (
-              <View style={styles.standardSportSuggestions}>
+              <View style={styles.standardSuggestionWindow}>
                 <Text style={styles.suggestionsHeader}>
                   {t("label.sportSuggestions")}
                 </Text>
-                <View style={styles.suggestionList}>
-                  {standardSportSuggestions.length > 0 ? (
-                    standardSportSuggestions.map((entry) => {
-                      const label = getStandardSportLabel(entry, language);
-                      const isActive = entry.id === selectedStandardSportId;
-                      return (
-                        <Pressable
-                          key={entry.id}
-                          style={[
-                            styles.suggestionItem,
-                            isActive && styles.suggestionItemActive,
-                          ]}
-                          onPress={() => applyStandardSport(entry)}
-                        >
-                          <View style={styles.suggestionMain}>
-                            <Text style={styles.suggestionIcon}>
-                              {entry.icon || DEFAULT_ICON}
-                            </Text>
-                            <View>
-                              <Text style={styles.suggestionLabel}>{label}</Text>
-                              <Text style={styles.suggestionMeta}>
-                                {entry.type === "reps"
-                                  ? t("label.reps")
-                                  : t("label.timeBased")}
+                <View style={styles.suggestionListContainer}>
+                  <ScrollView
+                    contentContainerStyle={styles.suggestionList}
+                    showsVerticalScrollIndicator={false}
+                  >
+                    {standardSportSuggestions.length > 0 ? (
+                      standardSportSuggestions.map((entry) => {
+                        const label = getStandardSportLabel(entry, language);
+                        const isActive = entry.id === selectedStandardSportId;
+                        return (
+                          <Pressable
+                            key={entry.id}
+                            style={[
+                              styles.suggestionItem,
+                              isActive && styles.suggestionItemActive,
+                            ]}
+                            onPress={() => applyStandardSport(entry)}
+                          >
+                            <View style={styles.suggestionMain}>
+                              <Text style={styles.suggestionIcon}>
+                                {entry.icon || DEFAULT_ICON}
                               </Text>
+                              <View>
+                                <Text style={styles.suggestionLabel}>{label}</Text>
+                                <Text style={styles.suggestionMeta}>
+                                  {entry.type === "reps"
+                                    ? t("label.reps")
+                                    : t("label.timeBased")}
+                                </Text>
+                              </View>
                             </View>
-                          </View>
-                        </Pressable>
-                      );
-                    })
-                  ) : (
-                    <Text style={styles.helperText}>
-                      {t("label.noSportSuggestions")}
-                    </Text>
-                  )}
+                          </Pressable>
+                        );
+                      })
+                    ) : (
+                      <Text style={styles.helperText}>
+                        {t("label.noSportSuggestions")}
+                      </Text>
+                    )}
+                  </ScrollView>
                 </View>
                 {showCustomSuggestionButton ? (
                   <Pressable
@@ -7492,14 +7497,23 @@ const styles = StyleSheet.create({
   iconPreview: {
     fontSize: 20,
   },
-  standardSportSuggestions: {
+  standardSuggestionWindow: {
     marginBottom: 12,
+    height: 230,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(148, 163, 184, 0.4)",
+    padding: 12,
+    backgroundColor: COLORS.card,
   },
   suggestionsHeader: {
     marginBottom: 6,
     color: COLORS.muted,
     fontSize: 12,
     fontWeight: "600",
+  },
+  suggestionListContainer: {
+    flex: 1,
   },
   suggestionList: {
     gap: 6,
