@@ -228,6 +228,7 @@ const MONTH_LABELS = {
   ],
 };
 const DEFAULT_ICON = "⭐";
+const DEFAULT_DIFFICULTY = 5;
 const PRESET_KEYS = {
   pushups: "pushups",
 };
@@ -450,11 +451,13 @@ const STRINGS = {
     "label.repsShort": "Wdh.",
     "label.timeUnit": "Zeit",
     "label.weightExercise": "Gewichtsübung",
-    "label.weightFactor": "Faktor (1-10)",
-    "label.weightFactorHint":
-      "Screen Time = Gewicht × Wdh. × Faktor ÷ 50 (Sekunden).",
-    "label.weightFactorGuide":
-      "Wähle 1–10: nah an 1 für leichte Sets, nah an 10 für schwere oder langsame Wiederholungen.",
+    "label.difficultyLabel": "Schwierigkeitsgrad (1-10)",
+    "label.difficultyDescription":
+      "Passe die Schwierigkeit an, damit die Screen Time zur Intensität oder Geschwindigkeit passt.",
+    "label.difficultyHint":
+      "Nutze die Buttons und die Anzeige, um den passenden Wert einzustellen.",
+    "label.difficultyGuide":
+      "1-3 leicht oder schnell, 4-7 normal, 8-10 schwer oder langsam.",
     "label.weightEntryButton": "Satz eintragen",
     "label.weightEntryPreview": "Screen Time (Vorschau)",
     "label.weightEntryWeight": "Gewicht (kg)",
@@ -505,6 +508,7 @@ const STRINGS = {
     "label.confirmShow": "Sicher, dass du einblenden willst?",
     "label.confirm": "Ja",
     "label.cancel": "Abbrechen",
+    "label.close": "Schließen",
     "placeholder.sportName": "Name (z.B. Situps)",
     "language.de": "Deutsch",
     "language.en": "Englisch",
@@ -519,19 +523,21 @@ const STRINGS = {
     "label.tutorialStart": "Tutorial starten",
     "tutorial.step.overview.title": "Deine Bildschirmzeit",
     "tutorial.step.overview.body":
-      "Hier siehst du erspielte Zeit, Restzeit und den \u00dcbertrag.",
+      "Hier siehst du erspielte Zeit, Restzeit und den \u00dcbertrag; tippe die Karten an, um mehr Details zu sehen.",
     "tutorial.step.openSport.title": "Sportart \u00f6ffnen",
     "tutorial.step.openSport.body":
-      "Tippe eine Sportkarte an, um sie zu tracken.",
+      "Tippe eine Sportkarte an, um den Trackingbereich mit Schieberegler, Modus und Eingaben zu öffnen.",
     "tutorial.step.addSport.title": "Neue Sportart",
-    "tutorial.step.addSport.body": "Tippe auf +, um eine Sportart hinzuzuf\u00fcgen.",
+    "tutorial.step.addSport.body":
+      "Tippe auf +, um einen Sport anzulegen, Typ, Rate und den Schwierigkeitsregler festzulegen.",
     "tutorial.step.track.title": "Training tracken",
     "tutorial.step.track.body.reps":
-      "Tippe einmal in die gro\u00dfe Fl\u00e4che, um eine Wiederholung zu z\u00e4hlen.",
-    "tutorial.step.track.body.time": "Tippe auf Start, um den Timer zu starten.",
+      "Tippe auf die große Fläche, um eine Wiederholung zu zählen; der Schwierigkeitsgrad steuert die Screen Time.",
+    "tutorial.step.track.body.time":
+      "Tippe auf Start, um den Timer zu starten; Dauer und Schwierigkeit ergeben deine Screen Time.",
     "tutorial.step.back.title": "Zur\u00fcck zur \u00dcbersicht",
     "tutorial.step.back.body":
-      "Mit Zur\u00fcck gelangst du wieder zur Sport-\u00dcbersicht.",
+      "Nutze Zurück, um zur Sportübersicht zurückzukehren und andere Sportarten zu prüfen.",
     "tutorial.step.openSettings.title": "Einstellungen \u00f6ffnen",
     "tutorial.step.openSettings.body":
       "Tippe auf Einstellungen f\u00fcr Apps, Berechtigungen und mehr.",
@@ -546,7 +552,7 @@ const STRINGS = {
       "Im Tab Einzelne Übungen findest du deine Sportarten und kannst sie direkt antippen.",
     "tutorial.step.workout.title": "Workout-Tab",
     "tutorial.step.workout.body":
-      "Im Workout-Tab startest du ein getracktes Training und zählst deine Übungen während der Session.",
+      "Im Workout-Tab startest du Sessions; die Liste vergangener Workouts öffnet beim Tippen eine Detailansicht.",
     "tutorial.cta.next": "Weiter",
     "tutorial.cta.skip": "\u00dcberspringen",
     "tutorial.cta.exit": "Tutorial abbrechen",
@@ -671,11 +677,13 @@ const STRINGS = {
     "label.repsShort": "reps",
     "label.timeUnit": "Time",
     "label.weightExercise": "Weight exercise",
-    "label.weightFactor": "Factor (1-10)",
-    "label.weightFactorHint":
-      "Screen time = weight × reps × factor ÷ 50 (seconds).",
-    "label.weightFactorGuide":
-      "Pick 1–10: lower for light sets, higher for slow heavy efforts.",
+    "label.difficultyLabel": "Difficulty level (1-10)",
+    "label.difficultyDescription":
+      "Adjust the difficulty control so Screen Time matches how intense or slow the set felt.",
+    "label.difficultyHint":
+      "Use the buttons and the indicator to set a value between 1 and 10.",
+    "label.difficultyGuide":
+      "Lower values keep the intensity light, higher values recognize challenging work.",
     "label.weightEntryButton": "Log set",
     "label.weightEntryPreview": "Screen time preview",
     "label.weightEntryWeight": "Weight (kg)",
@@ -725,6 +733,7 @@ const STRINGS = {
     "label.confirmShow": "Are you sure you want to show it?",
     "label.confirm": "Yes",
     "label.cancel": "Cancel",
+    "label.close": "Close",
     "placeholder.sportName": "Name (e.g. Situps)",
     "language.de": "German",
     "language.en": "English",
@@ -739,31 +748,36 @@ const STRINGS = {
     "label.tutorialStart": "Start tutorial",
     "tutorial.step.overview.title": "Your screen time",
     "tutorial.step.overview.body":
-      "Here you see earned time, remaining time, and carryover.",
+      "Track earned time, remaining allotment, and carryover here; tap the cards for more detail.",
     "tutorial.step.openSport.title": "Open a sport",
-    "tutorial.step.openSport.body": "Tap any sport card to track it.",
+    "tutorial.step.openSport.body":
+      "Tap any sport card to open the tracking area with the difficulty slider, mode toggle, and logging fields.",
     "tutorial.step.addSport.title": "Add a sport",
-    "tutorial.step.addSport.body": "Tap + to add a new sport.",
+    "tutorial.step.addSport.body":
+      "Tap + to add a sport, pick reps or time mode, and use the slider to match effort.",
     "tutorial.step.track.title": "Track a session",
-    "tutorial.step.track.body.reps": "Tap the big area once to log a rep.",
-    "tutorial.step.track.body.time": "Tap Start to begin a timer.",
+    "tutorial.step.track.body.reps":
+      "Tap the big area once to log a rep; the difficulty level decides how much Screen Time you earn.",
+    "tutorial.step.track.body.time":
+      "Tap Start to begin a timer; stop it when you finish so duration and difficulty produce Screen Time.",
     "tutorial.step.back.title": "Back to overview",
-    "tutorial.step.back.body": "Use Back to return to your sports list.",
+    "tutorial.step.back.body":
+      "Use Back to return to your sports list and review other cards.",
     "tutorial.step.openSettings.title": "Open settings",
     "tutorial.step.openSettings.body":
-      "Tap Settings to manage apps and permissions.",
+      "Tap Settings to manage apps, permissions, and preface delay.",
     "tutorial.step.openApps.title": "Restricted apps",
     "tutorial.step.openApps.body":
-      "Tap Apps to pick which applications you want to restrict.",
+      "Tap Apps to pick which applications should be restricted once the time is up.",
     "tutorial.step.finish.title": "All set",
     "tutorial.step.finish.body":
       "You can restart this tutorial anytime from the main menu by tapping the Tutorial button in the top-right of Single exercises.",
     "tutorial.step.singleExercises.title": "Single exercises",
     "tutorial.step.singleExercises.body":
-      "The Single exercises tab keeps your sports ready for tracking, just tap one to start.",
+      "The Single exercises tab keeps your sports ready; tap one to adjust difficulty, choose reps or time, and start tracking.",
     "tutorial.step.workout.title": "Workout tab",
     "tutorial.step.workout.body":
-      "Use Workout to time a session and tap each exercise you do to log it for the active workout.",
+      "Workout times sessions, and the past-workouts list opens detail views when you tap a row.",
     "tutorial.cta.next": "Next",
     "tutorial.cta.skip": "Skip",
     "tutorial.cta.exit": "Exit tutorial",
@@ -891,11 +905,13 @@ const STRINGS = {
     "label.repsShort": "rep.",
     "label.timeUnit": "Tiempo",
     "label.weightExercise": "Ejercicio con peso",
-    "label.weightFactor": "Factor (1-10)",
-    "label.weightFactorHint":
-      "Tiempo de pantalla = peso × repeticiones × factor ÷ 50 (segundos).",
-    "label.weightFactorGuide":
-      "Elige 1–10: valores bajos para ejercicios ligeros, altos para los más pesados o lentos.",
+    "label.difficultyLabel": "Nivel de dificultad (1-10)",
+    "label.difficultyDescription":
+      "Ajusta el control para que el tiempo de pantalla refleje la intensidad o la lentitud del esfuerzo.",
+    "label.difficultyHint":
+      "Usa los botones y la barra para fijar un valor entre 1 y 10.",
+    "label.difficultyGuide":
+      "1-3 para ejercicios ligeros, 4-7 intensidad media, 8-10 esfuerzo fuerte o pausado.",
     "label.weightEntryButton": "Registrar serie",
     "label.weightEntryPreview": "Tiempo de pantalla (vista previa)",
     "label.weightEntryWeight": "Peso (kg)",
@@ -946,6 +962,7 @@ const STRINGS = {
     "label.confirmShow": "¿Seguro que quieres mostrar?",
     "label.confirm": "Sí",
     "label.cancel": "Cancelar",
+    "label.close": "Cerrar",
     "placeholder.sportName": "Nombre (p. ej. Situps)",
     "language.de": "Alemán",
     "language.en": "Inglés",
@@ -960,32 +977,35 @@ const STRINGS = {
     "label.tutorialStart": "Iniciar tutorial",
     "tutorial.step.overview.title": "Tu tiempo de pantalla",
     "tutorial.step.overview.body":
-      "Aqui ves el tiempo ganado, el restante y el arrastre.",
+      "Aquí ves el tiempo ganado, lo que queda y el arrastre; toca las tarjetas para ver más detalles.",
     "tutorial.step.openSport.title": "Abrir un deporte",
     "tutorial.step.openSport.body":
-      "Toca una tarjeta de deporte para registrarlo.",
+      "Toca una tarjeta para abrir el área de seguimiento con el deslizador de dificultad, el modo y los campos de registro.",
     "tutorial.step.addSport.title": "Anadir un deporte",
-    "tutorial.step.addSport.body": "Toca + para anadir un deporte.",
+    "tutorial.step.addSport.body":
+      "Toca + para añadir un deporte, elige repeticiones o tiempo y ajusta la dificultad.",
     "tutorial.step.track.title": "Registrar sesion",
     "tutorial.step.track.body.reps":
-      "Toca una vez el area grande para sumar una repeticion.",
-    "tutorial.step.track.body.time": "Toca Iniciar para empezar el temporizador.",
+      "Toca el área grande una vez para sumar una repetición; el nivel de dificultad decide cuánto tiempo ganas.",
+    "tutorial.step.track.body.time":
+      "Toca Iniciar para comenzar el temporizador; deténlo cuando termines para que duración y dificultad sumen el tiempo de pantalla.",
     "tutorial.step.back.title": "Volver al inicio",
-    "tutorial.step.back.body": "Usa Atras para volver a la lista.",
+    "tutorial.step.back.body":
+      "Usa Atrás para regresar a la lista y revisar otras tarjetas.",
     "tutorial.step.openSettings.title": "Abrir ajustes",
     "tutorial.step.openSettings.body":
-      "Toca Ajustes para apps, permisos y mas.",
+      "Toca Ajustes para gestionar apps, permisos y tiempos de preámbulo.",
     "tutorial.step.openApps.title": "Apps restringidas",
     "tutorial.step.openApps.body":
-      "Toca Apps para elegir qué aplicaciones quieres restringir.",
+      "Toca Apps para elegir qué aplicaciones se restringen cuando se acaba el tiempo.",
     "tutorial.step.finish.title": "Listo",
     "tutorial.step.finish.body": "Puedes reiniciar este tutorial desde el menú principal tocando el botón Tutorial arriba a la derecha en 'Ejercicios individuales'.",
     "tutorial.step.singleExercises.title": "Ejercicios individuales",
     "tutorial.step.singleExercises.body":
-      "La pestaña Ejercicios individuales reúne todos tus deportes para tocarlos y seguirlos.",
+      "La pestaña Ejercicios individuales reúne tus deportes; tócalos para ajustar la dificultad y empezar a registrar.",
     "tutorial.step.workout.title": "Pestaña Workout",
     "tutorial.step.workout.body":
-      "Desde Workout arrancas sesiones cronometradas y tocas las disciplinas que haces para guardarlas en el entrenamiento.",
+      "Desde Workout cronometras sesiones; la lista de entrenamientos pasados abre un detalle al tocar cada fila.",
     "tutorial.cta.next": "Siguiente",
     "tutorial.cta.skip": "Saltar",
     "tutorial.cta.exit": "Salir del tutorial",
@@ -1108,11 +1128,13 @@ const STRINGS = {
     "label.repsShort": "rép.",
     "label.timeUnit": "Temps",
     "label.weightExercise": "Exercice de force",
-    "label.weightFactor": "Facteur (1-10)",
-    "label.weightFactorHint":
-      "Temps écran = poids × répétitions × facteur ÷ 50 (secondes).",
-    "label.weightFactorGuide":
-      "Choisis 1–10 : bas pour les séries légères, haut pour les efforts lourds ou lents.",
+    "label.difficultyLabel": "Niveau de difficulté (1-10)",
+    "label.difficultyDescription":
+      "Réglez la difficulté pour que le temps écran reflète l'effort ou la lenteur du mouvement.",
+    "label.difficultyHint":
+      "Utilisez les boutons et la barre pour choisir une valeur entre 1 et 10.",
+    "label.difficultyGuide":
+      "1-3 léger, 4-7 intensité moyenne, 8-10 effort lent ou intense.",
     "label.weightEntryButton": "Enregistrer la série",
     "label.weightEntryPreview": "Aperçu du temps écran",
     "label.weightEntryWeight": "Poids (kg)",
@@ -1163,6 +1185,7 @@ const STRINGS = {
     "label.confirmShow": "Confirmer l’affichage ?",
     "label.confirm": "Oui",
     "label.cancel": "Annuler",
+    "label.close": "Fermer",
     "placeholder.sportName": "Nom (ex. Situps)",
     "language.de": "Allemand",
     "language.en": "Anglais",
@@ -1177,33 +1200,36 @@ const STRINGS = {
     "label.tutorialStart": "Demarrer le tutoriel",
     "tutorial.step.overview.title": "Ton temps d'ecran",
     "tutorial.step.overview.body":
-      "Ici tu vois le temps gagne, le restant et le report.",
+      "Ici tu vois le temps gagné, le temps restant et le report; touche les cartes pour plus de détails.",
     "tutorial.step.openSport.title": "Ouvrir un sport",
     "tutorial.step.openSport.body":
-      "Touche une carte pour commencer le suivi.",
+      "Touche une carte pour ouvrir la zone de suivi avec le curseur de difficulté, le mode et les champs de saisie.",
     "tutorial.step.addSport.title": "Ajouter un sport",
-    "tutorial.step.addSport.body": "Touche + pour ajouter un sport.",
+    "tutorial.step.addSport.body":
+      "Touche + pour ajouter un sport, choisis répétitions ou temps et règle la difficulté.",
     "tutorial.step.track.title": "Suivre une session",
     "tutorial.step.track.body.reps":
-      "Touche une fois la grande zone pour compter une repetition.",
-    "tutorial.step.track.body.time": "Touche Demarrer pour lancer le minuteur.",
+      "Touche une fois la grande zone pour compter une répétition; le niveau de difficulté détermine ton temps d'écran.",
+    "tutorial.step.track.body.time":
+      "Touche Démarrer pour lancer le minuteur; arrête-le quand tu as fini afin que durée et difficulté s'additionnent.",
     "tutorial.step.back.title": "Retour a la liste",
-    "tutorial.step.back.body": "Utilise Retour pour revenir aux sports.",
+    "tutorial.step.back.body":
+      "Utilise Retour pour revenir à la liste et consulter d'autres sports.",
     "tutorial.step.openSettings.title": "Ouvrir les reglages",
     "tutorial.step.openSettings.body":
-      "Touche Reglages pour apps, permissions et plus.",
+      "Touche Réglages pour gérer apps, permissions et délais de préface.",
     "tutorial.step.openApps.title": "Apps restreintes",
     "tutorial.step.openApps.body":
-      "Touche Apps pour choisir quelles applications restreindre.",
+      "Touche Apps pour choisir quelles applications seront restreintes une fois le temps écoulé.",
     "tutorial.step.finish.title": "Termine",
     "tutorial.step.finish.body":
       "Tu peux relancer ce tutoriel depuis le menu principal en touchant le bouton Tutoriel en haut à droite de 'Exercices individuels'.",
     "tutorial.step.singleExercises.title": "Exercices individuels",
     "tutorial.step.singleExercises.body":
-      "L'onglet Exercices individuels rassemble tes sports ; touche-en un pour activer son suivi.",
+      "L'onglet Exercices individuels rassemble tes sports ; touche-en un pour régler la difficulté et commencer à suivre.",
     "tutorial.step.workout.title": "Onglet Workout",
     "tutorial.step.workout.body":
-      "Dans Workout, lance une session chronometree et touche chaque exercice que tu réalises pour l'ajouter à cet entraînement.",
+      "Dans Workout, chronomètre les séances ; la liste des entraînements passés ouvre un détail quand tu touches une ligne.",
     "tutorial.cta.next": "Suivant",
     "tutorial.cta.skip": "Passer",
     "tutorial.cta.exit": "Quitter le tutoriel",
@@ -1413,13 +1439,30 @@ const parsePositiveInteger = (value) => {
   return Math.max(0, parsed);
 };
 
-const clampWeightFactor = (value) => {
+const clampDifficultyLevel = (value) => {
   const parsed = Number.parseFloat(value);
   if (!Number.isFinite(parsed)) {
-    return 1;
+    return DEFAULT_DIFFICULTY;
   }
   return Math.max(1, Math.min(10, parsed));
 };
+
+const difficultyLevelForSport = (sport) => {
+  if (!sport) {
+    return DEFAULT_DIFFICULTY;
+  }
+  const fallbackWeightFactor =
+    Number.isFinite(Number(sport.weightFactor)) &&
+    sport.weightFactor !== undefined
+      ? Number(sport.weightFactor)
+      : undefined;
+  const candidate =
+    sport.difficultyLevel ?? fallbackWeightFactor ?? DEFAULT_DIFFICULTY;
+  return clampDifficultyLevel(candidate);
+};
+
+const difficultyScaleForSport = (sport) =>
+  difficultyLevelForSport(sport) / DEFAULT_DIFFICULTY;
 
 const getDefaultRateMinutes = (sportType) => {
   if (sportType === "reps") {
@@ -1439,27 +1482,41 @@ const screenSecondsForStats = (sport, dayStats) => {
     return Math.max(0, Math.floor(dayStats.screenSeconds || 0));
   }
   const rate = sport.screenSecondsPerUnit ?? 0;
+  const difficultyScale = difficultyScaleForSport(sport);
   if (sport.type === "reps") {
-    return dayStats.reps * rate;
+    return Math.max(
+      0,
+      Math.floor((dayStats.reps || 0) * rate * difficultyScale)
+    );
   }
-  return (dayStats.seconds || 0) * rate;
+  return Math.max(
+    0,
+    Math.floor((dayStats.seconds || 0) * rate * difficultyScale)
+  );
 };
 
 const screenSecondsForEntry = (sport, entry) => {
   if (!sport || !entry) {
     return 0;
   }
+  const difficultyLevel = difficultyLevelForSport(sport);
+  const difficultyScale = difficultyLevel / DEFAULT_DIFFICULTY;
   if (sport.type === "reps" && sport.weightExercise) {
     const weight = parsePositiveNumber(entry.weight);
-    const factor = clampWeightFactor(sport.weightFactor ?? 1);
-    const value = (weight * (entry.reps || 0) * factor) / 50;
+    const value = (weight * (entry.reps || 0) * difficultyLevel) / 50;
     return Math.max(0, Math.floor(value));
   }
   const rate = sport.screenSecondsPerUnit ?? 0;
   if (sport.type === "reps") {
-    return Math.max(0, Math.floor((entry.reps || 0) * rate));
+    return Math.max(
+      0,
+      Math.floor((entry.reps || 0) * rate * difficultyScale)
+    );
   }
-  return Math.max(0, Math.floor((entry.seconds || 0) * rate));
+  return Math.max(
+    0,
+    Math.floor((entry.seconds || 0) * rate * difficultyScale)
+  );
 };
 
 const widgetValueForStats = (sport, dayStats) => {
@@ -1629,6 +1686,7 @@ const normalizeSports = (sportList) => {
       changed = true;
     }
     const supportsAi = sport.supportsAi ?? Boolean(getAiModeForSport(sport));
+    const difficultyLevel = difficultyLevelForSport(sport);
     const next = {
       ...sport,
       name,
@@ -1636,10 +1694,16 @@ const normalizeSports = (sportList) => {
       icon: sport.icon || defaultIconForSport(sport),
       screenSecondsPerUnit:
         sport.screenSecondsPerUnit ?? defaultScreenSecondsPerUnit(sport),
+      difficultyLevel,
       supportsAi,
       nonDeletable: supportsAi,
     };
-    if (!sport.icon || sport.screenSecondsPerUnit == null || presetKey) {
+    if (
+      !sport.icon ||
+      sport.screenSecondsPerUnit == null ||
+      presetKey ||
+      !Number.isFinite(Number(sport.difficultyLevel))
+    ) {
       changed = true;
     }
     return next;
@@ -1788,6 +1852,7 @@ export default function App() {
   const [currentWorkout, setCurrentWorkout] = useState(null);
   const [workoutHistory, setWorkoutHistory] = useState([]);
   const [workoutDetailId, setWorkoutDetailId] = useState(null);
+  const [isWorkoutDetailOpen, setIsWorkoutDetailOpen] = useState(false);
   const [workoutRunning, setWorkoutRunning] = useState(false);
   const [workoutSeconds, setWorkoutSeconds] = useState(0);
   const [workoutSessionCount, setWorkoutSessionCount] = useState(0);
@@ -1798,7 +1863,15 @@ export default function App() {
   const [newIcon, setNewIcon] = useState("");
   const [newRateMinutes, setNewRateMinutes] = useState("1");
   const [newWeightExercise, setNewWeightExercise] = useState(false);
-  const [newWeightFactor, setNewWeightFactor] = useState("3");
+  const [newDifficultyLevel, setNewDifficultyLevel] = useState(
+    DEFAULT_DIFFICULTY
+  );
+  const adjustDifficultyLevel = useCallback((delta) => {
+    setNewDifficultyLevel((current) => {
+      const next = Math.max(1, Math.min(10, current + delta));
+      return next;
+    });
+  }, []);
   const [showIconInput, setShowIconInput] = useState(false);
   const [installedApps, setInstalledApps] = useState([]);
   const [appSearch, setAppSearch] = useState("");
@@ -2585,13 +2658,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       setNewIcon(sport.icon || "");
       setNewRateMinutes(String(rateMinutes || getDefaultRateMinutes(sport.type)));
       setNewWeightExercise(!!sport.weightExercise);
-      setNewWeightFactor(
-        String(
-          clampWeightFactor(
-            Number.isFinite(sport.weightFactor) ? sport.weightFactor : 3
-          )
-        )
-      );
+      setNewDifficultyLevel(difficultyLevelForSport(sport));
     } else {
       setEditingSportId(null);
       setNewName("");
@@ -2599,7 +2666,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       setNewIcon("");
       setNewRateMinutes(String(getDefaultRateMinutes("reps")));
       setNewWeightExercise(false);
-      setNewWeightFactor("3");
+      setNewDifficultyLevel(DEFAULT_DIFFICULTY);
       maybeAdvanceTutorial("openAddSport");
     }
     setShowIconInput(false);
@@ -2625,8 +2692,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     const screenSecondsPerUnit =
       newType === "reps" ? rateMinutes * 60 : rateMinutes;
     const weightMode = newType === "reps" && newWeightExercise;
-    const parsedFactor =
-      clampWeightFactor(parsePositiveNumber(newWeightFactor) || 1);
+    const parsedDifficulty = clampDifficultyLevel(newDifficultyLevel);
     if (editingSportId) {
       const nextSports = sports.map((sport) => {
         if (sport.id !== editingSportId) {
@@ -2645,7 +2711,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           presetKey: keepPresetKey,
           supportsAi: sport.supportsAi,
           weightExercise: weightMode,
-          weightFactor: parsedFactor,
+          difficultyLevel: parsedDifficulty,
         };
       });
       await saveSports(nextSports);
@@ -2659,7 +2725,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         screenSecondsPerUnit,
         createdAt: Date.now(),
         weightExercise: weightMode,
-        weightFactor: parsedFactor,
+        difficultyLevel: parsedDifficulty,
       };
       await saveSports([newSport, ...sports]);
     }
@@ -2683,6 +2749,16 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     if (selectedSportId === sportId) {
       setSelectedSportId(null);
     }
+  };
+
+  const openWorkoutDetail = (sessionId) => {
+    setWorkoutDetailId(sessionId);
+    setIsWorkoutDetailOpen(true);
+  };
+
+  const closeWorkoutDetail = () => {
+    setIsWorkoutDetailOpen(false);
+    setWorkoutDetailId(null);
   };
 
   const moveSport = async (sportId, direction) => {
@@ -4865,6 +4941,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             </View>
             {selectedSport.supportsAi || selectedSport.id === "pushups" ? (
               <View style={styles.aiRow}>
+                <View style={styles.aiRowBadge}>
+                  <View style={styles.aiBadge}>
+                    <Text style={styles.aiBadgeText}>AI</Text>
+                  </View>
+                  <Text style={styles.aiBadgeLabel}>{t("label.aiHint")}</Text>
+                </View>
                 <Pressable
                   style={[
                     styles.secondaryButton,
@@ -4961,7 +5043,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   }
 
   if (isWorkoutOpen) {
-    const recentWorkouts = workoutHistory.slice(0, 5);
+    const recentWorkouts = [...workoutHistory].sort(
+      (a, b) => (b.startTs || 0) - (a.startTs || 0)
+    );
     const workoutDetail = workoutHistory.find(
       (entry) => entry.id === workoutDetailId
     );
@@ -5038,83 +5122,104 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           {recentWorkouts.length === 0 ? (
             <Text style={styles.helperText}>{t("label.noEntries")}</Text>
           ) : (
-            recentWorkouts.map((session) => (
-              <View key={session.id} style={styles.workoutHistoryWrapper}>
-                <View style={styles.workoutHistoryHeader}>
+            <View style={styles.workoutHistoryList}>
+              {recentWorkouts.map((session) => (
+                <View key={session.id} style={styles.workoutHistoryListItem}>
+                  <View style={styles.workoutHistoryRowWrapper}>
+                    <Pressable
+                      style={({ pressed }) => [
+                        styles.workoutHistoryRow,
+                        pressed && styles.workoutHistoryRowPressed,
+                      ]}
+                      onPress={() => openWorkoutDetail(session.id)}
+                    >
+                      <View style={styles.workoutHistoryRowMain}>
+                        <View>
+                          <Text style={styles.workoutHistoryRowTitle}>
+                            {formatDateLabel(
+                              dateKeyFromDate(
+                                new Date(session.startTs || Date.now())
+                              )
+                            )}
+                          </Text>
+                          <Text style={styles.workoutHistoryRowMeta}>
+                            {formatTime(session.startTs || Date.now())} ·{" "}
+                            {formatSeconds(session.duration || 0)}
+                          </Text>
+                        </View>
+                        <Text style={styles.workoutHistoryRowArrow}>›</Text>
+                      </View>
+                    </Pressable>
+                    <Pressable
+                      style={styles.workoutHistoryDelete}
+                      onPress={() =>
+                        confirmAction(t("label.confirmDelete"), () =>
+                          deleteWorkout(session.id)
+                        )
+                      }
+                    >
+                      <Text style={styles.iconActionText}>🗑</Text>
+                    </Pressable>
+                  </View>
+                  <Text style={styles.workoutHistoryRowStats}>
+                    {t("label.screenTime")}:{" "}
+                    {formatScreenTime(session.screenSeconds || 0)}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          )}
+          <Modal
+            visible={isWorkoutDetailOpen && Boolean(workoutDetail)}
+            animationType="slide"
+            transparent
+            onRequestClose={closeWorkoutDetail}
+          >
+            <View style={styles.workoutDetailModalOverlay}>
+              <View style={styles.workoutDetailModalCard}>
+                <View style={styles.workoutDetailModalHeader}>
+                  <Text style={styles.sectionTitle}>
+                    {t("label.workoutDetail")}
+                  </Text>
                   <Pressable
-                    style={[
-                      styles.workoutHistoryItem,
-                      workoutDetailId === session.id &&
-                        styles.workoutHistoryItemActive,
-                    ]}
-                    onPress={() => setWorkoutDetailId(session.id)}
+                    style={styles.secondaryButton}
+                    onPress={closeWorkoutDetail}
                   >
-                    <Text style={styles.workoutHistoryTitle}>
-                      {formatDateLabel(
-                        dateKeyFromDate(new Date(session.startTs || Date.now()))
-                      )}
+                    <Text style={styles.secondaryButtonText}>
+                      {t("label.close")}
                     </Text>
-                    <Text style={styles.workoutHistoryMeta}>
-                      {formatTime(session.startTs || Date.now())} ·{" "}
-                      {formatSeconds(session.duration || 0)}
-                    </Text>
-                  </Pressable>
-                  <Pressable
-                    style={styles.workoutHistoryDelete}
-                    onPress={() =>
-                      confirmAction(t("label.confirmDelete"), () =>
-                        deleteWorkout(session.id)
-                      )
-                    }
-                  >
-                    <Text style={styles.iconActionText}>🗑</Text>
                   </Pressable>
                 </View>
-                <Text style={styles.workoutHistoryMeta}>
-                  {t("label.screenTime")}:{" "}
-                  {formatScreenTime(session.screenSeconds || 0)}
+                <Text style={styles.workoutDetailText}>
+                  {formatTime(workoutDetail?.startTs || Date.now())} ·{" "}
+                  {t("label.workoutDuration")}:{" "}
+                  {formatSeconds(workoutDetail?.duration || 0)}
                 </Text>
+                <Text style={styles.workoutDetailText}>
+                  {t("label.screenTime")}:{" "}
+                  {formatScreenTime(workoutDetail?.screenSeconds || 0)}
+                </Text>
+                {(workoutDetail?.exercises || []).length === 0 ? (
+                  <Text style={styles.helperText}>{t("label.noEntries")}</Text>
+                ) : (
+                  (workoutDetail?.exercises || []).map((entry) => {
+                    const sport = sports.find((item) => item.id === entry.sportId);
+                    return (
+                      <View key={entry.sportId} style={styles.workoutDetailRow}>
+                        <Text style={styles.workoutDetailLabel}>
+                          {sport?.icon || DEFAULT_ICON}{" "}
+                          {sport ? getSportLabel(sport) : entry.sportId}
+                        </Text>
+                        <Text style={styles.workoutDetailValue}>
+                          {entry.count}x
+                        </Text>
+                      </View>
+                    );
+                  })
+                )}
               </View>
-            ))
-          )}
-          {workoutDetail ? (
-            <View style={styles.workoutDetailCard}>
-              <Text style={styles.sectionTitle}>{t("label.workoutDetail")}</Text>
-              <Text style={styles.workoutDetailText}>
-                {formatTime(workoutDetail.startTs || Date.now())} ·{" "}
-                {t("label.workoutDuration")}:{" "}
-                {formatSeconds(workoutDetail.duration || 0)}
-              </Text>
-              <Text style={styles.workoutDetailText}>
-                {t("label.screenTime")}:{" "}
-                {formatScreenTime(workoutDetail.screenSeconds || 0)}
-              </Text>
-              {(workoutDetail.exercises || []).length === 0 ? (
-                <Text style={styles.helperText}>{t("label.noEntries")}</Text>
-              ) : (
-                (workoutDetail.exercises || []).map((entry) => {
-                  const sport = sports.find((item) => item.id === entry.sportId);
-                  return (
-                    <View key={entry.sportId} style={styles.workoutDetailRow}>
-                      <Text style={styles.workoutDetailLabel}>
-                        {sport?.icon || DEFAULT_ICON}{" "}
-                        {sport ? getSportLabel(sport) : entry.sportId}
-                      </Text>
-                      <Text style={styles.workoutDetailValue}>
-                        {entry.count}x
-                      </Text>
-                    </View>
-                  );
-                })
-              )}
-              <Pressable
-                style={[styles.secondaryButton, styles.workoutDetailClose]}
-                onPress={() => setWorkoutDetailId(null)}
-              >
-                <Text style={styles.secondaryButtonText}>{t("label.back")}</Text>
-              </Pressable>
             </View>
-          ) : null}
+          </Modal>
         </ScrollView>
       </SafeAreaView>
     );
@@ -6143,6 +6248,47 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 </Text>
               </Pressable>
             </View>
+            <View style={styles.sliderSection}>
+              <Text style={styles.rateLabel}>{t("label.difficultyLabel")}</Text>
+              <Text style={styles.sliderDescription}>
+                {t("label.difficultyDescription")}
+              </Text>
+              <View style={styles.difficultyBarWrapper}>
+                <View style={styles.difficultyBarTrack}>
+                  <View
+                    style={[
+                      styles.difficultyBarFill,
+                      {
+                        width: `${((newDifficultyLevel - 1) / 9) * 100}%`,
+                      },
+                    ]}
+                  />
+                </View>
+                <View style={styles.difficultyValuePill}>
+                  <Text style={styles.sliderValue}>{newDifficultyLevel}</Text>
+                </View>
+              </View>
+              <View style={styles.difficultyButtonsRow}>
+                <Pressable
+                  style={styles.difficultyButton}
+                  onPress={() => adjustDifficultyLevel(-1)}
+                >
+                  <Text style={styles.difficultyButtonText}>−</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.difficultyButton}
+                  onPress={() => adjustDifficultyLevel(1)}
+                >
+                  <Text style={styles.difficultyButtonText}>+</Text>
+                </Pressable>
+              </View>
+              <Text style={styles.sliderHintText}>
+                {t("label.difficultyHint")}
+              </Text>
+              <Text style={styles.sliderHintText}>
+                {t("label.difficultyGuide")}
+              </Text>
+            </View>
             {newType === "reps" ? (
               <>
                 <View style={styles.weightToggleRow}>
@@ -6161,27 +6307,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                     </Text>
                   </Pressable>
                 </View>
-                {newWeightExercise ? (
-                  <>
-                    <Text style={styles.rateLabel}>{t("label.weightFactor")}</Text>
-                    <TextInput
-                      style={styles.input}
-                      value={newWeightFactor}
-                      onChangeText={(value) =>
-                        setNewWeightFactor(value.replace(",", "."))
-                      }
-                      placeholder="3"
-                      keyboardType="number-pad"
-                      placeholderTextColor="#7a7a7a"
-                    />
-                    <Text style={styles.weightHintText}>
-                      {t("label.weightFactorHint")}
-                    </Text>
-                    <Text style={styles.weightGuideText}>
-                      {t("label.weightFactorGuide")}
-                    </Text>
-                  </>
-                ) : null}
               </>
             ) : null}
             <View style={styles.modalActions}>
@@ -6518,6 +6643,16 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.cardAlt,
     opacity: 0.7,
   },
+  aiRowBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginBottom: 4,
+  },
+  aiBadgeLabel: {
+    color: COLORS.muted,
+    fontSize: 12,
+  },
   aiHintInline: {
     color: COLORS.muted,
     textAlign: "center",
@@ -6614,15 +6749,21 @@ const styles = StyleSheet.create({
   aiBadge: {
     borderWidth: 1,
     borderColor: COLORS.accent,
-    paddingHorizontal: 6,
+    paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 6,
+    minWidth: 32,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
   },
   aiBadgeText: {
     color: COLORS.accent,
     fontSize: 10,
     fontWeight: "700",
     letterSpacing: 0.6,
+    lineHeight: 14,
+    textAlign: "center",
   },
   aiBadgePlaceholder: {
     width: 0,
@@ -7130,16 +7271,64 @@ const styles = StyleSheet.create({
     color: COLORS.accent,
     fontWeight: "700",
   },
-  weightHintText: {
+  sliderSection: {
+    marginBottom: 12,
+  },
+  sliderDescription: {
+    color: COLORS.muted,
+    fontSize: 12,
+    marginBottom: 6,
+  },
+  difficultyBarWrapper: {
+    marginTop: 10,
+    marginBottom: 4,
+  },
+  difficultyBarTrack: {
+    height: 8,
+    borderRadius: 999,
+    backgroundColor: "rgba(148, 163, 184, 0.2)",
+    overflow: "hidden",
+  },
+  difficultyBarFill: {
+    height: "100%",
+    borderRadius: 999,
+    backgroundColor: COLORS.accent,
+  },
+  difficultyValuePill: {
+    marginTop: 6,
+    alignSelf: "flex-end",
+    backgroundColor: COLORS.cardAlt,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  sliderValue: {
+    color: COLORS.text,
+    fontWeight: "700",
+    textAlign: "center",
+  },
+  difficultyButtonsRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 6,
+  },
+  difficultyButton: {
+    flex: 1,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: COLORS.cardAlt,
+    paddingVertical: 10,
+    alignItems: "center",
+  },
+  difficultyButtonText: {
+    color: COLORS.text,
+    fontWeight: "700",
+    fontSize: 18,
+  },
+  sliderHintText: {
     color: COLORS.muted,
     fontSize: 11,
     marginTop: 4,
-    marginBottom: 8,
-  },
-  weightGuideText: {
-    color: COLORS.muted,
-    fontSize: 11,
-    marginBottom: 8,
   },
   hiddenSection: {
     marginTop: 20,
@@ -7388,36 +7577,62 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
   },
-  workoutHistoryItem: {
-    borderRadius: 10,
-    backgroundColor: COLORS.cardAlt,
-    padding: 12,
-    marginBottom: 10,
-  },
-  workoutHistoryItemActive: {
-    borderWidth: 1,
-    borderColor: COLORS.accent,
-  },
-  workoutHistoryWrapper: {
+  workoutHistoryList: {
     marginBottom: 12,
+    gap: 8,
   },
-  workoutHistoryHeader: {
+  workoutHistoryListItem: {
+    backgroundColor: COLORS.card,
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "rgba(148, 163, 184, 0.3)",
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 3,
+  },
+  workoutHistoryRowWrapper: {
     flexDirection: "row",
-    alignItems: "flex-start",
     justifyContent: "space-between",
+    alignItems: "flex-start",
+    gap: 8,
   },
-  workoutHistoryDelete: {
-    marginLeft: 8,
+  workoutHistoryRow: {
+    flex: 1,
+    borderRadius: 10,
     padding: 6,
   },
-  workoutHistoryTitle: {
-    color: COLORS.text,
-    fontWeight: "600",
+  workoutHistoryRowPressed: {
+    opacity: 0.6,
   },
-  workoutHistoryMeta: {
+  workoutHistoryRowTitle: {
+    color: COLORS.text,
+    fontWeight: "700",
+  },
+  workoutHistoryRowMeta: {
     color: COLORS.muted,
     fontSize: 12,
     marginTop: 2,
+  },
+  workoutHistoryRowStats: {
+    color: COLORS.muted,
+    fontSize: 12,
+    marginTop: 6,
+  },
+  workoutHistoryRowMain: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  workoutHistoryRowArrow: {
+    color: COLORS.accent,
+    fontSize: 20,
+    fontWeight: "700",
+  },
+  workoutHistoryDelete: {
+    padding: 6,
   },
   workoutDetailCard: {
     borderRadius: 12,
@@ -7442,8 +7657,22 @@ const styles = StyleSheet.create({
     color: COLORS.accent,
     fontWeight: "600",
   },
-  workoutDetailClose: {
-    marginTop: 12,
+  workoutDetailModalOverlay: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+    justifyContent: "center",
+    padding: 24,
+  },
+  workoutDetailModalCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 18,
+    padding: 18,
+  },
+  workoutDetailModalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 8,
   },
   fixedTimers: {
     position: "absolute",
