@@ -6249,10 +6249,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               </Pressable>
             </View>
             <View style={styles.sliderSection}>
-              <Text style={styles.rateLabel}>{t("label.difficultyLabel")}</Text>
-              <Text style={styles.sliderDescription}>
-                {t("label.difficultyDescription")}
-              </Text>
+              <View style={styles.difficultyHeaderRow}>
+                <Text style={styles.rateLabel}>{t("label.difficultyLabel")}</Text>
+                <Text style={styles.difficultyHeaderValue}>
+                  {newDifficultyLevel}
+                </Text>
+              </View>
               <View style={styles.difficultyBarWrapper}>
                 <View style={styles.difficultyBarTrack}>
                   <View
@@ -6282,12 +6284,17 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                   <Text style={styles.difficultyButtonText}>+</Text>
                 </Pressable>
               </View>
-              <Text style={styles.sliderHintText}>
-                {t("label.difficultyHint")}
-              </Text>
-              <Text style={styles.sliderHintText}>
-                {t("label.difficultyGuide")}
-              </Text>
+              <View style={styles.difficultyHelperText}>
+                <Text style={styles.sliderDescription}>
+                  {t("label.difficultyDescription")}
+                </Text>
+                <Text style={styles.sliderHintText}>
+                  {t("label.difficultyHint")}
+                </Text>
+                <Text style={styles.sliderHintText}>
+                  {t("label.difficultyGuide")}
+                </Text>
+              </View>
             </View>
             {newType === "reps" ? (
               <>
@@ -7273,11 +7280,26 @@ const styles = StyleSheet.create({
   },
   sliderSection: {
     marginBottom: 12,
+    marginTop: 10,
   },
   sliderDescription: {
     color: COLORS.muted,
     fontSize: 12,
+    marginBottom: 4,
+  },
+  difficultyHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 6,
+  },
+  difficultyHeaderValue: {
+    color: COLORS.text,
+    fontWeight: "700",
+    fontSize: 16,
+  },
+  difficultyHelperText: {
+    marginTop: 8,
   },
   difficultyBarWrapper: {
     marginTop: 10,
