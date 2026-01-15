@@ -7113,6 +7113,8 @@ const styles = StyleSheet.create({
   },
   permissionCardCollapsed: {
     justifyContent: "center",
+    minHeight: 160,
+    paddingVertical: 16,
   },
   permissionHeaderRow: {
     flexDirection: "row",
