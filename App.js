@@ -4124,6 +4124,16 @@ const STRINGS = {
       "Aktiviere die Zugriffshilfe, damit Social Apps gesperrt werden können.",
     "label.settingsHint":
       "Aktiviere die Zugriffshilfe, damit die App Social Apps blockieren kann, wenn die Zeit aufgebraucht ist.",
+    "label.motivationTitle": "Motivation",
+    "label.motivationSubtitle": "Kleine Impulse, große Wirkung.",
+    "label.motivationDifficultyTitle": "Schwierigkeitsgrad steigern",
+    "label.motivationDifficultyBody":
+      "Heb den Regler an, damit jede Einheit mehr Zeit bringt.",
+    "label.motivationDifficultyAction": "Jetzt anpassen",
+    "label.motivationWorkoutTitle": "Bleib in Bewegung",
+    "label.motivationWorkoutBody":
+      "Starte ein Workout, um an deinem Tagesziel dranzubleiben.",
+    "label.motivationWorkoutAction": "Workout starten",
     "label.changeLanguage": "Sprache ändern",
     "label.prefaceSettings": "Vorschaltseite",
     "label.prefaceDelay": "Wartezeit (Sekunden)",
@@ -4354,6 +4364,16 @@ const STRINGS = {
     "label.accessibilityHint": "Enable accessibility to block social apps.",
     "label.settingsHint":
       "Enable accessibility so the app can block social apps when time is up.",
+    "label.motivationTitle": "Motivation",
+    "label.motivationSubtitle": "Fresh pushes that keep you moving.",
+    "label.motivationDifficultyTitle": "Raise the difficulty",
+    "label.motivationDifficultyBody":
+      "A little more challenge earns more screen time for the same effort.",
+    "label.motivationDifficultyAction": "Adjust now",
+    "label.motivationWorkoutTitle": "Keep moving",
+    "label.motivationWorkoutBody":
+      "Kick off a workout to keep today's momentum.",
+    "label.motivationWorkoutAction": "Start workout",
     "label.changeLanguage": "Change language",
     "label.prefaceSettings": "Preface screen",
     "label.prefaceDelay": "Wait time (seconds)",
@@ -4588,6 +4608,16 @@ const STRINGS = {
       "Activa la accesibilidad para bloquear apps sociales.",
     "label.settingsHint":
       "Activa la accesibilidad para que la app bloquee redes sociales cuando se acabe el tiempo.",
+    "label.motivationTitle": "Motivación",
+    "label.motivationSubtitle": "Impulsos pequeños que mantienen el ritmo.",
+    "label.motivationDifficultyTitle": "Aumenta la dificultad",
+    "label.motivationDifficultyBody":
+      "Más dificultad te da más tiempo de pantalla por esfuerzo.",
+    "label.motivationDifficultyAction": "Ajustar ahora",
+    "label.motivationWorkoutTitle": "Sigue en movimiento",
+    "label.motivationWorkoutBody":
+      "Inicia un entrenamiento para mantener el impulso.",
+    "label.motivationWorkoutAction": "Iniciar entrenamiento",
     "label.changeLanguage": "Cambiar idioma",
     "label.prefaceSettings": "Pantalla previa",
     "label.prefaceDelay": "Tiempo de espera (segundos)",
@@ -4816,7 +4846,17 @@ const STRINGS = {
       "Activez l’accessibilité pour bloquer les apps sociales.",
     "label.settingsHint":
       "Activez l’accessibilité pour que l’app bloque les apps sociales quand le temps est écoulé.",
-    "label.changeLanguage": "Changer de langue",
+        "label.motivationTitle": "Motivation",
+    "label.motivationSubtitle": "Un petit boost pour rester actif.",
+    "label.motivationDifficultyTitle": "Augmente la difficult?",
+    "label.motivationDifficultyBody":
+      "Un peu plus de difficult? rapporte plus de temps d'?cran.",
+    "label.motivationDifficultyAction": "Ajuster maintenant",
+    "label.motivationWorkoutTitle": "Reste actif",
+    "label.motivationWorkoutBody":
+      "Lance un entra?nement pour garder le cap.",
+    "label.motivationWorkoutAction": "D?marrer l'entra?nement",
+"label.changeLanguage": "Changer de langue",
     "label.prefaceSettings": "Ecran preface",
     "label.prefaceDelay": "Delai (secondes)",
     "label.tapAnywhere": "Touchez n’importe où",
@@ -6413,6 +6453,13 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setCustomSuggestionUsed(false);
   };
 
+  const handleIncreaseDifficulty = () => {
+    if (!motivationSport) {
+      return;
+    }
+    openSportModal(motivationSport);
+  };
+
   const saveSportModal = async () => {
     const trimmed = newName.trim();
     if (!trimmed) {
@@ -7378,6 +7425,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   const hiddenSports = sports.filter((sport) => sport.hidden);
   const selectedSport = sports.find((sport) => sport.id === selectedSportId);
   const tutorialSportId = activeSports[0]?.id;
+  const motivationSport = activeSports[0] ?? null;
   const statsSport = sports.find((sport) => sport.id === statsSportId);
   const aiSport = aiSession
     ? sports.find((sport) => sport.id === aiSession.sportId)
@@ -9357,6 +9405,26 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     0,
     Math.floor((gridWidth - gridGap * (columnCount - 1)) / columnCount)
   );
+  const motivationCards = [
+    {
+      id: "difficulty",
+      icon: "🔥",
+      titleKey: "label.motivationDifficultyTitle",
+      bodyKey: "label.motivationDifficultyBody",
+      actionLabelKey: "label.motivationDifficultyAction",
+      action: handleIncreaseDifficulty,
+      disabled: !motivationSport,
+    },
+    {
+      id: "workout",
+      icon: "⚡",
+      titleKey: "label.motivationWorkoutTitle",
+      bodyKey: "label.motivationWorkoutBody",
+      actionLabelKey: "label.motivationWorkoutAction",
+      action: () => openWorkout(),
+      disabled: false,
+    },
+  ];
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -9378,6 +9446,37 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           {renderTutorialHeaderButton()}
         </View>
         {renderMainNav("home")}
+        <View style={styles.motivationSection}>
+          <View style={styles.motivationHeaderRow}>
+            <Text style={styles.motivationSectionTitle}>
+              {t("label.motivationTitle")}
+            </Text>
+            <Text style={styles.motivationSectionCaption}>
+              {t("label.motivationSubtitle")}
+            </Text>
+          </View>
+          <View style={styles.motivationCardsRow}>
+            {motivationCards.map((card) => (
+              <View key={card.id} style={styles.motivationCard}>
+                <Text style={styles.motivationCardIcon}>{card.icon}</Text>
+                <Text style={styles.motivationCardTitle}>{t(card.titleKey)}</Text>
+                <Text style={styles.motivationCardBody}>{t(card.bodyKey)}</Text>
+                <Pressable
+                  style={[
+                    styles.motivationActionButton,
+                    card.disabled && styles.motivationActionButtonDisabled,
+                  ]}
+                  onPress={card.action}
+                  disabled={card.disabled}
+                >
+                  <Text style={styles.motivationActionText}>
+                    {t(card.actionLabelKey)}
+                  </Text>
+                </Pressable>
+              </View>
+            ))}
+          </View>
+        </View>
         {renderWorkoutBanner()}
         {showPermissionPrompt ? (
           <View
@@ -10969,6 +11068,72 @@ const styles = StyleSheet.create({
   },
   infoPopupSpacing: {
     marginTop: 6,
+  },
+  motivationSection: {
+    marginHorizontal: 2,
+    marginBottom: 12,
+  },
+  motivationHeaderRow: {
+    marginBottom: 8,
+  },
+  motivationSectionTitle: {
+    color: COLORS.text,
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  motivationSectionCaption: {
+    color: COLORS.muted,
+    fontSize: 12,
+    marginTop: 2,
+  },
+  motivationCardsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    marginHorizontal: -6,
+  },
+  motivationCard: {
+    flex: 1,
+    minWidth: 180,
+    borderRadius: 14,
+    padding: 14,
+    backgroundColor: COLORS.card,
+    borderWidth: 1,
+    borderColor: COLORS.cardAlt,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 3,
+    margin: 6,
+  },
+  motivationCardIcon: {
+    fontSize: 24,
+    marginBottom: 6,
+  },
+  motivationCardTitle: {
+    color: COLORS.text,
+    fontWeight: "700",
+    fontSize: 15,
+    marginBottom: 4,
+  },
+  motivationCardBody: {
+    color: COLORS.muted,
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 10,
+  },
+  motivationActionButton: {
+    backgroundColor: COLORS.accent,
+    borderRadius: 10,
+    paddingVertical: 8,
+    alignItems: "center",
+  },
+  motivationActionButtonDisabled: {
+    opacity: 0.5,
+  },
+  motivationActionText: {
+    color: COLORS.background,
+    fontWeight: "700",
   },
   statsTitle: {
     color: COLORS.muted,
