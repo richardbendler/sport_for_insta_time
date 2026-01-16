@@ -4200,6 +4200,7 @@ const STRINGS = {
     "label.motivationChallengeBody":
       "Fordere dich selbst mit einer Challenge heraus und bleib dran.",
     "label.motivationPreviewHint": "Tippe, um die Empfehlung zu öffnen.",
+    "label.motivationCollapsedHint": "Tipps einblenden",
     "label.aiFeatureTitle": "AI-Training",
     "label.aiFeatureBody":
       "Diese Sportart unterstützt AI-Features. Drücke den AI-Button in der Sportart, um das automatische Zählen zu starten.",
@@ -4499,6 +4500,7 @@ const STRINGS = {
     "label.motivationChallengeBody":
       "Set a new challenge to push yourself a little further.",
     "label.motivationPreviewHint": "Tap to expand the suggestion",
+    "label.motivationCollapsedHint": "Show tips",
     "label.aiFeatureTitle": "AI training",
     "label.aiFeatureBody":
       "This sport supports AI features. Tap the AI button inside the sport to start automatic counting.",
@@ -4802,6 +4804,7 @@ const STRINGS = {
     "label.motivationChallengeBody":
       "Inicia un reto adicional para desafiarte más.",
     "label.motivationPreviewHint": "Toca para ver la sugerencia",
+    "label.motivationCollapsedHint": "Mostrar consejos",
     "label.aiFeatureTitle": "Entrenamiento AI",
     "label.aiFeatureBody":
       "Este deporte admite funciones de IA. Pulsa el botón de IA dentro del deporte para iniciar el conteo automático.",
@@ -5099,6 +5102,7 @@ const STRINGS = {
     "label.motivationChallengeBody":
       "Crée un défi pour te pousser un peu plus loin.",
     "label.motivationPreviewHint": "Touchez pour voir la recommandation",
+    "label.motivationCollapsedHint": "Afficher les conseils",
     "label.aiFeatureTitle": "Entra?nement AI",
     "label.aiFeatureBody":
       "Ce sport peut utiliser les fonctions AI. Appuie sur le bouton AI dans le sport pour lancer le comptage automatique.",
@@ -10061,7 +10065,20 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                       {t("label.permissionsHint")}
                     </Text>
                   </>
-                ) : null}
+                ) : permissionsPanelOpen ? (
+                  <>
+                    <Text style={styles.permissionTitle}>
+                      {t("label.motivationTitle")}
+                    </Text>
+                    <Text style={styles.permissionSubtitle}>
+                      {t("label.motivationSubtitle")}
+                    </Text>
+                  </>
+                ) : (
+                  <Text style={styles.permissionCollapsedText}>
+                    {t("label.motivationCollapsedHint")}
+                  </Text>
+                )}
               </View>
               <Text style={styles.permissionToggle}>
                 {permissionsPanelOpen ? "-" : "+"}
@@ -11674,13 +11691,13 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     fontWeight: "700",
     fontSize: 15,
-    marginBottom: 6,
+    marginBottom: 4,
   },
   motivationQuoteBody: {
     color: COLORS.muted,
     fontSize: 13,
     lineHeight: 18,
-    marginBottom: 12,
+    marginBottom: 8,
   },
   motivationCardTitle: {
     color: COLORS.text,
@@ -11692,13 +11709,14 @@ const styles = StyleSheet.create({
     color: COLORS.muted,
     fontSize: 13,
     lineHeight: 18,
-    marginBottom: 10,
+    marginBottom: 6,
   },
   motivationActionButton: {
     backgroundColor: COLORS.accent,
     borderRadius: 10,
     paddingVertical: 8,
     alignItems: "center",
+    marginTop: 6,
   },
   motivationActionButtonDisabled: {
     opacity: 0.5,
@@ -12193,16 +12211,16 @@ const styles = StyleSheet.create({
   permissionCardLarge: {
     backgroundColor: "rgba(245, 158, 11, 0.12)",
     borderRadius: 14,
-    padding: 24,
-    marginBottom: 24,
-    minHeight: 220,
+    padding: 20,
+    marginBottom: 20,
+    minHeight: 200,
     borderWidth: 1,
     borderColor: COLORS.accentDark,
   },
   permissionCardCollapsed: {
     justifyContent: "center",
-    minHeight: 60,
-    paddingVertical: 8,
+    minHeight: 48,
+    paddingVertical: 6,
   },
   permissionHeaderRow: {
     flexDirection: "row",
@@ -12220,6 +12238,11 @@ const styles = StyleSheet.create({
     marginTop: 6,
     fontSize: 14,
   },
+  permissionCollapsedText: {
+    color: COLORS.text,
+    fontSize: 16,
+    fontWeight: "600",
+  },
   permissionHint: {
     color: COLORS.text,
     marginTop: 8,
@@ -12233,8 +12256,8 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   permissionList: {
-    marginTop: 18,
-    gap: 12,
+    marginTop: 14,
+    gap: 10,
   },
   permissionItem: {
     backgroundColor: COLORS.cardAlt,
