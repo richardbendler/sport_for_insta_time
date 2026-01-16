@@ -10067,11 +10067,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                   </>
                 ) : permissionsPanelOpen ? (
                   <>
-                    <Text style={styles.permissionTitle}>
-                      {t("label.motivationTitle")}
+                    <Text style={styles.motivationQuoteTitle}>
+                      {activeQuoteTitle}
                     </Text>
-                    <Text style={styles.permissionSubtitle}>
-                      {t("label.motivationSubtitle")}
+                    <Text style={styles.motivationQuoteBody}>
+                      {activeQuoteBody}
                     </Text>
                   </>
                 ) : (
@@ -10147,12 +10147,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                   </>
                 ) : (
                   <>
-                    <Text style={styles.motivationQuoteTitle}>
-                      {activeQuoteTitle}
-                    </Text>
-                    <Text style={styles.motivationQuoteBody}>
-                      {activeQuoteBody}
-                    </Text>
                     <Text style={styles.motivationCardTitle}>
                       {activeActionTitle}
                     </Text>
@@ -12256,8 +12250,8 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   permissionList: {
-    marginTop: 14,
-    gap: 10,
+    marginTop: 8,
+    gap: 6,
   },
   permissionItem: {
     backgroundColor: COLORS.cardAlt,
