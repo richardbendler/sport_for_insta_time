@@ -9,6 +9,7 @@ import {
   TextInput,
   ScrollView,
   StyleSheet,
+  ActivityIndicator,
   NativeModules,
   Platform,
   PermissionsAndroid,
@@ -4011,6 +4012,7 @@ const STRINGS = {
     "label.runningSession": "Laufende Session",
     "label.workoutTimer": "Workout-Timer",
     "label.startWorkout": "Workout starten",
+    "label.startWorkoutFirst": "Starte bitte erst ein Workout",
     "label.endWorkout": "Workout beenden",
     "label.workoutExercises": "Übungen",
     "label.workoutHistory": "Vergangene Workouts",
@@ -4103,17 +4105,16 @@ const STRINGS = {
     "label.timeUnit": "Zeit",
     "label.weightExercise": "Gewichtsübung",
     "label.difficultyLabel": "Schwierigkeitsgrad (1-10)",
-    "label.difficultyDescription":
-      "Passe die Schwierigkeit an, damit die Screen Time zur Intensität oder Geschwindigkeit passt.",
-    "label.difficultyHint":
-      "Nutze die Buttons und die Anzeige, um den passenden Wert einzustellen.",
-    "label.difficultyGuide":
-      "1-3 leicht oder schnell, 4-7 normal, 8-10 schwer oder langsam.",
+    "label.difficultyDescription": "Jede Einheit erzeugt Screen Time; die Schwierigkeit skaliert sie.",
+    "label.difficultyFormula":
+      "Bildschirmzeit = Einheit × Rate × (Schwierigkeitsgrad / 5)",
     "label.weightEntryButton": "Satz eintragen",
     "label.weightEntryPreview": "Screen Time (Vorschau)",
     "label.weightEntryWeight": "Gewicht (kg)",
     "label.weightEntryReps": "Wiederholungen",
     "label.timeBased": "Zeitbasiert",
+    "label.typePickerTitle": "Tracking-Modus",
+    "label.typeInfoTitle": "Modus verstehen",
     "label.typeHelp":
       "Wiederholungen: für Zählen (z.B. 10 Liegestütze). Zeitbasiert: für Minuten/Sekunden (z.B. 15 Minuten Joggen).",
     "label.activateNow": "Jetzt aktivieren",
@@ -4247,6 +4248,7 @@ const STRINGS = {
     "label.runningSession": "Running session",
     "label.workoutTimer": "Workout timer",
     "label.startWorkout": "Start workout",
+    "label.startWorkoutFirst": "Please start a workout first.",
     "label.endWorkout": "End workout",
     "label.workoutExercises": "Exercises",
     "label.workoutHistory": "Past workouts",
@@ -4334,16 +4336,16 @@ const STRINGS = {
     "label.weightExercise": "Weight exercise",
     "label.difficultyLabel": "Difficulty level (1-10)",
     "label.difficultyDescription":
-      "Adjust the difficulty control so Screen Time matches how intense or slow the set felt.",
-    "label.difficultyHint":
-      "Use the buttons and the indicator to set a value between 1 and 10.",
-    "label.difficultyGuide":
-      "Lower values keep the intensity light, higher values recognize challenging work.",
+      "Difficulty controls how much screen time each unit earns.",
+    "label.difficultyFormula":
+      "Screen Time = Units × Rate × (Difficulty / 5)",
     "label.weightEntryButton": "Log set",
     "label.weightEntryPreview": "Screen time preview",
     "label.weightEntryWeight": "Weight (kg)",
     "label.weightEntryReps": "Reps",
     "label.timeBased": "Time-based",
+    "label.typePickerTitle": "Tracking mode",
+    "label.typeInfoTitle": "How modes work",
     "label.typeHelp":
       "Repetitions: for counting sets (e.g. 10 push-ups). Time-based: for minutes/seconds (e.g. 15 minutes jogging).",
     "label.activateNow": "Enable now",
@@ -4476,6 +4478,7 @@ const STRINGS = {
     "label.runningSession": "Sesión activa",
     "label.workoutTimer": "Temporizador de entrenamiento",
     "label.startWorkout": "Iniciar entrenamiento",
+    "label.startWorkoutFirst": "Por favor inicia primero un entrenamiento.",
     "label.endWorkout": "Finalizar entrenamiento",
     "label.workoutExercises": "Ejercicios",
     "label.workoutHistory": "Entrenamientos anteriores",
@@ -4566,16 +4569,16 @@ const STRINGS = {
     "label.weightExercise": "Ejercicio con peso",
     "label.difficultyLabel": "Nivel de dificultad (1-10)",
     "label.difficultyDescription":
-      "Ajusta el control para que el tiempo de pantalla refleje la intensidad o la lentitud del esfuerzo.",
-    "label.difficultyHint":
-      "Usa los botones y la barra para fijar un valor entre 1 y 10.",
-    "label.difficultyGuide":
-      "1-3 para ejercicios ligeros, 4-7 intensidad media, 8-10 esfuerzo fuerte o pausado.",
+      "La dificultad ajusta cuánto tiempo de pantalla gana cada unidad.",
+    "label.difficultyFormula":
+      "Tiempo de pantalla = Unidades × Ritmo × (Dificultad / 5)",
     "label.weightEntryButton": "Registrar serie",
     "label.weightEntryPreview": "Tiempo de pantalla (vista previa)",
     "label.weightEntryWeight": "Peso (kg)",
     "label.weightEntryReps": "Repeticiones",
     "label.timeBased": "Por tiempo",
+    "label.typePickerTitle": "Modo de seguimiento",
+    "label.typeInfoTitle": "Cómo funcionan los modos",
     "label.typeHelp":
       "Repeticiones: para contar series (p. ej. 10 flexiones). Tiempo: para minutos/segundos (p. ej. 15 minutos).",
     "label.activateNow": "Activar ahora",
@@ -4708,6 +4711,7 @@ const STRINGS = {
     "label.runningSession": "Session en cours",
     "label.workoutTimer": "Minuteur d'entraînement",
     "label.startWorkout": "Démarrer l'entraînement",
+    "label.startWorkoutFirst": "Commence d'abord un entraînement.",
     "label.endWorkout": "Terminer l'entraînement",
     "label.workoutExercises": "Exercices",
     "label.workoutHistory": "Entraînements passés",
@@ -4793,16 +4797,16 @@ const STRINGS = {
     "label.weightExercise": "Exercice de force",
     "label.difficultyLabel": "Niveau de difficulté (1-10)",
     "label.difficultyDescription":
-      "Réglez la difficulté pour que le temps écran reflète l'effort ou la lenteur du mouvement.",
-    "label.difficultyHint":
-      "Utilisez les boutons et la barre pour choisir une valeur entre 1 et 10.",
-    "label.difficultyGuide":
-      "1-3 léger, 4-7 intensité moyenne, 8-10 effort lent ou intense.",
+      "La difficulté règle combien de temps d’écran génère chaque unité.",
+    "label.difficultyFormula":
+      "Temps d’écran = Unités × Taux × (Difficulté / 5)",
     "label.weightEntryButton": "Enregistrer la série",
     "label.weightEntryPreview": "Aperçu du temps écran",
     "label.weightEntryWeight": "Poids (kg)",
     "label.weightEntryReps": "Répétitions",
     "label.timeBased": "Basé sur le temps",
+    "label.typePickerTitle": "Mode de suivi",
+    "label.typeInfoTitle": "Comment fonctionnent les modes",
     "label.typeHelp":
       "Repetitions: pour compter les series (ex. 10 pompes). Temps: pour minutes/secondes (ex. 15 minutes).",
     "label.activateNow": "Activer",
@@ -5032,7 +5036,7 @@ const formatSeconds = (totalSeconds) => {
   )}`;
 };
 
-const getRollingStats = (logs, sportId) => {
+const getRollingStats = (logs, sportId, sport) => {
   const cutoff = Date.now() - 24 * 60 * 60 * 1000;
   const sportLogs = logs[sportId] || {};
   let reps = 0;
@@ -5045,7 +5049,9 @@ const getRollingStats = (logs, sportId) => {
       }
       reps += entry.reps || 0;
       seconds += entry.seconds || 0;
-      screenSeconds += entry.screenSeconds || 0;
+      screenSeconds += sport
+        ? screenSecondsForEntry(sport, entry)
+        : entry.screenSeconds || 0;
     });
   });
   return { reps, seconds, screenSeconds };
@@ -5250,9 +5256,11 @@ const normalizeLogs = (logs, sports) => {
   return { normalized, changed };
 };
 
-const buildStatsFromLogs = (logs) => {
+const buildStatsFromLogs = (logs, sports = []) => {
+  const sportsMap = new Map(sports.map((sport) => [sport.id, sport]));
   const nextStats = {};
   Object.entries(logs || {}).forEach(([sportId, sportLogs]) => {
+    const sport = sportsMap.get(sportId);
     const nextSportStats = {};
     Object.entries(sportLogs || {}).forEach(([dayKey, entries]) => {
       const dayEntries = entries || [];
@@ -5265,7 +5273,7 @@ const buildStatsFromLogs = (logs) => {
         0
       );
       const screenSeconds = dayEntries.reduce(
-        (sum, entry) => sum + (entry.screenSeconds || 0),
+        (sum, entry) => sum + screenSecondsForEntry(sport, entry),
         0
       );
       if (reps <= 0 && seconds <= 0 && screenSeconds <= 0) {
@@ -5538,8 +5546,14 @@ export default function App() {
     });
   }, []);
   const [showIconInput, setShowIconInput] = useState(false);
+  const [activeInfoPopup, setActiveInfoPopup] = useState(null);
   const [installedApps, setInstalledApps] = useState([]);
   const [appSearch, setAppSearch] = useState("");
+  const [appSearchInput, setAppSearchInput] = useState("");
+  const [appSearchBusy, setAppSearchBusy] = useState(false);
+  const [appsLoading, setAppsLoading] = useState(false);
+  const [appsUsageLoading, setAppsUsageLoading] = useState(false);
+  const [appToggleLoading, setAppToggleLoading] = useState({});
   const [appUsageMap, setAppUsageMap] = useState({});
   const [usageState, setUsageState] = useState({
     remainingSeconds: 0,
@@ -5761,7 +5775,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         parsedLogs,
         normalized
       );
-      const rebuiltStats = buildStatsFromLogs(normalizedLogs);
+      const rebuiltStats = buildStatsFromLogs(normalizedLogs, normalized);
       setStats(rebuiltStats);
       const statsJson = JSON.stringify(rebuiltStats);
       if (statsJson !== statsRaw) {
@@ -5945,13 +5959,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       const nextStats = { ...prev };
       const sportStats = { ...(nextStats[sportId] || {}) };
       const dayEntries = entries || [];
+      const sport = sports.find((item) => item.id === sportId);
       const repsTotal = dayEntries.reduce((sum, entry) => sum + (entry.reps || 0), 0);
       const secondsTotal = dayEntries.reduce(
         (sum, entry) => sum + (entry.seconds || 0),
         0
       );
       const screenSecondsTotal = dayEntries.reduce(
-        (sum, entry) => sum + (entry.screenSeconds || 0),
+        (sum, entry) => sum + screenSecondsForEntry(sport, entry),
         0
       );
       if (repsTotal <= 0 && secondsTotal <= 0 && screenSecondsTotal <= 0) {
@@ -5977,11 +5992,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     if (!sport || !entry?.id || !InstaControl?.upsertScreenTimeEntry) {
       return;
     }
+    const screenSeconds = screenSecondsForEntry(sport, entry);
     InstaControl.upsertScreenTimeEntry(
       entry.id,
       sport.id,
       entry.ts,
-      entry.screenSeconds || 0
+      screenSeconds
     );
     InstaControl?.updateOverallWidgets?.();
   };
@@ -6389,6 +6405,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setIsSportModalOpen(false);
     setEditingSportId(null);
     setShowIconInput(false);
+    setActiveInfoPopup(null);
   };
 
   const saveSportModal = async () => {
@@ -6723,26 +6740,34 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     if (!InstaControl?.getInstalledApps) {
       return;
     }
-    const hasUsageAccess = await checkUsageAccess();
-    const apps = await InstaControl.getInstalledApps();
-    setInstalledApps(apps || []);
-    if (!hasUsageAccess || !InstaControl?.getAppUsageStats) {
-      setAppUsageMap({});
-      return;
-    }
-    const usageStats = await InstaControl.getAppUsageStats();
-    const usageMap = {};
-    (usageStats || []).forEach((entry) => {
-      if (!entry?.packageName) {
+    setAppsLoading(true);
+    try {
+      const hasUsageAccess = await checkUsageAccess();
+      const apps = await InstaControl.getInstalledApps();
+      setInstalledApps(apps || []);
+      if (!hasUsageAccess || !InstaControl?.getAppUsageStats) {
+        setAppUsageMap({});
         return;
       }
-      const totalMs = Number(entry.totalTimeMs || 0);
-      usageMap[entry.packageName] = Number.isFinite(totalMs) ? totalMs : 0;
-    });
-    setAppUsageMap(usageMap);
+      setAppsUsageLoading(true);
+      const usageStats = await InstaControl.getAppUsageStats();
+      const usageMap = {};
+      (usageStats || []).forEach((entry) => {
+        if (!entry?.packageName) {
+          return;
+        }
+        const totalMs = Number(entry.totalTimeMs || 0);
+        usageMap[entry.packageName] = Number.isFinite(totalMs) ? totalMs : 0;
+      });
+      setAppUsageMap(usageMap);
+    } finally {
+      setAppsLoading(false);
+      setAppsUsageLoading(false);
+    }
   };
 
   const toggleControlledApp = async (packageName) => {
+    setAppToggleLoading((prev) => ({ ...prev, [packageName]: true }));
     const current = settings.controlledApps || [];
     const exists = current.includes(packageName);
     const nextApps = exists
@@ -6752,6 +6777,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     if (InstaControl?.setControlledApps) {
       InstaControl.setControlledApps(nextApps);
     }
+    setAppToggleLoading((prev) => {
+      const next = { ...prev };
+      delete next[packageName];
+      return next;
+    });
   };
 
   const toggleGrayscaleRestrictedApps = async () => {
@@ -6793,6 +6823,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setStatsEditMode(false);
     setWorkoutDetailId(null);
     setIsWorkoutOpen(true);
+    maybeAdvanceTutorial("openWorkout");
   };
 
   const openStatsOverview = () => {
@@ -6846,6 +6877,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
 
   const openAppsSettings = () => {
     setIsAppsSettingsOpen(true);
+    setAppSearch("");
+    setAppSearchInput("");
     maybeAdvanceTutorial("openApps");
   };
 
@@ -7079,27 +7112,39 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     if (!startTs || !endTs) {
       return 0;
     }
+    const sportMap = new Map(sports.map((sport) => [sport.id, sport]));
     let total = 0;
-    Object.values(logs || {}).forEach((sportLogs) => {
+    Object.entries(logs || {}).forEach(([sportId, sportLogs]) => {
+      const sport = sportMap.get(sportId);
+      if (!sport) {
+        return;
+      }
       Object.values(sportLogs || {}).forEach((dayEntries) => {
         (dayEntries || []).forEach((entry) => {
-          if (
-            entry?.ts >= startTs &&
-            entry?.ts <= endTs &&
-            Number.isFinite(entry.screenSeconds)
-          ) {
-            total += entry.screenSeconds;
+          if (!entry || !entry.ts) {
+            return;
           }
+          if (entry.ts < startTs || entry.ts > endTs) {
+            return;
+          }
+          total += screenSecondsForEntry(sport, entry);
         });
       });
     });
-    return total;
+    return Math.max(0, Math.floor(total));
   };
 
   const handleWorkoutExercisePress = (sport) => {
-    if (workoutRunning) {
-      recordWorkoutExercise(sport);
+    if (!workoutRunning) {
+      Alert.alert(
+        t("label.startWorkout"),
+        t("label.startWorkoutFirst"),
+        [{ text: t("label.close"), style: "cancel" }],
+        { cancelable: true }
+      );
+      return;
     }
+    recordWorkoutExercise(sport);
     handleSelectSport(sport.id);
   };
 
@@ -7347,6 +7392,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         titleKey: "tutorial.step.overview.title",
         bodyKey: "tutorial.step.overview.body",
         targetRef: tutorialScreenTimeRef,
+        actionId: "overviewCard",
+        requiresAction: true,
       },
     ];
     if (activeSports.length > 0) {
@@ -7395,6 +7442,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       titleKey: "tutorial.step.workout.title",
       bodyKey: "tutorial.step.workout.body",
       targetRef: tutorialWorkoutNavRef,
+      actionId: "openWorkout",
+      requiresAction: true,
     });
     steps.push({
       id: "openSettings",
@@ -7710,6 +7759,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     const maskColor = "rgba(2, 6, 23, 0.72)";
     const blockingResponder = { onStartShouldSetResponder: () => true };
     const renderBlockingAreas = () => {
+      if (!tutorialStep.requiresAction) {
+        return (
+          <View
+            style={[styles.tutorialBackdrop, StyleSheet.absoluteFillObject]}
+            {...blockingResponder}
+          />
+        );
+      }
       if (!hasTarget) {
         return (
           <View
@@ -7832,7 +7889,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     if (!selectedSport) {
       return { reps: 0, seconds: 0 };
     }
-    return getRollingStats(logs, selectedSport.id);
+    return getRollingStats(logs, selectedSport.id, selectedSport);
   }, [logs, selectedSport]);
 
   const workoutDisplayReps = workoutTrackingMode ? workoutSessionCount : todayStats.reps;
@@ -7841,7 +7898,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     if (!aiSport) {
       return { reps: 0, seconds: 0 };
     }
-    return getRollingStats(logs, aiSport.id);
+    return getRollingStats(logs, aiSport.id, aiSport);
   }, [logs, aiSport]);
 
   useEffect(() => {
@@ -7880,6 +7937,19 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
     startTutorial();
   }, [hasLoaded, tutorialSeen, tutorialActive, completedGettingStarted]);
+  useEffect(() => {
+    if (appSearchInput === appSearch) {
+      setAppSearchBusy(false);
+      return;
+    }
+    setAppSearchBusy(true);
+    const handle = setTimeout(() => {
+      setAppSearch(appSearchInput);
+      setAppSearchBusy(false);
+    }, 200);
+    return () => clearTimeout(handle);
+  }, [appSearchInput, appSearch]);
+
   const appSearchTerm = appSearch.trim().toLowerCase();
   const filteredApps = installedApps.filter((app) => {
     if (!appSearchTerm) {
@@ -7941,7 +8011,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       return;
     }
     sports.forEach((sport) => {
-      const dayStats = getRollingStats(logs, sport.id);
+      const dayStats = getRollingStats(logs, sport.id, sport);
       const label = getSportLabel(sport);
       InstaControl.setWidgetSportData(
         sport.id,
@@ -8401,9 +8471,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                     statsSport.type === "reps"
                       ? `${entry.reps || 0} ${repsShort}`
                       : formatSeconds(entry.seconds || 0);
-                  const earnedSeconds = Number.isFinite(entry.screenSeconds)
-                    ? entry.screenSeconds
-                    : screenSecondsForEntry(statsSport, entry);
+                  const earnedSeconds = screenSecondsForEntry(statsSport, entry);
                   return (
                     <View key={entry.id} style={styles.statRow}>
                       <Text style={styles.statLabel}>
@@ -8816,7 +8884,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               return (
                 <Pressable
                   key={sport.id}
-                  style={styles.workoutListItem}
+                  style={[
+                    styles.workoutListItem,
+                    !workoutRunning && styles.workoutListItemDisabled,
+                  ]}
                   onPress={() => handleWorkoutExercisePress(sport)}
                 >
                   <Text style={styles.workoutListItemMain}>
@@ -8958,12 +9029,24 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             <>
               <TextInput
                 style={styles.searchInput}
-                value={appSearch}
-                onChangeText={setAppSearch}
+                value={appSearchInput}
+                onChangeText={setAppSearchInput}
                 placeholder={t("label.searchApps")}
                 placeholderTextColor="#7a7a7a"
               />
-              {installedApps.length === 0 ? (
+              {appsLoading ? (
+                <View style={styles.appsStatusRow}>
+                  <ActivityIndicator size="small" color={COLORS.accent} />
+                  <Text style={styles.appsStatusText}>{t("label.loadApps")}</Text>
+                </View>
+              ) : null}
+              {appSearchBusy ? (
+                <View style={styles.appsStatusRow}>
+                  <ActivityIndicator size="small" color={COLORS.accent} />
+                  <Text style={styles.appsStatusText}>{t("label.searchApps")}</Text>
+                </View>
+              ) : null}
+              {!appsLoading && installedApps.length === 0 ? (
                 <Text style={styles.helperText}>{t("label.noApps")}</Text>
               ) : null}
               {sortedApps.map((app) => {
@@ -8971,14 +9054,17 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 const usageMs = appUsageMap[app.packageName] || 0;
                 const usageMinutes = Math.floor(usageMs / 60000);
                 const grayscaleActive = settings.grayscaleRestrictedApps && enabled;
+                const isToggling = !!appToggleLoading[app.packageName];
                 return (
                   <Pressable
                     key={app.packageName}
                     style={[
                       styles.appRow,
+                      isToggling && styles.appRowDisabled,
                       enabled && styles.appRowActive,
                       grayscaleActive && styles.appRowGrayscale,
                     ]}
+                    disabled={appsLoading || isToggling}
                     onPress={() => toggleControlledApp(app.packageName)}
                   >
                     <Text
@@ -9003,17 +9089,25 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                         grayscaleActive && styles.grayscaleText,
                       ]}
                     >
-                      {usageMinutes} min
+                      {appsUsageLoading ? "..." : `${usageMinutes} min`}
                     </Text>
-                    <Text
-                      style={[
-                        styles.appToggle,
-                        enabled && styles.appToggleActive,
-                        grayscaleActive && styles.grayscaleText,
-                      ]}
-                    >
-                      {enabled ? t("label.active") : t("label.off")}
-                    </Text>
+                    {isToggling ? (
+                      <ActivityIndicator
+                        size="small"
+                        color={COLORS.accent}
+                        style={styles.appToggleSpinner}
+                      />
+                    ) : (
+                      <Text
+                        style={[
+                          styles.appToggle,
+                          enabled && styles.appToggleActive,
+                          grayscaleActive && styles.grayscaleText,
+                        ]}
+                      >
+                        {enabled ? t("label.active") : t("label.off")}
+                      </Text>
+                    )}
                   </Pressable>
                 );
               })}
@@ -9426,7 +9520,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         ) : null}
         <View style={styles.sportsGrid}>
           {activeSports.map((sport) => {
-            const daily = getRollingStats(logs, sport.id);
+            const daily = getRollingStats(logs, sport.id, sport);
             const sportLabel = getSportLabel(sport);
             return (
               <View
@@ -9574,9 +9668,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             </Text>
             <Text style={styles.hiddenToggleIcon}>{showHidden ? "v" : ">"}</Text>
           </Pressable>
-          {showHidden
-            ? hiddenSports.map((sport) => {
-                const daily = getRollingStats(logs, sport.id);
+              {showHidden
+                ? hiddenSports.map((sport) => {
+                    const daily = getRollingStats(logs, sport.id, sport);
                 const sportLabel = getSportLabel(sport);
                 return (
                   <View
@@ -9751,7 +9845,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           style={[styles.infoCard, styles.infoCardMain]}
           ref={tutorialScreenTimeRef}
           onLayout={(event) => setInfoCardWidth(event.nativeEvent.layout.width)}
-          onPress={() => setInfoHint(null)}
+          onPress={() => {
+            setInfoHint(null);
+            maybeAdvanceTutorial("overviewCard");
+          }}
         >
             <Text style={styles.sectionTitle}>{t("label.screenTimeTitle")}</Text>
           <View style={styles.infoRow}>
@@ -9871,6 +9968,31 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               </Pressable>
             </View>
           </View>
+          {activeInfoPopup ? (
+            <View style={styles.infoPopupContainer} pointerEvents="box-none">
+              <Pressable
+                style={styles.infoPopupBackdrop}
+                onPress={() => setActiveInfoPopup(null)}
+              />
+              <View style={styles.infoPopupCard}>
+                <Text style={styles.infoPopupTitle}>
+                  {activeInfoPopup === "type"
+                    ? t("label.typeInfoTitle")
+                    : t("label.difficultyLabel")}
+                </Text>
+                <Text style={styles.infoPopupText}>
+                  {activeInfoPopup === "type"
+                    ? t("label.typeHelp")
+                    : t("label.difficultyDescription")}
+                </Text>
+                {activeInfoPopup === "difficulty" ? (
+                  <Text style={[styles.infoPopupText, styles.infoPopupSpacing]}>
+                    {t("label.difficultyFormula")}
+                  </Text>
+                ) : null}
+              </View>
+            </View>
+          ) : null}
         </View>
       ) : null}
       {isSportModalOpen ? (
@@ -9985,7 +10107,19 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 </Text>
               </View>
             )}
-            <Text style={styles.typeHelpText}>{t("label.typeHelp")}</Text>
+            <View style={styles.typeHeaderRow}>
+              <Text style={styles.typeHeaderTitle}>
+                {t("label.typePickerTitle")}
+              </Text>
+              <Pressable
+                style={styles.infoButton}
+                onPress={() =>
+                  setActiveInfoPopup((prev) => (prev === "type" ? null : "type"))
+                }
+              >
+                <Text style={styles.infoButtonText}>?</Text>
+              </Pressable>
+            </View>
             <View style={styles.typeRow}>
               <Pressable
                 style={[
@@ -10030,9 +10164,21 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             <View style={styles.sliderSection}>
               <View style={styles.difficultyHeaderRow}>
                 <Text style={styles.rateLabel}>{t("label.difficultyLabel")}</Text>
-                <Text style={styles.difficultyHeaderValue}>
-                  {newDifficultyLevel}
-                </Text>
+                <View style={styles.difficultyHeaderActions}>
+                  <Text style={styles.difficultyHeaderValue}>
+                    {newDifficultyLevel}
+                  </Text>
+                  <Pressable
+                    style={styles.infoButton}
+                    onPress={() =>
+                      setActiveInfoPopup((prev) =>
+                        prev === "difficulty" ? null : "difficulty"
+                      )
+                    }
+                  >
+                    <Text style={styles.infoButtonText}>?</Text>
+                  </Pressable>
+                </View>
               </View>
               <View style={styles.difficultyBarWrapper}>
                 <View style={styles.difficultyBarTrack}>
@@ -10051,7 +10197,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                   style={styles.difficultyButton}
                   onPress={() => adjustDifficultyLevel(-1)}
                 >
-                  <Text style={styles.difficultyButtonText}>−</Text>
+                  <Text style={styles.difficultyButtonText}>-</Text>
                 </Pressable>
                 <Pressable
                   style={styles.difficultyButton}
@@ -10060,37 +10206,31 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                   <Text style={styles.difficultyButtonText}>+</Text>
                 </Pressable>
               </View>
-              <View style={styles.difficultyHelperText}>
-                <Text style={styles.sliderDescription}>
-                  {t("label.difficultyDescription")}
-                </Text>
-                <Text style={styles.sliderHintText}>
-                  {t("label.difficultyHint")}
-                </Text>
-                <Text style={styles.sliderHintText}>
-                  {t("label.difficultyGuide")}
-                </Text>
-              </View>
             </View>
             {newType === "reps" ? (
-              <>
-                <View style={styles.weightToggleRow}>
-                  <Pressable
+              <View style={styles.weightToggleRow}>
+                <Pressable
+                  style={[
+                    styles.weightToggleButton,
+                    newWeightExercise && styles.weightToggleButtonActive,
+                  ]}
+                  onPress={() => setNewWeightExercise((prev) => !prev)}
+                >
+                  <View
                     style={[
-                      styles.weightToggleButton,
-                      newWeightExercise && styles.weightToggleButtonActive,
+                      styles.weightToggleIcon,
+                      newWeightExercise && styles.weightToggleIconActive,
                     ]}
-                    onPress={() => setNewWeightExercise((prev) => !prev)}
                   >
-                    <Text style={styles.weightToggleLabel}>
-                      {t("label.weightExercise")}
-                    </Text>
-                    <Text style={styles.weightToggleIndicator}>
-                      {newWeightExercise ? "✔" : "○"}
-                    </Text>
-                  </Pressable>
-                </View>
-              </>
+                    {newWeightExercise ? (
+                      <Text style={styles.weightToggleIconText}>✓</Text>
+                    ) : null}
+                  </View>
+                  <Text style={styles.weightToggleLabel}>
+                    {t("label.weightExercise")}
+                  </Text>
+                </Pressable>
+              </View>
             ) : null}
             <View style={styles.modalActions}>
               <Pressable
@@ -10516,12 +10656,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   sportGridColumnCenter: {
-    width: "50%",
+    width: "45%",
     alignItems: "center",
     justifyContent: "center",
   },
   sportGridColumnRight: {
-    width: "25%",
+    width: "30%",
     alignItems: "flex-end",
     justifyContent: "center",
   },
@@ -10790,6 +10930,41 @@ const styles = StyleSheet.create({
     gap: 10,
     marginTop: 10,
   },
+  infoPopupContainer: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 35,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  infoPopupBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(2, 6, 23, 0.7)",
+  },
+  infoPopupCard: {
+    backgroundColor: COLORS.cardDark,
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: COLORS.cardAlt,
+    maxWidth: 320,
+    alignItems: "center",
+  },
+  infoPopupTitle: {
+    color: COLORS.white,
+    fontWeight: "700",
+    marginBottom: 6,
+    fontSize: 14,
+    textAlign: "center",
+  },
+  infoPopupText: {
+    color: COLORS.muted,
+    fontSize: 12,
+    lineHeight: 18,
+    textAlign: "center",
+  },
+  infoPopupSpacing: {
+    marginTop: 6,
+  },
   statsTitle: {
     color: COLORS.muted,
     marginBottom: 6,
@@ -10899,6 +11074,7 @@ const styles = StyleSheet.create({
     marginTop: 0,
     textAlign: "left",
     flex: 1,
+    flexWrap: "wrap",
     flexShrink: 1,
   },
   primaryButton: {
@@ -11003,7 +11179,7 @@ const styles = StyleSheet.create({
   },
   standardSuggestionWindow: {
     marginBottom: 12,
-    height: 230,
+    height: 150,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: "rgba(148, 163, 184, 0.4)",
@@ -11072,11 +11248,28 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 12,
   },
-  typeHelpText: {
-    color: COLORS.muted,
-    fontSize: 12,
-    marginBottom: 8,
-    lineHeight: 16,
+  typeHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 6,
+  },
+  typeHeaderTitle: {
+    color: COLORS.text,
+    fontWeight: "600",
+  },
+  infoButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: COLORS.cardAlt,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  infoButtonText: {
+    color: COLORS.text,
+    fontWeight: "700",
   },
   typeButton: {
     flex: 1,
@@ -11101,33 +11294,42 @@ const styles = StyleSheet.create({
   weightToggleButton: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     borderWidth: 1,
     borderColor: COLORS.cardAlt,
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
+    gap: 10,
   },
   weightToggleButtonActive: {
     borderColor: COLORS.accent,
-    backgroundColor: "rgba(245, 158, 11, 0.1)",
+    backgroundColor: "rgba(245, 158, 11, 0.12)",
+  },
+  weightToggleIcon: {
+    width: 18,
+    height: 18,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: "rgba(148, 163, 184, 0.6)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  weightToggleIconActive: {
+    borderColor: COLORS.accent,
+    backgroundColor: COLORS.accent,
+  },
+  weightToggleIconText: {
+    color: COLORS.white,
+    fontSize: 12,
+    fontWeight: "700",
   },
   weightToggleLabel: {
     color: COLORS.text,
     fontWeight: "600",
   },
-  weightToggleIndicator: {
-    color: COLORS.accent,
-    fontWeight: "700",
-  },
   sliderSection: {
     marginBottom: 12,
     marginTop: 10,
-  },
-  sliderDescription: {
-    color: COLORS.muted,
-    fontSize: 12,
-    marginBottom: 4,
   },
   difficultyHeaderRow: {
     flexDirection: "row",
@@ -11135,13 +11337,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 6,
   },
+  difficultyHeaderActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   difficultyHeaderValue: {
     color: COLORS.text,
     fontWeight: "700",
     fontSize: 16,
-  },
-  difficultyHelperText: {
-    marginTop: 8,
   },
   difficultyBarWrapper: {
     marginTop: 10,
@@ -11175,11 +11379,6 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     fontWeight: "700",
     fontSize: 18,
-  },
-  sliderHintText: {
-    color: COLORS.muted,
-    fontSize: 11,
-    marginTop: 4,
   },
   hiddenSection: {
     marginTop: 20,
@@ -11411,22 +11610,37 @@ const styles = StyleSheet.create({
   },
   workoutList: {
     marginBottom: 12,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
   },
   workoutListItem: {
     borderRadius: 10,
-    backgroundColor: COLORS.card,
-    padding: 12,
-    marginBottom: 10,
+    backgroundColor: COLORS.cardAlt,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: COLORS.accent,
+    alignItems: "center",
+    justifyContent: "center",
+    flexGrow: 1,
+    flexBasis: "31%",
+    minWidth: 140,
+  },
+  workoutListItemDisabled: {
+    opacity: 0.4,
   },
   workoutListItemMain: {
     color: COLORS.text,
     fontSize: 14,
     fontWeight: "600",
+    textAlign: "center",
   },
   workoutListItemMeta: {
     color: COLORS.muted,
     fontSize: 12,
     marginTop: 4,
+    textAlign: "center",
   },
   workoutHistoryList: {
     marginBottom: 12,
@@ -11646,6 +11860,9 @@ const styles = StyleSheet.create({
     padding: 12,
     marginTop: 10,
   },
+  appRowDisabled: {
+    opacity: 0.6,
+  },
   appRowActive: {
     borderWidth: 1,
     borderColor: COLORS.accentDark,
@@ -11675,8 +11892,21 @@ const styles = StyleSheet.create({
     color: COLORS.muted,
     fontWeight: "600",
   },
+  appToggleSpinner: {
+    marginTop: 8,
+  },
   appToggleActive: {
     color: COLORS.success,
+  },
+  appsStatusRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 10,
+  },
+  appsStatusText: {
+    color: COLORS.muted,
+    fontSize: 12,
   },
   statRow: {
     flexDirection: "row",
