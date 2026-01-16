@@ -8007,8 +8007,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
   }, [voiceEnabled]);
 
+  const showGettingStartedSection = Platform.OS === "android";
   const showPermissionPrompt =
-    Platform.OS === "android" && (needsAccessibility || !usageAccessGranted);
+    showGettingStartedSection && (needsAccessibility || !usageAccessGranted);
   const missingPermissions = needsAccessibility || !usageAccessGranted;
   const completedGettingStarted =
     !missingPermissions &&
@@ -9484,39 +9485,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           {renderTutorialHeaderButton()}
         </View>
         {renderMainNav("home")}
-        <View style={styles.motivationSection}>
-          <View style={styles.motivationHeaderRow}>
-            <Text style={styles.motivationSectionTitle}>
-              {t("label.motivationTitle")}
-            </Text>
-            <Text style={styles.motivationSectionCaption}>
-              {t("label.motivationSubtitle")}
-            </Text>
-          </View>
-          <View style={styles.motivationCardsRow}>
-            {motivationCards.map((card) => (
-              <View key={card.id} style={styles.motivationCard}>
-                <Text style={styles.motivationCardIcon}>{card.icon}</Text>
-                <Text style={styles.motivationCardTitle}>{t(card.titleKey)}</Text>
-                <Text style={styles.motivationCardBody}>{t(card.bodyKey)}</Text>
-                <Pressable
-                  style={[
-                    styles.motivationActionButton,
-                    card.disabled && styles.motivationActionButtonDisabled,
-                  ]}
-                  onPress={card.action}
-                  disabled={card.disabled}
-                >
-                  <Text style={styles.motivationActionText}>
-                    {t(card.actionLabelKey)}
-                  </Text>
-                </Pressable>
-              </View>
-            ))}
-          </View>
-        </View>
         {renderWorkoutBanner()}
-        {showPermissionPrompt ? (
+        {showGettingStartedSection ? (
           <View
             style={[
               styles.permissionCardLarge,
@@ -9532,74 +9502,119 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                   {t("label.gettingStarted")}
                 </Text>
                 <Text style={styles.permissionSubtitle}>
-                  {t("label.permissionsNeeded")}
+                  {missingPermissions
+                    ? t("label.permissionsNeeded")
+                    : t("label.motivationSubtitle")}
                 </Text>
-                <Text style={styles.permissionHint}>
-                  {t("label.permissionsHint")}
-                </Text>
+                {missingPermissions ? (
+                  <Text style={styles.permissionHint}>
+                    {t("label.permissionsHint")}
+                  </Text>
+                ) : null}
               </View>
               <Text style={styles.permissionToggle}>
-                {permissionsPanelOpen ? "−" : "+"}
+                {permissionsPanelOpen ? "-" : "+"}
               </Text>
             </Pressable>
             {permissionsPanelOpen ? (
               <View style={styles.permissionList}>
-                <View
-                  style={[
-                    styles.permissionItem,
-                    !needsAccessibility && styles.permissionItemGranted,
-                  ]}
-                >
-                  <Text style={styles.permissionItemTitle}>
-                    {t("label.accessibilityTitle")}
-                  </Text>
-                  <Text style={styles.permissionItemText}>
-                    {t("label.accessibilityReason")}
-                  </Text>
-                  <Text style={styles.permissionItemSteps}>
-                    {t("label.accessibilitySteps")}
-                  </Text>
-                  {!needsAccessibility ? null : (
-                    <View style={styles.permissionItemActions}>
-                      <Pressable
-                        style={styles.permissionActionButton}
-                        onPress={requestAccessibilityAccess}
-                      >
-                        <Text style={styles.permissionActionButtonText}>
-                          {t("label.accessibilityDisclosureConfirm")}
-                        </Text>
-                      </Pressable>
+                {missingPermissions ? (
+                  <>
+                    <View
+                      style={[
+                        styles.permissionItem,
+                        !needsAccessibility && styles.permissionItemGranted,
+                      ]}
+                    >
+                      <Text style={styles.permissionItemTitle}>
+                        {t("label.accessibilityTitle")}
+                      </Text>
+                      <Text style={styles.permissionItemText}>
+                        {t("label.accessibilityReason")}
+                      </Text>
+                      <Text style={styles.permissionItemSteps}>
+                        {t("label.accessibilitySteps")}
+                      </Text>
+                      {!needsAccessibility ? null : (
+                        <View style={styles.permissionItemActions}>
+                          <Pressable
+                            style={styles.permissionActionButton}
+                            onPress={requestAccessibilityAccess}
+                          >
+                            <Text style={styles.permissionActionButtonText}>
+                              {t("label.accessibilityDisclosureConfirm")}
+                            </Text>
+                          </Pressable>
+                        </View>
+                      )}
                     </View>
-                  )}
-                </View>
-                <View
-                  style={[
-                    styles.permissionItem,
-                    usageAccessGranted && styles.permissionItemGranted,
-                  ]}
-                >
-                  <Text style={styles.permissionItemTitle}>
-                    {t("label.usageAccessTitle")}
-                  </Text>
-                  <Text style={styles.permissionItemText}>
-                    {t("label.usageAccessReason")}
-                  </Text>
-                  <Text style={styles.permissionItemSteps}>
-                    {t("label.usageAccessSteps")}
-                  </Text>
-                  {usageAccessGranted ? null : (
-                    <View style={styles.permissionItemActions}>
-                      <Pressable
-                        style={styles.permissionActionButton}
-                        onPress={openUsageAccessSettings}
-                      >
-                        <Text style={styles.permissionActionButtonText}>
-                          {t("label.openUsageAccess")}
-                        </Text>
-                      </Pressable>
+                    <View
+                      style={[
+                        styles.permissionItem,
+                        usageAccessGranted && styles.permissionItemGranted,
+                      ]}
+                    >
+                      <Text style={styles.permissionItemTitle}>
+                        {t("label.usageAccessTitle")}
+                      </Text>
+                      <Text style={styles.permissionItemText}>
+                        {t("label.usageAccessReason")}
+                      </Text>
+                      <Text style={styles.permissionItemSteps}>
+                        {t("label.usageAccessSteps")}
+                      </Text>
+                      {usageAccessGranted ? null : (
+                        <View style={styles.permissionItemActions}>
+                          <Pressable
+                            style={styles.permissionActionButton}
+                            onPress={openUsageAccessSettings}
+                          >
+                            <Text style={styles.permissionActionButtonText}>
+                              {t("label.openUsageAccess")}
+                            </Text>
+                          </Pressable>
+                        </View>
+                      )}
                     </View>
-                  )}
-                </View>
+                  </>
+                ) : (
+                  <View style={styles.motivationSection}>
+                    <Text style={styles.motivationSectionTitle}>
+                      {t("label.motivationTitle")}
+                    </Text>
+                    <Text style={styles.motivationSectionCaption}>
+                      {t("label.motivationSubtitle")}
+                    </Text>
+                    <View style={styles.motivationCardsRow}>
+                      {motivationCards.map((card) => (
+                        <View key={card.id} style={styles.motivationCard}>
+                          <Text style={styles.motivationCardIcon}>
+                            {card.icon}
+                          </Text>
+                          <Text style={styles.motivationCardTitle}>
+                            {t(card.titleKey)}
+                          </Text>
+                          <Text style={styles.motivationCardBody}>
+                            {t(card.bodyKey)}
+                          </Text>
+                          <Pressable
+                            style={[
+                              styles.motivationActionButton,
+                              card.disabled &&
+                                styles.motivationActionButtonDisabled,
+                            ]}
+                            onPress={card.action}
+                            disabled={card.disabled}
+                          >
+                            <Text style={styles.motivationActionText}>
+                              {t(card.actionLabelKey)}
+                            </Text>
+                          </Pressable>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                )}
               </View>
             ) : null}
           </View>
