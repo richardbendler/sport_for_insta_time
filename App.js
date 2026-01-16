@@ -5546,6 +5546,7 @@ export default function App() {
     });
   }, []);
   const [showIconInput, setShowIconInput] = useState(false);
+  const [customSuggestionUsed, setCustomSuggestionUsed] = useState(false);
   const [activeInfoPopup, setActiveInfoPopup] = useState(null);
   const [installedApps, setInstalledApps] = useState([]);
   const [appSearch, setAppSearch] = useState("");
@@ -5656,6 +5657,7 @@ export default function App() {
     setNewName(value);
     setSelectedStandardSportId(null);
     setIsCustomSportMode(true);
+    setCustomSuggestionUsed(false);
   };
   const applyStandardSport = (entry) => {
     const label = getStandardSportLabel(entry, language);
@@ -5672,12 +5674,14 @@ export default function App() {
     setShowIconInput(false);
     setSelectedStandardSportId(entry.id);
     setIsCustomSportMode(false);
+    setCustomSuggestionUsed(false);
   };
   const handleUseSearchAsCustom = () => {
     setIsCustomSportMode(true);
     setSelectedStandardSportId(null);
     setShowIconInput(false);
     setNewName(trimmedSportSearch);
+    setCustomSuggestionUsed(true);
   };
 
   useEffect(() => {
@@ -6406,6 +6410,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setEditingSportId(null);
     setShowIconInput(false);
     setActiveInfoPopup(null);
+    setCustomSuggestionUsed(false);
   };
 
   const saveSportModal = async () => {
@@ -10033,7 +10038,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 <Pressable
                     style={({ pressed }) => [
                       styles.customSuggestionButton,
-                      pressed && styles.customSuggestionButtonActive,
+                      (pressed || customSuggestionUsed) && styles.customSuggestionButtonActive,
                     ]}
                     onPress={handleUseSearchAsCustom}
                   >
@@ -10041,7 +10046,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                       <Text
                         style={[
                           styles.customSuggestionButtonText,
-                          pressed && styles.customSuggestionButtonTextActive,
+                          (pressed || customSuggestionUsed) && styles.customSuggestionButtonTextActive,
                         ]}
                       >
                         {customSuggestionLabel}
