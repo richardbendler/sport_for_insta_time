@@ -5853,7 +5853,7 @@ export default function App() {
   const [usageAccessGranted, setUsageAccessGranted] = useState(true);
   const [notificationsPrompted, setNotificationsPrompted] = useState(false);
   const [notificationsGranted, setNotificationsGranted] = useState(false);
-  const [permissionsPanelOpen, setPermissionsPanelOpen] = useState(false);
+  const [permissionsPanelOpen, setPermissionsPanelOpen] = useState(true);
   const [permissionsCheckTick, setPermissionsCheckTick] = useState(0);
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [statsRange, setStatsRange] = useState("month");
@@ -10032,9 +10032,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             style={[
               styles.permissionCardLarge,
               !permissionsPanelOpen && styles.permissionCardCollapsed,
-              !missingPermissions &&
-                !permissionsPanelOpen &&
-                styles.motivationCardCollapsed,
             ]}
           >
             <Pressable
@@ -10042,27 +10039,25 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               onPress={() => setPermissionsPanelOpen((prev) => !prev)}
             >
               <View>
-                <Text style={styles.permissionTitle}>
-                  {missingPermissions
-                    ? t("label.gettingStarted")
-                    : activeQuoteTitle}
-                </Text>
-                <Text style={styles.permissionSubtitle}>
-                  {missingPermissions
-                    ? t("label.permissionsNeeded")
-                    : t("label.motivationSubtitle")}
-                </Text>
                 {missingPermissions ? (
-                  <Text style={styles.permissionHint}>
-                    {t("label.permissionsHint")}
-                  </Text>
+                  <>
+                    <Text style={styles.permissionTitle}>
+                      {t("label.gettingStarted")}
+                    </Text>
+                    <Text style={styles.permissionSubtitle}>
+                      {t("label.permissionsNeeded")}
+                    </Text>
+                    <Text style={styles.permissionHint}>
+                      {t("label.permissionsHint")}
+                    </Text>
+                  </>
                 ) : null}
               </View>
               <Text style={styles.permissionToggle}>
                 {permissionsPanelOpen ? "-" : "+"}
               </Text>
             </Pressable>
-            {permissionsPanelOpen ? (
+            {permissionsPanelOpen && (
               <View style={styles.permissionList}>
                 {missingPermissions ? (
                   <>
@@ -10124,7 +10119,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                     </View>
                   </>
                 ) : (
-                  <View style={styles.motivationCardWrapper}>
+                  <>
                     <Text style={styles.motivationQuoteTitle}>
                       {activeQuoteTitle}
                     </Text>
@@ -10150,42 +10145,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                         {activeActionLabel}
                       </Text>
                     </Pressable>
-                  </View>
+                  </>
                 )}
               </View>
-            ) : (
-              !missingPermissions && (
-                <Pressable
-                  style={styles.motivationPreview}
-                  onPress={() => setPermissionsPanelOpen(true)}
-                >
-                  <View style={styles.motivationPreviewSection}>
-                    <Text style={styles.motivationPreviewLabel}>
-                      {activeQuoteTitle}
-                    </Text>
-                    <Text
-                      style={styles.motivationPreviewBody}
-                      numberOfLines={2}
-                    >
-                      {activeQuoteBody}
-                    </Text>
-                  </View>
-                  <View style={styles.motivationPreviewSection}>
-                    <Text style={styles.motivationPreviewLabel}>
-                      {activeAction.icon} {activeActionTitle}
-                    </Text>
-                    <Text
-                      style={styles.motivationPreviewBody}
-                      numberOfLines={2}
-                    >
-                      {activeActionBody}
-                    </Text>
-                  </View>
-                  <Text style={styles.motivationPreviewHint}>
-                    {t("label.motivationPreviewHint")}
-                  </Text>
-                </Pressable>
-              )
             )}
           </View>
         ) : null}
@@ -11655,14 +11617,6 @@ const styles = StyleSheet.create({
     gap: 10,
     marginTop: 10,
   },
-  motivationCardWrapper: {
-    backgroundColor: COLORS.card,
-    borderRadius: 14,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: COLORS.cardAlt,
-    marginTop: 12,
-  },
   motivationQuoteTitle: {
     color: COLORS.text,
     fontWeight: "700",
@@ -11699,36 +11653,6 @@ const styles = StyleSheet.create({
   motivationActionText: {
     color: COLORS.background,
     fontWeight: "700",
-  },
-  motivationPreview: {
-    marginTop: 12,
-    borderRadius: 12,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: COLORS.cardAlt,
-    backgroundColor: COLORS.card,
-  },
-  motivationPreviewSection: {
-    marginBottom: 10,
-  },
-  motivationPreviewLabel: {
-    color: COLORS.text,
-    fontWeight: "600",
-  },
-  motivationPreviewBody: {
-    color: COLORS.muted,
-    fontSize: 13,
-    lineHeight: 18,
-    marginTop: 4,
-  },
-  motivationPreviewHint: {
-    marginTop: 8,
-    color: COLORS.muted,
-    fontSize: 12,
-    textAlign: "right",
-  },
-  motivationCardCollapsed: {
-    minHeight: 64,
   },
   inlineInfoTooltip: {
     marginTop: 8,
@@ -12218,14 +12142,14 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 24,
     marginBottom: 24,
-    minHeight: 320,
+    minHeight: 220,
     borderWidth: 1,
     borderColor: COLORS.accentDark,
   },
   permissionCardCollapsed: {
     justifyContent: "center",
-    minHeight: 160,
-    paddingVertical: 16,
+    minHeight: 60,
+    paddingVertical: 8,
   },
   permissionHeaderRow: {
     flexDirection: "row",
