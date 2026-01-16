@@ -4134,6 +4134,49 @@ const STRINGS = {
     "label.motivationWorkoutBody":
       "Starte ein Workout, um an deinem Tagesziel dranzubleiben.",
     "label.motivationWorkoutAction": "Workout starten",
+    "label.motivationActionDefault": "Los geht's",
+    "label.motivationStartSportTitle": "Erste Sportart anlegen",
+    "label.motivationStartSportBody":
+      "Starte deinen ersten Sport und reduziere deine Appnutzung, um mehr Zeit zu gewinnen.",
+    "label.motivationStatsTitle": "Statistiken checken",
+    "label.motivationStatsBody":
+      "Sieh nach, wie oft du Sport gemacht hast und bleib im Rhythmus.",
+    "label.motivationNewSportTitle": "Weitere Sportart ausprobieren",
+    "label.motivationNewSportBody":
+      "Füge etwas Neues hinzu, damit der Tag abwechslungsreich bleibt.",
+    "label.motivationWidgetTitle": "Widget hinzufügen",
+    "label.motivationWidgetBody":
+      "Leg ein Screen Time-Widget an, um deine Fortschritte sofort zu sehen.",
+    "label.motivationNotificationsTitle": "Erinnerungen aktivieren",
+    "label.motivationNotificationsBody":
+      "Aktiviere Benachrichtigungen und verpasse keine Timer oder Workouts.",
+    "label.motivationAppsTitle": "Apps im Griff behalten",
+    "label.motivationAppsBody":
+      "Die stärkste App hat {{minutes}} Min genutzt. Nutze die App-Auswahl, um sie zu begrenzen.",
+    "label.motivationSettingsTitle": "Einstellungen optimieren",
+    "label.motivationSettingsBody":
+      "Passe die wichtigsten Einstellungen an, damit alles zu deinem Alltag passt.",
+    "label.motivationPrefaceTitle": "Preface anpassen",
+    "label.motivationPrefaceBody":
+      "Stell die Vorschaltseite ein, damit du motiviert startest.",
+    "label.motivationVoiceTitle": "Spracheingabe nutzen",
+    "label.motivationVoiceBody":
+      "Aktiviere Voice, damit du beim Zählen nicht stoppen musst.",
+    "label.motivationLanguageTitle": "Sprache ändern",
+    "label.motivationLanguageBody":
+      "Wähle deine bevorzugte Sprache für die App.",
+    "label.motivationTutorialTitle": "Tutorial wiederholen",
+    "label.motivationTutorialBody":
+      "Starte das Tutorial, wenn du die wichtigsten Bereiche noch einmal sehen willst.",
+    "label.motivationHistoryTitle": "Workout-Verlauf",
+    "label.motivationHistoryBody":
+      "Sieh dir vergangene Workouts an, um den Fortschritt zu feiern.",
+    "label.motivationLogWeightTitle": "Gewichtsbuchungen",
+    "label.motivationLogWeightBody":
+      "Trage Gewichte ein, um die Screen Time genauer zu rechnen.",
+    "label.motivationChallengeTitle": "Neue Challenge",
+    "label.motivationChallengeBody":
+      "Fordere dich selbst mit einer Challenge heraus und bleib dran.",
     "label.aiFeatureTitle": "AI-Training",
     "label.aiFeatureBody":
       "Diese Sportart unterstützt AI-Features. Drücke den AI-Button in der Sportart, um das automatische Zählen zu starten.",
@@ -4378,6 +4421,48 @@ const STRINGS = {
     "label.motivationWorkoutBody":
       "Kick off a workout to keep today's momentum.",
     "label.motivationWorkoutAction": "Start workout",
+    "label.motivationActionDefault": "Go for it",
+    "label.motivationStartSportTitle": "Set up your first sport",
+    "label.motivationStartSportBody":
+      "Log a sport and cut down on apps to earn more screen time.",
+    "label.motivationStatsTitle": "Check your stats",
+    "label.motivationStatsBody":
+      "Review your entries to see how far you've come.",
+    "label.motivationNewSportTitle": "Add a new sport",
+    "label.motivationNewSportBody":
+      "Bring variety into your training by creating another sport.",
+    "label.motivationWidgetTitle": "Add a widget",
+    "label.motivationWidgetBody":
+      "Pin the widget to track your screen time at a glance.",
+    "label.motivationNotificationsTitle": "Enable reminders",
+    "label.motivationNotificationsBody":
+      "Allow notifications so you never miss a timer or workout.",
+    "label.motivationAppsTitle": "Tame your apps",
+    "label.motivationAppsBody":
+      "Your top app used {{minutes}} min. Block it to stay focused.",
+    "label.motivationSettingsTitle": "Fine-tune settings",
+    "label.motivationSettingsBody":
+      "Adjust core settings so the app works with your routine.",
+    "label.motivationPrefaceTitle": "Adjust the preface",
+    "label.motivationPrefaceBody":
+      "Set the preface timer to get into the right mindset.",
+    "label.motivationVoiceTitle": "Try voice input",
+    "label.motivationVoiceBody":
+      "Enable voice counting to keep your hands free.",
+    "label.motivationLanguageTitle": "Change language",
+    "label.motivationLanguageBody": "Pick a language that feels right.",
+    "label.motivationTutorialTitle": "Rerun the tutorial",
+    "label.motivationTutorialBody":
+      "Replay the tutorial to meet the app again from the beginning.",
+    "label.motivationHistoryTitle": "Workout history",
+    "label.motivationHistoryBody":
+      "Open past workouts to celebrate what you already did.",
+    "label.motivationLogWeightTitle": "Log weights",
+    "label.motivationLogWeightBody":
+      "Enter weights to get more accurate Screen Time numbers.",
+    "label.motivationChallengeTitle": "Start a challenge",
+    "label.motivationChallengeBody":
+      "Set a new challenge to push yourself a little further.",
     "label.aiFeatureTitle": "AI training",
     "label.aiFeatureBody":
       "This sport supports AI features. Tap the AI button inside the sport to start automatic counting.",
@@ -4626,6 +4711,48 @@ const STRINGS = {
     "label.motivationWorkoutBody":
       "Inicia un entrenamiento para mantener el impulso.",
     "label.motivationWorkoutAction": "Iniciar entrenamiento",
+    "label.motivationActionDefault": "Vamos",
+    "label.motivationStartSportTitle": "Agrega tu primer deporte",
+    "label.motivationStartSportBody":
+      "Crea un deporte y reduce el uso de apps para ganar más tiempo.",
+    "label.motivationStatsTitle": "Revisa tus estadísticas",
+    "label.motivationStatsBody":
+      "Mira tus registros para ver tu progreso.",
+    "label.motivationNewSportTitle": "Añade otra disciplina",
+    "label.motivationNewSportBody":
+      "Varía tu rutina creando un nuevo deporte.",
+    "label.motivationWidgetTitle": "Añade un widget",
+    "label.motivationWidgetBody":
+      "Fija el widget para ver tu Screen Time al instante.",
+    "label.motivationNotificationsTitle": "Activa recordatorios",
+    "label.motivationNotificationsBody":
+      "Permite notificaciones para no perder temporizadores o entrenos.",
+    "label.motivationAppsTitle": "Controla tus apps",
+    "label.motivationAppsBody":
+      "Tu app principal usó {{minutes}} min. Limítala para concentrarte.",
+    "label.motivationSettingsTitle": "Ajusta la configuración",
+    "label.motivationSettingsBody":
+      "Modifica las opciones clave para que funcione contigo.",
+    "label.motivationPrefaceTitle": "Prefacio",
+    "label.motivationPrefaceBody":
+      "Configura la pantalla inicial para empezar con el pie derecho.",
+    "label.motivationVoiceTitle": "Usa la voz",
+    "label.motivationVoiceBody":
+      "Activa el conteo por voz y mantén las manos libres.",
+    "label.motivationLanguageTitle": "Cambia el idioma",
+    "label.motivationLanguageBody": "Escoge el idioma que prefieras.",
+    "label.motivationTutorialTitle": "Repite el tutorial",
+    "label.motivationTutorialBody":
+      "Vuelve a ver el tutorial para repasar lo esencial.",
+    "label.motivationHistoryTitle": "Historial de entrenos",
+    "label.motivationHistoryBody":
+      "Consulta entrenos pasados y celebra lo logrado.",
+    "label.motivationLogWeightTitle": "Registra pesos",
+    "label.motivationLogWeightBody":
+      "Añade pesos para que el Screen Time sea más preciso.",
+    "label.motivationChallengeTitle": "Nuevos retos",
+    "label.motivationChallengeBody":
+      "Inicia un reto adicional para desafiarte más.",
     "label.aiFeatureTitle": "Entrenamiento AI",
     "label.aiFeatureBody":
       "Este deporte admite funciones de IA. Pulsa el botón de IA dentro del deporte para iniciar el conteo automático.",
@@ -4868,6 +4995,48 @@ const STRINGS = {
     "label.motivationWorkoutBody":
       "Lance un entra?nement pour garder le cap.",
     "label.motivationWorkoutAction": "D?marrer l'entra?nement",
+    "label.motivationActionDefault": "Allons-y",
+    "label.motivationStartSportTitle": "Crée ton premier sport",
+    "label.motivationStartSportBody":
+      "Ajoute un sport et réduis l’usage des apps pour gagner du temps.",
+    "label.motivationStatsTitle": "Consulte les stats",
+    "label.motivationStatsBody":
+      "Regarde tes entrées pour voir tes progrès.",
+    "label.motivationNewSportTitle": "Ajoute un autre sport",
+    "label.motivationNewSportBody":
+      "Diversifie ton entraînement avec une nouvelle activité.",
+    "label.motivationWidgetTitle": "Ajoute un widget",
+    "label.motivationWidgetBody":
+      "Ajoute le widget pour suivre ton Screen Time rapidement.",
+    "label.motivationNotificationsTitle": "Active les rappels",
+    "label.motivationNotificationsBody":
+      "Autorise les notifications pour ne rien manquer.",
+    "label.motivationAppsTitle": "Maîtrise tes apps",
+    "label.motivationAppsBody":
+      "Ton app principale a utilisé {{minutes}} min. Bloque-la pour rester focus.",
+    "label.motivationSettingsTitle": "Affinez les réglages",
+    "label.motivationSettingsBody":
+      "Ajuste les paramètres pour que l’app colle à ton rythme.",
+    "label.motivationPrefaceTitle": "Ajuste l’intro",
+    "label.motivationPrefaceBody":
+      "Configure l’écran de préface pour bien démarrer.",
+    "label.motivationVoiceTitle": "Utilise la voix",
+    "label.motivationVoiceBody":
+      "Active la saisie vocale pour garder les mains libres.",
+    "label.motivationLanguageTitle": "Change la langue",
+    "label.motivationLanguageBody": "Choisis la langue qui te convient.",
+    "label.motivationTutorialTitle": "Revoir le tutoriel",
+    "label.motivationTutorialBody":
+      "Reprends le tutoriel pour te remettre à niveau.",
+    "label.motivationHistoryTitle": "Historique d’entraînements",
+    "label.motivationHistoryBody":
+      "Ouvre les anciens entraînements pour célébrer tes succès.",
+    "label.motivationLogWeightTitle": "Enregistre les poids",
+    "label.motivationLogWeightBody":
+      "Ajoute les charges pour des temps d’écran plus précis.",
+    "label.motivationChallengeTitle": "Lance un défi",
+    "label.motivationChallengeBody":
+      "Crée un défi pour te pousser un peu plus loin.",
     "label.aiFeatureTitle": "Entra?nement AI",
     "label.aiFeatureBody":
       "Ce sport peut utiliser les fonctions AI. Appuie sur le bouton AI dans le sport pour lancer le comptage automatique.",
@@ -5634,6 +5803,7 @@ export default function App() {
   const [notificationsGranted, setNotificationsGranted] = useState(false);
   const [permissionsPanelOpen, setPermissionsPanelOpen] = useState(false);
   const [permissionsCheckTick, setPermissionsCheckTick] = useState(0);
+  const [selectedMotivationId, setSelectedMotivationId] = useState(null);
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [statsRange, setStatsRange] = useState("month");
   const [infoHint, setInfoHint] = useState(null);
@@ -6728,6 +6898,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       checkAccessibility();
       checkUsageAccess();
       refreshNotificationPermission();
+    }
+  }, [permissionsPanelOpen]);
+
+  useEffect(() => {
+    if (!permissionsPanelOpen) {
+      setSelectedMotivationId(null);
     }
   }, [permissionsPanelOpen]);
 
@@ -9444,26 +9620,254 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     0,
     Math.floor((gridWidth - gridGap * (columnCount - 1)) / columnCount)
   );
-  const motivationCards = [
-    {
-      id: "difficulty",
-      icon: "🔥",
-      titleKey: "label.motivationDifficultyTitle",
-      bodyKey: "label.motivationDifficultyBody",
-      actionLabelKey: "label.motivationDifficultyAction",
-      action: handleIncreaseDifficulty,
-      disabled: !motivationSport,
-    },
-    {
-      id: "workout",
-      icon: "⚡",
-      titleKey: "label.motivationWorkoutTitle",
-      bodyKey: "label.motivationWorkoutBody",
-      actionLabelKey: "label.motivationWorkoutAction",
-      action: () => openWorkout(),
-      disabled: false,
-    },
-  ];
+  const highestAppUsageMs = useMemo(() => {
+    const values = Object.values(appUsageMap || {});
+    if (values.length === 0) {
+      return 0;
+    }
+    return Math.max(
+      ...values.map((value) => (Number.isFinite(value) ? Number(value) : 0))
+    );
+  }, [appUsageMap]);
+  const highestAppUsageMinutes = Math.max(
+    0,
+    Math.round(highestAppUsageMs / 60000)
+  );
+  const showMotivationAlert = (titleKey, bodyKey) => {
+    Alert.alert(t(titleKey), t(bodyKey));
+  };
+
+  const motivationItems = useMemo(() => {
+    const defaultSport = motivationSport ?? activeSports[0];
+    return [
+      {
+        id: "startSport",
+        icon: "Start",
+        titleKey: "label.motivationStartSportTitle",
+        bodyKey: "label.motivationStartSportBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: () => openSportModal(),
+      },
+      {
+        id: "difficulty",
+        icon: "Diff",
+        titleKey: "label.motivationDifficultyTitle",
+        bodyKey: "label.motivationDifficultyBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: handleIncreaseDifficulty,
+        disabled: !motivationSport,
+      },
+      {
+        id: "workout",
+        icon: "Work",
+        titleKey: "label.motivationWorkoutTitle",
+        bodyKey: "label.motivationWorkoutBody",
+        actionLabelKey: "label.motivationWorkoutAction",
+        action: () => openWorkout(),
+      },
+      {
+        id: "stats",
+        icon: "Stats",
+        titleKey: "label.motivationStatsTitle",
+        bodyKey: "label.motivationStatsBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: () => openStatsOverview(),
+      },
+      {
+        id: "newSport",
+        icon: "New",
+        titleKey: "label.motivationNewSportTitle",
+        bodyKey: "label.motivationNewSportBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: () => openSportModal(),
+      },
+      {
+        id: "ai",
+        icon: "AI",
+        titleKey: "label.aiFeatureTitle",
+        bodyKey: "label.aiFeatureBody",
+        actionLabelKey: "label.aiFeatureAction",
+        action: () =>
+          defaultSport
+            ? handleAiButtonPress(defaultSport)
+            : showMotivationAlert("label.aiFeatureTitle", "label.aiFeatureBody"),
+        disabled: !defaultSport,
+      },
+      {
+        id: "widget",
+        icon: "Widget",
+        titleKey: "label.motivationWidgetTitle",
+        bodyKey: "label.motivationWidgetBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: () => {
+          if (InstaControl?.requestPinWidget) {
+            InstaControl.requestPinWidget("overall", t("label.todayScreenTime"));
+            return;
+          }
+          showMotivationAlert("label.motivationWidgetTitle", "label.motivationWidgetBody");
+        },
+      },
+      {
+        id: "notifications",
+        icon: "Notif",
+        titleKey: "label.motivationNotificationsTitle",
+        bodyKey: "label.motivationNotificationsBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: openNotificationSettings,
+      },
+      {
+        id: "apps",
+        icon: "Apps",
+        titleKey: "label.motivationAppsTitle",
+        bodyKey: "label.motivationAppsBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: openAppsSettings,
+        bodyParams: { minutes: highestAppUsageMinutes },
+      },
+      {
+        id: "settings",
+        icon: "Set",
+        titleKey: "label.motivationSettingsTitle",
+        bodyKey: "label.motivationSettingsBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: openSettings,
+      },
+      {
+        id: "preface",
+        icon: "Pref",
+        titleKey: "label.motivationPrefaceTitle",
+        bodyKey: "label.motivationPrefaceBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: openPrefaceSettings,
+      },
+      {
+        id: "voice",
+        icon: "Voice",
+        titleKey: "label.motivationVoiceTitle",
+        bodyKey: "label.motivationVoiceBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: toggleVoice,
+      },
+      {
+        id: "language",
+        icon: "Lang",
+        titleKey: "label.motivationLanguageTitle",
+        bodyKey: "label.motivationLanguageBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: () => setShowLanguageMenu(true),
+      },
+      {
+        id: "tutorial",
+        icon: "Tut",
+        titleKey: "label.motivationTutorialTitle",
+        bodyKey: "label.motivationTutorialBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: startTutorial,
+      },
+      {
+        id: "history",
+        icon: "Hist",
+        titleKey: "label.motivationHistoryTitle",
+        bodyKey: "label.motivationHistoryBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: () =>
+          showMotivationAlert("label.motivationHistoryTitle", "label.motivationHistoryBody"),
+      },
+      {
+        id: "logWeight",
+        icon: "Weight",
+        titleKey: "label.motivationLogWeightTitle",
+        bodyKey: "label.motivationLogWeightBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: () =>
+          showMotivationAlert("label.motivationLogWeightTitle", "label.motivationLogWeightBody"),
+      },
+      {
+        id: "challenge",
+        icon: "Goal",
+        titleKey: "label.motivationChallengeTitle",
+        bodyKey: "label.motivationChallengeBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: () =>
+          showMotivationAlert("label.motivationChallengeTitle", "label.motivationChallengeBody"),
+      },
+    ];
+  }, [
+    activeSports,
+    handleAiButtonPress,
+    handleIncreaseDifficulty,
+    openAppsSettings,
+    openNotificationSettings,
+    openPrefaceSettings,
+    openSettings,
+    openSportModal,
+    openStatsOverview,
+    openWorkout,
+    setShowLanguageMenu,
+    startTutorial,
+    toggleVoice,
+    motivationSport,
+    highestAppUsageMinutes,
+  ]);
+  const motivationMap = useMemo(
+    () => new Map(motivationItems.map((item) => [item.id, item])),
+    [motivationItems]
+  );
+  const recommendedMotivationId = useMemo(() => {
+    const hasSports = activeSports.length > 0;
+    const hasEntries = (usageState.entryCount || 0) > 0;
+    if (!hasSports || !hasEntries) {
+      return "startSport";
+    }
+    if (highestAppUsageMinutes >= 45) {
+      return "apps";
+    }
+    const usedSeconds = usageState.usedSeconds || 0;
+    const remainingSeconds = usageState.remainingSeconds || 0;
+    if (remainingSeconds < 10 * 60 && usedSeconds > 0) {
+      return "workout";
+    }
+    const totalSeconds = usedSeconds + remainingSeconds;
+    const usageRatio = totalSeconds > 0 ? usedSeconds / totalSeconds : 0;
+    if (usageRatio >= 0.7 && remainingSeconds < 30 * 60) {
+      return "difficulty";
+    }
+    if (highestAppUsageMinutes >= 25) {
+      return "notifications";
+    }
+    return "stats";
+  }, [
+    activeSports.length,
+    highestAppUsageMinutes,
+    usageState.entryCount,
+    usageState.remainingSeconds,
+    usageState.usedSeconds,
+  ]);
+  const currentMotivationId =
+    selectedMotivationId ??
+    recommendedMotivationId ??
+    motivationItems[0]?.id ??
+    "difficulty";
+  const activeMotivation =
+    motivationMap.get(currentMotivationId) ?? motivationItems[0];
+  const activeMotivationTitle = activeMotivation
+    ? t(activeMotivation.titleKey)
+    : "";
+  const activeMotivationBody = activeMotivation
+    ? interpolateTemplate(
+        t(activeMotivation.bodyKey),
+        activeMotivation.bodyParams ?? {}
+      )
+    : "";
+  const activeMotivationActionLabel = t(
+    activeMotivation?.actionLabelKey ?? "label.motivationActionDefault"
+  );
+  const handleMotivationAction = (motivation) => {
+    if (!motivation?.action) {
+      return;
+    }
+    motivation.action();
+  };
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -9491,6 +9895,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             style={[
               styles.permissionCardLarge,
               !permissionsPanelOpen && styles.permissionCardCollapsed,
+              !missingPermissions &&
+                !permissionsPanelOpen &&
+                styles.motivationCardCollapsed,
             ]}
           >
             <Pressable
@@ -9578,45 +9985,53 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                     </View>
                   </>
                 ) : (
-                  <View style={styles.motivationSection}>
-                    <Text style={styles.motivationSectionTitle}>
-                      {t("label.motivationTitle")}
+                  <View style={styles.motivationCardWrapper}>
+                    <Text style={styles.motivationCardTitle}>
+                      {activeMotivationTitle}
                     </Text>
-                    <Text style={styles.motivationSectionCaption}>
-                      {t("label.motivationSubtitle")}
+                    <Text style={styles.motivationCardBody}>
+                      {activeMotivationBody}
                     </Text>
-                    <View style={styles.motivationCardsRow}>
-                      {motivationCards.map((card) => (
-                        <View key={card.id} style={styles.motivationCard}>
-                          <Text style={styles.motivationCardIcon}>
-                            {card.icon}
-                          </Text>
-                          <Text style={styles.motivationCardTitle}>
-                            {t(card.titleKey)}
-                          </Text>
-                          <Text style={styles.motivationCardBody}>
-                            {t(card.bodyKey)}
-                          </Text>
-                          <Pressable
-                            style={[
-                              styles.motivationActionButton,
-                              card.disabled &&
-                                styles.motivationActionButtonDisabled,
-                            ]}
-                            onPress={card.action}
-                            disabled={card.disabled}
-                          >
-                            <Text style={styles.motivationActionText}>
-                              {t(card.actionLabelKey)}
-                            </Text>
-                          </Pressable>
-                        </View>
-                      ))}
-                    </View>
+                    <Pressable
+                      style={[
+                        styles.motivationActionButton,
+                        activeMotivation?.disabled &&
+                          styles.motivationActionButtonDisabled,
+                      ]}
+                      onPress={() => handleMotivationAction(activeMotivation)}
+                      disabled={activeMotivation?.disabled}
+                    >
+                      <Text style={styles.motivationActionText}>
+                        {activeMotivationActionLabel}
+                      </Text>
+                    </Pressable>
                   </View>
                 )}
               </View>
-            ) : null}
+            ) : (
+              !missingPermissions && (
+                <View style={styles.motivationList}>
+                  {motivationItems.map((item) => (
+                    <Pressable
+                      key={item.id}
+                      style={[
+                        styles.motivationListItem,
+                        item.id === currentMotivationId &&
+                          styles.motivationListItemActive,
+                      ]}
+                      onPress={() => {
+                        setSelectedMotivationId(item.id);
+                        setPermissionsPanelOpen(true);
+                      }}
+                    >
+                      <Text style={styles.motivationListText}>
+                        {item.icon} {t(item.titleKey)}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              )
+            )}
           </View>
         ) : null}
         <Modal
