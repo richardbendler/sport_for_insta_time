@@ -4147,6 +4147,12 @@ const STRINGS = {
     "label.motivationQuoteDifficultyTitle": "Ein Extra-Tipp",
     "label.motivationQuoteDifficultyBody":
       "Ein höherer Schwierigkeitsgrad multipliziert deine erspielte Zeit; schiebe den Regler nach oben und geh richtig ran.",
+    "label.motivationQuoteScreenTimeTitle": "Screen Time als Bonus",
+    "label.motivationQuoteScreenTimeBody":
+      "Jede Bewegung verdient extra Zeit fürs Handy — bleib dran und kassier noch mehr.",
+    "label.motivationQuoteFocusTitle": "Fokus auf Bewegung",
+    "label.motivationQuoteFocusBody":
+      "Ein paar Minuten Sport ziehen dich raus vom Bildschirm und rein in deinen Flow.",
     "label.motivationNewSportTitle": "Weitere Sportart ausprobieren",
     "label.motivationNewSportBody":
       "Füge etwas Neues hinzu, damit der Tag abwechslungsreich bleibt.",
@@ -4183,6 +4189,7 @@ const STRINGS = {
     "label.motivationChallengeTitle": "Neue Challenge",
     "label.motivationChallengeBody":
       "Fordere dich selbst mit einer Challenge heraus und bleib dran.",
+    "label.motivationPreviewHint": "Tippe, um die Empfehlung zu öffnen.",
     "label.aiFeatureTitle": "AI-Training",
     "label.aiFeatureBody":
       "Diese Sportart unterstützt AI-Features. Drücke den AI-Button in der Sportart, um das automatische Zählen zu starten.",
@@ -4440,6 +4447,12 @@ const STRINGS = {
     "label.motivationQuoteDifficultyTitle": "Quick reminder",
     "label.motivationQuoteDifficultyBody":
       "A slightly higher difficulty boosts the time each rep gives you—nudge the slider up and go for it.",
+    "label.motivationQuoteScreenTimeTitle": "Screen time as a bonus",
+    "label.motivationQuoteScreenTimeBody":
+      "Every move earns you extra phone minutes — keep going to cash in.",
+    "label.motivationQuoteFocusTitle": "Focus on movement",
+    "label.motivationQuoteFocusBody":
+      "A few more sport minutes pull you away from the screen and into momentum.",
     "label.motivationNewSportTitle": "Add a new sport",
     "label.motivationNewSportBody":
       "Bring variety into your training by creating another sport.",
@@ -4475,6 +4488,7 @@ const STRINGS = {
     "label.motivationChallengeTitle": "Start a challenge",
     "label.motivationChallengeBody":
       "Set a new challenge to push yourself a little further.",
+    "label.motivationPreviewHint": "Tap to expand the suggestion",
     "label.aiFeatureTitle": "AI training",
     "label.aiFeatureBody":
       "This sport supports AI features. Tap the AI button inside the sport to start automatic counting.",
@@ -4736,6 +4750,12 @@ const STRINGS = {
     "label.motivationQuoteDifficultyTitle": "Consejo rápido",
     "label.motivationQuoteDifficultyBody":
       "Aumentar un poco la dificultad hace que cada repetición valga más. Sube el regulador y sigue adelante.",
+    "label.motivationQuoteScreenTimeTitle": "Tiempo de pantalla como premio",
+    "label.motivationQuoteScreenTimeBody":
+      "Cada movimiento te da minutos extra en el móvil — sigue así para cobrarlos.",
+    "label.motivationQuoteFocusTitle": "Concéntrate en moverte",
+    "label.motivationQuoteFocusBody":
+      "Unos minutos de deporte te alejan de la pantalla y te ponen en ritmo.",
     "label.motivationNewSportTitle": "Añade otra disciplina",
     "label.motivationNewSportBody":
       "Varía tu rutina creando un nuevo deporte.",
@@ -4771,6 +4791,7 @@ const STRINGS = {
     "label.motivationChallengeTitle": "Nuevos retos",
     "label.motivationChallengeBody":
       "Inicia un reto adicional para desafiarte más.",
+    "label.motivationPreviewHint": "Toca para ver la sugerencia",
     "label.aiFeatureTitle": "Entrenamiento AI",
     "label.aiFeatureBody":
       "Este deporte admite funciones de IA. Pulsa el botón de IA dentro del deporte para iniciar el conteo automático.",
@@ -5022,10 +5043,16 @@ const STRINGS = {
       "Regarde tes entrées pour voir tes progrès.",
     "label.motivationQuoteStartTitle": "Petit retour",
     "label.motivationQuoteStartBody":
-      "Tu savais que quelques unités suffisent pour accumuler du temps d’écran ? Lance un sport et relève la difficulté.",
+      "Tu savais que quelques unités suffisent pour accumuler du temps d'écran ? Lance un sport et relève la difficulté.",
     "label.motivationQuoteDifficultyTitle": "Astuce rapide",
     "label.motivationQuoteDifficultyBody":
       "Un peu plus de difficulté augmente la valeur de chaque répétition. Monte le curseur et fonce.",
+    "label.motivationQuoteScreenTimeTitle": "Du temps d'écran en bonus",
+    "label.motivationQuoteScreenTimeBody":
+      "Chaque mouvement te rapporte des minutes supplémentaires sur ton téléphone — continue comme ça.",
+    "label.motivationQuoteFocusTitle": "Concentre-toi sur le mouvement",
+    "label.motivationQuoteFocusBody":
+      "Quelques minutes de sport te sortent de l'écran et te lancent dans ton élan.",
     "label.motivationNewSportTitle": "Ajoute un autre sport",
     "label.motivationNewSportBody":
       "Diversifie ton entraînement avec une nouvelle activité.",
@@ -5061,6 +5088,7 @@ const STRINGS = {
     "label.motivationChallengeTitle": "Lance un défi",
     "label.motivationChallengeBody":
       "Crée un défi pour te pousser un peu plus loin.",
+    "label.motivationPreviewHint": "Touchez pour voir la recommandation",
     "label.aiFeatureTitle": "Entra?nement AI",
     "label.aiFeatureBody":
       "Ce sport peut utiliser les fonctions AI. Appuie sur le bouton AI dans le sport pour lancer le comptage automatique.",
@@ -5796,7 +5824,7 @@ export default function App() {
   }, []);
   const [showIconInput, setShowIconInput] = useState(false);
   const [customSuggestionUsed, setCustomSuggestionUsed] = useState(false);
-  const [activeInfoPopup, setActiveInfoPopup] = useState(null);
+  const [inlineInfoKey, setInlineInfoKey] = useState(null);
   const [pendingAiSport, setPendingAiSport] = useState(null);
   const [aiInfoVisible, setAiInfoVisible] = useState(false);
   const [installedApps, setInstalledApps] = useState([]);
@@ -5827,7 +5855,6 @@ export default function App() {
   const [notificationsGranted, setNotificationsGranted] = useState(false);
   const [permissionsPanelOpen, setPermissionsPanelOpen] = useState(false);
   const [permissionsCheckTick, setPermissionsCheckTick] = useState(0);
-  const [selectedMotivationId, setSelectedMotivationId] = useState(null);
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [statsRange, setStatsRange] = useState("month");
   const [infoHint, setInfoHint] = useState(null);
@@ -6681,7 +6708,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setIsSportModalOpen(false);
     setEditingSportId(null);
     setShowIconInput(false);
-    setActiveInfoPopup(null);
     setCustomSuggestionUsed(false);
   };
 
@@ -6922,12 +6948,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       checkAccessibility();
       checkUsageAccess();
       refreshNotificationPermission();
-    }
-  }, [permissionsPanelOpen]);
-
-  useEffect(() => {
-    if (!permissionsPanelOpen) {
-      setSelectedMotivationId(null);
     }
   }, [permissionsPanelOpen]);
 
@@ -8051,12 +8071,13 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     const blockingResponder = { onStartShouldSetResponder: () => true };
     const renderBlockingAreas = () => {
       if (!tutorialStep.requiresAction) {
-        return (
-          <View
-            style={[styles.tutorialBackdrop, StyleSheet.absoluteFillObject]}
-            {...blockingResponder}
-          />
-        );
+      return (
+        <View
+          style={[styles.tutorialBackdrop, StyleSheet.absoluteFillObject]}
+          {...blockingResponder}
+          pointerEvents="auto"
+        />
+      );
       }
       if (!hasTarget) {
         return (
@@ -8080,6 +8101,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               },
             ]}
             {...blockingResponder}
+            pointerEvents="auto"
           />
           <View
             style={[
@@ -8093,6 +8115,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               },
             ]}
             {...blockingResponder}
+            pointerEvents="auto"
           />
           <View
             style={[
@@ -8106,6 +8129,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               },
             ]}
             {...blockingResponder}
+            pointerEvents="auto"
           />
           <View
             style={[
@@ -8119,6 +8143,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               },
             ]}
             {...blockingResponder}
+            pointerEvents="auto"
           />
         </>
       );
@@ -9014,32 +9039,62 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               ) : null}
             </View>
             {selectedSport.supportsAi || selectedSport.id === "pushups" ? (
-              <View style={styles.aiRow}>
-                <View style={styles.aiRowBadge}>
-                  <View style={styles.aiBadge}>
-                    <Text style={styles.aiBadgeText}>AI</Text>
+              <View style={styles.aiInfoWrapper}>
+                <View style={styles.aiRow}>
+                  <View style={styles.aiRowBadge}>
+                    <View style={styles.aiBadge}>
+                      <Text style={styles.aiBadgeText}>AI</Text>
+                    </View>
+                    <Text style={styles.aiBadgeLabel}>{t("label.aiHint")}</Text>
                   </View>
-                  <Text style={styles.aiBadgeLabel}>{t("label.aiHint")}</Text>
-                </View>
-                <Pressable
-                  style={[
-                    styles.secondaryButton,
-                    styles.aiButton,
-                    !AI_CAMERA_ENABLED && styles.aiButtonDisabled,
-                  ]}
-                  onPress={() => handleAiButtonPress(selectedSport)}
-                >
-                  <Text style={styles.secondaryButtonText}>
-                    {t("label.aiStart")}
+                  <Pressable
+                    style={[
+                      styles.secondaryButton,
+                      styles.aiButton,
+                      !AI_CAMERA_ENABLED && styles.aiButtonDisabled,
+                    ]}
+                    onPress={() => handleAiButtonPress(selectedSport)}
+                  >
+                    <Text style={styles.secondaryButtonText}>
+                      {t("label.aiStart")}
+                    </Text>
+                  </Pressable>
+                  <Text style={styles.aiHintInline}>
+                    {t(
+                      AI_CAMERA_ENABLED
+                        ? "label.aiHintInline"
+                        : "label.aiUnavailableInline"
+                    )}
                   </Text>
-                </Pressable>
-                <Text style={styles.aiHintInline}>
-                  {t(
-                    AI_CAMERA_ENABLED
-                      ? "label.aiHintInline"
-                      : "label.aiUnavailableInline"
-                  )}
-                </Text>
+                </View>
+                {aiInfoVisible ? (
+                  <View style={styles.inlineInfoPopup}>
+                    <Text style={styles.inlineInfoPopupTitle}>
+                      {t("label.aiFeatureTitle")}
+                    </Text>
+                    <Text style={styles.inlineInfoPopupText}>
+                      {t("label.aiFeatureBody")}
+                    </Text>
+                    <View style={styles.modalActions}>
+                      <Pressable
+                        style={styles.secondaryButton}
+                        onPress={handleCloseAiInfo}
+                      >
+                        <Text style={styles.secondaryButtonText}>
+                          {t("label.close")}
+                        </Text>
+                      </Pressable>
+                      <Pressable
+                        style={styles.primaryButton}
+                        onPress={handleConfirmAiInfo}
+                      >
+                        <Text style={styles.primaryButtonText}>
+                          {t("label.aiFeatureAction")}
+                        </Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                ) : null}
               </View>
             ) : null}
           </Pressable>
@@ -9661,38 +9716,51 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     Alert.alert(t(titleKey), t(bodyKey));
   };
 
-  const motivationItems = useMemo(() => {
+  const motivationQuotes = useMemo(
+    () => [
+      {
+        id: "quoteStart",
+        titleKey: "label.motivationQuoteStartTitle",
+        bodyKey: "label.motivationQuoteStartBody",
+      },
+      {
+        id: "quoteDifficulty",
+        titleKey: "label.motivationQuoteDifficultyTitle",
+        bodyKey: "label.motivationQuoteDifficultyBody",
+      },
+      {
+        id: "quoteScreenTime",
+        titleKey: "label.motivationQuoteScreenTimeTitle",
+        bodyKey: "label.motivationQuoteScreenTimeBody",
+      },
+      {
+        id: "quoteFocus",
+        titleKey: "label.motivationQuoteFocusTitle",
+        bodyKey: "label.motivationQuoteFocusBody",
+      },
+    ],
+    [language]
+  );
+  const motivationQuoteMap = useMemo(
+    () => new Map(motivationQuotes.map((item) => [item.id, item])),
+    [motivationQuotes]
+  );
+
+  const motivationActions = useMemo(() => {
     const defaultSport = motivationSport ?? activeSports[0];
     return [
-    {
-      id: "quoteStart",
-      icon: "Idea",
-      titleKey: "label.motivationQuoteStartTitle",
-      bodyKey: "label.motivationQuoteStartBody",
-      actionLabelKey: "label.motivationActionDefault",
-      action: () => openSportModal(),
-    },
-    {
-      id: "startSport",
-      icon: "Start",
-      titleKey: "label.motivationStartSportTitle",
-      bodyKey: "label.motivationStartSportBody",
-      actionLabelKey: "label.motivationActionDefault",
-      action: () => openSportModal(),
-    },
-    {
-      id: "quoteDifficulty",
-      icon: "Mind",
-      titleKey: "label.motivationQuoteDifficultyTitle",
-      bodyKey: "label.motivationQuoteDifficultyBody",
-      actionLabelKey: "label.motivationActionDefault",
-      action: handleIncreaseDifficulty,
-      disabled: !motivationSport,
-    },
-    {
-      id: "difficulty",
-      icon: "Diff",
-      titleKey: "label.motivationDifficultyTitle",
+      {
+        id: "startSport",
+        icon: "Start",
+        titleKey: "label.motivationStartSportTitle",
+        bodyKey: "label.motivationStartSportBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: () => openSportModal(),
+      },
+      {
+        id: "difficulty",
+        icon: "Diff",
+        titleKey: "label.motivationDifficultyTitle",
         bodyKey: "label.motivationDifficultyBody",
         actionLabelKey: "label.motivationActionDefault",
         action: handleIncreaseDifficulty,
@@ -9845,16 +9913,41 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     openStatsOverview,
     openWorkout,
     setShowLanguageMenu,
+    showMotivationAlert,
     startTutorial,
     toggleVoice,
     motivationSport,
     highestAppUsageMinutes,
   ]);
-  const motivationMap = useMemo(
-    () => new Map(motivationItems.map((item) => [item.id, item])),
-    [motivationItems]
+  const motivationActionMap = useMemo(
+    () => new Map(motivationActions.map((item) => [item.id, item])),
+    [motivationActions]
   );
-  const recommendedMotivationId = useMemo(() => {
+
+  const recommendedQuoteId = useMemo(() => {
+    const hasEntries = (usageState.entryCount || 0) > 0;
+    if (!hasEntries) {
+      return "quoteStart";
+    }
+    if (highestAppUsageMinutes >= 45) {
+      return "quoteScreenTime";
+    }
+    const usedSeconds = usageState.usedSeconds || 0;
+    const remainingSeconds = usageState.remainingSeconds || 0;
+    const totalSeconds = usedSeconds + remainingSeconds;
+    const usageRatio = totalSeconds > 0 ? usedSeconds / totalSeconds : 0;
+    if (usageRatio >= 0.7) {
+      return "quoteFocus";
+    }
+    return "quoteDifficulty";
+  }, [
+    highestAppUsageMinutes,
+    usageState.entryCount,
+    usageState.remainingSeconds,
+    usageState.usedSeconds,
+  ]);
+
+  const recommendedActionId = useMemo(() => {
     const hasSports = activeSports.length > 0;
     const hasEntries = (usageState.entryCount || 0) > 0;
     if (!hasSports || !hasEntries) {
@@ -9884,30 +9977,30 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     usageState.remainingSeconds,
     usageState.usedSeconds,
   ]);
-  const currentMotivationId =
-    selectedMotivationId ??
-    recommendedMotivationId ??
-    motivationItems[0]?.id ??
-    "difficulty";
-  const activeMotivation =
-    motivationMap.get(currentMotivationId) ?? motivationItems[0];
-  const activeMotivationTitle = activeMotivation
-    ? t(activeMotivation.titleKey)
-    : "";
-  const activeMotivationBody = activeMotivation
+
+  const activeQuote =
+    motivationQuoteMap.get(recommendedQuoteId) ?? motivationQuotes[0];
+  const activeQuoteTitle = activeQuote ? t(activeQuote.titleKey) : "";
+  const activeQuoteBody = activeQuote ? t(activeQuote.bodyKey) : "";
+
+  const activeAction =
+    motivationActionMap.get(recommendedActionId) ?? motivationActions[0];
+  const activeActionTitle = activeAction ? t(activeAction.titleKey) : "";
+  const activeActionBody = activeAction
     ? interpolateTemplate(
-        t(activeMotivation.bodyKey),
-        activeMotivation.bodyParams ?? {}
+        t(activeAction.bodyKey),
+        activeAction.bodyParams ?? {}
       )
     : "";
-  const activeMotivationActionLabel = t(
-    activeMotivation?.actionLabelKey ?? "label.motivationActionDefault"
+  const activeActionLabel = t(
+    activeAction?.actionLabelKey ?? "label.motivationActionDefault"
   );
-  const handleMotivationAction = (motivation) => {
-    if (!motivation?.action) {
+
+  const handleMotivationAction = (actionItem) => {
+    if (!actionItem?.action) {
       return;
     }
-    motivation.action();
+    actionItem.action();
   };
   return (
     <SafeAreaView style={styles.container}>
@@ -9916,6 +10009,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         onTouchStart={() => {
           if (infoHint) {
             setInfoHint(null);
+          }
+          if (inlineInfoKey) {
+            setInlineInfoKey(null);
           }
         }}
       >
@@ -9947,7 +10043,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             >
               <View>
                 <Text style={styles.permissionTitle}>
-                  {t("label.gettingStarted")}
+                  {missingPermissions
+                    ? t("label.gettingStarted")
+                    : activeQuoteTitle}
                 </Text>
                 <Text style={styles.permissionSubtitle}>
                   {missingPermissions
@@ -10027,23 +10125,29 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                   </>
                 ) : (
                   <View style={styles.motivationCardWrapper}>
+                    <Text style={styles.motivationQuoteTitle}>
+                      {activeQuoteTitle}
+                    </Text>
+                    <Text style={styles.motivationQuoteBody}>
+                      {activeQuoteBody}
+                    </Text>
                     <Text style={styles.motivationCardTitle}>
-                      {activeMotivationTitle}
+                      {activeActionTitle}
                     </Text>
                     <Text style={styles.motivationCardBody}>
-                      {activeMotivationBody}
+                      {activeActionBody}
                     </Text>
                     <Pressable
                       style={[
                         styles.motivationActionButton,
-                        activeMotivation?.disabled &&
+                        activeAction?.disabled &&
                           styles.motivationActionButtonDisabled,
                       ]}
-                      onPress={() => handleMotivationAction(activeMotivation)}
-                      disabled={activeMotivation?.disabled}
+                      onPress={() => handleMotivationAction(activeAction)}
+                      disabled={activeAction?.disabled}
                     >
                       <Text style={styles.motivationActionText}>
-                        {activeMotivationActionLabel}
+                        {activeActionLabel}
                       </Text>
                     </Pressable>
                   </View>
@@ -10051,26 +10155,36 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               </View>
             ) : (
               !missingPermissions && (
-                <View style={styles.motivationList}>
-                  {motivationItems.map((item) => (
-                    <Pressable
-                      key={item.id}
-                      style={[
-                        styles.motivationListItem,
-                        item.id === currentMotivationId &&
-                          styles.motivationListItemActive,
-                      ]}
-                      onPress={() => {
-                        setSelectedMotivationId(item.id);
-                        setPermissionsPanelOpen(true);
-                      }}
+                <Pressable
+                  style={styles.motivationPreview}
+                  onPress={() => setPermissionsPanelOpen(true)}
+                >
+                  <View style={styles.motivationPreviewSection}>
+                    <Text style={styles.motivationPreviewLabel}>
+                      {activeQuoteTitle}
+                    </Text>
+                    <Text
+                      style={styles.motivationPreviewBody}
+                      numberOfLines={2}
                     >
-                      <Text style={styles.motivationListText}>
-                        {item.icon} {t(item.titleKey)}
-                      </Text>
-                    </Pressable>
-                  ))}
-                </View>
+                      {activeQuoteBody}
+                    </Text>
+                  </View>
+                  <View style={styles.motivationPreviewSection}>
+                    <Text style={styles.motivationPreviewLabel}>
+                      {activeAction.icon} {activeActionTitle}
+                    </Text>
+                    <Text
+                      style={styles.motivationPreviewBody}
+                      numberOfLines={2}
+                    >
+                      {activeActionBody}
+                    </Text>
+                  </View>
+                  <Text style={styles.motivationPreviewHint}>
+                    {t("label.motivationPreviewHint")}
+                  </Text>
+                </Pressable>
               )
             )}
           </View>
@@ -10702,7 +10816,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               <Pressable
                 style={styles.infoButton}
                 onPress={() =>
-                  setActiveInfoPopup((prev) => (prev === "type" ? null : "type"))
+                  setInlineInfoKey((prev) => (prev === "type" ? null : "type"))
                 }
               >
                 <Text style={styles.infoButtonText}>?</Text>
@@ -10749,6 +10863,16 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 </Text>
               </Pressable>
             </View>
+            {inlineInfoKey === "type" ? (
+              <View style={styles.inlineInfoTooltip}>
+                <Text style={styles.inlineInfoTooltipTitle}>
+                  {t("label.typeInfoTitle")}
+                </Text>
+                <Text style={styles.inlineInfoTooltipText}>
+                  {t("label.typeHelp")}
+                </Text>
+              </View>
+            ) : null}
             <View style={styles.sliderSection}>
               <View style={styles.difficultyHeaderRow}>
                 <Text style={styles.rateLabel}>{t("label.difficultyLabel")}</Text>
@@ -10759,7 +10883,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                   <Pressable
                     style={styles.infoButton}
                     onPress={() =>
-                      setActiveInfoPopup((prev) =>
+                      setInlineInfoKey((prev) =>
                         prev === "difficulty" ? null : "difficulty"
                       )
                     }
@@ -10768,6 +10892,19 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                   </Pressable>
                 </View>
               </View>
+              {inlineInfoKey === "difficulty" ? (
+                <View style={styles.inlineInfoTooltip}>
+                  <Text style={styles.inlineInfoTooltipTitle}>
+                    {t("label.difficultyLabel")}
+                  </Text>
+                  <Text style={styles.inlineInfoTooltipText}>
+                    {t("label.difficultyDescription")}
+                  </Text>
+                  <Text style={styles.inlineInfoTooltipText}>
+                    {t("label.difficultyFormula")}
+                  </Text>
+                </View>
+              ) : null}
               <View style={styles.difficultyBarWrapper}>
                 <View style={styles.difficultyBarTrack}>
                   <View
@@ -10829,57 +10966,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               </Pressable>
               <Pressable style={styles.primaryButton} onPress={saveSportModal}>
                 <Text style={styles.primaryButtonText}>{t("label.save")}</Text>
-              </Pressable>
-            </View>
-          </View>
-          {activeInfoPopup ? (
-            <View style={styles.infoPopupContainer} pointerEvents="box-none">
-              <Pressable
-                style={styles.infoPopupBackdrop}
-                onPress={() => setActiveInfoPopup(null)}
-              />
-              <View style={styles.infoPopupCard}>
-                <Text style={styles.infoPopupTitle}>
-                  {activeInfoPopup === "type"
-                    ? t("label.typeInfoTitle")
-                    : t("label.difficultyLabel")}
-                </Text>
-                <Text style={styles.infoPopupText}>
-                  {activeInfoPopup === "type"
-                    ? t("label.typeHelp")
-                    : t("label.difficultyDescription")}
-                </Text>
-                {activeInfoPopup === "difficulty" ? (
-                  <Text style={[styles.infoPopupText, styles.infoPopupSpacing]}>
-                    {t("label.difficultyFormula")}
-                  </Text>
-                ) : null}
-              </View>
-            </View>
-          ) : null}
-        </View>
-      ) : null}
-      {aiInfoVisible ? (
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>{t("label.aiFeatureTitle")}</Text>
-            <Text style={styles.modalSubtitle}>
-              {t("label.aiFeatureBody")}
-            </Text>
-            <View style={styles.modalActions}>
-              <Pressable
-                style={styles.secondaryButton}
-                onPress={handleCloseAiInfo}
-              >
-                <Text style={styles.secondaryButtonText}>{t("label.close")}</Text>
-              </Pressable>
-              <Pressable
-                style={styles.primaryButton}
-                onPress={handleConfirmAiInfo}
-              >
-                <Text style={styles.primaryButtonText}>
-                  {t("label.aiFeatureAction")}
-                </Text>
               </Pressable>
             </View>
           </View>
@@ -11569,81 +11655,25 @@ const styles = StyleSheet.create({
     gap: 10,
     marginTop: 10,
   },
-  infoPopupContainer: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 35,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  infoPopupBackdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(2, 6, 23, 0.7)",
-  },
-  infoPopupCard: {
-    backgroundColor: COLORS.cardDark,
-    borderRadius: 12,
+  motivationCardWrapper: {
+    backgroundColor: COLORS.card,
+    borderRadius: 14,
     padding: 16,
     borderWidth: 1,
     borderColor: COLORS.cardAlt,
-    maxWidth: 320,
-    alignItems: "center",
+    marginTop: 12,
   },
-  infoPopupTitle: {
-    color: COLORS.white,
-    fontWeight: "700",
-    marginBottom: 6,
-    fontSize: 14,
-    textAlign: "center",
-  },
-  infoPopupText: {
-    color: COLORS.muted,
-    fontSize: 12,
-    lineHeight: 18,
-    textAlign: "center",
-  },
-  infoPopupSpacing: {
-    marginTop: 6,
-  },
-  motivationSection: {
-    marginHorizontal: 2,
-    marginBottom: 12,
-  },
-  motivationHeaderRow: {
-    marginBottom: 8,
-  },
-  motivationSectionTitle: {
+  motivationQuoteTitle: {
     color: COLORS.text,
-    fontSize: 16,
     fontWeight: "700",
-  },
-  motivationSectionCaption: {
-    color: COLORS.muted,
-    fontSize: 12,
-    marginTop: 2,
-  },
-  motivationCardsRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    marginHorizontal: -6,
-  },
-  motivationCard: {
-    flex: 1,
-    minWidth: 180,
-    borderRadius: 14,
-    padding: 14,
-    backgroundColor: COLORS.card,
-    borderWidth: 1,
-    borderColor: COLORS.cardAlt,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 3,
-    margin: 6,
-  },
-  motivationCardIcon: {
-    fontSize: 24,
+    fontSize: 15,
     marginBottom: 6,
+  },
+  motivationQuoteBody: {
+    color: COLORS.muted,
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 12,
   },
   motivationCardTitle: {
     color: COLORS.text,
@@ -11669,6 +11699,80 @@ const styles = StyleSheet.create({
   motivationActionText: {
     color: COLORS.background,
     fontWeight: "700",
+  },
+  motivationPreview: {
+    marginTop: 12,
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: COLORS.cardAlt,
+    backgroundColor: COLORS.card,
+  },
+  motivationPreviewSection: {
+    marginBottom: 10,
+  },
+  motivationPreviewLabel: {
+    color: COLORS.text,
+    fontWeight: "600",
+  },
+  motivationPreviewBody: {
+    color: COLORS.muted,
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 4,
+  },
+  motivationPreviewHint: {
+    marginTop: 8,
+    color: COLORS.muted,
+    fontSize: 12,
+    textAlign: "right",
+  },
+  motivationCardCollapsed: {
+    minHeight: 64,
+  },
+  inlineInfoTooltip: {
+    marginTop: 8,
+    borderRadius: 12,
+    backgroundColor: COLORS.cardDark,
+    borderWidth: 1,
+    borderColor: COLORS.cardAlt,
+    padding: 12,
+  },
+  inlineInfoTooltipTitle: {
+    color: COLORS.white,
+    fontWeight: "700",
+    marginBottom: 6,
+  },
+  inlineInfoTooltipText: {
+    color: COLORS.muted,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  aiInfoWrapper: {
+    marginTop: 12,
+  },
+  inlineInfoPopup: {
+    marginTop: 8,
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: COLORS.cardAlt,
+    backgroundColor: COLORS.card,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 3,
+  },
+  inlineInfoPopupTitle: {
+    color: COLORS.text,
+    fontWeight: "700",
+    marginBottom: 6,
+  },
+  inlineInfoPopupText: {
+    color: COLORS.muted,
+    fontSize: 13,
+    marginBottom: 10,
   },
   statsTitle: {
     color: COLORS.muted,
