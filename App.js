@@ -4134,6 +4134,10 @@ const STRINGS = {
     "label.motivationWorkoutBody":
       "Starte ein Workout, um an deinem Tagesziel dranzubleiben.",
     "label.motivationWorkoutAction": "Workout starten",
+    "label.aiFeatureTitle": "AI-Training",
+    "label.aiFeatureBody":
+      "Diese Sportart unterstützt AI-Features. Drücke den AI-Button in der Sportart, um das automatische Zählen zu starten.",
+    "label.aiFeatureAction": "AI starten",
     "label.changeLanguage": "Sprache ändern",
     "label.prefaceSettings": "Vorschaltseite",
     "label.prefaceDelay": "Wartezeit (Sekunden)",
@@ -4374,6 +4378,10 @@ const STRINGS = {
     "label.motivationWorkoutBody":
       "Kick off a workout to keep today's momentum.",
     "label.motivationWorkoutAction": "Start workout",
+    "label.aiFeatureTitle": "AI training",
+    "label.aiFeatureBody":
+      "This sport supports AI features. Tap the AI button inside the sport to start automatic counting.",
+    "label.aiFeatureAction": "Start AI",
     "label.changeLanguage": "Change language",
     "label.prefaceSettings": "Preface screen",
     "label.prefaceDelay": "Wait time (seconds)",
@@ -4618,6 +4626,10 @@ const STRINGS = {
     "label.motivationWorkoutBody":
       "Inicia un entrenamiento para mantener el impulso.",
     "label.motivationWorkoutAction": "Iniciar entrenamiento",
+    "label.aiFeatureTitle": "Entrenamiento AI",
+    "label.aiFeatureBody":
+      "Este deporte admite funciones de IA. Pulsa el botón de IA dentro del deporte para iniciar el conteo automático.",
+    "label.aiFeatureAction": "Iniciar IA",
     "label.changeLanguage": "Cambiar idioma",
     "label.prefaceSettings": "Pantalla previa",
     "label.prefaceDelay": "Tiempo de espera (segundos)",
@@ -4856,6 +4868,10 @@ const STRINGS = {
     "label.motivationWorkoutBody":
       "Lance un entra?nement pour garder le cap.",
     "label.motivationWorkoutAction": "D?marrer l'entra?nement",
+    "label.aiFeatureTitle": "Entra?nement AI",
+    "label.aiFeatureBody":
+      "Ce sport peut utiliser les fonctions AI. Appuie sur le bouton AI dans le sport pour lancer le comptage automatique.",
+    "label.aiFeatureAction": "Démarrer AI",
 "label.changeLanguage": "Changer de langue",
     "label.prefaceSettings": "Ecran preface",
     "label.prefaceDelay": "Delai (secondes)",
@@ -5588,6 +5604,8 @@ export default function App() {
   const [showIconInput, setShowIconInput] = useState(false);
   const [customSuggestionUsed, setCustomSuggestionUsed] = useState(false);
   const [activeInfoPopup, setActiveInfoPopup] = useState(null);
+  const [pendingAiSport, setPendingAiSport] = useState(null);
+  const [aiInfoVisible, setAiInfoVisible] = useState(false);
   const [installedApps, setInstalledApps] = useState([]);
   const [appSearch, setAppSearch] = useState("");
   const [appSearchInput, setAppSearchInput] = useState("");
@@ -5722,6 +5740,26 @@ export default function App() {
     setShowIconInput(false);
     setNewName(trimmedSportSearch);
     setCustomSuggestionUsed(true);
+  };
+
+  const handleAiButtonPress = (sport) => {
+    setPendingAiSport(sport);
+    setAiInfoVisible(true);
+  };
+
+  const handleCloseAiInfo = () => {
+    setPendingAiSport(null);
+    setAiInfoVisible(false);
+  };
+
+  const handleConfirmAiInfo = () => {
+    if (!pendingAiSport) {
+      handleCloseAiInfo();
+      return;
+    }
+    setAiInfoVisible(false);
+    startAiSession(pendingAiSport);
+    setPendingAiSport(null);
   };
 
   useEffect(() => {
@@ -8788,7 +8826,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                     styles.aiButton,
                     !AI_CAMERA_ENABLED && styles.aiButtonDisabled,
                   ]}
-                  onPress={() => startAiSession(selectedSport)}
+                  onPress={() => handleAiButtonPress(selectedSport)}
                 >
                   <Text style={styles.secondaryButtonText}>
                     {t("label.aiStart")}
@@ -10348,6 +10386,32 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               </View>
             </View>
           ) : null}
+        </View>
+      ) : null}
+      {aiInfoVisible ? (
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>{t("label.aiFeatureTitle")}</Text>
+            <Text style={styles.modalSubtitle}>
+              {t("label.aiFeatureBody")}
+            </Text>
+            <View style={styles.modalActions}>
+              <Pressable
+                style={styles.secondaryButton}
+                onPress={handleCloseAiInfo}
+              >
+                <Text style={styles.secondaryButtonText}>{t("label.close")}</Text>
+              </Pressable>
+              <Pressable
+                style={styles.primaryButton}
+                onPress={handleConfirmAiInfo}
+              >
+                <Text style={styles.primaryButtonText}>
+                  {t("label.aiFeatureAction")}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
         </View>
       ) : null}
       {tutorialActive ? renderTutorialOverlay() : null}
