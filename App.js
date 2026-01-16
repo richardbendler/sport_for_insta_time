@@ -3934,7 +3934,7 @@ const COLORS = {
   white: "#f8fafc",
 };
 
-const SportTitleSlots = ({ sport, sportLabel }) => {
+const SportTitleSlots = ({ sport, sportLabel, onAiPress }) => {
   const [leftWidth, setLeftWidth] = useState(0);
   const [rightWidth, setRightWidth] = useState(0);
   const slotWidth = Math.max(leftWidth, rightWidth);
@@ -3962,9 +3962,19 @@ const SportTitleSlots = ({ sport, sportLabel }) => {
         onLayout={handleRightLayout}
       >
         {sport.supportsAi ? (
-          <View style={styles.aiBadge}>
-            <Text style={styles.aiBadgeText}>AI</Text>
-          </View>
+          onAiPress ? (
+            <Pressable
+              style={styles.aiBadge}
+              onPress={onAiPress}
+              hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
+            >
+              <Text style={styles.aiBadgeText}>AI</Text>
+            </Pressable>
+          ) : (
+            <View style={styles.aiBadge}>
+              <Text style={styles.aiBadgeText}>AI</Text>
+            </View>
+          )
         ) : (
           <View style={styles.aiBadgePlaceholder} />
         )}
@@ -10233,7 +10243,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                     </Pressable>
                   </View>
                   <View style={styles.sportTopTitleCenter}>
-                    <SportTitleSlots sport={sport} sportLabel={sportLabel} />
+                    <SportTitleSlots
+                      sport={sport}
+                      sportLabel={sportLabel}
+                      onAiPress={() => handleAiButtonPress(sport)}
+                    />
                   </View>
                   <View style={styles.sportTopIconsRight}>
                     <Pressable
@@ -10382,7 +10396,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                         </Pressable>
                       </View>
                       <View style={styles.sportTopTitleCenter}>
-                        <SportTitleSlots sport={sport} sportLabel={sportLabel} />
+                        <SportTitleSlots
+                          sport={sport}
+                          sportLabel={sportLabel}
+                          onAiPress={() => handleAiButtonPress(sport)}
+                        />
                       </View>
                       <View style={styles.sportTopIconsRight}>
                         <Pressable
@@ -10529,6 +10547,41 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       
 
     </ScrollView>
+    <Modal
+      visible={aiInfoVisible}
+      transparent
+      animationType="fade"
+      onRequestClose={handleCloseAiInfo}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.inlineInfoPopup}>
+          <Text style={styles.inlineInfoPopupTitle}>
+            {t("label.aiFeatureTitle")}
+          </Text>
+          <Text style={styles.inlineInfoPopupText}>
+            {t("label.aiFeatureBody")}
+          </Text>
+          <View style={styles.modalActions}>
+            <Pressable
+              style={styles.secondaryButton}
+              onPress={handleCloseAiInfo}
+            >
+              <Text style={styles.secondaryButtonText}>
+                {t("label.close")}
+              </Text>
+            </Pressable>
+            <Pressable
+              style={styles.primaryButton}
+              onPress={handleConfirmAiInfo}
+            >
+              <Text style={styles.primaryButtonText}>
+                {t("label.aiFeatureAction")}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      </View>
+    </Modal>
       <View style={styles.fixedTimers}>
         <Pressable
           style={[styles.infoCard, styles.infoCardMain]}
