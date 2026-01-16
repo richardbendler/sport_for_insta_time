@@ -4141,6 +4141,12 @@ const STRINGS = {
     "label.motivationStatsTitle": "Statistiken checken",
     "label.motivationStatsBody":
       "Sieh nach, wie oft du Sport gemacht hast und bleib im Rhythmus.",
+    "label.motivationQuoteStartTitle": "Wusstest du schon?",
+    "label.motivationQuoteStartBody":
+      "Wusstest du, dass schon wenige Einheiten dir Screen Time sichern? Starte jetzt deinen Sport und stelle die Schwierigkeit hoch.",
+    "label.motivationQuoteDifficultyTitle": "Ein Extra-Tipp",
+    "label.motivationQuoteDifficultyBody":
+      "Ein höherer Schwierigkeitsgrad multipliziert deine erspielte Zeit; schiebe den Regler nach oben und geh richtig ran.",
     "label.motivationNewSportTitle": "Weitere Sportart ausprobieren",
     "label.motivationNewSportBody":
       "Füge etwas Neues hinzu, damit der Tag abwechslungsreich bleibt.",
@@ -4428,6 +4434,12 @@ const STRINGS = {
     "label.motivationStatsTitle": "Check your stats",
     "label.motivationStatsBody":
       "Review your entries to see how far you've come.",
+    "label.motivationQuoteStartTitle": "Fun fact",
+    "label.motivationQuoteStartBody":
+      "Did you know that each unit multiplies your earned time? Start a sport and raise the difficulty to pull ahead.",
+    "label.motivationQuoteDifficultyTitle": "Quick reminder",
+    "label.motivationQuoteDifficultyBody":
+      "A slightly higher difficulty boosts the time each rep gives you—nudge the slider up and go for it.",
     "label.motivationNewSportTitle": "Add a new sport",
     "label.motivationNewSportBody":
       "Bring variety into your training by creating another sport.",
@@ -4718,6 +4730,12 @@ const STRINGS = {
     "label.motivationStatsTitle": "Revisa tus estadísticas",
     "label.motivationStatsBody":
       "Mira tus registros para ver tu progreso.",
+    "label.motivationQuoteStartTitle": "Dato curioso",
+    "label.motivationQuoteStartBody":
+      "¿Sabías que cada unidad suma más tiempo de pantalla? Crea un deporte ahora y sube la dificultad para multiplicar tu recompensa.",
+    "label.motivationQuoteDifficultyTitle": "Consejo rápido",
+    "label.motivationQuoteDifficultyBody":
+      "Aumentar un poco la dificultad hace que cada repetición valga más. Sube el regulador y sigue adelante.",
     "label.motivationNewSportTitle": "Añade otra disciplina",
     "label.motivationNewSportBody":
       "Varía tu rutina creando un nuevo deporte.",
@@ -5002,6 +5020,12 @@ const STRINGS = {
     "label.motivationStatsTitle": "Consulte les stats",
     "label.motivationStatsBody":
       "Regarde tes entrées pour voir tes progrès.",
+    "label.motivationQuoteStartTitle": "Petit retour",
+    "label.motivationQuoteStartBody":
+      "Tu savais que quelques unités suffisent pour accumuler du temps d’écran ? Lance un sport et relève la difficulté.",
+    "label.motivationQuoteDifficultyTitle": "Astuce rapide",
+    "label.motivationQuoteDifficultyBody":
+      "Un peu plus de difficulté augmente la valeur de chaque répétition. Monte le curseur et fonce.",
     "label.motivationNewSportTitle": "Ajoute un autre sport",
     "label.motivationNewSportBody":
       "Diversifie ton entraînement avec une nouvelle activité.",
@@ -9640,18 +9664,35 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   const motivationItems = useMemo(() => {
     const defaultSport = motivationSport ?? activeSports[0];
     return [
-      {
-        id: "startSport",
-        icon: "Start",
-        titleKey: "label.motivationStartSportTitle",
-        bodyKey: "label.motivationStartSportBody",
-        actionLabelKey: "label.motivationActionDefault",
-        action: () => openSportModal(),
-      },
-      {
-        id: "difficulty",
-        icon: "Diff",
-        titleKey: "label.motivationDifficultyTitle",
+    {
+      id: "quoteStart",
+      icon: "Idea",
+      titleKey: "label.motivationQuoteStartTitle",
+      bodyKey: "label.motivationQuoteStartBody",
+      actionLabelKey: "label.motivationActionDefault",
+      action: () => openSportModal(),
+    },
+    {
+      id: "startSport",
+      icon: "Start",
+      titleKey: "label.motivationStartSportTitle",
+      bodyKey: "label.motivationStartSportBody",
+      actionLabelKey: "label.motivationActionDefault",
+      action: () => openSportModal(),
+    },
+    {
+      id: "quoteDifficulty",
+      icon: "Mind",
+      titleKey: "label.motivationQuoteDifficultyTitle",
+      bodyKey: "label.motivationQuoteDifficultyBody",
+      actionLabelKey: "label.motivationActionDefault",
+      action: handleIncreaseDifficulty,
+      disabled: !motivationSport,
+    },
+    {
+      id: "difficulty",
+      icon: "Diff",
+      titleKey: "label.motivationDifficultyTitle",
         bodyKey: "label.motivationDifficultyBody",
         actionLabelKey: "label.motivationActionDefault",
         action: handleIncreaseDifficulty,
