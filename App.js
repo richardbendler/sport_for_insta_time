@@ -9968,31 +9968,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               </Pressable>
             </View>
           </View>
-          {activeInfoPopup ? (
-            <View style={styles.infoPopupContainer} pointerEvents="box-none">
-              <Pressable
-                style={styles.infoPopupBackdrop}
-                onPress={() => setActiveInfoPopup(null)}
-              />
-              <View style={styles.infoPopupCard}>
-                <Text style={styles.infoPopupTitle}>
-                  {activeInfoPopup === "type"
-                    ? t("label.typeInfoTitle")
-                    : t("label.difficultyLabel")}
-                </Text>
-                <Text style={styles.infoPopupText}>
-                  {activeInfoPopup === "type"
-                    ? t("label.typeHelp")
-                    : t("label.difficultyDescription")}
-                </Text>
-                {activeInfoPopup === "difficulty" ? (
-                  <Text style={[styles.infoPopupText, styles.infoPopupSpacing]}>
-                    {t("label.difficultyFormula")}
-                  </Text>
-                ) : null}
-              </View>
-            </View>
-          ) : null}
         </View>
       ) : null}
       {isSportModalOpen ? (
@@ -10244,6 +10219,31 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               </Pressable>
             </View>
           </View>
+          {activeInfoPopup ? (
+            <View style={styles.infoPopupContainer} pointerEvents="box-none">
+              <Pressable
+                style={styles.infoPopupBackdrop}
+                onPress={() => setActiveInfoPopup(null)}
+              />
+              <View style={styles.infoPopupCard}>
+                <Text style={styles.infoPopupTitle}>
+                  {activeInfoPopup === "type"
+                    ? t("label.typeInfoTitle")
+                    : t("label.difficultyLabel")}
+                </Text>
+                <Text style={styles.infoPopupText}>
+                  {activeInfoPopup === "type"
+                    ? t("label.typeHelp")
+                    : t("label.difficultyDescription")}
+                </Text>
+                {activeInfoPopup === "difficulty" ? (
+                  <Text style={[styles.infoPopupText, styles.infoPopupSpacing]}>
+                    {t("label.difficultyFormula")}
+                  </Text>
+                ) : null}
+              </View>
+            </View>
+          ) : null}
         </View>
       ) : null}
       {tutorialActive ? renderTutorialOverlay() : null}
