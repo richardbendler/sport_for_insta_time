@@ -8594,23 +8594,32 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     return () => clearTimeout(handle);
   }, [appSearchInput, appSearch]);
 
-  const appSearchTerm = appSearch.trim().toLowerCase();
-  const filteredApps = installedApps.filter((app) => {
+  const appSearchTerm = useMemo(() => appSearch.trim().toLowerCase(), [
+    appSearch,
+  ]);
+
+  const filteredApps = useMemo(() => {
     if (!appSearchTerm) {
-      return true;
+      return installedApps;
     }
-    const label = (app.label || "").toLowerCase();
-    const pkg = (app.packageName || "").toLowerCase();
-    return label.includes(appSearchTerm) || pkg.includes(appSearchTerm);
-  });
-  const sortedApps = [...filteredApps].sort((a, b) => {
-    const aUsage = appUsageMap[a.packageName] || 0;
-    const bUsage = appUsageMap[b.packageName] || 0;
-    if (bUsage !== aUsage) {
-      return bUsage - aUsage;
-    }
-    return (a.label || "").localeCompare(b.label || "");
-  });
+    return installedApps.filter((app) => {
+      const label = (app.label || "").toLowerCase();
+      const pkg = (app.packageName || "").toLowerCase();
+      return label.includes(appSearchTerm) || pkg.includes(appSearchTerm);
+    });
+  }, [installedApps, appSearchTerm]);
+
+  const sortedApps = useMemo(() => {
+    const appsToSort = [...filteredApps];
+    return appsToSort.sort((a, b) => {
+      const aUsage = appUsageMap[a.packageName] || 0;
+      const bUsage = appUsageMap[b.packageName] || 0;
+      if (bUsage !== aUsage) {
+        return bUsage - aUsage;
+      }
+      return (a.label || "").localeCompare(b.label || "");
+    });
+  }, [filteredApps, appUsageMap]);
 
   useEffect(() => {
     Voice.onSpeechResults = handleVoiceResults;
