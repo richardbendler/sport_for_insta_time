@@ -4287,6 +4287,9 @@ const STRINGS = {
     "tutorial.step.openApps.title": "Eingeschr\u00e4nkte Apps",
     "tutorial.step.openApps.body":
       "Tippe auf Apps, um auszuw\u00e4hlen, welche Anwendungen eingeschr\u00e4nkt bleiben.",
+    "tutorial.step.openAppsInfo.title": "Apps ausw\u00e4hlen",
+    "tutorial.step.openAppsInfo.body":
+      "W\u00e4hle eine App aus der Liste, damit sie eingeschr\u00e4nkt wird, und tippe danach auf Zur\u00fcck, um mit dem Tutorial weiterzumachen.",
     "tutorial.step.finish.title": "Fertig",
     "tutorial.step.finish.body":
       "Tippe auf Weiter, um das Tutorial abzuschließen. Du kannst es jederzeit über den Tutorial-Button oben rechts im Tab 'Einzelne Übungen' im Hauptmenü starten.",
@@ -4604,6 +4607,9 @@ const STRINGS = {
     "tutorial.step.openApps.title": "Restricted apps",
     "tutorial.step.openApps.body":
       "Tap Apps to pick which applications should be restricted once the time is up.",
+    "tutorial.step.openAppsInfo.title": "Choose apps",
+    "tutorial.step.openAppsInfo.body":
+      "Select an app to restrict it and then tap Back to return to the tutorial.",
     "tutorial.step.finish.title": "All set",
     "tutorial.step.finish.body":
       "Tap Next to finish the tutorial. You can restart it anytime from the main menu by tapping the Tutorial button in the top-right of Single exercises.",
@@ -4925,6 +4931,9 @@ const STRINGS = {
     "tutorial.step.openApps.title": "Apps restringidas",
     "tutorial.step.openApps.body":
       "Toca Apps para elegir qué aplicaciones se restringen cuando se acaba el tiempo.",
+    "tutorial.step.openAppsInfo.title": "Elige apps",
+    "tutorial.step.openAppsInfo.body":
+      "Selecciona una app para restringirla y luego pulsa Atrás para volver al tutorial.",
     "tutorial.step.finish.title": "Listo",
     "tutorial.step.finish.body":
       "Pulsa Siguiente para terminar el tutorial. Puedes reiniciarlo desde el menú principal tocando el botón Tutorial arriba a la derecha en 'Ejercicios individuales'.",
@@ -5241,6 +5250,9 @@ const STRINGS = {
     "tutorial.step.openApps.title": "Apps restreintes",
     "tutorial.step.openApps.body":
       "Touche Apps pour choisir quelles applications seront restreintes une fois le temps écoulé.",
+    "tutorial.step.openAppsInfo.title": "Choisissez des apps",
+    "tutorial.step.openAppsInfo.body":
+      "Sélectionnez une app pour la restreindre, puis appuyez sur Retour pour revenir au tutoriel.",
     "tutorial.step.finish.title": "Termine",
     "tutorial.step.finish.body":
       "Touchez Suivant pour terminer le tutoriel. Tu peux le relancer depuis le menu principal en touchant le bouton Tutoriel en haut à droite de 'Exercices individuels'.",
@@ -5994,6 +6006,7 @@ export default function App() {
   const tutorialHeaderButtonRef = useRef(null);
   const [overlayOffset, setOverlayOffset] = useState({ x: 0, y: 0 });
   const tutorialAppsButtonRef = useRef(null);
+  const tutorialAppsScreenRef = useRef(null);
   const tutorialSamplePushupRef = useRef({
     entryId: null,
     cleaned: false,
@@ -8041,6 +8054,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         actionId: "openApps",
         requiresAction: true,
       });
+      steps.push({
+        id: "openAppsInfo",
+        titleKey: "tutorial.step.openAppsInfo.title",
+        bodyKey: "tutorial.step.openAppsInfo.body",
+        targetRef: tutorialAppsScreenRef,
+      });
     }
     steps.push({
       id: "finish",
@@ -9063,8 +9082,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         })
         .sort((a, b) => a.group.startTs - b.group.startTs);
       return (
-        <SafeAreaView style={styles.container}>
-          <ScrollView contentContainerStyle={styles.scrollContent}>
+    <SafeAreaView style={styles.container}>
+        <ScrollView
+          ref={tutorialAppsScreenRef}
+          contentContainerStyle={styles.scrollContent}
+        >
             <View style={styles.headerRow}>
               <View
                 style={[
