@@ -3949,6 +3949,7 @@ const SportTitleSlots = ({ sport, sportLabel, onAiPress }) => {
     []
   );
 
+
   return (
     <View style={styles.sportTitleCenterRow}>
       <View style={[styles.titleSideSlot, slotStyle]} onLayout={handleLeftLayout}>
@@ -6980,11 +6981,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   }, [selectedSportId]);
 
   useEffect(() => {
-    setWeightEntryWeight("");
-    setWeightEntryReps("");
-  }, [selectedSportId]);
-
-  useEffect(() => {
     const handler = () => {
       if (statsSportId) {
         setStatsSportId(null);
@@ -7059,6 +7055,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       setOverallDayKey(null);
     }
   }, [overallStatsOpen]);
+
+  useEffect(() => {
+    setWeightEntryWeight("");
+    setWeightEntryReps("");
+  }, [selectedSportId]);
 
   const loadInstalledApps = async () => {
     if (!InstaControl?.getInstalledApps) {
@@ -7835,6 +7836,318 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     Platform.OS === "android" && Number(Platform.Version) >= 33;
   const tooltipWidth =
     infoCardWidth > 0 ? Math.min(220, Math.max(180, infoCardWidth - 24)) : 200;
+
+  const gridPadding = 16;
+  const gridGap = 12;
+  const gridWidth = Math.max(0, width - gridPadding * 2);
+  const columnCount = width >= 900 ? 3 : width >= 520 ? 2 : 1;
+  const cardWidth = Math.max(
+    0,
+    Math.floor((gridWidth - gridGap * (columnCount - 1)) / columnCount)
+  );
+  const highestAppUsageMs = useMemo(() => {
+    const values = Object.values(appUsageMap || {});
+    if (values.length === 0) {
+      return 0;
+    }
+    return Math.max(
+      ...values.map((value) => (Number.isFinite(value) ? Number(value) : 0))
+    );
+  }, [appUsageMap]);
+  const highestAppUsageMinutes = Math.max(
+    0,
+    Math.round(highestAppUsageMs / 60000)
+  );
+  const showMotivationAlert = (titleKey, bodyKey) => {
+    Alert.alert(t(titleKey), t(bodyKey));
+  };
+
+  const motivationQuotes = useMemo(
+    () => [
+      {
+        id: "quoteStart",
+        titleKey: "label.motivationQuoteStartTitle",
+        bodyKey: "label.motivationQuoteStartBody",
+      },
+      {
+        id: "quoteDifficulty",
+        titleKey: "label.motivationQuoteDifficultyTitle",
+        bodyKey: "label.motivationQuoteDifficultyBody",
+      },
+      {
+        id: "quoteScreenTime",
+        titleKey: "label.motivationQuoteScreenTimeTitle",
+        bodyKey: "label.motivationQuoteScreenTimeBody",
+      },
+      {
+        id: "quoteFocus",
+        titleKey: "label.motivationQuoteFocusTitle",
+        bodyKey: "label.motivationQuoteFocusBody",
+      },
+    ],
+    [language]
+  );
+  const motivationQuoteMap = useMemo(
+    () => new Map(motivationQuotes.map((item) => [item.id, item])),
+    [motivationQuotes]
+  );
+
+  const motivationActions = useMemo(() => {
+    const defaultSport = motivationSport ?? activeSports[0];
+    return [
+      {
+        id: "startSport",
+        icon: "Start",
+        titleKey: "label.motivationStartSportTitle",
+        bodyKey: "label.motivationStartSportBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: () => openSportModal(),
+      },
+      {
+        id: "difficulty",
+        icon: "Diff",
+        titleKey: "label.motivationDifficultyTitle",
+        bodyKey: "label.motivationDifficultyBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: handleIncreaseDifficulty,
+        disabled: !motivationSport,
+      },
+      {
+        id: "workout",
+        icon: "Work",
+        titleKey: "label.motivationWorkoutTitle",
+        bodyKey: "label.motivationWorkoutBody",
+        actionLabelKey: "label.motivationWorkoutAction",
+        action: () => openWorkout(),
+      },
+      {
+        id: "stats",
+        icon: "Stats",
+        titleKey: "label.motivationStatsTitle",
+        bodyKey: "label.motivationStatsBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: () => openStatsOverview(),
+      },
+      {
+        id: "newSport",
+        icon: "New",
+        titleKey: "label.motivationNewSportTitle",
+        bodyKey: "label.motivationNewSportBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: () => openSportModal(),
+      },
+      {
+        id: "ai",
+        icon: "AI",
+        titleKey: "label.aiFeatureTitle",
+        bodyKey: "label.aiFeatureBody",
+        actionLabelKey: "label.aiFeatureAction",
+        action: () =>
+          defaultSport
+            ? handleAiButtonPress(defaultSport)
+            : showMotivationAlert("label.aiFeatureTitle", "label.aiFeatureBody"),
+        disabled: !defaultSport,
+      },
+      {
+        id: "widget",
+        icon: "Widget",
+        titleKey: "label.motivationWidgetTitle",
+        bodyKey: "label.motivationWidgetBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: () => {
+          if (InstaControl?.requestPinWidget) {
+            InstaControl.requestPinWidget("overall", t("label.todayScreenTime"));
+            return;
+          }
+          showMotivationAlert("label.motivationWidgetTitle", "label.motivationWidgetBody");
+        },
+      },
+      {
+        id: "notifications",
+        icon: "Notif",
+        titleKey: "label.motivationNotificationsTitle",
+        bodyKey: "label.motivationNotificationsBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: openNotificationSettings,
+      },
+      {
+        id: "apps",
+        icon: "Apps",
+        titleKey: "label.motivationAppsTitle",
+        bodyKey: "label.motivationAppsBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: openAppsSettings,
+        bodyParams: { minutes: highestAppUsageMinutes },
+      },
+      {
+        id: "settings",
+        icon: "Set",
+        titleKey: "label.motivationSettingsTitle",
+        bodyKey: "label.motivationSettingsBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: openSettings,
+      },
+      {
+        id: "preface",
+        icon: "Pref",
+        titleKey: "label.motivationPrefaceTitle",
+        bodyKey: "label.motivationPrefaceBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: openPrefaceSettings,
+      },
+      {
+        id: "voice",
+        icon: "Voice",
+        titleKey: "label.motivationVoiceTitle",
+        bodyKey: "label.motivationVoiceBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: toggleVoice,
+      },
+      {
+        id: "language",
+        icon: "Lang",
+        titleKey: "label.motivationLanguageTitle",
+        bodyKey: "label.motivationLanguageBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: () => setShowLanguageMenu(true),
+      },
+      {
+        id: "tutorial",
+        icon: "Tut",
+        titleKey: "label.motivationTutorialTitle",
+        bodyKey: "label.motivationTutorialBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: startTutorial,
+      },
+      {
+        id: "history",
+        icon: "Hist",
+        titleKey: "label.motivationHistoryTitle",
+        bodyKey: "label.motivationHistoryBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: () =>
+          showMotivationAlert("label.motivationHistoryTitle", "label.motivationHistoryBody"),
+      },
+      {
+        id: "logWeight",
+        icon: "Weight",
+        titleKey: "label.motivationLogWeightTitle",
+        bodyKey: "label.motivationLogWeightBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: () =>
+          showMotivationAlert("label.motivationLogWeightTitle", "label.motivationLogWeightBody"),
+      },
+      {
+        id: "challenge",
+        icon: "Goal",
+        titleKey: "label.motivationChallengeTitle",
+        bodyKey: "label.motivationChallengeBody",
+        actionLabelKey: "label.motivationActionDefault",
+        action: () =>
+          showMotivationAlert("label.motivationChallengeTitle", "label.motivationChallengeBody"),
+      },
+    ];
+  }, [
+    activeSports,
+    handleAiButtonPress,
+    handleIncreaseDifficulty,
+    openAppsSettings,
+    openNotificationSettings,
+    openPrefaceSettings,
+    openSettings,
+    openSportModal,
+    openStatsOverview,
+    openWorkout,
+    setShowLanguageMenu,
+    showMotivationAlert,
+    startTutorial,
+    toggleVoice,
+    motivationSport,
+    highestAppUsageMinutes,
+  ]);
+  const motivationActionMap = useMemo(
+    () => new Map(motivationActions.map((item) => [item.id, item])),
+    [motivationActions]
+  );
+
+  const recommendedQuoteId = useMemo(() => {
+    const hasEntries = (usageState.entryCount || 0) > 0;
+    if (!hasEntries) {
+      return "quoteStart";
+    }
+    if (highestAppUsageMinutes >= 45) {
+      return "quoteScreenTime";
+    }
+    const usedSeconds = usageState.usedSeconds || 0;
+    const remainingSeconds = usageState.remainingSeconds || 0;
+    const totalSeconds = usedSeconds + remainingSeconds;
+    const usageRatio = totalSeconds > 0 ? usedSeconds / totalSeconds : 0;
+    if (usageRatio >= 0.7) {
+      return "quoteFocus";
+    }
+    return "quoteDifficulty";
+  }, [
+    highestAppUsageMinutes,
+    usageState.entryCount,
+    usageState.remainingSeconds,
+    usageState.usedSeconds,
+  ]);
+
+  const recommendedActionId = useMemo(() => {
+    const hasSports = activeSports.length > 0;
+    const hasEntries = (usageState.entryCount || 0) > 0;
+    if (!hasSports || !hasEntries) {
+      return "startSport";
+    }
+    if (highestAppUsageMinutes >= 45) {
+      return "apps";
+    }
+    const usedSeconds = usageState.usedSeconds || 0;
+    const remainingSeconds = usageState.remainingSeconds || 0;
+    if (remainingSeconds < 10 * 60 && usedSeconds > 0) {
+      return "workout";
+    }
+    const totalSeconds = usedSeconds + remainingSeconds;
+    const usageRatio = totalSeconds > 0 ? usedSeconds / totalSeconds : 0;
+    if (usageRatio >= 0.7 && remainingSeconds < 30 * 60) {
+      return "difficulty";
+    }
+    if (highestAppUsageMinutes >= 25) {
+      return "notifications";
+    }
+    return "stats";
+  }, [
+    activeSports.length,
+    highestAppUsageMinutes,
+    usageState.entryCount,
+    usageState.remainingSeconds,
+    usageState.usedSeconds,
+  ]);
+
+  const activeQuote =
+    motivationQuoteMap.get(recommendedQuoteId) ?? motivationQuotes[0];
+  const activeQuoteTitle = activeQuote ? t(activeQuote.titleKey) : "";
+  const activeQuoteBody = activeQuote ? t(activeQuote.bodyKey) : "";
+
+  const activeAction =
+    motivationActionMap.get(recommendedActionId) ?? motivationActions[0];
+  const activeActionTitle = activeAction ? t(activeAction.titleKey) : "";
+  const activeActionBody = activeAction
+    ? interpolateTemplate(
+        t(activeAction.bodyKey),
+        activeAction.bodyParams ?? {}
+      )
+    : "";
+  const activeActionLabel = t(
+    activeAction?.actionLabelKey ?? "label.motivationActionDefault"
+  );
+
+  const handleMotivationAction = (actionItem) => {
+    if (!actionItem?.action) {
+      return;
+    }
+    actionItem.action();
+  };
 
   useEffect(() => {
     if (!infoHint) {
@@ -9705,317 +10018,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       </SafeAreaView>
     );
   }
-  const gridPadding = 16;
-  const gridGap = 12;
-  const gridWidth = Math.max(0, width - gridPadding * 2);
-  const columnCount = width >= 900 ? 3 : width >= 520 ? 2 : 1;
-  const cardWidth = Math.max(
-    0,
-    Math.floor((gridWidth - gridGap * (columnCount - 1)) / columnCount)
-  );
-  const highestAppUsageMs = useMemo(() => {
-    const values = Object.values(appUsageMap || {});
-    if (values.length === 0) {
-      return 0;
-    }
-    return Math.max(
-      ...values.map((value) => (Number.isFinite(value) ? Number(value) : 0))
-    );
-  }, [appUsageMap]);
-  const highestAppUsageMinutes = Math.max(
-    0,
-    Math.round(highestAppUsageMs / 60000)
-  );
-  const showMotivationAlert = (titleKey, bodyKey) => {
-    Alert.alert(t(titleKey), t(bodyKey));
-  };
 
-  const motivationQuotes = useMemo(
-    () => [
-      {
-        id: "quoteStart",
-        titleKey: "label.motivationQuoteStartTitle",
-        bodyKey: "label.motivationQuoteStartBody",
-      },
-      {
-        id: "quoteDifficulty",
-        titleKey: "label.motivationQuoteDifficultyTitle",
-        bodyKey: "label.motivationQuoteDifficultyBody",
-      },
-      {
-        id: "quoteScreenTime",
-        titleKey: "label.motivationQuoteScreenTimeTitle",
-        bodyKey: "label.motivationQuoteScreenTimeBody",
-      },
-      {
-        id: "quoteFocus",
-        titleKey: "label.motivationQuoteFocusTitle",
-        bodyKey: "label.motivationQuoteFocusBody",
-      },
-    ],
-    [language]
-  );
-  const motivationQuoteMap = useMemo(
-    () => new Map(motivationQuotes.map((item) => [item.id, item])),
-    [motivationQuotes]
-  );
-
-  const motivationActions = useMemo(() => {
-    const defaultSport = motivationSport ?? activeSports[0];
-    return [
-      {
-        id: "startSport",
-        icon: "Start",
-        titleKey: "label.motivationStartSportTitle",
-        bodyKey: "label.motivationStartSportBody",
-        actionLabelKey: "label.motivationActionDefault",
-        action: () => openSportModal(),
-      },
-      {
-        id: "difficulty",
-        icon: "Diff",
-        titleKey: "label.motivationDifficultyTitle",
-        bodyKey: "label.motivationDifficultyBody",
-        actionLabelKey: "label.motivationActionDefault",
-        action: handleIncreaseDifficulty,
-        disabled: !motivationSport,
-      },
-      {
-        id: "workout",
-        icon: "Work",
-        titleKey: "label.motivationWorkoutTitle",
-        bodyKey: "label.motivationWorkoutBody",
-        actionLabelKey: "label.motivationWorkoutAction",
-        action: () => openWorkout(),
-      },
-      {
-        id: "stats",
-        icon: "Stats",
-        titleKey: "label.motivationStatsTitle",
-        bodyKey: "label.motivationStatsBody",
-        actionLabelKey: "label.motivationActionDefault",
-        action: () => openStatsOverview(),
-      },
-      {
-        id: "newSport",
-        icon: "New",
-        titleKey: "label.motivationNewSportTitle",
-        bodyKey: "label.motivationNewSportBody",
-        actionLabelKey: "label.motivationActionDefault",
-        action: () => openSportModal(),
-      },
-      {
-        id: "ai",
-        icon: "AI",
-        titleKey: "label.aiFeatureTitle",
-        bodyKey: "label.aiFeatureBody",
-        actionLabelKey: "label.aiFeatureAction",
-        action: () =>
-          defaultSport
-            ? handleAiButtonPress(defaultSport)
-            : showMotivationAlert("label.aiFeatureTitle", "label.aiFeatureBody"),
-        disabled: !defaultSport,
-      },
-      {
-        id: "widget",
-        icon: "Widget",
-        titleKey: "label.motivationWidgetTitle",
-        bodyKey: "label.motivationWidgetBody",
-        actionLabelKey: "label.motivationActionDefault",
-        action: () => {
-          if (InstaControl?.requestPinWidget) {
-            InstaControl.requestPinWidget("overall", t("label.todayScreenTime"));
-            return;
-          }
-          showMotivationAlert("label.motivationWidgetTitle", "label.motivationWidgetBody");
-        },
-      },
-      {
-        id: "notifications",
-        icon: "Notif",
-        titleKey: "label.motivationNotificationsTitle",
-        bodyKey: "label.motivationNotificationsBody",
-        actionLabelKey: "label.motivationActionDefault",
-        action: openNotificationSettings,
-      },
-      {
-        id: "apps",
-        icon: "Apps",
-        titleKey: "label.motivationAppsTitle",
-        bodyKey: "label.motivationAppsBody",
-        actionLabelKey: "label.motivationActionDefault",
-        action: openAppsSettings,
-        bodyParams: { minutes: highestAppUsageMinutes },
-      },
-      {
-        id: "settings",
-        icon: "Set",
-        titleKey: "label.motivationSettingsTitle",
-        bodyKey: "label.motivationSettingsBody",
-        actionLabelKey: "label.motivationActionDefault",
-        action: openSettings,
-      },
-      {
-        id: "preface",
-        icon: "Pref",
-        titleKey: "label.motivationPrefaceTitle",
-        bodyKey: "label.motivationPrefaceBody",
-        actionLabelKey: "label.motivationActionDefault",
-        action: openPrefaceSettings,
-      },
-      {
-        id: "voice",
-        icon: "Voice",
-        titleKey: "label.motivationVoiceTitle",
-        bodyKey: "label.motivationVoiceBody",
-        actionLabelKey: "label.motivationActionDefault",
-        action: toggleVoice,
-      },
-      {
-        id: "language",
-        icon: "Lang",
-        titleKey: "label.motivationLanguageTitle",
-        bodyKey: "label.motivationLanguageBody",
-        actionLabelKey: "label.motivationActionDefault",
-        action: () => setShowLanguageMenu(true),
-      },
-      {
-        id: "tutorial",
-        icon: "Tut",
-        titleKey: "label.motivationTutorialTitle",
-        bodyKey: "label.motivationTutorialBody",
-        actionLabelKey: "label.motivationActionDefault",
-        action: startTutorial,
-      },
-      {
-        id: "history",
-        icon: "Hist",
-        titleKey: "label.motivationHistoryTitle",
-        bodyKey: "label.motivationHistoryBody",
-        actionLabelKey: "label.motivationActionDefault",
-        action: () =>
-          showMotivationAlert("label.motivationHistoryTitle", "label.motivationHistoryBody"),
-      },
-      {
-        id: "logWeight",
-        icon: "Weight",
-        titleKey: "label.motivationLogWeightTitle",
-        bodyKey: "label.motivationLogWeightBody",
-        actionLabelKey: "label.motivationActionDefault",
-        action: () =>
-          showMotivationAlert("label.motivationLogWeightTitle", "label.motivationLogWeightBody"),
-      },
-      {
-        id: "challenge",
-        icon: "Goal",
-        titleKey: "label.motivationChallengeTitle",
-        bodyKey: "label.motivationChallengeBody",
-        actionLabelKey: "label.motivationActionDefault",
-        action: () =>
-          showMotivationAlert("label.motivationChallengeTitle", "label.motivationChallengeBody"),
-      },
-    ];
-  }, [
-    activeSports,
-    handleAiButtonPress,
-    handleIncreaseDifficulty,
-    openAppsSettings,
-    openNotificationSettings,
-    openPrefaceSettings,
-    openSettings,
-    openSportModal,
-    openStatsOverview,
-    openWorkout,
-    setShowLanguageMenu,
-    showMotivationAlert,
-    startTutorial,
-    toggleVoice,
-    motivationSport,
-    highestAppUsageMinutes,
-  ]);
-  const motivationActionMap = useMemo(
-    () => new Map(motivationActions.map((item) => [item.id, item])),
-    [motivationActions]
-  );
-
-  const recommendedQuoteId = useMemo(() => {
-    const hasEntries = (usageState.entryCount || 0) > 0;
-    if (!hasEntries) {
-      return "quoteStart";
-    }
-    if (highestAppUsageMinutes >= 45) {
-      return "quoteScreenTime";
-    }
-    const usedSeconds = usageState.usedSeconds || 0;
-    const remainingSeconds = usageState.remainingSeconds || 0;
-    const totalSeconds = usedSeconds + remainingSeconds;
-    const usageRatio = totalSeconds > 0 ? usedSeconds / totalSeconds : 0;
-    if (usageRatio >= 0.7) {
-      return "quoteFocus";
-    }
-    return "quoteDifficulty";
-  }, [
-    highestAppUsageMinutes,
-    usageState.entryCount,
-    usageState.remainingSeconds,
-    usageState.usedSeconds,
-  ]);
-
-  const recommendedActionId = useMemo(() => {
-    const hasSports = activeSports.length > 0;
-    const hasEntries = (usageState.entryCount || 0) > 0;
-    if (!hasSports || !hasEntries) {
-      return "startSport";
-    }
-    if (highestAppUsageMinutes >= 45) {
-      return "apps";
-    }
-    const usedSeconds = usageState.usedSeconds || 0;
-    const remainingSeconds = usageState.remainingSeconds || 0;
-    if (remainingSeconds < 10 * 60 && usedSeconds > 0) {
-      return "workout";
-    }
-    const totalSeconds = usedSeconds + remainingSeconds;
-    const usageRatio = totalSeconds > 0 ? usedSeconds / totalSeconds : 0;
-    if (usageRatio >= 0.7 && remainingSeconds < 30 * 60) {
-      return "difficulty";
-    }
-    if (highestAppUsageMinutes >= 25) {
-      return "notifications";
-    }
-    return "stats";
-  }, [
-    activeSports.length,
-    highestAppUsageMinutes,
-    usageState.entryCount,
-    usageState.remainingSeconds,
-    usageState.usedSeconds,
-  ]);
-
-  const activeQuote =
-    motivationQuoteMap.get(recommendedQuoteId) ?? motivationQuotes[0];
-  const activeQuoteTitle = activeQuote ? t(activeQuote.titleKey) : "";
-  const activeQuoteBody = activeQuote ? t(activeQuote.bodyKey) : "";
-
-  const activeAction =
-    motivationActionMap.get(recommendedActionId) ?? motivationActions[0];
-  const activeActionTitle = activeAction ? t(activeAction.titleKey) : "";
-  const activeActionBody = activeAction
-    ? interpolateTemplate(
-        t(activeAction.bodyKey),
-        activeAction.bodyParams ?? {}
-      )
-    : "";
-  const activeActionLabel = t(
-    activeAction?.actionLabelKey ?? "label.motivationActionDefault"
-  );
-
-  const handleMotivationAction = (actionItem) => {
-    if (!actionItem?.action) {
-      return;
-    }
-    actionItem.action();
-  };
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
