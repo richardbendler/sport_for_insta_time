@@ -10,6 +10,7 @@ import {
   ScrollView,
   StyleSheet,
   ActivityIndicator,
+  Animated,
   NativeModules,
   Platform,
   PermissionsAndroid,
@@ -4037,7 +4038,9 @@ const STRINGS = {
       "Damit Screen Time berechnet und Apps blockiert werden können, braucht die App Zugriff. Du wirst jetzt zu den Einstellungen geführt.",
       "label.gettingStarted": "Erste Schritte",
       "label.permissionsNeeded": "Diese Berechtigungen sind erforderlich, damit die App funktioniert.",
-      "label.permissionsHint": "Tippe, um alles einzurichten",
+    "label.permissionsHint": "Tippe, um alles einzurichten",
+    "label.permissionsReminder":
+      "Aktiviere Zugriffshilfe und Nutzungszugriff, damit eingeschränkte Apps bei Zeitende zuverlässig gesperrt bleiben.",
       "label.accessibilityTitle": "Zugriffshilfe",
       "label.accessibilityReason": "N\u00f6tig, um die Vordergrund-App zu erkennen und gesperrte Apps zu blockieren.",
       "label.accessibilitySteps": "Einstellungen > Zugriffshilfe > Sport for Screen Time > Aktivieren",
@@ -4090,6 +4093,9 @@ const STRINGS = {
       "Wir nutzen die Zugriffshilfe, um die Vordergrund-App zu erkennen und gesperrte Apps zu blockieren. Wir lesen oder teilen keine Inhalte aus deinen Apps.",
     "label.accessibilityDisclosureConfirm": "Zugriff erlauben",
     "label.accessibilityDisclosureCancel": "Später",
+    "label.storageErrorTitle": "Fehler beim Speichern",
+    "label.storageErrorBody":
+      "Konnte {{context}} nicht speichern. Bitte versuche es später erneut.",
     "label.hiddenShow": "Versteckte Sportarten anzeigen",
     "label.hiddenHide": "Versteckte Sportarten verbergen",
     "label.screenRateReps": "Screen Time pro Wiederholung (Minuten)",
@@ -4257,7 +4263,7 @@ const STRINGS = {
     "label.tutorialStart": "Tutorial starten",
     "tutorial.step.overview.title": "Deine Bildschirmzeit",
     "tutorial.step.overview.body":
-      "Hier siehst du erspielte Zeit, Restzeit und den \u00dcbertrag; tippe die Karten an, um mehr Details zu sehen.",
+      "Sieh dir deine Screen-Time-Karten an, tippe für Details oder auf Weiter, um zu starten.",
     "tutorial.step.openSport.title": "Sportart \u00f6ffnen",
     "tutorial.step.openSport.body":
       "Tippe eine Sportkarte an, um den Trackingbereich mit Schieberegler, Modus und Eingaben zu öffnen.",
@@ -4269,24 +4275,36 @@ const STRINGS = {
       "Tippe auf die große Fläche, um eine Wiederholung zu zählen; der Schwierigkeitsgrad steuert die Screen Time.",
     "tutorial.step.track.body.time":
       "Tippe auf Start, um den Timer zu starten; Dauer und Schwierigkeit ergeben deine Screen Time.",
+    "tutorial.step.samplePushupInfo.title": "Toll gemacht!",
+    "tutorial.step.samplePushupInfo.body":
+      "Nur zur Info: Der Probestütz wird gleich wieder entfernt, er war nur fürs Tutorial gedacht.",
     "tutorial.step.back.title": "Zur\u00fcck zur \u00dcbersicht",
     "tutorial.step.back.body":
-      "Nutze Zurück, um zur Sportübersicht zurückzukehren und andere Sportarten zu prüfen.",
+      "Tippe auf Zurück, um zur Sportübersicht zurückzukehren und andere Sportarten zu prüfen.",
     "tutorial.step.openSettings.title": "Einstellungen \u00f6ffnen",
     "tutorial.step.openSettings.body":
-      "Tippe auf Einstellungen f\u00fcr Apps, Berechtigungen und mehr.",
+      "Tippe unten auf Einstellungen, um Apps, Berechtigungen und mehr zu konfigurieren.",
     "tutorial.step.openApps.title": "Eingeschr\u00e4nkte Apps",
     "tutorial.step.openApps.body":
       "Tippe auf Apps, um auszuw\u00e4hlen, welche Anwendungen eingeschr\u00e4nkt bleiben.",
     "tutorial.step.finish.title": "Fertig",
     "tutorial.step.finish.body":
-      "Du kannst das Tutorial jederzeit über den Tutorial-Button oben rechts im Tab 'Einzelne Übungen' im Hauptmenü starten.",
+      "Tippe auf Weiter, um das Tutorial abzuschließen. Du kannst es jederzeit über den Tutorial-Button oben rechts im Tab 'Einzelne Übungen' im Hauptmenü starten.",
     "tutorial.step.singleExercises.title": "Einzelne Übungen",
     "tutorial.step.singleExercises.body":
-      "Im Tab Einzelne Übungen findest du deine Sportarten und kannst sie direkt antippen.",
+      "Im Tab Einzelne Übungen liegen deine Sportarten; tippe eine an, um zu starten, oder tippe auf Weiter.",
     "tutorial.step.workout.title": "Workout-Tab",
     "tutorial.step.workout.body":
-      "Im Workout-Tab startest du Sessions; die Liste vergangener Workouts öffnet beim Tippen eine Detailansicht.",
+      "Tippe unten auf Workout, um diesen Tab zu öffnen; hier startest du Sessions und siehst vergangene Workouts.",
+    "tutorial.step.workoutDetail.title": "Workout-Details",
+    "tutorial.step.workoutDetail.body":
+      "Hier steuerst du das Workout-Timer-Panel und kannst Trainingseinheiten starten oder stoppen. Tippe auf Weiter, um fortzufahren.",
+    "tutorial.step.stats.title": "Stats-Tab",
+    "tutorial.step.stats.body":
+      "Tippe unten auf Stats, um deine Auswertungen aufzurufen; hier findest du Tages- und Wochenwerte.",
+    "tutorial.step.statsDetail.title": "Stats-Übersicht",
+    "tutorial.step.statsDetail.body":
+      "In dieser Karte siehst du schnelle Aktionen und Filter. Tippe auf Weiter, um zur Einstellungen-Übersicht zu wechseln.",
     "tutorial.cta.next": "Weiter",
     "tutorial.cta.skip": "\u00dcberspringen",
     "tutorial.cta.exit": "Tutorial abbrechen",
@@ -4344,7 +4362,9 @@ const STRINGS = {
       "To track screen time and block apps, the app needs access. You'll be sent to settings now.",
       "label.gettingStarted": "Getting started",
       "label.permissionsNeeded": "These permissions are required for the app to work.",
-      "label.permissionsHint": "Tap to set everything up",
+    "label.permissionsHint": "Tap to set everything up",
+    "label.permissionsReminder":
+      "Enable Accessibility and Usage Access so restricted apps stay blocked when your earned time runs out.",
       "label.accessibilityTitle": "Accessibility",
       "label.accessibilityReason": "Needed to detect the foreground app and block restricted apps.",
       "label.accessibilitySteps": "Settings > Accessibility > Sport for Screen Time > Enable",
@@ -4391,6 +4411,9 @@ const STRINGS = {
       "We use Accessibility to detect which app is in the foreground and to block restricted apps when your earned screen time is used up. We do not read or share any content from your apps.",
     "label.accessibilityDisclosureConfirm": "Allow access",
     "label.accessibilityDisclosureCancel": "Not now",
+    "label.storageErrorTitle": "Save failed",
+    "label.storageErrorBody":
+      "Could not save {{context}}. Please try again later.",
     "label.hiddenShow": "Show hidden sports",
     "label.hiddenHide": "Hide hidden sports",
     "label.screenRateReps": "Screen Time per rep (minutes)",
@@ -4557,7 +4580,7 @@ const STRINGS = {
     "label.tutorialStart": "Start tutorial",
     "tutorial.step.overview.title": "Your screen time",
     "tutorial.step.overview.body":
-      "Track earned time, remaining allotment, and carryover here; tap the cards for more detail.",
+      "Track earned time, remaining allotment, and carryover here; tap the cards for more detail or hit Next.",
     "tutorial.step.openSport.title": "Open a sport",
     "tutorial.step.openSport.body":
       "Tap any sport card to open the tracking area with the difficulty slider, mode toggle, and logging fields.",
@@ -4569,24 +4592,36 @@ const STRINGS = {
       "Tap the big area once to log a rep; the difficulty level decides how much Screen Time you earn.",
     "tutorial.step.track.body.time":
       "Tap Start to begin a timer; stop it when you finish so duration and difficulty produce Screen Time.",
+    "tutorial.step.samplePushupInfo.title": "Nice work!",
+    "tutorial.step.samplePushupInfo.body":
+      "Quick note: this sample push-up will be deleted again since it’s only for the tutorial.",
     "tutorial.step.back.title": "Back to overview",
     "tutorial.step.back.body":
-      "Use Back to return to your sports list and review other cards.",
+      "Tap Back to return to your sports list and review other cards.",
     "tutorial.step.openSettings.title": "Open settings",
     "tutorial.step.openSettings.body":
-      "Tap Settings to manage apps, permissions, and preface delay.",
+      "Tap Settings in the bottom nav to manage apps, permissions, and preface delay.",
     "tutorial.step.openApps.title": "Restricted apps",
     "tutorial.step.openApps.body":
       "Tap Apps to pick which applications should be restricted once the time is up.",
     "tutorial.step.finish.title": "All set",
     "tutorial.step.finish.body":
-      "You can restart this tutorial anytime from the main menu by tapping the Tutorial button in the top-right of Single exercises.",
+      "Tap Next to finish the tutorial. You can restart it anytime from the main menu by tapping the Tutorial button in the top-right of Single exercises.",
     "tutorial.step.singleExercises.title": "Single exercises",
     "tutorial.step.singleExercises.body":
-      "The Single exercises tab keeps your sports ready; tap one to adjust difficulty, choose reps or time, and start tracking.",
+      "The Single exercises tab keeps your sports ready; tap one to start tracking or tap Next to continue.",
     "tutorial.step.workout.title": "Workout tab",
     "tutorial.step.workout.body":
-      "Workout times sessions, and the past-workouts list opens detail views when you tap a row.",
+      "Tap Workout in the bottom nav to open this tab; start sessions and see past workouts here.",
+    "tutorial.step.workoutDetail.title": "Workout details",
+    "tutorial.step.workoutDetail.body":
+      "This panel controls the workout timer and lets you start or stop sessions. Tap Next to keep going.",
+    "tutorial.step.stats.title": "Stats tab",
+    "tutorial.step.stats.body":
+      "Tap Stats in the bottom nav to view your earned time and entries overview.",
+    "tutorial.step.statsDetail.title": "Stats overview",
+    "tutorial.step.statsDetail.body":
+      "Use these cards and filters to inspect daily and weekly stats. Tap Next to proceed.",
     "tutorial.cta.next": "Next",
     "tutorial.cta.skip": "Skip",
     "tutorial.cta.exit": "Exit tutorial",
@@ -4645,6 +4680,8 @@ const STRINGS = {
       "label.gettingStarted": "Comencemos",
       "label.permissionsNeeded": "Estos permisos son necesarios para que la app funcione.",
       "label.permissionsHint": "Toca para configurarlo todo",
+      "label.permissionsReminder":
+        "Activa accesibilidad y acceso de uso para que las apps restringidas sigan bloqueadas cuando se acabe el tiempo ganado.",
       "label.accessibilityTitle": "Accesibilidad",
       "label.accessibilityReason": "Necesario para detectar la app en primer plano y bloquear apps restringidas.",
       "label.accessibilitySteps": "Configuraci\u00f3n > Accesibilidad > Sport for Screen Time > Activar",
@@ -4694,6 +4731,9 @@ const STRINGS = {
       "Usamos Accesibilidad para detectar qu\u00e9 app est\u00e1 en primer plano y bloquear apps restringidas cuando se acaba tu tiempo ganado. No leemos ni compartimos contenido de tus apps.",
     "label.accessibilityDisclosureConfirm": "Permitir acceso",
     "label.accessibilityDisclosureCancel": "M\u00e1s tarde",
+    "label.storageErrorTitle": "Error al guardar",
+    "label.storageErrorBody":
+      "No se pudo guardar {{context}}. Intenta de nuevo más tarde.",
     "label.hiddenShow": "Mostrar deportes ocultos",
     "label.hiddenHide": "Ocultar deportes ocultos",
     "label.screenRateReps": "Tiempo de pantalla por repetición (minutos)",
@@ -4861,7 +4901,7 @@ const STRINGS = {
     "label.tutorialStart": "Iniciar tutorial",
     "tutorial.step.overview.title": "Tu tiempo de pantalla",
     "tutorial.step.overview.body":
-      "Aquí ves el tiempo ganado, lo que queda y el arrastre; toca las tarjetas para ver más detalles.",
+      "Aquí ves el tiempo ganado, lo restante y el arrastre; toca las tarjetas para detalles o pulsa Siguiente.",
     "tutorial.step.openSport.title": "Abrir un deporte",
     "tutorial.step.openSport.body":
       "Toca una tarjeta para abrir el área de seguimiento con el deslizador de dificultad, el modo y los campos de registro.",
@@ -4873,23 +4913,36 @@ const STRINGS = {
       "Toca el área grande una vez para sumar una repetición; el nivel de dificultad decide cuánto tiempo ganas.",
     "tutorial.step.track.body.time":
       "Toca Iniciar para comenzar el temporizador; deténlo cuando termines para que duración y dificultad sumen el tiempo de pantalla.",
+    "tutorial.step.samplePushupInfo.title": "¡Bien hecho!",
+    "tutorial.step.samplePushupInfo.body":
+      "Para que lo sepas: esta flexión de prueba se eliminará porque solo era para el tutorial.",
     "tutorial.step.back.title": "Volver al inicio",
     "tutorial.step.back.body":
-      "Usa Atrás para regresar a la lista y revisar otras tarjetas.",
+      "Toca Atrás para regresar a la lista y revisar otras tarjetas.",
     "tutorial.step.openSettings.title": "Abrir ajustes",
     "tutorial.step.openSettings.body":
-      "Toca Ajustes para gestionar apps, permisos y tiempos de preámbulo.",
+      "Toca Ajustes en la barra inferior para gestionar apps, permisos y tiempos de preámbulo.",
     "tutorial.step.openApps.title": "Apps restringidas",
     "tutorial.step.openApps.body":
       "Toca Apps para elegir qué aplicaciones se restringen cuando se acaba el tiempo.",
     "tutorial.step.finish.title": "Listo",
-    "tutorial.step.finish.body": "Puedes reiniciar este tutorial desde el menú principal tocando el botón Tutorial arriba a la derecha en 'Ejercicios individuales'.",
+    "tutorial.step.finish.body":
+      "Pulsa Siguiente para terminar el tutorial. Puedes reiniciarlo desde el menú principal tocando el botón Tutorial arriba a la derecha en 'Ejercicios individuales'.",
     "tutorial.step.singleExercises.title": "Ejercicios individuales",
     "tutorial.step.singleExercises.body":
-      "La pestaña Ejercicios individuales reúne tus deportes; tócalos para ajustar la dificultad y empezar a registrar.",
+      "La pestaña Ejercicios individuales reúne tus deportes; toca uno para comenzar o pulsa Siguiente para continuar.",
     "tutorial.step.workout.title": "Pestaña Workout",
     "tutorial.step.workout.body":
-      "Desde Workout cronometras sesiones; la lista de entrenamientos pasados abre un detalle al tocar cada fila.",
+      "Toca Workout en la barra inferior para abrir esta pestaña; aquí cronometras sesiones y ves entrenamientos pasados.",
+    "tutorial.step.workoutDetail.title": "Detalles del workout",
+    "tutorial.step.workoutDetail.body":
+      "Este panel controla el temporizador y te deja iniciar o parar sesiones. Pulsa Siguiente para continuar.",
+    "tutorial.step.stats.title": "Pestaña Stats",
+    "tutorial.step.stats.body":
+      "Toca Stats en la barra inferior para ver tus estadísticas diarias y semanales.",
+    "tutorial.step.statsDetail.title": "Resumen de Stats",
+    "tutorial.step.statsDetail.body":
+      "Estas tarjetas y filtros muestran tus valores rápidos. Pulsa Siguiente para seguir.",
     "tutorial.cta.next": "Siguiente",
     "tutorial.cta.skip": "Saltar",
     "tutorial.cta.exit": "Salir del tutorial",
@@ -4948,6 +5001,11 @@ const STRINGS = {
       "label.gettingStarted": "Bien d\u00e9marrer",
       "label.permissionsNeeded": "Ces autorisations sont n\u00e9cessaires pour que l\u2019app fonctionne.",
       "label.permissionsHint": "Appuie pour tout configurer",
+      "label.permissionsReminder":
+        "Active l'accessibilité et l'accès à l'utilisation afin que les apps restreintes restent bloquées quand le temps gagné est écoulé.",
+      "label.storageErrorTitle": "Erreur de sauvegarde",
+      "label.storageErrorBody":
+        "Impossible d'enregistrer {{context}}. Réessaie plus tard.",
       "label.accessibilityTitle": "Accessibilit\u00e9",
       "label.accessibilityReason": "N\u00e9cessaire pour d\u00e9tecter l\u2019app au premier plan et bloquer les apps restreintes.",
       "label.accessibilitySteps": "R\u00e9glages > Accessibilit\u00e9 > Sport for Screen Time > Activer",
@@ -5159,7 +5217,7 @@ const STRINGS = {
     "label.tutorialStart": "Demarrer le tutoriel",
     "tutorial.step.overview.title": "Ton temps d'ecran",
     "tutorial.step.overview.body":
-      "Ici tu vois le temps gagné, le temps restant et le report; touche les cartes pour plus de détails.",
+      "Ici tu vois le temps gagné, le temps restant et le report; touche les cartes pour plus de détails ou appuie sur Suivant.",
     "tutorial.step.openSport.title": "Ouvrir un sport",
     "tutorial.step.openSport.body":
       "Touche une carte pour ouvrir la zone de suivi avec le curseur de difficulté, le mode et les champs de saisie.",
@@ -5171,24 +5229,36 @@ const STRINGS = {
       "Touche une fois la grande zone pour compter une répétition; le niveau de difficulté détermine ton temps d'écran.",
     "tutorial.step.track.body.time":
       "Touche Démarrer pour lancer le minuteur; arrête-le quand tu as fini afin que durée et difficulté s'additionnent.",
+    "tutorial.step.samplePushupInfo.title": "Bien joué !",
+    "tutorial.step.samplePushupInfo.body":
+      "Juste pour info : cette pompe de démonstration va être supprimée, elle n’était utilisée que pour le tutoriel.",
     "tutorial.step.back.title": "Retour a la liste",
     "tutorial.step.back.body":
-      "Utilise Retour pour revenir à la liste et consulter d'autres sports.",
+      "Touche Retour pour revenir à la liste et consulter d'autres sports.",
     "tutorial.step.openSettings.title": "Ouvrir les reglages",
     "tutorial.step.openSettings.body":
-      "Touche Réglages pour gérer apps, permissions et délais de préface.",
+      "Touche Réglages dans la barre inférieure pour gérer apps, permissions et délais de préface.",
     "tutorial.step.openApps.title": "Apps restreintes",
     "tutorial.step.openApps.body":
       "Touche Apps pour choisir quelles applications seront restreintes une fois le temps écoulé.",
     "tutorial.step.finish.title": "Termine",
     "tutorial.step.finish.body":
-      "Tu peux relancer ce tutoriel depuis le menu principal en touchant le bouton Tutoriel en haut à droite de 'Exercices individuels'.",
+      "Touchez Suivant pour terminer le tutoriel. Tu peux le relancer depuis le menu principal en touchant le bouton Tutoriel en haut à droite de 'Exercices individuels'.",
     "tutorial.step.singleExercises.title": "Exercices individuels",
     "tutorial.step.singleExercises.body":
-      "L'onglet Exercices individuels rassemble tes sports ; touche-en un pour régler la difficulté et commencer à suivre.",
+      "L'onglet Exercices individuels rassemble tes sports ; touche-en un pour commencer ou appuie sur Suivant pour continuer.",
     "tutorial.step.workout.title": "Onglet Workout",
     "tutorial.step.workout.body":
-      "Dans Workout, chronomètre les séances ; la liste des entraînements passés ouvre un détail quand tu touches une ligne.",
+      "Touche Workout dans la barre inférieure pour ouvrir cet onglet ; tu lances des séances et consultes les entraînements passés ici.",
+    "tutorial.step.workoutDetail.title": "Détails du workout",
+    "tutorial.step.workoutDetail.body":
+      "Ce panneau gère le minuteur et te permet de lancer ou arrêter les séances. Appuie sur Suivant pour poursuivre.",
+    "tutorial.step.stats.title": "Onglet Stats",
+    "tutorial.step.stats.body":
+      "Touche Stats dans la barre inférieure pour consulter ton aperçu d'activité.",
+    "tutorial.step.statsDetail.title": "Vue d'ensemble des stats",
+    "tutorial.step.statsDetail.body":
+      "Ces cartes et filtres montrent tes totaux journaliers et hebdomadaires. Appuie sur Suivant pour continuer.",
     "tutorial.cta.next": "Suivant",
     "tutorial.cta.skip": "Passer",
     "tutorial.cta.exit": "Quitter le tutoriel",
@@ -5870,6 +5940,8 @@ export default function App() {
   const [notificationsGranted, setNotificationsGranted] = useState(false);
   const [permissionsPanelOpen, setPermissionsPanelOpen] = useState(true);
   const [permissionsCheckTick, setPermissionsCheckTick] = useState(0);
+  const [dismissedMotivationActionId, setDismissedMotivationActionId] =
+    useState(null);
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [statsRange, setStatsRange] = useState("month");
   const [infoHint, setInfoHint] = useState(null);
@@ -5913,15 +5985,65 @@ export default function App() {
   const tutorialBackButtonRef = useRef(null);
   const tutorialSettingsNavRef = useRef(null);
   const tutorialWorkoutNavRef = useRef(null);
+  const tutorialStatsNavRef = useRef(null);
+  const tutorialWorkoutTimerRef = useRef(null);
   const tutorialAddSportRef = useRef(null);
   const tutorialSettingsCardRef = useRef(null);
+  const tutorialStatsSummaryRef = useRef(null);
   const tutorialOverlayRef = useRef(null);
+  const tutorialHeaderButtonRef = useRef(null);
   const [overlayOffset, setOverlayOffset] = useState({ x: 0, y: 0 });
   const tutorialAppsButtonRef = useRef(null);
+  const tutorialSamplePushupRef = useRef({
+    entryId: null,
+    cleaned: false,
+    sportId: null,
+    entry: null,
+  });
+  const tutorialFingerScale = useRef(new Animated.Value(1)).current;
 
   const t = (key) => {
     const dict = STRINGS[language] || STRINGS.de;
     return dict[key] ?? STRINGS.de[key] ?? key;
+  };
+  useEffect(() => {
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(tutorialFingerScale, {
+          toValue: 1.15,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+        Animated.timing(tutorialFingerScale, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    pulse.start();
+    return () => pulse.stop();
+  }, [tutorialFingerScale]);
+  const storageErrorAlertedRef = useRef(false);
+  const handleStorageError = (contextLabel, error) => {
+    console.warn("Storage save failed", contextLabel, error);
+    if (storageErrorAlertedRef.current) {
+      return;
+    }
+    storageErrorAlertedRef.current = true;
+    Alert.alert(
+      t("label.storageErrorTitle"),
+      interpolateTemplate(t("label.storageErrorBody"), {
+        context: contextLabel,
+      })
+    );
+  };
+  const persistStorageValue = async (key, value, contextLabel) => {
+    try {
+      await AsyncStorage.setItem(key, value);
+    } catch (error) {
+      handleStorageError(contextLabel, error);
+    }
   };
   const repsShort = t("label.repsShort");
   const voiceStatusText = voiceError
@@ -6234,27 +6356,37 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
 
   const saveSports = async (nextSports) => {
     setSports(nextSports);
-    await AsyncStorage.setItem(
+    await persistStorageValue(
       STORAGE_KEYS.sports,
-      JSON.stringify(nextSports)
+      JSON.stringify(nextSports),
+      t("menu.sports")
     );
   };
 
   const saveStats = async (nextStats) => {
     setStats(nextStats);
-    await AsyncStorage.setItem(STORAGE_KEYS.stats, JSON.stringify(nextStats));
+    await persistStorageValue(
+      STORAGE_KEYS.stats,
+      JSON.stringify(nextStats),
+      t("menu.stats")
+    );
   };
 
   const saveLogs = async (nextLogs) => {
     setLogs(nextLogs);
-    await AsyncStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(nextLogs));
+    await persistStorageValue(
+      STORAGE_KEYS.logs,
+      JSON.stringify(nextLogs),
+      t("label.recentActivity")
+    );
   };
 
   const saveSettings = async (nextSettings) => {
     setSettings(nextSettings);
-    await AsyncStorage.setItem(
+    await persistStorageValue(
       STORAGE_KEYS.settings,
-      JSON.stringify(nextSettings)
+      JSON.stringify(nextSettings),
+      t("menu.settings")
     );
   };
 
@@ -6356,6 +6488,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     });
     syncScreenTimeEntry(sport, nextEntry);
     refreshUsageState();
+    return nextEntry;
   };
 
   const syncScreenTimeEntries = useCallback(() => {
@@ -6678,6 +6811,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       entryCount: 0,
       carryoverSeconds: 0,
     });
+    if (InstaControl?.clearAllScreenTimeEntries) {
+      InstaControl.clearAllScreenTimeEntries();
+      InstaControl?.updateOverallWidgets?.();
+    }
+    if (InstaControl?.setControlledApps) {
+      InstaControl.setControlledApps([]);
+    }
+    refreshUsageState();
     if (InstaControl?.clearAllScreenTimeEntries) {
       InstaControl.clearAllScreenTimeEntries();
       InstaControl?.updateOverallWidgets?.();
@@ -7093,20 +7234,25 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
 
   const toggleControlledApp = async (packageName) => {
     setAppToggleLoading((prev) => ({ ...prev, [packageName]: true }));
-    const current = settings.controlledApps || [];
-    const exists = current.includes(packageName);
-    const nextApps = exists
-      ? current.filter((pkg) => pkg !== packageName)
-      : [packageName, ...current];
-    await saveSettings({ ...settings, controlledApps: nextApps });
-    if (InstaControl?.setControlledApps) {
-      InstaControl.setControlledApps(nextApps);
+    try {
+      const current = settings.controlledApps || [];
+      const exists = current.includes(packageName);
+      const nextApps = exists
+        ? current.filter((pkg) => pkg !== packageName)
+        : [packageName, ...current];
+      await saveSettings({ ...settings, controlledApps: nextApps });
+      if (InstaControl?.setControlledApps) {
+        InstaControl.setControlledApps(nextApps);
+      }
+    } catch (error) {
+      console.warn("toggleControlledApp failed", packageName, error);
+    } finally {
+      setAppToggleLoading((prev) => {
+        const next = { ...prev };
+        delete next[packageName];
+        return next;
+      });
     }
-    setAppToggleLoading((prev) => {
-      const next = { ...prev };
-      delete next[packageName];
-      return next;
-    });
   };
 
   const toggleGrayscaleRestrictedApps = async () => {
@@ -7161,6 +7307,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setOverallDayKey(null);
     setStatsEditMode(false);
     setOverallStatsOpen(true);
+    maybeAdvanceTutorial("openStats");
   };
 
   const openSportStats = (sportId) => {
@@ -7208,6 +7355,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   };
 
   const startTutorial = () => {
+    tutorialSamplePushupRef.current = {
+      entryId: null,
+      cleaned: false,
+      sportId: null,
+      entry: null,
+    };
     openHome();
     setTutorialTarget(null);
     setTutorialStepIndex(0);
@@ -7219,6 +7372,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setTutorialTarget(null);
     setTutorialSeen(true);
     await AsyncStorage.setItem(STORAGE_KEYS.tutorialSeen, "true");
+    tutorialSamplePushupRef.current = {
+      entryId: null,
+      cleaned: false,
+      sportId: null,
+      entry: null,
+    };
   };
 
   const completeTutorial = async () => {
@@ -7227,7 +7386,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   };
 
   const renderTutorialHeaderButton = () => (
-    <Pressable style={styles.tutorialHeaderButton} onPress={startTutorial}>
+    <Pressable
+      ref={tutorialHeaderButtonRef}
+      style={styles.tutorialHeaderButton}
+      onPress={startTutorial}
+    >
       <Text style={styles.tutorialHeaderText}>{t("label.tutorial")}</Text>
     </Pressable>
   );
@@ -7272,6 +7435,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           styles.mainNavButton,
           active === "stats" && styles.mainNavButtonActive,
         ]}
+        ref={tutorialStatsNavRef}
         onPress={openStatsOverview}
       >
         <Text
@@ -7486,6 +7650,57 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
 
   const getSpeechLocale = () => SPEECH_LOCALES[language] || "en-US";
 
+  const cleanupTutorialSamplePushup = useCallback(
+    (sport, entry) => {
+      if (!sport || !entry?.id || tutorialSamplePushupRef.current.cleaned) {
+        return;
+      }
+      const dayKey = dateKeyFromDate(entry.ts || Date.now());
+      let nextDayEntries = null;
+      setLogs((prev) => {
+        const nextLogs = { ...prev };
+        const sportLogs = { ...(nextLogs[sport.id] || {}) };
+        const dayEntries = [...(sportLogs[dayKey] || [])];
+        const filtered = dayEntries.filter((item) => item.id !== entry.id);
+        nextDayEntries = filtered;
+        if (filtered.length === 0) {
+          delete sportLogs[dayKey];
+        } else {
+          sportLogs[dayKey] = filtered;
+        }
+        if (Object.keys(sportLogs).length === 0) {
+          delete nextLogs[sport.id];
+        } else {
+          nextLogs[sport.id] = sportLogs;
+        }
+        AsyncStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(nextLogs));
+        return nextLogs;
+      });
+      if (nextDayEntries !== null) {
+        syncDayStatsFromEntries(sport.id, dayKey, nextDayEntries);
+      }
+      removeScreenTimeEntry(entry.id);
+      refreshUsageState();
+      tutorialSamplePushupRef.current.cleaned = true;
+    },
+    [refreshUsageState, syncDayStatsFromEntries]
+  );
+
+  useEffect(() => {
+    if (tutorialStep?.id !== "samplePushupInfo") {
+      return;
+    }
+    const info = tutorialSamplePushupRef.current;
+    if (!info?.entry || info.cleaned) {
+      return;
+    }
+    const sport = sports.find((item) => item.id === info.sportId);
+    if (!sport) {
+      return;
+    }
+    cleanupTutorialSamplePushup(sport, info.entry);
+  }, [tutorialStep, cleanupTutorialSamplePushup, sports]);
+
   const incrementReps = () => {
     const currentSport = selectedSportRef.current;
     if (!currentSport || currentSport.type !== "reps") {
@@ -7495,7 +7710,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       recordWorkoutExercise(currentSport);
       setWorkoutSessionCount((prev) => prev + 1);
     }
-    addLogEntry(currentSport, {
+    const entry = addLogEntry(currentSport, {
       ts: Date.now(),
       reps: 1,
     });
@@ -7505,6 +7720,19 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       reps: dayStats.reps + 1,
       screenSeconds: (dayStats.screenSeconds || 0) + addedSeconds,
     }));
+    if (
+      tutorialActive &&
+      tutorialStep?.id === "track" &&
+      !tutorialSamplePushupRef.current.entryId &&
+      entry
+    ) {
+      tutorialSamplePushupRef.current = {
+        entryId: entry.id,
+        cleaned: false,
+        sportId: currentSport.id,
+        entry,
+      };
+    }
     maybeAdvanceTutorial("trackAction");
   };
 
@@ -7718,8 +7946,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         titleKey: "tutorial.step.overview.title",
         bodyKey: "tutorial.step.overview.body",
         targetRef: tutorialScreenTimeRef,
-        actionId: "overviewCard",
-        requiresAction: true,
+        requiresAction: false,
       },
     ];
     if (activeSports.length > 0) {
@@ -7744,6 +7971,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         targetRef: tutorialTrackingAreaRef,
         actionId: "trackAction",
         requiresAction: true,
+      });
+      steps.push({
+        id: "samplePushupInfo",
+        titleKey: "tutorial.step.samplePushupInfo.title",
+        bodyKey: "tutorial.step.samplePushupInfo.body",
+        targetRef: tutorialTrackingAreaRef,
       });
       steps.push({
         id: "back",
@@ -7772,6 +8005,26 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       requiresAction: true,
     });
     steps.push({
+      id: "workoutDetail",
+      titleKey: "tutorial.step.workoutDetail.title",
+      bodyKey: "tutorial.step.workoutDetail.body",
+      targetRef: tutorialWorkoutTimerRef,
+    });
+    steps.push({
+      id: "statsNav",
+      titleKey: "tutorial.step.stats.title",
+      bodyKey: "tutorial.step.stats.body",
+      targetRef: tutorialStatsNavRef,
+      actionId: "openStats",
+      requiresAction: true,
+    });
+    steps.push({
+      id: "statsDetail",
+      titleKey: "tutorial.step.statsDetail.title",
+      bodyKey: "tutorial.step.statsDetail.body",
+      targetRef: tutorialStatsSummaryRef,
+    });
+    steps.push({
       id: "openSettings",
       titleKey: "tutorial.step.openSettings.title",
       bodyKey: "tutorial.step.openSettings.body",
@@ -7793,7 +8046,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       id: "finish",
       titleKey: "tutorial.step.finish.title",
       bodyKey: "tutorial.step.finish.body",
-      targetRef: tutorialSettingsCardRef,
+      targetRef: tutorialHeaderButtonRef,
     });
     return steps;
   }, [activeSports.length, trackBodyKey]);
@@ -8124,6 +8377,15 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     usageState.usedSeconds,
   ]);
 
+  useEffect(() => {
+    if (
+      dismissedMotivationActionId &&
+      dismissedMotivationActionId !== recommendedActionId
+    ) {
+      setDismissedMotivationActionId(null);
+    }
+  }, [recommendedActionId, dismissedMotivationActionId]);
+
   const activeQuote =
     motivationQuoteMap.get(recommendedQuoteId) ?? motivationQuotes[0];
   const activeQuoteTitle = activeQuote ? t(activeQuote.titleKey) : "";
@@ -8141,10 +8403,16 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   const activeActionLabel = t(
     activeAction?.actionLabelKey ?? "label.motivationActionDefault"
   );
+  const shouldShowMotivationAction =
+    !dismissedMotivationActionId ||
+    dismissedMotivationActionId !== recommendedActionId;
 
   const handleMotivationAction = (actionItem) => {
     if (!actionItem?.action) {
       return;
+    }
+    if (actionItem.id === recommendedActionId) {
+      setDismissedMotivationActionId(actionItem.id);
     }
     actionItem.action();
   };
@@ -8338,15 +8606,27 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     };
     const minHighlightWidth = minWidthByStep[tutorialStep.titleKey] ?? 56;
     const minHighlightHeight = minHeightByStep[tutorialStep.titleKey] ?? 40;
-    const highlightWidth = hasTarget
-      ? Math.max(target.width + highlightPadding * 2, minHighlightWidth)
-      : 64;
-    const highlightHeight = hasTarget
-      ? Math.max(target.height + highlightPadding * 2, minHighlightHeight)
-      : 64;
+    const highlightScaleByStep = {
+      "tutorial.step.track.title": 0.7,
+      "tutorial.step.samplePushupInfo.title": 0.7,
+    };
+    const highlightScale = highlightScaleByStep[tutorialStep.titleKey] ?? 1;
+    const safeTargetWidth = target?.width ?? 0;
+    const safeTargetHeight = target?.height ?? 0;
+    const baseWidth = Math.max(safeTargetWidth + highlightPadding * 2, minHighlightWidth);
+    const baseHeight = Math.max(
+      safeTargetHeight + highlightPadding * 2,
+      minHighlightHeight
+    );
+    const highlightWidth =
+      hasTarget ? Math.max(baseWidth * highlightScale, minHighlightWidth) : 64;
+    const highlightHeight =
+      hasTarget ? Math.max(baseHeight * highlightScale, minHighlightHeight) : 64;
     const offsetYByStep = {
-      "tutorial.step.back.title": 24,
-      "tutorial.step.openSettings.title": 24,
+      "tutorial.step.back.title": -8,
+      "tutorial.step.openSettings.title": -2,
+      "tutorial.step.workout.title": -4,
+      "tutorial.step.stats.title": -4,
     };
     const offsetXByStep = {
       // Additional horizontal adjustments can be added here.
@@ -8394,17 +8674,29 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     );
     const highlightBottom = highlightTop + highlightHeight;
     const highlightRight = highlightLeft + highlightWidth;
+    const pointerSize = 56;
+    const pointerSpacing = 12;
+    const pointerCenterY = highlightTop + highlightHeight / 2;
+    const pointerCenterX = highlightLeft + highlightWidth / 2;
+    const pointerTop = Math.min(
+      Math.max(pointerSpacing, pointerCenterY - pointerSize / 2),
+      height - pointerSize - pointerSpacing
+    );
+    const pointerLeft = Math.min(
+      Math.max(pointerCenterX - pointerSize / 2, pointerSpacing),
+      width - pointerSize - pointerSpacing
+    );
+    const showPointer = tutorialStep.requiresAction && hasTarget;
     const maskColor = "rgba(2, 6, 23, 0.72)";
     const blockingResponder = { onStartShouldSetResponder: () => true };
     const renderBlockingAreas = () => {
       if (!tutorialStep.requiresAction) {
-      return (
-        <View
-          style={[styles.tutorialBackdrop, StyleSheet.absoluteFillObject]}
-          {...blockingResponder}
-          pointerEvents="auto"
-        />
-      );
+        return (
+          <View
+            style={[styles.tutorialBackdrop, StyleSheet.absoluteFillObject]}
+            pointerEvents="none"
+          />
+        );
       }
       if (!hasTarget) {
         return (
@@ -8496,6 +8788,21 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             ]}
             pointerEvents="none"
           />
+        ) : null}
+        {showPointer ? (
+          <Animated.View
+            style={[
+              styles.tutorialPointer,
+              {
+                left: pointerLeft,
+                top: pointerTop,
+                transform: [{ scale: tutorialFingerScale }],
+              },
+            ]}
+            pointerEvents="none"
+          >
+            <Text style={styles.tutorialPointerText}>👆</Text>
+          </Animated.View>
         ) : null}
         <Pressable style={styles.tutorialExitButton} onPress={finishTutorial}>
           <Text style={styles.tutorialExitText}>{t("tutorial.cta.exit")}</Text>
@@ -8840,7 +9147,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             {renderTutorialHeaderButton()}
           </View>
           {renderMainNav("stats")}
-          <View style={styles.infoCard}>
+          <View style={styles.infoCard} ref={tutorialStatsSummaryRef}>
             <Text style={styles.sectionTitle}>{t("label.statsBySport")}</Text>
             <View style={styles.quickActionsRow}>
               {activeSports.length === 0 ? (
@@ -9246,6 +9553,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             );
           })}
         </ScrollView>
+        {tutorialActive ? renderTutorialOverlay() : null}
       </SafeAreaView>
     );
   }
@@ -9529,7 +9837,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           </View>
           {renderMainNav("workout")}
           {renderWorkoutBanner()}
-          <View style={[styles.infoCard, styles.workoutTimerCard]}>
+          <View
+            style={[styles.infoCard, styles.workoutTimerCard]}
+            ref={tutorialWorkoutTimerRef}
+          >
             <View style={styles.workoutTimerContent}>
               <Text
                 style={[styles.sectionTitle, styles.workoutTimerTitle]}
@@ -9689,6 +10000,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             </View>
           </Modal>
         </ScrollView>
+        {tutorialActive ? renderTutorialOverlay() : null}
       </SafeAreaView>
     );
   }
@@ -10060,10 +10372,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               !permissionsPanelOpen && styles.permissionCardCollapsed,
             ]}
           >
-            <Pressable
-              style={styles.permissionHeaderRow}
-              onPress={() => setPermissionsPanelOpen((prev) => !prev)}
-            >
+              <Pressable
+                style={styles.permissionHeaderRow}
+                onPress={() => setPermissionsPanelOpen((prev) => !prev)}
+              >
               <View>
                 {missingPermissions ? (
                   <>
@@ -10096,8 +10408,16 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 {permissionsPanelOpen ? "-" : "+"}
               </Text>
             </Pressable>
-            {permissionsPanelOpen && (
-              <View style={styles.permissionList}>
+            {missingPermissions ? (
+              <View style={styles.permissionReminder}>
+                <Text style={styles.permissionReminderText}>
+                  {t("label.permissionsReminder")}
+                </Text>
+              </View>
+            ) : null}
+            {permissionsPanelOpen &&
+              (missingPermissions || shouldShowMotivationAction) && (
+                <View style={styles.permissionList}>
                 {missingPermissions ? (
                   <>
                     <View
@@ -11714,8 +12034,8 @@ const styles = StyleSheet.create({
   motivationCardBody: {
     color: COLORS.muted,
     fontSize: 13,
-    lineHeight: 18,
-    marginBottom: 6,
+    lineHeight: 16,
+    marginBottom: 4,
   },
   motivationActionButton: {
     backgroundColor: COLORS.accent,
@@ -12262,13 +12582,13 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   permissionList: {
-    marginTop: 8,
-    gap: 6,
+    marginTop: 6,
+    gap: 4,
   },
   permissionItem: {
     backgroundColor: COLORS.cardAlt,
     borderRadius: 12,
-    padding: 12,
+    padding: 10,
   },
   permissionItemGranted: {
     backgroundColor: "rgba(34, 197, 94, 0.22)",
@@ -12669,6 +12989,17 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontWeight: "600",
   },
+  permissionReminder: {
+    marginTop: 10,
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: "rgba(59, 130, 246, 0.08)",
+  },
+  permissionReminderText: {
+    color: COLORS.text,
+    fontSize: 13,
+    lineHeight: 18,
+  },
   appRow: {
     backgroundColor: COLORS.surface,
     borderRadius: 12,
@@ -12915,6 +13246,25 @@ const styles = StyleSheet.create({
     borderColor: COLORS.accent,
     backgroundColor: "transparent",
     borderRadius: 8,
+  },
+  tutorialPointer: {
+    position: "absolute",
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "rgba(249, 115, 22, 0.12)",
+    borderWidth: 1,
+    borderColor: COLORS.accent,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+  },
+  tutorialPointerText: {
+    fontSize: 28,
   },
   tutorialCard: {
     position: "absolute",
