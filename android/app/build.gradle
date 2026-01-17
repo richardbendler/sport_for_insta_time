@@ -180,3 +180,14 @@ dependencies {
         implementation jscFlavor
     }
 }
+
+afterEvaluate {
+    try {
+        def stripTaskClass = Class.forName("com.android.build.gradle.tasks.StripDebugSymbolsTask")
+        tasks.withType(stripTaskClass).configureEach {
+            enabled = false
+        }
+    } catch (ClassNotFoundException ignored) {
+        // AGP might not expose StripDebugSymbolsTask in every environment.
+    }
+}
