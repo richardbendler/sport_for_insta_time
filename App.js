@@ -8618,8 +8618,18 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       safeTargetHeight + highlightPadding * 2,
       minHighlightHeight
     );
-    const highlightWidth =
+    const forcedHighlightWidthByStep = {
+      "tutorial.step.track.title": width - 32,
+    };
+    const forcedHighlightLeftByStep = {
+      "tutorial.step.track.title": 16,
+    };
+    const baseHighlightWidth =
       hasTarget ? Math.max(baseWidth * highlightScale, minHighlightWidth) : 64;
+    const forcedWidth = forcedHighlightWidthByStep[tutorialStep.titleKey];
+    const highlightWidth = forcedWidth
+      ? Math.min(Math.max(forcedWidth, 64), Math.max(width - 32, 0))
+      : baseHighlightWidth;
     const highlightHeight =
       hasTarget ? Math.max(baseHeight * highlightScale, minHighlightHeight) : 64;
     const offsetYByStep = {
@@ -8647,10 +8657,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       : (height - highlightHeight) / 2;
     const horizontalMax = Math.max(width - highlightWidth, 0);
     const verticalMax = Math.max(height - highlightHeight, 0);
-    const highlightLeft = Math.min(
-      Math.max(desiredLeft, 0),
-      horizontalMax
-    );
+    const forcedLeft = forcedHighlightLeftByStep[tutorialStep.titleKey];
+    const highlightLeft =
+      forcedLeft !== undefined
+        ? Math.min(Math.max(forcedLeft, 0), horizontalMax)
+        : Math.min(Math.max(desiredLeft, 0), horizontalMax);
     const highlightTop = Math.min(
       Math.max(desiredTop, 0),
       verticalMax
@@ -8676,10 +8687,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     const highlightRight = highlightLeft + highlightWidth;
     const pointerSize = 56;
     const pointerSpacing = 12;
-    const pointerCenterY = highlightTop + highlightHeight / 2;
     const pointerCenterX = highlightLeft + highlightWidth / 2;
     const pointerTop = Math.min(
-      Math.max(pointerSpacing, pointerCenterY - pointerSize / 2),
+      Math.max(
+        highlightBottom - pointerSize + 8,
+        pointerSpacing
+      ),
       height - pointerSize - pointerSpacing
     );
     const pointerLeft = Math.min(
@@ -9122,6 +9135,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               })
             )}
           </ScrollView>
+          {tutorialActive ? renderTutorialOverlay() : null}
         </SafeAreaView>
       );
     }
@@ -9292,6 +9306,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             </View>
           </View>
         ) : null}
+        {tutorialActive ? renderTutorialOverlay() : null}
       </SafeAreaView>
     );
   }
