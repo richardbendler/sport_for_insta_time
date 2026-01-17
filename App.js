@@ -7477,8 +7477,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   );
 
   const MainNavIcon = ({ type, active }) => {
-    const strokeColor = active ? COLORS.accent : COLORS.muted;
-    const fillColor = active ? COLORS.accent : "transparent";
+    const strokeColor = active ? COLORS.background : COLORS.muted;
+    const fillColor = active ? COLORS.background : "transparent";
     if (type === "home") {
       return (
         <View style={styles.mainNavIconWrapper}>
