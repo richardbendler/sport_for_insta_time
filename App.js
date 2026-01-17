@@ -8493,6 +8493,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   const shouldShowMotivationAction =
     !dismissedMotivationActionId ||
     dismissedMotivationActionId !== recommendedActionId;
+  const showMotivationBlock =
+    showGettingStartedSection && (missingPermissions || shouldShowMotivationAction);
 
   const handleMotivationAction = (actionItem) => {
     if (!actionItem?.action) {
@@ -10472,7 +10474,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         </View>
         {renderMainNav("home")}
         {renderWorkoutBanner()}
-        {showGettingStartedSection ? (
+        {showMotivationBlock ? (
           <View
             style={[
               styles.permissionCardLarge,
