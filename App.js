@@ -7476,6 +7476,68 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     </Pressable>
   );
 
+  const MainNavIcon = ({ type, active }) => {
+    const strokeColor = active ? COLORS.accent : COLORS.muted;
+    const fillColor = active ? COLORS.accent : "transparent";
+    if (type === "home") {
+      return (
+        <View style={styles.mainNavIconWrapper}>
+          <View
+            style={[
+              styles.navIconRoof,
+              { borderColor: strokeColor, borderBottomColor: "transparent" },
+            ]}
+          />
+          <View
+            style={[
+              styles.navIconHouse,
+              { borderColor: strokeColor, backgroundColor: "transparent" },
+            ]}
+          />
+        </View>
+      );
+    }
+    if (type === "workout") {
+      return (
+        <View style={styles.mainNavIconWrapper}>
+          <View style={[styles.navIconDumbbellBar, { backgroundColor: strokeColor }]} />
+          <View style={styles.navIconDumbbellEnds}>
+            <View style={[styles.navIconCircle, { borderColor: strokeColor }]} />
+            <View style={[styles.navIconCircle, { borderColor: strokeColor }]} />
+          </View>
+        </View>
+      );
+    }
+    if (type === "stats") {
+      return (
+        <View style={styles.mainNavIconWrapper}>
+          <View style={styles.navIconBars}>
+            <View style={[styles.navIconBar, { height: 12, backgroundColor: strokeColor }]} />
+            <View style={[styles.navIconBar, { height: 16, backgroundColor: strokeColor }]} />
+            <View style={[styles.navIconBar, { height: 8, backgroundColor: strokeColor }]} />
+          </View>
+        </View>
+      );
+    }
+    // settings or default
+    return (
+      <View style={styles.mainNavIconWrapper}>
+        <View
+          style={[
+            styles.navIconGear,
+            { borderColor: strokeColor, backgroundColor: fillColor },
+          ]}
+        />
+        <View
+          style={[
+            styles.navIconGearCenter,
+            { backgroundColor: strokeColor },
+          ]}
+        />
+      </View>
+    );
+  };
+
   const renderMainNav = (active) => (
     <View style={styles.mainNav}>
       <Pressable
@@ -7485,6 +7547,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         ]}
         onPress={openHome}
       >
+        <MainNavIcon type="home" active={active === "home"} />
         <Text
           style={[
             styles.mainNavText,
@@ -7502,6 +7565,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         ref={tutorialWorkoutNavRef}
         onPress={openWorkout}
       >
+        <MainNavIcon type="workout" active={active === "workout"} />
         <Text
           style={[
             styles.mainNavText,
@@ -7519,6 +7583,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         ref={tutorialStatsNavRef}
         onPress={openStatsOverview}
       >
+        <MainNavIcon type="stats" active={active === "stats"} />
         <Text
           style={[
             styles.mainNavText,
@@ -7536,6 +7601,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         ref={tutorialSettingsNavRef}
         onPress={openSettings}
       >
+        <MainNavIcon type="settings" active={active === "settings"} />
         <Text
           style={[
             styles.mainNavText,
@@ -11518,6 +11584,10 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 999,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "column",
+    gap: 4,
   },
   mainNavButtonActive: {
     backgroundColor: COLORS.accent,
@@ -11529,6 +11599,74 @@ const styles = StyleSheet.create({
   },
   mainNavTextActive: {
     color: COLORS.ink,
+  },
+  mainNavIconWrapper: {
+    width: 24,
+    height: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  navIconRoof: {
+    width: 20,
+    height: 10,
+    borderLeftWidth: 2,
+    borderTopWidth: 2,
+    borderRightWidth: 2,
+    borderColor: COLORS.muted,
+    borderBottomWidth: 0,
+  },
+  navIconHouse: {
+    width: 18,
+    height: 12,
+    borderWidth: 2,
+    borderColor: COLORS.muted,
+    borderTopWidth: 0,
+    borderBottomLeftRadius: 3,
+    borderBottomRightRadius: 3,
+  },
+  navIconDumbbellBar: {
+    width: 16,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: COLORS.muted,
+    marginBottom: 4,
+  },
+  navIconDumbbellEnds: {
+    flexDirection: "row",
+    width: 22,
+    justifyContent: "space-between",
+  },
+  navIconCircle: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    borderWidth: 2,
+    borderColor: COLORS.muted,
+  },
+  navIconBars: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    width: 22,
+  },
+  navIconBar: {
+    width: 4,
+    borderRadius: 2,
+  },
+  navIconGear: {
+    width: 18,
+    height: 18,
+    borderWidth: 2,
+    borderRadius: 9,
+    borderColor: COLORS.muted,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  navIconGearCenter: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.muted,
   },
   settingsSectionTitle: {
     color: COLORS.muted,
