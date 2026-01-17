@@ -8687,22 +8687,27 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       width - pointerSize - pointerSpacing
     );
     const showPointer = tutorialStep.requiresAction && hasTarget;
-    const maskColor = "rgba(2, 6, 23, 0.72)";
+    const highlightBackground = tutorialStep.requiresAction
+      ? "rgba(249, 115, 22, 0.12)"
+      : "rgba(249, 115, 22, 0.06)";
+    const maskColor = tutorialStep.requiresAction
+      ? "rgba(2, 6, 23, 0.72)"
+      : "rgba(2, 6, 23, 0.54)";
     const blockingResponder = { onStartShouldSetResponder: () => true };
+    const touchProps = tutorialStep.requiresAction
+      ? { ...blockingResponder, pointerEvents: "auto" }
+      : { pointerEvents: "none" };
     const renderBlockingAreas = () => {
-      if (!tutorialStep.requiresAction) {
-        return (
-          <View
-            style={[styles.tutorialBackdrop, StyleSheet.absoluteFillObject]}
-            pointerEvents="none"
-          />
-        );
-      }
       if (!hasTarget) {
         return (
           <View
-            style={[styles.tutorialBackdrop, StyleSheet.absoluteFillObject]}
-            {...blockingResponder}
+            style={[
+              styles.tutorialBackdrop,
+              StyleSheet.absoluteFillObject,
+              { backgroundColor: maskColor },
+            ]}
+            {...(tutorialStep.requiresAction ? blockingResponder : {})}
+            pointerEvents={tutorialStep.requiresAction ? "auto" : "none"}
           />
         );
       }
@@ -8719,8 +8724,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 backgroundColor: maskColor,
               },
             ]}
-            {...blockingResponder}
-            pointerEvents="auto"
+            {...touchProps}
           />
           <View
             style={[
@@ -8733,8 +8737,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 backgroundColor: maskColor,
               },
             ]}
-            {...blockingResponder}
-            pointerEvents="auto"
+            {...touchProps}
           />
           <View
             style={[
@@ -8747,8 +8750,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 backgroundColor: maskColor,
               },
             ]}
-            {...blockingResponder}
-            pointerEvents="auto"
+            {...touchProps}
           />
           <View
             style={[
@@ -8761,8 +8763,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 backgroundColor: maskColor,
               },
             ]}
-            {...blockingResponder}
-            pointerEvents="auto"
+            {...touchProps}
           />
         </>
       );
@@ -8775,19 +8776,20 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         ref={tutorialOverlayRef}
       >
         {renderBlockingAreas()}
-        {hasTarget ? (
-          <View
-            style={[
-              styles.tutorialHighlight,
-              {
-                width: highlightWidth,
-                height: highlightHeight,
-                left: highlightLeft,
-                top: highlightTop,
-              },
-            ]}
-            pointerEvents="none"
-          />
+          {hasTarget ? (
+            <View
+              style={[
+                styles.tutorialHighlight,
+                {
+                  width: highlightWidth,
+                  height: highlightHeight,
+                  left: highlightLeft,
+                  top: highlightTop,
+                  backgroundColor: highlightBackground,
+                },
+              ]}
+              pointerEvents="none"
+            />
         ) : null}
         {showPointer ? (
           <Animated.View
@@ -13268,22 +13270,27 @@ const styles = StyleSheet.create({
   },
   tutorialCard: {
     position: "absolute",
-    backgroundColor: COLORS.cardDark,
-    borderRadius: 16,
-    padding: 16,
+    backgroundColor: COLORS.surface,
+    borderRadius: 18,
+    padding: 18,
     borderWidth: 1,
-    borderColor: "rgba(148, 163, 184, 0.35)",
+    borderColor: "rgba(249, 115, 22, 0.35)",
+    shadowColor: "#f97316",
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 8,
   },
   tutorialTitle: {
-    color: COLORS.text,
+    color: COLORS.accent,
     fontSize: 16,
     fontWeight: "700",
     marginBottom: 6,
   },
   tutorialBody: {
-    color: COLORS.muted,
-    fontSize: 13,
-    lineHeight: 18,
+    color: COLORS.text,
+    fontSize: 14,
+    lineHeight: 20,
   },
   tutorialActions: {
     flexDirection: "row",
