@@ -4307,6 +4307,9 @@ const STRINGS = {
     "tutorial.step.openAppsInfo.title": "Apps ausw\u00e4hlen",
     "tutorial.step.openAppsInfo.body":
       "W\u00e4hle eine App aus der Liste, damit sie eingeschr\u00e4nkt wird, und tippe danach auf Zur\u00fcck, um mit dem Tutorial weiterzumachen.",
+    "tutorial.step.chooseAppAction.title": "App w\u00e4hlen",
+    "tutorial.step.chooseAppAction.body":
+      "Tippe auf eine App, die du einschr\u00e4nken willst, und dr\u00fccke dann Zur\u00fcck, um zum Tutorial zur\u00fcckzukehren.",
     "tutorial.step.finish.title": "Fertig",
     "tutorial.step.finish.body":
       "Tippe auf Weiter, um das Tutorial abzuschließen. Du kannst es jederzeit über den Tutorial-Button oben rechts im Tab 'Einzelne Übungen' im Hauptmenü starten.",
@@ -4644,6 +4647,9 @@ const STRINGS = {
     "tutorial.step.openAppsInfo.title": "Choose apps",
     "tutorial.step.openAppsInfo.body":
       "Select an app to restrict it and then tap Back to return to the tutorial.",
+    "tutorial.step.chooseAppAction.title": "Pick an app",
+    "tutorial.step.chooseAppAction.body":
+      "Tap an app you’d like to restrict and then tap Back to return to the tutorial.",
     "tutorial.step.finish.title": "All set",
     "tutorial.step.finish.body":
       "Tap Next to finish the tutorial. You can restart it anytime from the main menu by tapping the Tutorial button in the top-right of Single exercises.",
@@ -4985,6 +4991,9 @@ const STRINGS = {
     "tutorial.step.openAppsInfo.title": "Elige apps",
     "tutorial.step.openAppsInfo.body":
       "Selecciona una app para restringirla y luego pulsa Atrás para volver al tutorial.",
+    "tutorial.step.chooseAppAction.title": "Selecciona una app",
+    "tutorial.step.chooseAppAction.body":
+      "Pulsa una app que quieras restringir y luego pulsa Atrás para regresar al tutorial.",
     "tutorial.step.finish.title": "Listo",
     "tutorial.step.finish.body":
       "Pulsa Siguiente para terminar el tutorial. Puedes reiniciarlo desde el menú principal tocando el botón Tutorial arriba a la derecha en 'Ejercicios individuales'.",
@@ -5321,6 +5330,9 @@ const STRINGS = {
     "tutorial.step.openAppsInfo.title": "Choisissez des apps",
     "tutorial.step.openAppsInfo.body":
       "Sélectionnez une app pour la restreindre, puis appuyez sur Retour pour revenir au tutoriel.",
+    "tutorial.step.chooseAppAction.title": "Choisissez une app",
+    "tutorial.step.chooseAppAction.body":
+      "Touchez une app que vous souhaitez restreindre, puis appuyez sur Retour pour revenir au tutoriel.",
     "tutorial.step.finish.title": "Termine",
     "tutorial.step.finish.body":
       "Touchez Suivant pour terminer le tutoriel. Tu peux le relancer depuis le menu principal en touchant le bouton Tutoriel en haut à droite de 'Exercices individuels'.",
@@ -6008,14 +6020,14 @@ export default function App() {
     entryCount: 0,
     carryoverSeconds: 0,
   });
-  const [needsAccessibility, setNeedsAccessibility] = useState(false);
+  const [needsAccessibility, setNeedsAccessibility] = useState(true);
   const [accessibilityDisclosureVisible, setAccessibilityDisclosureVisible] =
     useState(false);
   const [permissionsPrompted, setPermissionsPrompted] = useState(false);
   const [accessibilityDisclosureAccepted, setAccessibilityDisclosureAccepted] =
     useState(false);
   const [usagePermissionsPrompted, setUsagePermissionsPrompted] = useState(false);
-  const [usageAccessGranted, setUsageAccessGranted] = useState(true);
+  const [usageAccessGranted, setUsageAccessGranted] = useState(false);
   const [notificationsPrompted, setNotificationsPrompted] = useState(false);
   const [notificationsGranted, setNotificationsGranted] = useState(false);
   const [permissionsPanelOpen, setPermissionsPanelOpen] = useState(true);
@@ -6072,6 +6084,7 @@ export default function App() {
   const tutorialStatsSummaryRef = useRef(null);
   const tutorialOverlayRef = useRef(null);
   const tutorialHeaderButtonRef = useRef(null);
+  const tutorialAppsBackRef = useRef(null);
   const [overlayOffset, setOverlayOffset] = useState({ x: 0, y: 0 });
   const tutorialAppsButtonRef = useRef(null);
   const tutorialAppsScreenRef = useRef(null);
@@ -6365,6 +6378,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
 
   useEffect(() => {
     checkAccessibility();
+  }, []);
+
+  useEffect(() => {
+    checkUsageAccess();
   }, []);
 
   useEffect(() => {
@@ -7189,7 +7206,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   }, [permissionsPanelOpen]);
 
   useEffect(() => {
-    if (!needsAccessibility && accessibilityDisclosureVisible) {
+    if (needsAccessibility === false && accessibilityDisclosureVisible) {
       setAccessibilityDisclosureVisible(false);
     }
   }, [needsAccessibility, accessibilityDisclosureVisible]);
@@ -8239,6 +8256,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         titleKey: "tutorial.step.samplePushupInfo.title",
         bodyKey: "tutorial.step.samplePushupInfo.body",
         targetRef: tutorialTrackingAreaRef,
+        hideHighlight: true,
+        centerCard: true,
       });
       steps.push({
         id: "back",
@@ -8271,6 +8290,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       titleKey: "tutorial.step.workoutDetail.title",
       bodyKey: "tutorial.step.workoutDetail.body",
       targetRef: tutorialWorkoutTimerRef,
+      blocksTouches: true,
     });
     steps.push({
       id: "statsNav",
@@ -8285,6 +8305,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       titleKey: "tutorial.step.statsDetail.title",
       bodyKey: "tutorial.step.statsDetail.body",
       targetRef: tutorialStatsSummaryRef,
+      blocksTouches: true,
     });
     steps.push({
       id: "openSettings",
@@ -8308,6 +8329,25 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         titleKey: "tutorial.step.openAppsInfo.title",
         bodyKey: "tutorial.step.openAppsInfo.body",
         targetRef: tutorialAppsScreenRef,
+      });
+      steps.push({
+        id: "chooseAppAction",
+        titleKey: "tutorial.step.chooseAppAction.title",
+        targetRef: tutorialAppsScreenRef,
+        hideHighlight: true,
+        maskColor: "transparent",
+        blocksTouches: false,
+        cardDock: "top",
+        inlineAction: true,
+        actionLabelKey: "tutorial.cta.done",
+      });
+      steps.push({
+        id: "chooseAppBack",
+        titleKey: "tutorial.step.back.title",
+        bodyKey: "tutorial.step.back.body",
+        targetRef: tutorialAppsBackRef,
+        actionId: "backFromApps",
+        requiresAction: true,
       });
     }
     steps.push({
@@ -8673,8 +8713,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   const shouldShowMotivationAction =
     !dismissedMotivationActionId ||
     dismissedMotivationActionId !== recommendedActionId;
-  const showMotivationBlock =
-    showGettingStartedSection && (missingPermissions || shouldShowMotivationAction);
+  const showMotivationBlock = missingPermissions || shouldShowMotivationAction;
 
   const handleMotivationAction = (actionItem) => {
     if (!actionItem?.action) {
@@ -8860,6 +8899,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       Number.isFinite(target.y) &&
       Number.isFinite(target.width) &&
       Number.isFinite(target.height);
+    const usesTarget = !tutorialStep.hideHighlight && hasTarget;
+    const effectiveTarget = usesTarget ? target : null;
+    const hasEffectiveTarget = !!effectiveTarget;
     const basePadding = 14;
     const paddingByStep = {
       "tutorial.step.track.title": 8,
@@ -8880,8 +8922,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       "tutorial.step.samplePushupInfo.title": 0.7,
     };
     const highlightScale = highlightScaleByStep[tutorialStep.titleKey] ?? 1;
-    const safeTargetWidth = target?.width ?? 0;
-    const safeTargetHeight = target?.height ?? 0;
+    const safeTargetWidth = effectiveTarget?.width ?? 0;
+    const safeTargetHeight = effectiveTarget?.height ?? 0;
     const baseWidth = Math.max(safeTargetWidth + highlightPadding * 2, minHighlightWidth);
     const baseHeight = Math.max(
       safeTargetHeight + highlightPadding * 2,
@@ -8894,32 +8936,35 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       "tutorial.step.track.title": 16,
     };
     const baseHighlightWidth =
-      hasTarget ? Math.max(baseWidth * highlightScale, minHighlightWidth) : 64;
+      hasEffectiveTarget ? Math.max(baseWidth * highlightScale, minHighlightWidth) : 64;
     const forcedWidth = forcedHighlightWidthByStep[tutorialStep.titleKey];
     const highlightWidth = forcedWidth
       ? Math.min(Math.max(forcedWidth, 64), Math.max(width - 32, 0))
       : baseHighlightWidth;
     const highlightHeight =
-      hasTarget ? Math.max(baseHeight * highlightScale, minHighlightHeight) : 64;
+      hasEffectiveTarget
+        ? Math.max(baseHeight * highlightScale, minHighlightHeight)
+        : 64;
     const offsetYByStep = {
       "tutorial.step.back.title": -8,
       "tutorial.step.openSettings.title": -2,
       "tutorial.step.workout.title": -4,
       "tutorial.step.stats.title": -4,
+      "tutorial.step.chooseAppAction.title": height * 0.05,
     };
     const offsetXByStep = {
       // Additional horizontal adjustments can be added here.
     };
     const overlayX = overlayOffset?.x ?? 0;
     const overlayY = overlayOffset?.y ?? 0;
-    const desiredLeft = hasTarget
-      ? target.x -
+    const desiredLeft = hasEffectiveTarget
+      ? effectiveTarget.x -
         highlightPadding -
         overlayX +
         (offsetXByStep[tutorialStep.titleKey] ?? 0)
       : (width - highlightWidth) / 2;
-    const desiredTop = hasTarget
-      ? target.y -
+    const desiredTop = hasEffectiveTarget
+      ? effectiveTarget.y -
         highlightPadding -
         overlayY +
         (offsetYByStep[tutorialStep.titleKey] ?? 0)
@@ -8944,6 +8989,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     const preferBelow = spaceBelow >= estimatedCardHeight || spaceBelow >= spaceAbove;
     const exitButtonSafe = 72;
     const maxTop = Math.max(16, height - estimatedCardHeight - exitButtonSafe);
+    const safeCenterTop = Math.max(
+      16,
+      Math.min((height - estimatedCardHeight) / 2, height - estimatedCardHeight - 16)
+    );
+    const safeCenterLeft = Math.max(
+      16,
+      Math.min((width - cardWidth) / 2, width - cardWidth - 16)
+    );
     let cardTop = preferBelow
       ? centerY + highlightHeight / 2 + 12
       : centerY - highlightHeight / 2 - 12 - estimatedCardHeight;
@@ -8952,6 +9005,21 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       width - cardWidth - 16,
       Math.max(16, centerX - cardWidth / 2)
     );
+    const cardDock = tutorialStep.cardDock;
+    const dockTop = Math.min(16, Math.max(0, height - estimatedCardHeight - 16));
+    const dockLeft = Math.min(16, Math.max(0, width - cardWidth - 16));
+    const finalCardTop =
+      cardDock === "top"
+        ? dockTop
+        : tutorialStep.centerCard
+        ? safeCenterTop
+        : cardTop;
+    const finalCardLeft =
+      cardDock === "top"
+        ? dockLeft
+        : tutorialStep.centerCard
+        ? safeCenterLeft
+        : cardLeft;
     const highlightBottom = highlightTop + highlightHeight;
     const highlightRight = highlightLeft + highlightWidth;
     const pointerSize = 56;
@@ -8968,19 +9036,34 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       Math.max(pointerCenterX - pointerSize / 2, pointerSpacing),
       width - pointerSize - pointerSpacing
     );
-    const showPointer = tutorialStep.requiresAction && hasTarget;
+    const showHighlight = hasEffectiveTarget && !tutorialStep.hideHighlight;
+    const shouldBlockTouches =
+      tutorialStep.blocksTouches ?? !tutorialStep.requiresAction;
+    const showPointer = tutorialStep.requiresAction && hasEffectiveTarget;
     const highlightBackground = tutorialStep.requiresAction
       ? "rgba(249, 115, 22, 0.12)"
       : "rgba(249, 115, 22, 0.06)";
-    const maskColor = tutorialStep.requiresAction
+    const defaultMaskColor = tutorialStep.requiresAction
       ? "rgba(2, 6, 23, 0.72)"
       : "rgba(2, 6, 23, 0.54)";
+    const maskColor = tutorialStep.maskColor ?? defaultMaskColor;
     const blockingResponder = { onStartShouldSetResponder: () => true };
-    const touchProps = tutorialStep.requiresAction
+    const touchProps = shouldBlockTouches
       ? { ...blockingResponder, pointerEvents: "auto" }
       : { pointerEvents: "none" };
+    const bodyText = tutorialStep.bodyKey ? t(tutorialStep.bodyKey) : null;
+    const actionLabelKey = tutorialStep.actionLabelKey;
+    const defaultActionLabel = isTutorialLastStep
+      ? t("tutorial.cta.done")
+      : t("tutorial.cta.next");
+    const actionLabel = actionLabelKey
+      ? t(actionLabelKey)
+      : defaultActionLabel;
+    const actionHandler = isTutorialLastStep ? completeTutorial : advanceTutorial;
+    const showInlineAction = !!tutorialStep.inlineAction;
+    const showFooterAction = !tutorialStep.requiresAction && !showInlineAction;
     const renderBlockingAreas = () => {
-      if (!hasTarget) {
+      if (!hasEffectiveTarget) {
         return (
           <View
             style={[
@@ -8988,8 +9071,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               StyleSheet.absoluteFillObject,
               { backgroundColor: maskColor },
             ]}
-            {...(tutorialStep.requiresAction ? blockingResponder : {})}
-            pointerEvents={tutorialStep.requiresAction ? "auto" : "none"}
+            {...(shouldBlockTouches ? blockingResponder : {})}
+            pointerEvents={shouldBlockTouches ? "auto" : "none"}
           />
         );
       }
@@ -9058,7 +9141,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         ref={tutorialOverlayRef}
       >
         {renderBlockingAreas()}
-          {hasTarget ? (
+          {showHighlight ? (
             <View
               style={[
                 styles.tutorialHighlight,
@@ -9070,9 +9153,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                   backgroundColor: highlightBackground,
                 },
               ]}
-              pointerEvents="none"
+              pointerEvents={shouldBlockTouches ? "auto" : "none"}
+              {...(shouldBlockTouches ? blockingResponder : {})}
             />
-        ) : null}
+          ) : null}
         {showPointer ? (
           <Animated.View
             style={[
@@ -9092,7 +9176,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           <Text style={styles.tutorialExitText}>{t("tutorial.cta.exit")}</Text>
         </Pressable>
         <View
-          style={[styles.tutorialCard, { width: cardWidth, left: cardLeft, top: cardTop }]}
+          style={[
+            styles.tutorialCard,
+            { width: cardWidth, left: finalCardLeft, top: finalCardTop },
+          ]}
           onLayout={(event) => {
             const nextHeight = event.nativeEvent.layout.height;
             if (Math.abs(nextHeight - tutorialCardHeight) > 1) {
@@ -9100,20 +9187,39 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             }
           }}
         >
-          <Text style={styles.tutorialTitle}>{t(tutorialStep.titleKey)}</Text>
-          <Text style={styles.tutorialBody}>{t(tutorialStep.bodyKey)}</Text>
-          <View style={styles.tutorialActions}>
-            {!tutorialStep.requiresAction ? (
+          <View
+            style={[
+              styles.tutorialTitleRow,
+              showInlineAction && styles.tutorialTitleRowInline,
+            ]}
+          >
+            <Text style={styles.tutorialTitle}>{t(tutorialStep.titleKey)}</Text>
+            {showInlineAction ? (
               <Pressable
-                style={[styles.tutorialActionButton, styles.tutorialActionPrimary]}
-                onPress={isTutorialLastStep ? completeTutorial : advanceTutorial}
+                style={[
+                  styles.tutorialActionButton,
+                  styles.tutorialActionPrimary,
+                  styles.tutorialInlineActionButton,
+                ]}
+                onPress={actionHandler}
               >
-                <Text style={styles.tutorialActionPrimaryText}>
-                  {isTutorialLastStep ? t("tutorial.cta.done") : t("tutorial.cta.next")}
-                </Text>
+                <Text style={styles.tutorialActionPrimaryText}>{actionLabel}</Text>
               </Pressable>
             ) : null}
           </View>
+          {bodyText ? (
+            <Text style={styles.tutorialBody}>{bodyText}</Text>
+          ) : null}
+          {showFooterAction ? (
+            <View style={styles.tutorialActions}>
+              <Pressable
+                style={[styles.tutorialActionButton, styles.tutorialActionPrimary]}
+                onPress={actionHandler}
+              >
+                <Text style={styles.tutorialActionPrimaryText}>{actionLabel}</Text>
+              </Pressable>
+            </View>
+          ) : null}
         </View>
       </View>
     );
@@ -9151,9 +9257,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   }, [voiceEnabled]);
 
   const showGettingStartedSection = Platform.OS === "android";
+  const accessibilityMissing = needsAccessibility !== false;
+  const usageAccessMissing = usageAccessGranted !== true;
+  const missingPermissions = accessibilityMissing || usageAccessMissing;
   const showPermissionPrompt =
-    showGettingStartedSection && (needsAccessibility || !usageAccessGranted);
-  const missingPermissions = needsAccessibility || !usageAccessGranted;
+    showGettingStartedSection && missingPermissions;
   const completedGettingStarted =
     !missingPermissions &&
     (permissionsPrompted ||
@@ -9334,7 +9442,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       return (
     <SafeAreaView style={styles.container}>
         <ScrollView
-          ref={tutorialAppsScreenRef}
           contentContainerStyle={styles.scrollContent}
         >
             <View style={styles.headerRow}>
@@ -10297,12 +10404,19 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   if (isAppsSettingsOpen) {
     return (
       <SafeAreaView style={styles.container}>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView
+          ref={tutorialAppsScreenRef}
+          contentContainerStyle={styles.scrollContent}
+        >
           <View style={styles.headerRow}>
             <Pressable
-              style={styles.backButton}
-              onPress={() => setIsAppsSettingsOpen(false)}
-            >
+                style={styles.backButton}
+                ref={tutorialAppsBackRef}
+                onPress={() => {
+                  setIsAppsSettingsOpen(false);
+                  maybeAdvanceTutorial("backFromApps");
+                }}
+              >
               <Text style={styles.backText}>{t("label.back")}</Text>
             </Pressable>
             <Text style={styles.headerTitle}>{t("label.apps")}</Text>
@@ -10398,6 +10512,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             </>
           )}
         </ScrollView>
+        {tutorialActive ? renderTutorialOverlay() : null}
       </SafeAreaView>
     );
   }
@@ -10569,17 +10684,17 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           <View style={styles.infoCard}>
             <Text style={styles.helperText}>
               {t("label.accessibilityTitle")}:{" "}
-              {needsAccessibility
+              {accessibilityMissing
                 ? t("label.accessibilityMissing")
                 : t("label.accessibilityActive")}
             </Text>
             <Text style={styles.helperText}>
               {t("label.usageAccessTitle")}:{" "}
-              {!usageAccessGranted
+              {usageAccessMissing
                 ? t("label.usageAccessMissing")
                 : t("label.usageAccessActive")}
             </Text>
-            {needsAccessibility ? (
+            {accessibilityMissing ? (
               <Pressable
                 style={styles.primaryButton}
                 onPress={requestAccessibilityAccess}
@@ -10589,7 +10704,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 </Text>
               </Pressable>
             ) : null}
-            {!usageAccessGranted ? (
+            {usageAccessMissing ? (
               <Pressable
                 style={styles.secondaryButton}
                 onPress={openUsageAccessSettings}
@@ -10712,90 +10827,90 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             {permissionsPanelOpen &&
               (missingPermissions || shouldShowMotivationAction) && (
                 <View style={styles.permissionList}>
-                {missingPermissions ? (
-                  <>
-                    <View
-                      style={[
-                        styles.permissionItem,
-                        !needsAccessibility && styles.permissionItemGranted,
-                      ]}
-                    >
-                      <Text style={styles.permissionItemTitle}>
-                        {t("label.accessibilityTitle")}
+                  {missingPermissions ? (
+                    <>
+                      <View
+                        style={[
+                          styles.permissionItem,
+                          !accessibilityMissing && styles.permissionItemGranted,
+                        ]}
+                      >
+                        <Text style={styles.permissionItemTitle}>
+                          {t("label.accessibilityTitle")}
+                        </Text>
+                        <Text style={styles.permissionItemText}>
+                          {t("label.accessibilityReason")}
+                        </Text>
+                        <Text style={styles.permissionItemSteps}>
+                          {t("label.accessibilitySteps")}
+                        </Text>
+                        {!accessibilityMissing ? null : (
+                          <View style={styles.permissionItemActions}>
+                            <Pressable
+                              style={styles.permissionActionButton}
+                              onPress={requestAccessibilityAccess}
+                            >
+                              <Text style={styles.permissionActionButtonText}>
+                                {t("label.accessibilityDisclosureConfirm")}
+                              </Text>
+                            </Pressable>
+                          </View>
+                        )}
+                      </View>
+                      <View
+                        style={[
+                          styles.permissionItem,
+                          !usageAccessMissing && styles.permissionItemGranted,
+                        ]}
+                      >
+                        <Text style={styles.permissionItemTitle}>
+                          {t("label.usageAccessTitle")}
+                        </Text>
+                        <Text style={styles.permissionItemText}>
+                          {t("label.usageAccessReason")}
+                        </Text>
+                        <Text style={styles.permissionItemSteps}>
+                          {t("label.usageAccessSteps")}
+                        </Text>
+                        {usageAccessMissing ? (
+                          <View style={styles.permissionItemActions}>
+                            <Pressable
+                              style={styles.permissionActionButton}
+                              onPress={openUsageAccessSettings}
+                            >
+                              <Text style={styles.permissionActionButtonText}>
+                                {t("label.openUsageAccess")}
+                              </Text>
+                            </Pressable>
+                          </View>
+                        ) : null}
+                      </View>
+                    </>
+                  ) : (
+                    <>
+                      <Text style={styles.motivationCardTitle}>
+                        {activeActionTitle}
                       </Text>
-                      <Text style={styles.permissionItemText}>
-                        {t("label.accessibilityReason")}
+                      <Text style={styles.motivationCardBody}>
+                        {activeActionBody}
                       </Text>
-                      <Text style={styles.permissionItemSteps}>
-                        {t("label.accessibilitySteps")}
-                      </Text>
-                      {!needsAccessibility ? null : (
-                        <View style={styles.permissionItemActions}>
-                          <Pressable
-                            style={styles.permissionActionButton}
-                            onPress={requestAccessibilityAccess}
-                          >
-                            <Text style={styles.permissionActionButtonText}>
-                              {t("label.accessibilityDisclosureConfirm")}
-                            </Text>
-                          </Pressable>
-                        </View>
-                      )}
-                    </View>
-                    <View
-                      style={[
-                        styles.permissionItem,
-                        usageAccessGranted && styles.permissionItemGranted,
-                      ]}
-                    >
-                      <Text style={styles.permissionItemTitle}>
-                        {t("label.usageAccessTitle")}
-                      </Text>
-                      <Text style={styles.permissionItemText}>
-                        {t("label.usageAccessReason")}
-                      </Text>
-                      <Text style={styles.permissionItemSteps}>
-                        {t("label.usageAccessSteps")}
-                      </Text>
-                      {usageAccessGranted ? null : (
-                        <View style={styles.permissionItemActions}>
-                          <Pressable
-                            style={styles.permissionActionButton}
-                            onPress={openUsageAccessSettings}
-                          >
-                            <Text style={styles.permissionActionButtonText}>
-                              {t("label.openUsageAccess")}
-                            </Text>
-                          </Pressable>
-                        </View>
-                      )}
-                    </View>
-                  </>
-                ) : (
-                  <>
-                    <Text style={styles.motivationCardTitle}>
-                      {activeActionTitle}
-                    </Text>
-                    <Text style={styles.motivationCardBody}>
-                      {activeActionBody}
-                    </Text>
-                    <Pressable
-                      style={[
-                        styles.motivationActionButton,
-                        activeAction?.disabled &&
-                          styles.motivationActionButtonDisabled,
-                      ]}
-                      onPress={() => handleMotivationAction(activeAction)}
-                      disabled={activeAction?.disabled}
-                    >
-                      <Text style={styles.motivationActionText}>
-                        {activeActionLabel}
-                      </Text>
-                    </Pressable>
-                  </>
-                )}
-              </View>
-            )}
+                      <Pressable
+                        style={[
+                          styles.motivationActionButton,
+                          activeAction?.disabled &&
+                            styles.motivationActionButtonDisabled,
+                        ]}
+                        onPress={() => handleMotivationAction(activeAction)}
+                        disabled={activeAction?.disabled}
+                      >
+                        <Text style={styles.motivationActionText}>
+                          {activeActionLabel}
+                        </Text>
+                      </Pressable>
+                    </>
+                  )}
+                </View>
+              )}
           </View>
         ) : null}
         <Modal
@@ -13725,9 +13840,8 @@ const styles = StyleSheet.create({
   },
   tutorialExitButton: {
     position: "absolute",
-    left: 24,
-    right: 24,
-    bottom: 24,
+    top: 72,
+    right: 12,
     backgroundColor: COLORS.cardDark,
     borderRadius: 12,
     paddingVertical: 10,
@@ -13769,7 +13883,7 @@ const styles = StyleSheet.create({
   },
   tutorialCard: {
     position: "absolute",
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.cardDark,
     borderRadius: 18,
     padding: 18,
     borderWidth: 1,
@@ -13815,5 +13929,16 @@ const styles = StyleSheet.create({
     color: COLORS.ink,
     fontWeight: "700",
     fontSize: 12,
+  },
+  tutorialTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  tutorialTitleRowInline: {
+    gap: 8,
+  },
+  tutorialInlineActionButton: {
+    marginLeft: 12,
   },
 });
