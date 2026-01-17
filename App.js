@@ -7538,6 +7538,121 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     );
   };
 
+  const ActionGlyph = ({ type, color = COLORS.muted }) => {
+    if (type === "stats") {
+      return (
+        <View style={styles.actionGlyphBars}>
+          {[10, 14, 8].map((height, index) => (
+            <View
+              key={index}
+              style={[styles.actionGlyphBar, { height, backgroundColor: color }]}
+            />
+          ))}
+        </View>
+      );
+    }
+    if (type === "edit") {
+      return (
+        <View style={[styles.actionGlyphBox, { borderColor: color }]}>
+          <View style={[styles.actionGlyphBoxDot, { backgroundColor: color }]} />
+        </View>
+      );
+    }
+    if (type === "hide") {
+      return (
+        <View style={[styles.actionGlyphEye, { borderColor: color }]}>
+          <View style={[styles.actionGlyphEyePupil, { backgroundColor: color }]} />
+        </View>
+      );
+    }
+    if (type === "delete") {
+      return (
+        <View style={styles.actionGlyphCross}>
+          <View
+            style={[
+              styles.actionGlyphCrossLine,
+              { backgroundColor: color, transform: [{ rotate: "45deg" }] },
+            ]}
+          />
+          <View
+            style={[
+              styles.actionGlyphCrossLine,
+              { backgroundColor: color, transform: [{ rotate: "-45deg" }] },
+            ]}
+          />
+        </View>
+      );
+    }
+    return null;
+  };
+
+  const WidgetGlyph = ({ color = COLORS.text }) => (
+    <View style={styles.widgetGlyphGrid}>
+      {Array.from({ length: 4 }).map((_, index) => (
+        <View
+          key={index}
+          style={[
+            styles.widgetGlyphSquare,
+            { backgroundColor: color },
+          ]}
+        />
+      ))}
+    </View>
+  );
+
+  const InfoGlyph = ({ type, color = COLORS.text }) => {
+    if (type === "earned") {
+      return (
+        <View style={styles.infoGlyph}>
+          <View style={[styles.infoGlyphStopwatch, { borderColor: color }]} />
+          <View
+            style={[styles.infoGlyphStopwatchKnob, { backgroundColor: color }]}
+          />
+        </View>
+      );
+    }
+    if (type === "remaining") {
+      return (
+        <View style={[styles.infoGlyph, styles.infoGlyphHourglassWrapper]}>
+          <View
+            style={[
+              styles.infoGlyphHourglassTop,
+              { borderBottomColor: color },
+            ]}
+          />
+          <View
+            style={[
+              styles.infoGlyphHourglassBottom,
+              { borderTopColor: color },
+            ]}
+          />
+        </View>
+      );
+    }
+    if (type === "carryover") {
+      return (
+        <View style={styles.infoGlyph}>
+          <View
+            style={[styles.infoGlyphCarryoverCircle, { borderColor: color }]}
+          />
+          <View
+            style={[
+              styles.infoGlyphCarryoverArrow,
+              { borderColor: color, transform: [{ rotate: "45deg" }] },
+            ]}
+          />
+          <View
+            style={[
+              styles.infoGlyphCarryoverArrow,
+              { borderColor: color, transform: [{ rotate: "-45deg" }] },
+            ]}
+          />
+        </View>
+      );
+    }
+    return null;
+  };
+
   const renderMainNav = (active) => (
     <View style={styles.mainNav}>
       <Pressable
@@ -8236,7 +8351,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     groups.sort((a, b) => b.latestTs - a.latestTs);
     return groups;
   }, [logs, sports]);
-  const widgetIcon = "\uD83D\uDCCC";
   const micIcon = "\uD83C\uDFA4";
   const notificationsSupported =
     Platform.OS === "android" && Number(Platform.Version) >= 33;
@@ -10350,7 +10464,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           <View style={styles.infoCard}>
             <Text style={styles.helperText}>{t("label.widgetOverall")}</Text>
             <Pressable
-              style={styles.secondaryButton}
+              style={[styles.secondaryButton, styles.widgetButton]}
               onPress={() =>
                 InstaControl?.requestPinWidget?.(
                   "overall",
@@ -10358,9 +10472,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 )
               }
             >
-              <Text style={styles.secondaryButtonText}>
-                {widgetIcon} {t("label.widgetOverall")}
-              </Text>
+              <View style={styles.widgetButtonContent}>
+                <WidgetGlyph color={COLORS.text} />
+                <Text
+                  style={[styles.secondaryButtonText, styles.widgetButtonText]}
+                >
+                  {t("label.widgetOverall")}
+                </Text>
+              </View>
             </Pressable>
           </View>
           <View style={styles.settingsDivider} />
@@ -10751,13 +10870,13 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                       style={styles.iconAction}
                       onPress={() => setStatsSportId(sport.id)}
                     >
-                      <Text style={styles.iconActionText}>📊</Text>
+                      <ActionGlyph type="stats" color={COLORS.text} />
                     </Pressable>
                     <Pressable
                       style={styles.iconAction}
                       onPress={() => openSportModal(sport)}
                     >
-                      <Text style={styles.iconActionText}>🛠</Text>
+                      <ActionGlyph type="edit" color={COLORS.text} />
                     </Pressable>
                   </View>
                   <View style={styles.sportTopTitleCenter}>
@@ -10776,7 +10895,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                         )
                       }
                     >
-                      <Text style={styles.iconActionText}>👁</Text>
+                      <ActionGlyph type="hide" color={COLORS.text} />
                     </Pressable>
                     {canDeleteSport(sport) ? (
                       <Pressable
@@ -10787,7 +10906,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                           )
                         }
                       >
-                        <Text style={styles.iconActionText}>✕</Text>
+                        <ActionGlyph type="delete" color={COLORS.text} />
                       </Pressable>
                     ) : null}
                   </View>
@@ -10806,16 +10925,17 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                               InstaControl?.requestPinWidget?.(sport.id, sportLabel)
                             }
                           >
-                            <Text
-                              style={[
-                                styles.secondaryButtonText,
-                                styles.widgetButtonText,
-                              ]}
-                            >
-                              {widgetIcon}
-                              {"\n"}
-                              {t("label.widget")}
-                            </Text>
+                            <View style={styles.widgetButtonContent}>
+                              <WidgetGlyph color={COLORS.text} />
+                              <Text
+                                style={[
+                                  styles.secondaryButtonText,
+                                  styles.widgetButtonText,
+                                ]}
+                              >
+                                {t("label.widget")}
+                              </Text>
+                            </View>
                           </Pressable>
                         </View>
                         <View style={styles.sportGridColumnCenter}>
@@ -10956,23 +11076,24 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                         <View style={styles.sportGridContent}>
                         <View style={styles.sportGridRow}>
                           <View style={styles.sportGridColumnLeft}>
-                            <Pressable
-                              style={[styles.secondaryButton, styles.widgetButton]}
-                              onPress={() =>
-                                InstaControl?.requestPinWidget?.(sport.id, sportLabel)
-                              }
-                            >
-                            <Text
-                              style={[
-                                styles.secondaryButtonText,
-                                styles.widgetButtonText,
-                              ]}
-                            >
-                              {widgetIcon}
-                              {"\n"}
-                              {t("label.widget")}
-                            </Text>
-                            </Pressable>
+                      <Pressable
+                        style={[styles.secondaryButton, styles.widgetButton]}
+                        onPress={() =>
+                          InstaControl?.requestPinWidget?.(sport.id, sportLabel)
+                        }
+                      >
+                        <View style={styles.widgetButtonContent}>
+                          <WidgetGlyph color={COLORS.text} />
+                          <Text
+                            style={[
+                              styles.secondaryButtonText,
+                              styles.widgetButtonText,
+                            ]}
+                          >
+                            {t("label.widget")}
+                          </Text>
+                        </View>
+                      </Pressable>
                           </View>
                           <View style={styles.sportGridColumnCenter}>
                             <View style={styles.sportCounterCenter}>
@@ -11129,7 +11250,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 )
               }
             >
-              <Text style={styles.infoIcon}>⏱</Text>
+              <InfoGlyph type="earned" color={COLORS.text} />
               <Text style={styles.infoValue}>
                 {formatScreenTime(rollingEarnedSeconds)}
               </Text>
@@ -11152,7 +11273,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 )
               }
             >
-              <Text style={styles.infoIcon}>⏳</Text>
+              <InfoGlyph type="remaining" color={COLORS.text} />
               <Text style={styles.infoValue}>
                 {formatScreenTime(usageState.remainingSeconds || 0)}
               </Text>
@@ -11175,7 +11296,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 )
               }
             >
-              <Text style={styles.infoIcon}>♻️</Text>
+              <InfoGlyph type="carryover" color={COLORS.text} />
               <Text style={styles.infoValue}>
                 {formatScreenTime(usageState.carryoverSeconds || 0)}
               </Text>
@@ -11599,6 +11720,59 @@ const styles = StyleSheet.create({
   },
   mainNavTextActive: {
     color: COLORS.ink,
+  },
+  mainNavIconWrapper: {
+    width: 24,
+    height: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  actionGlyphBars: {
+    flexDirection: "row",
+    width: 18,
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+  },
+  actionGlyphBar: {
+    width: 4,
+    borderRadius: 2,
+  },
+  actionGlyphBox: {
+    width: 16,
+    height: 16,
+    borderWidth: 2,
+    borderRadius: 4,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  actionGlyphBoxDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 1,
+  },
+  actionGlyphEye: {
+    width: 16,
+    height: 10,
+    borderWidth: 2,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  actionGlyphEyePupil: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  actionGlyphCross: {
+    width: 14,
+    height: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  actionGlyphCrossLine: {
+    position: "absolute",
+    width: 2,
+    height: 16,
   },
   mainNavIconWrapper: {
     width: 24,
@@ -12430,6 +12604,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  widgetButtonContent: {
+    alignItems: "center",
+  },
+  widgetGlyphGrid: {
+    width: 18,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+  },
+  widgetGlyphSquare: {
+    width: 6,
+    height: 6,
+    margin: 1,
+    borderRadius: 1,
+  },
   moveButtonColumn: {
     justifyContent: "flex-end",
     alignItems: "flex-end",
@@ -13149,9 +13338,72 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 6,
   },
-  infoIcon: {
-    fontSize: 16,
+  infoGlyph: {
+    width: 24,
+    height: 24,
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 4,
+  },
+  infoGlyphStopwatch: {
+    width: 16,
+    height: 16,
+    borderWidth: 2,
+    borderRadius: 8,
+  },
+  infoGlyphStopwatchKnob: {
+    position: "absolute",
+    width: 6,
+    height: 3,
+    top: -4,
+    borderRadius: 1,
+  },
+  infoGlyphHourglassWrapper: {
+    position: "relative",
+    width: 16,
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  infoGlyphHourglassTop: {
+    position: "absolute",
+    width: 0,
+    height: 0,
+    borderLeftWidth: 6,
+    borderRightWidth: 6,
+    borderBottomWidth: 8,
+    borderStyle: "solid",
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderBottomColor: "transparent",
+  },
+  infoGlyphHourglassBottom: {
+    position: "absolute",
+    width: 0,
+    height: 0,
+    borderLeftWidth: 6,
+    borderRightWidth: 6,
+    borderTopWidth: 8,
+    borderStyle: "solid",
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderTopColor: "transparent",
+    bottom: 0,
+  },
+  infoGlyphCarryoverCircle: {
+    position: "absolute",
+    width: 18,
+    height: 18,
+    borderWidth: 2,
+    borderRadius: 9,
+  },
+  infoGlyphCarryoverArrow: {
+    position: "absolute",
+    width: 10,
+    height: 10,
+    borderTopWidth: 2,
+    borderRightWidth: 2,
+    top: 4,
   },
   infoValue: {
     fontSize: 16,
