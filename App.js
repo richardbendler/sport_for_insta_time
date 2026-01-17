@@ -11032,9 +11032,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         </View>
       </View>
     </Modal>
-      <View style={styles.fixedTimers}>
+          <View style={styles.fixedTimers}>
         <Pressable
-          style={[styles.infoCard, styles.infoCardMain]}
+          style={[styles.infoCard, styles.infoCardNoAlpha, styles.infoCardMain]}
           ref={tutorialScreenTimeRef}
           onLayout={(event) => setInfoCardWidth(event.nativeEvent.layout.width)}
           onPress={() => {
@@ -12810,9 +12810,11 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 12,
   },
+  infoCardNoAlpha: {
+    backgroundColor: COLORS.cardSolid,
+  },
   infoCardMain: {
     position: "relative",
-    backgroundColor: COLORS.cardSolid,
   },
   workoutNotification: {
     marginBottom: 12,
