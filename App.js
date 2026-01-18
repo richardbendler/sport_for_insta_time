@@ -231,8 +231,10 @@ const MONTH_LABELS = {
 };
 const DEFAULT_ICON = "⭐";
 const DEFAULT_DIFFICULTY = 5;
-const DEFAULT_TIME_RATE = 0.1;
+const DEFAULT_TIME_RATE = 0.2;
 const DEFAULT_REPS_RATE = 1;
+const ADMIN_SCREEN_TIME_FACTOR = 0.1; // tweak this factor to globally adjust granted Screen Time
+const WEIGHT_SCREEN_TIME_BALANCE = 0.25; // reduces the impact of weight entries after scaling
 const DEFAULT_WEIGHT_RATE = 0.08;
 const interpolateTemplate = (template = "", values = {}) =>
   template.replace(/\{\{(\w+)\}\}/g, (_, key) =>
@@ -241,7 +243,94 @@ const interpolateTemplate = (template = "", values = {}) =>
 const PRESET_KEYS = {
   pushups: "pushups",
 };
+const STANDARD_SPORT_TRANSLATIONS = {
+  push_ups: {
+    de: "Liegestütze",
+    en: "Push-ups",
+    es: "Flexiones",
+    fr: "Pompes",
+  },
+  running: {
+    de: "Laufen",
+    en: "Running",
+    es: "Correr",
+    fr: "Course",
+  },
+  pullups: {
+    de: "Klimmzüge",
+    en: "Pull-ups",
+    es: "Dominadas",
+    fr: "Tractions",
+  },
+};
+
 const RAW_STANDARD_SPORTS = [
+
+  {
+    id: "treadmill_running",
+    labels: {
+      de: "Laufband",
+      en: "Treadmill running",
+      es: "Cinta de correr",
+      fr: "Tapis de course",
+    },
+    icon: "👟",
+    type: "time",
+    defaultRateMinutes: 1,
+    difficultyLevel: 4,
+  },
+  {
+    id: "stationary_bike",
+    labels: {
+      de: "Fahrrad-Ergometer",
+      en: "Stationary bike",
+      es: "Bicicleta estática",
+      fr: "Vélo d'appartement",
+    },
+    icon: "🚴",
+    type: "time",
+    defaultRateMinutes: 1,
+    difficultyLevel: 3,
+  },
+  {
+    id: "rowing_machine",
+    labels: {
+      de: "Rudergerät",
+      en: "Rowing machine",
+      es: "Máquina de remo",
+      fr: "Rameur",
+    },
+    icon: "🚣",
+    type: "time",
+    defaultRateMinutes: 1,
+    difficultyLevel: 5,
+  },
+  {
+    id: "elliptical_trainer",
+    labels: {
+      de: "Ellipsentrainer",
+      en: "Elliptical trainer",
+      es: "Entrenador elíptico",
+      fr: "Elliptique",
+    },
+    icon: "🛼",
+    type: "time",
+    defaultRateMinutes: 1,
+    difficultyLevel: 3,
+  },
+  {
+    id: "stair_stepper",
+    labels: {
+      de: "Stepper",
+      en: "Stair stepper",
+      es: "Stepper",
+      fr: "Stepper",
+    },
+    icon: "🪜",
+    type: "time",
+    defaultRateMinutes: 1,
+    difficultyLevel: 4,
+  },
 
 ﻿  {
     id: "barbell_bench_press",
@@ -294,6 +383,58 @@ const RAW_STANDARD_SPORTS = [
     type: "reps",
     defaultRateMinutes: 1,
     difficultyLevel: 6,
+  },
+  {
+    id: "squat",
+    labels: {
+      de: "Kniebeuge",
+      en: "Squat",
+      es: "Sentadillas",
+      fr: "Squat",
+    },
+    icon: "🏋️‍♀️",
+    type: "reps",
+    defaultRateMinutes: 1,
+    difficultyLevel: 6,
+  },
+  {
+    id: "leg_press",
+    labels: {
+      de: "Beinpresse",
+      en: "Leg press",
+      es: "Prensa de piernas",
+      fr: "Presse à cuisses",
+    },
+    icon: "🦵",
+    type: "reps",
+    defaultRateMinutes: 1,
+    difficultyLevel: 5,
+  },
+  {
+    id: "lat_pulldown",
+    labels: {
+      de: "Latziehen",
+      en: "Lat pulldown",
+      es: "Jalón al pecho",
+      fr: "Tirage vertical",
+    },
+    icon: "🏋️",
+    type: "reps",
+    defaultRateMinutes: 1,
+    difficultyLevel: 4,
+  },
+  {
+    id: "cable_row",
+    labels: {
+      de: "Low Row",
+      en: "Cable row",
+      es: "Remo en polea",
+      fr: "Tirage horizontal",
+    },
+    icon: "💪",
+    type: "reps",
+    defaultRateMinutes: 1,
+    difficultyLevel: 4,
   },
   {
     id: "decline_barbell_bench_press",
@@ -554,6 +695,84 @@ const RAW_STANDARD_SPORTS = [
     type: "reps",
     defaultRateMinutes: 1,
     difficultyLevel: 10,
+  },
+  {
+    id: "kettlebell_swing",
+    labels: {
+      de: "Kettlebell Swing",
+      en: "Kettlebell swing",
+      es: "Kettlebell swing",
+      fr: "Balancement kettlebell",
+    },
+    icon: "🏋️‍♀️",
+    type: "reps",
+    defaultRateMinutes: 1,
+    difficultyLevel: 5,
+  },
+  {
+    id: "jump_rope",
+    labels: {
+      de: "Seilspringen",
+      en: "Jump rope",
+      es: "Saltar la cuerda",
+      fr: "Corde à sauter",
+    },
+    icon: "🪢",
+    type: "time",
+    defaultRateMinutes: 1,
+    difficultyLevel: 4,
+  },
+  {
+    id: "swimming",
+    labels: {
+      de: "Schwimmen",
+      en: "Swimming",
+      es: "Natación",
+      fr: "Natation",
+    },
+    icon: "🏊",
+    type: "time",
+    defaultRateMinutes: 1,
+    difficultyLevel: 4,
+  },
+  {
+    id: "outdoor_running",
+    labels: {
+      de: "Joggen",
+      en: "Outdoor running",
+      es: "Correr al aire libre",
+      fr: "Course en plein air",
+    },
+    icon: "🏃",
+    type: "time",
+    defaultRateMinutes: 1,
+    difficultyLevel: 3,
+  },
+  {
+    id: "road_cycling",
+    labels: {
+      de: "Straßenrad",
+      en: "Road cycling",
+      es: "Ciclismo en carretera",
+      fr: "Cyclisme sur route",
+    },
+    icon: "🚴",
+    type: "time",
+    defaultRateMinutes: 1,
+    difficultyLevel: 4,
+  },
+  {
+    id: "hiking",
+    labels: {
+      de: "Wandern",
+      en: "Hiking",
+      es: "Senderismo",
+      fr: "Randonnée",
+    },
+    icon: "🥾",
+    type: "time",
+    defaultRateMinutes: 1,
+    difficultyLevel: 3,
   },
   {
     id: "medicine_ball_push_ups",
@@ -3872,9 +4091,18 @@ const deriveTemplateIcon = (entry) => {
   return DEFAULT_ICON;
 };
 
+const mergeTranslatedLabels = (entry) => {
+  const translations = STANDARD_SPORT_TRANSLATIONS[entry.id] || {};
+  return {
+    ...entry.labels,
+    ...translations,
+  };
+};
+
 const STANDARD_SPORTS = RAW_STANDARD_SPORTS.map((sport) => ({
   ...sport,
   icon: deriveTemplateIcon(sport),
+  labels: mergeTranslatedLabels(sport),
 }));
 const getStandardSportLabel = (entry, language) =>
   entry.labels?.[language] || entry.labels?.en || entry.id;
@@ -3991,7 +4219,7 @@ const SportTitleSlots = ({ sport, sportLabel, onAiPress }) => {
 const STRINGS = {
   de: {
     "app.title": "Sport für Screen Time",
-    "menu.home": "Einzelne Übungen",
+    "menu.home": "Sport",
     "menu.sports": "Deine Sportarten",
     "menu.apps": "Eingeschränkte Apps bearbeiten",
     "menu.settings": "Einstellungen",
@@ -4015,6 +4243,11 @@ const STRINGS = {
     "label.editEntry": "Eintrag bearbeiten",
     "label.dayDetails": "Tagesdetails",
     "label.noEntries": "Keine Einträge",
+    "label.weightLastSet": "Letzter Satz",
+    "label.weightWorkoutTotal": "Workout gesamt",
+    "label.weightHistory": "Letzte Sätze",
+    "label.weightUnit": "kg",
+    "label.noSportsMatch": "Keine Sportart gefunden",
     "label.breakdown": "Aufschlüsselung",
     "label.save": "Speichern",
     "label.editHint": "Nur verringern möglich.",
@@ -4087,6 +4320,7 @@ const STRINGS = {
       "Zeigt blockierte Apps in der Liste mit einem Schwarz-Weiß-Stil an.",
     "label.closeApps": "Apps schließen",
     "label.searchApps": "Apps suchen",
+    "label.searchSports": "Sportarten durchsuchen",
     "label.noApps": "Keine Apps gefunden.",
     "label.accessibilityMissing": "Zugriffshilfe fehlt",
     "label.accessibilityActive": "Zugriffshilfe aktiv",
@@ -4106,7 +4340,6 @@ const STRINGS = {
     "label.weekOverview": "Tagesübersicht",
     "label.weekTotal": "Diese Woche",
     "label.noSports": "Keine aktiven Sportarten. Füge neue hinzu.",
-    "label.searchSports": "Sportarten durchsuchen",
     "label.sportSuggestions": "Sportvorlagen",
     "label.noSportSuggestions": "Keine Vorschläge gefunden.",
     "label.useAsCustomSport": "Nutze \"{{term}}\" als neue Sportart",
@@ -4316,13 +4549,13 @@ const STRINGS = {
       "Tippe auf eine App, die du einschr\u00e4nken willst, und dr\u00fccke dann Zur\u00fcck, um zum Tutorial zur\u00fcckzukehren.",
     "tutorial.step.finish.title": "Fertig",
     "tutorial.step.finish.body":
-      "Tippe auf Weiter, um das Tutorial abzuschließen. Du kannst es jederzeit über den Tutorial-Button oben rechts im Tab 'Einzelne Übungen' im Hauptmenü starten.",
-    "tutorial.step.singleExercises.title": "Einzelne Übungen",
+      "Tippe auf Weiter, um das Tutorial abzuschließen. Du kannst es jederzeit über den Tutorial-Button oben rechts im Tab 'Sport' im Hauptmenü starten.",
+    "tutorial.step.singleExercises.title": "Sport",
     "tutorial.step.singleExercises.body":
-      "Im Tab Einzelne Übungen liegen deine Sportarten; tippe eine an, um zu starten, oder tippe auf Weiter.",
-    "tutorial.step.workout.title": "Workout-Tab",
+      "Im Sport-Tab liegen deine Sportarten; tippe eine an, um zu starten, oder tippe auf Weiter.",
+    "tutorial.step.workout.title": "Sport-Tab",
     "tutorial.step.workout.body":
-      "Tippe unten auf Workout, um diesen Tab zu öffnen; hier startest du Sessions und siehst vergangene Workouts.",
+      "Tippe oben auf \"Start Workout\", um die Workout-Ansicht zu öffnen; hier startest du Sessions und siehst vergangene Workouts.",
     "tutorial.step.workoutDetail.title": "Workout-Details",
     "tutorial.step.workoutDetail.body":
       "Hier steuerst du das Workout-Timer-Panel und kannst Trainingseinheiten starten oder stoppen. Tippe auf Weiter, um fortzufahren.",
@@ -4339,7 +4572,7 @@ const STRINGS = {
   },
   en: {
     "app.title": "Sport for Screen Time",
-    "menu.home": "Single exercises",
+    "menu.home": "Sport",
     "menu.sports": "Your sports",
     "menu.apps": "Edit restricted apps",
     "menu.settings": "Settings",
@@ -4363,6 +4596,11 @@ const STRINGS = {
     "label.editEntry": "Edit entry",
     "label.dayDetails": "Day details",
     "label.noEntries": "No entries",
+    "label.weightLastSet": "Last set",
+    "label.weightWorkoutTotal": "Workout total",
+    "label.weightHistory": "Recent sets",
+    "label.weightUnit": "kg",
+    "label.noSportsMatch": "No sports found",
     "label.breakdown": "Breakdown",
     "label.save": "Save",
     "label.editHint": "Only reducing is possible.",
@@ -4429,6 +4667,7 @@ const STRINGS = {
       "Render restricted apps in the list with a black-and-white style.",
     "label.closeApps": "Close apps",
     "label.searchApps": "Search apps",
+    "label.searchSports": "Search sports",
     "label.noApps": "No apps found.",
     "label.accessibilityMissing": "Accessibility missing",
     "label.accessibilityActive": "Accessibility active",
@@ -4448,7 +4687,6 @@ const STRINGS = {
     "label.weekOverview": "Daily overview",
     "label.weekTotal": "This week",
     "label.noSports": "No active sports. Add new ones.",
-    "label.searchSports": "Search sports",
     "label.sportSuggestions": "Sport templates",
     "label.noSportSuggestions": "No suggestions found.",
     "label.useAsCustomSport": "Use \"{{term}}\" as custom sport",
@@ -4656,13 +4894,13 @@ const STRINGS = {
       "Tap an app you’d like to restrict and then tap Back to return to the tutorial.",
     "tutorial.step.finish.title": "All set",
     "tutorial.step.finish.body":
-      "Tap Next to finish the tutorial. You can restart it anytime from the main menu by tapping the Tutorial button in the top-right of Single exercises.",
-    "tutorial.step.singleExercises.title": "Single exercises",
+      "Tap Next to finish the tutorial. You can restart it anytime from the main menu by tapping the Tutorial button in the top-right of the Sport tab.",
+    "tutorial.step.singleExercises.title": "Sport",
     "tutorial.step.singleExercises.body":
-      "The Single exercises tab keeps your sports ready; tap one to start tracking or tap Next to continue.",
-    "tutorial.step.workout.title": "Workout tab",
+      "The Sport tab keeps your sports ready; tap one to start tracking or tap Next to continue.",
+    "tutorial.step.workout.title": "Sport tab",
     "tutorial.step.workout.body":
-      "Tap Workout in the bottom nav to open this tab; start sessions and see past workouts here.",
+      "Tap Start Workout at the top of the Sport tab to open the workout view; start sessions and see past workouts here.",
     "tutorial.step.workoutDetail.title": "Workout details",
     "tutorial.step.workoutDetail.body":
       "This panel controls the workout timer and lets you start or stop sessions. Tap Next to keep going.",
@@ -4679,7 +4917,7 @@ const STRINGS = {
   },
   es: {
     "app.title": "Deporte por tiempo de pantalla",
-    "menu.home": "Ejercicios individuales",
+    "menu.home": "Deporte",
     "menu.sports": "Tus deportes",
     "menu.apps": "Editar apps restringidas",
     "menu.settings": "Ajustes",
@@ -4703,6 +4941,11 @@ const STRINGS = {
     "label.editEntry": "Editar entrada",
     "label.dayDetails": "Detalles del día",
     "label.noEntries": "Sin entradas",
+    "label.weightLastSet": "Última serie",
+    "label.weightWorkoutTotal": "Total del entrenamiento",
+    "label.weightHistory": "Series recientes",
+    "label.weightUnit": "kg",
+    "label.noSportsMatch": "No se encontraron deportes",
     "label.breakdown": "Desglose",
     "label.save": "Guardar",
     "label.editHint": "Solo se puede reducir.",
@@ -4772,6 +5015,7 @@ const STRINGS = {
       "Aplica un estilo en blanco y negro a las apps restringidas en la lista.",
     "label.closeApps": "Cerrar apps",
     "label.searchApps": "Buscar apps",
+    "label.searchSports": "Buscar deportes",
     "label.noApps": "No se encontraron apps.",
     "label.accessibilityMissing": "Accesibilidad desactivada",
     "label.accessibilityActive": "Accesibilidad activa",
@@ -4791,7 +5035,6 @@ const STRINGS = {
     "label.weekOverview": "Resumen diario",
     "label.weekTotal": "Esta semana",
     "label.noSports": "No hay deportes activos. Añade nuevos.",
-    "label.searchSports": "Buscar deportes",
     "label.sportSuggestions": "Plantillas deportivas",
     "label.noSportSuggestions": "No se encontraron sugerencias.",
     "label.useAsCustomSport": "Usar \"{{term}}\" como deporte personalizado",
@@ -5000,13 +5243,13 @@ const STRINGS = {
       "Pulsa una app que quieras restringir y luego pulsa Atrás para regresar al tutorial.",
     "tutorial.step.finish.title": "Listo",
     "tutorial.step.finish.body":
-      "Pulsa Siguiente para terminar el tutorial. Puedes reiniciarlo desde el menú principal tocando el botón Tutorial arriba a la derecha en 'Ejercicios individuales'.",
-    "tutorial.step.singleExercises.title": "Ejercicios individuales",
+      "Pulsa Siguiente para terminar el tutorial. Puedes reiniciarlo desde el menú principal tocando el botón Tutorial arriba a la derecha en 'Sport'.",
+    "tutorial.step.singleExercises.title": "Sport",
     "tutorial.step.singleExercises.body":
-      "La pestaña Ejercicios individuales reúne tus deportes; toca uno para comenzar o pulsa Siguiente para continuar.",
-    "tutorial.step.workout.title": "Pestaña Workout",
+      "La pestaña Sport reúne tus deportes; toca uno para comenzar o pulsa Siguiente para continuar.",
+    "tutorial.step.workout.title": "Pestaña Sport",
     "tutorial.step.workout.body":
-      "Toca Workout en la barra inferior para abrir esta pestaña; aquí cronometras sesiones y ves entrenamientos pasados.",
+      "Toca Start Workout en la parte superior de la pestaña Sport para abrir la vista de entrenamiento; aquí cronometras sesiones y ves entrenamientos pasados.",
     "tutorial.step.workoutDetail.title": "Detalles del workout",
     "tutorial.step.workoutDetail.body":
       "Este panel controla el temporizador y te deja iniciar o parar sesiones. Pulsa Siguiente para continuar.",
@@ -5023,7 +5266,7 @@ const STRINGS = {
   },
   fr: {
     "app.title": "Sport pour le temps d’écran",
-    "menu.home": "Exercices individuels",
+    "menu.home": "Sport",
     "menu.sports": "Tes sports",
     "menu.apps": "Modifier les apps restreintes",
     "menu.settings": "Reglages",
@@ -5047,6 +5290,11 @@ const STRINGS = {
     "label.editEntry": "Modifier l’entrée",
     "label.dayDetails": "Détails du jour",
     "label.noEntries": "Aucune entrée",
+    "label.weightLastSet": "Dernière série",
+    "label.weightWorkoutTotal": "Total de l'entraînement",
+    "label.weightHistory": "Séries récentes",
+    "label.weightUnit": "kg",
+    "label.noSportsMatch": "Aucun sport trouvé",
     "label.breakdown": "Detail",
     "label.save": "Enregistrer",
     "label.editHint": "Réduction uniquement.",
@@ -5119,6 +5367,7 @@ const STRINGS = {
       "Applique un style noir et blanc aux apps restreintes dans la liste.",
     "label.closeApps": "Fermer les apps",
     "label.searchApps": "Rechercher des apps",
+    "label.searchSports": "Rechercher des sports",
     "label.noApps": "Aucune app trouvee.",
     "label.accessibilityMissing": "Accessibilité inactive",
     "label.accessibilityActive": "Accessibilité active",
@@ -5130,7 +5379,6 @@ const STRINGS = {
     "label.weekOverview": "Aperçu quotidien",
     "label.weekTotal": "Cette semaine",
     "label.noSports": "Aucun sport actif. Ajoutez-en.",
-    "label.searchSports": "Rechercher un sport",
     "label.sportSuggestions": "Modèles sportifs",
     "label.noSportSuggestions": "Aucune suggestion trouvée.",
     "label.useAsCustomSport": "Utiliser \"{{term}}\" comme sport personnalisé",
@@ -5339,13 +5587,13 @@ const STRINGS = {
       "Touchez une app que vous souhaitez restreindre, puis appuyez sur Retour pour revenir au tutoriel.",
     "tutorial.step.finish.title": "Termine",
     "tutorial.step.finish.body":
-      "Touchez Suivant pour terminer le tutoriel. Tu peux le relancer depuis le menu principal en touchant le bouton Tutoriel en haut à droite de 'Exercices individuels'.",
-    "tutorial.step.singleExercises.title": "Exercices individuels",
+      "Touchez Suivant pour terminer le tutoriel. Tu peux le relancer depuis le menu principal en touchant le bouton Tutoriel en haut à droite de 'Sport'.",
+    "tutorial.step.singleExercises.title": "Sport",
     "tutorial.step.singleExercises.body":
-      "L'onglet Exercices individuels rassemble tes sports ; touche-en un pour commencer ou appuie sur Suivant pour continuer.",
-    "tutorial.step.workout.title": "Onglet Workout",
+      "L'onglet Sport rassemble tes sports ; touche-en un pour commencer ou appuie sur Suivant pour continuer.",
+    "tutorial.step.workout.title": "Onglet Sport",
     "tutorial.step.workout.body":
-      "Touche Workout dans la barre inférieure pour ouvrir cet onglet ; tu lances des séances et consultes les entraînements passés ici.",
+      "Touchez Start Workout en haut de l'onglet Sport pour ouvrir la vue workout ; tu lances des sessions et consultes les entraînements passés ici.",
     "tutorial.step.workoutDetail.title": "Détails du workout",
     "tutorial.step.workoutDetail.body":
       "Ce panneau gère le minuteur et te permet de lancer ou arrêter les séances. Appuie sur Suivant pour poursuivre.",
@@ -5542,6 +5790,36 @@ const formatTime = (timestamp) => {
   return `${hours}:${minutes}`;
 };
 
+const formatWeightValue = (value) => {
+  if (!Number.isFinite(value)) {
+    return "0";
+  }
+  return `${Math.round(value)}`;
+};
+
+const flattenSportEntries = (logs, sportId) => {
+  const sportLog = (logs || {})[sportId] || {};
+  return Object.values(sportLog || {}).flatMap((dayEntries) => dayEntries || []);
+};
+
+const getRecentWeightEntriesForSport = (logs, sportId, limit = 5) => {
+  if (!sportId) {
+    return [];
+  }
+  const allEntries = flattenSportEntries(logs, sportId);
+  const weightEntries = allEntries.filter(
+    (entry) =>
+      entry &&
+      Number.isFinite(entry.weight) &&
+      Number.isFinite(entry.reps) &&
+      entry.weight > 0 &&
+      entry.reps > 0
+  );
+  return weightEntries
+    .sort((a, b) => (b.ts || 0) - (a.ts || 0))
+    .slice(0, limit);
+};
+
 const parseRateMinutes = (value, fallback) => {
   const parsed = Number.parseFloat(String(value).replace(",", "."));
   if (Number.isNaN(parsed) || parsed <= 0) {
@@ -5598,6 +5876,9 @@ const getDefaultRateMinutes = (sportType) => {
 const generateLogId = () =>
   `log_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
 
+const scaleScreenSeconds = (value, balance = 1) =>
+  Math.max(0, Math.floor(value * ADMIN_SCREEN_TIME_FACTOR * balance));
+
 const screenSecondsForStats = (sport, dayStats) => {
   if (!sport || !dayStats) {
     return 0;
@@ -5610,12 +5891,12 @@ const screenSecondsForStats = (sport, dayStats) => {
   if (sport.type === "reps") {
     return Math.max(
       0,
-      Math.floor((dayStats.reps || 0) * baseRate * difficultyFactor)
+      scaleScreenSeconds((dayStats.reps || 0) * baseRate * difficultyFactor)
     );
   }
   return Math.max(
     0,
-    Math.floor((dayStats.seconds || 0) * baseRate * difficultyFactor)
+    scaleScreenSeconds((dayStats.seconds || 0) * baseRate * difficultyFactor)
   );
 };
 
@@ -5629,16 +5910,16 @@ const screenSecondsForEntry = (sport, entry) => {
     const reps = parsePositiveInteger(entry.reps);
     const weight = parsePositiveNumber(entry.weight);
     const value = weight * reps * baseRate * difficultyFactor;
-    return Math.max(0, Math.floor(value));
+    return scaleScreenSeconds(value, WEIGHT_SCREEN_TIME_BALANCE);
   }
   if (sport.type === "reps") {
     const reps = parsePositiveInteger(entry.reps);
     const value = reps * baseRate * difficultyFactor;
-    return Math.max(0, Math.floor(value));
+    return scaleScreenSeconds(value);
   }
   const seconds = parsePositiveNumber(entry.seconds);
   const value = seconds * baseRate * difficultyFactor;
-  return Math.max(0, Math.floor(value));
+  return scaleScreenSeconds(value);
 };
 
 const widgetValueForStats = (sport, dayStats) => {
@@ -6009,6 +6290,7 @@ export default function App() {
   const [workoutSessionCount, setWorkoutSessionCount] = useState(0);
   const workoutTrackingMode = workoutRunning && isWorkoutOpen;
   const [showHidden, setShowHidden] = useState(false);
+  const [sportSearch, setSportSearch] = useState("");
   const [newName, setNewName] = useState("");
   const [newType, setNewType] = useState("reps");
   const [newIcon, setNewIcon] = useState("");
@@ -6103,7 +6385,7 @@ export default function App() {
   const tutorialTrackingAreaRef = useRef(null);
   const tutorialBackButtonRef = useRef(null);
   const tutorialSettingsNavRef = useRef(null);
-  const tutorialWorkoutNavRef = useRef(null);
+  const tutorialWorkoutStartRef = useRef(null);
   const tutorialStatsNavRef = useRef(null);
   const tutorialWorkoutTimerRef = useRef(null);
   const tutorialAddSportRef = useRef(null);
@@ -7718,30 +8000,15 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       >
         <MainNavIcon type="home" active={active === "home"} />
         <Text
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.75}
           style={[
             styles.mainNavText,
             active === "home" && styles.mainNavTextActive,
           ]}
         >
           {t("menu.home")}
-        </Text>
-      </Pressable>
-      <Pressable
-        style={[
-          styles.mainNavButton,
-          active === "workout" && styles.mainNavButtonActive,
-        ]}
-        ref={tutorialWorkoutNavRef}
-        onPress={openWorkout}
-      >
-        <MainNavIcon type="workout" active={active === "workout"} />
-        <Text
-          style={[
-            styles.mainNavText,
-            active === "workout" && styles.mainNavTextActive,
-          ]}
-        >
-          {t("menu.workout")}
         </Text>
       </Pressable>
       <Pressable
@@ -7754,6 +8021,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       >
         <MainNavIcon type="stats" active={active === "stats"} />
         <Text
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.75}
           style={[
             styles.mainNavText,
             active === "stats" && styles.mainNavTextActive,
@@ -7772,6 +8042,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       >
         <MainNavIcon type="settings" active={active === "settings"} />
         <Text
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.75}
           style={[
             styles.mainNavText,
             active === "settings" && styles.mainNavTextActive,
@@ -7949,6 +8222,24 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       );
       return;
     }
+    const exerciseEntry = {
+      ts: Date.now(),
+    };
+    if (sport.type === "reps") {
+      exerciseEntry.reps = 1;
+    }
+    if (sport.type === "time" && Number.isFinite(sport.defaultRateMinutes)) {
+      exerciseEntry.seconds = Math.max(1, sport.defaultRateMinutes * 60);
+    }
+    addLogEntry(sport, exerciseEntry);
+    const addedSeconds = screenSecondsForEntry(sport, exerciseEntry);
+    updateDayStat(sport.id, (dayStats) => ({
+      ...dayStats,
+      reps: dayStats.reps + (exerciseEntry.reps || 0),
+      seconds: dayStats.seconds + (exerciseEntry.seconds || 0),
+      screenSeconds: (dayStats.screenSeconds || 0) + addedSeconds,
+    }));
+    setWorkoutSessionCount((prev) => prev + 1);
     recordWorkoutExercise(sport);
     handleSelectSport(sport.id);
   };
@@ -8240,9 +8531,66 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
 
   const activeSports = sports.filter((sport) => !sport.hidden);
   const hiddenSports = sports.filter((sport) => sport.hidden);
+  const normalizedSportSearchTerm = sportSearch.trim().toLowerCase();
+  const filteredActiveSports = useMemo(() => {
+    if (!normalizedSportSearchTerm) {
+      return activeSports;
+    }
+    return activeSports.filter((sport) =>
+      doesSportMatchSearchTerm(sport, normalizedSportSearchTerm)
+    );
+  }, [activeSports, normalizedSportSearchTerm]);
+  const filteredHiddenSports = useMemo(() => {
+    if (!normalizedSportSearchTerm) {
+      return hiddenSports;
+    }
+    return hiddenSports.filter((sport) =>
+      doesSportMatchSearchTerm(sport, normalizedSportSearchTerm)
+    );
+  }, [hiddenSports, normalizedSportSearchTerm]);
   const selectedSport = sports.find((sport) => sport.id === selectedSportId);
   const tutorialSportId = activeSports[0]?.id;
   const motivationSport = activeSports[0] ?? null;
+  const workoutWeightSummary = (() => {
+    if (
+      !selectedSport ||
+      !selectedSport.weightExercise ||
+      !workoutRunning ||
+      !currentWorkout
+    ) {
+      return { total: 0, last: null };
+    }
+    const startTs = workoutStartRef.current || currentWorkout.startTs;
+    if (!startTs) {
+      return { total: 0, last: null };
+    }
+    const now = Date.now();
+    const entries = flattenSportEntries(logs, selectedSport.id);
+    let total = 0;
+    let last = null;
+    entries.forEach((entry) => {
+      if (!entry || !Number.isFinite(entry.weight) || !entry.reps) {
+        return;
+      }
+      const timestamp = entry.ts || 0;
+      if (timestamp < startTs || timestamp > now) {
+        return;
+      }
+      total += entry.weight * entry.reps;
+      if (!last || timestamp > (last.ts || 0)) {
+        last = entry;
+      }
+    });
+    return { total: Math.round(total), last };
+  })();
+  const weightWorkoutTotal = workoutWeightSummary.total || 0;
+  const lastWorkoutWeightEntry = workoutWeightSummary.last;
+  const recentWeightEntries = useMemo(() => {
+    if (!selectedSport || !selectedSport.weightExercise) {
+      return [];
+    }
+    return getRecentWeightEntriesForSport(logs, selectedSport.id);
+  }, [logs, selectedSport?.id]);
   const statsSport = sports.find((sport) => sport.id === statsSportId);
   const aiSport = aiSession
     ? sports.find((sport) => sport.id === aiSession.sportId)
@@ -8318,7 +8666,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       id: "workout",
       titleKey: "tutorial.step.workout.title",
       bodyKey: "tutorial.step.workout.body",
-      targetRef: tutorialWorkoutNavRef,
+      targetRef: tutorialWorkoutStartRef,
       actionId: "openWorkout",
       requiresAction: true,
     });
@@ -10222,6 +10570,24 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           </Pressable>
         ) : isWeightMode ? (
           <View style={styles.weightEntryArea} ref={tutorialTrackingAreaRef}>
+            <View style={styles.weightSummaryRow}>
+              <View style={styles.weightSummaryColumn}>
+                <Text style={styles.weightSummaryLabel}>{t("label.weightLastSet")}</Text>
+                <Text style={styles.weightSummaryValue}>
+                  {lastWorkoutWeightEntry
+                    ? `${formatWeightValue(lastWorkoutWeightEntry.weight)} × ${lastWorkoutWeightEntry.reps}`
+                    : t("label.weightEntryPreview")}
+                </Text>
+              </View>
+              <View style={styles.weightSummaryColumn}>
+                <Text style={styles.weightSummaryLabel}>{t("label.weightWorkoutTotal")}</Text>
+                <Text style={styles.weightSummaryValue}>
+                  {weightWorkoutTotal > 0
+                    ? `${formatWeightValue(weightWorkoutTotal)} ${t("label.weightUnit")}`
+                    : "-"}
+                </Text>
+              </View>
+            </View>
             <View style={styles.weightFieldsRow}>
               <View style={styles.weightField}>
                 <Text style={styles.weightFieldLabel}>
@@ -10261,6 +10627,28 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 {t("label.weightEntryButton")}
               </Text>
             </Pressable>
+            {recentWeightEntries.length > 0 ? (
+              <View style={styles.weightHistoryCard}>
+                <Text style={styles.sectionTitle}>{t("label.weightHistory")}</Text>
+                {recentWeightEntries.map((entry, index) => (
+                  <View
+                    key={entry.id || entry.ts}
+                    style={[
+                      styles.weightHistoryRow,
+                      index === recentWeightEntries.length - 1 &&
+                        styles.weightHistoryRowLast,
+                    ]}
+                  >
+                    <Text style={styles.weightHistoryTime}>
+                      {formatTime(entry.ts || Date.now())}
+                    </Text>
+                    <Text style={styles.weightHistorySet}>
+                      {formatWeightValue(entry.weight)} × {entry.reps}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            ) : null}
           </View>
         ) : (
           <View style={styles.trackingArea} ref={tutorialTrackingAreaRef}>
@@ -10307,16 +10695,21 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           contentContainerStyle={styles.scrollContent}
         >
           <View style={styles.headerRow}>
-            <View style={styles.headerTitleBlock}>
-              <View style={styles.titleWrap}>
-                <Text style={styles.title}>{t("app.title")}</Text>
-                <View style={styles.titleDecoration} />
+            <View style={styles.workoutHeaderLeft}>
+              <Pressable style={styles.backButton} onPress={openHome}>
+                <Text style={styles.backText}>{t("label.back")}</Text>
+              </Pressable>
+              <View style={styles.headerTitleBlock}>
+                <View style={styles.titleWrap}>
+                  <Text style={styles.title}>{t("app.title")}</Text>
+                  <View style={styles.titleDecoration} />
+                </View>
+                <Text style={styles.subtitle}>{t("menu.workout")}</Text>
               </View>
-              <Text style={styles.subtitle}>{t("menu.workout")}</Text>
             </View>
             {renderTutorialHeaderButton()}
           </View>
-          {renderMainNav("workout")}
+          {renderMainNav("home")}
           {renderWorkoutBanner()}
           <View
             style={[styles.infoCard, styles.workoutTimerCard]}
@@ -10862,7 +11255,28 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           {renderTutorialHeaderButton()}
         </View>
         {renderMainNav("home")}
+        <View style={styles.workoutStartRow}>
+          <Pressable
+            ref={tutorialWorkoutStartRef}
+            style={[styles.primaryButton, styles.fullWidthButton]}
+            onPress={openWorkout}
+          >
+            <Text style={styles.primaryButtonText}>
+              {t("label.startWorkout")}
+            </Text>
+          </Pressable>
+        </View>
         {renderWorkoutBanner()}
+        <TextInput
+          style={styles.searchInput}
+          autoCorrect={false}
+          autoCapitalize="none"
+          placeholder={t("label.searchSports")}
+          placeholderTextColor="#7a7a7a"
+          value={sportSearch}
+          onChangeText={setSportSearch}
+          clearButtonMode="while-editing"
+        />
         {showMotivationBlock ? (
           <View
             style={[
@@ -11058,8 +11472,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         {activeSports.length === 0 ? (
           <Text style={styles.helperText}>{t("label.noSports")}</Text>
         ) : null}
+        {activeSports.length > 0 && filteredActiveSports.length === 0 ? (
+          <Text style={styles.helperText}>{t("label.noSportsMatch")}</Text>
+        ) : null}
         <View style={styles.sportsGrid}>
-          {activeSports.map((sport) => {
+          {filteredActiveSports.map((sport) => {
             const daily = getRollingStats(logs, sport.id, sport);
             const sportLabel = getSportLabel(sport);
             return (
@@ -11209,13 +11626,13 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             onPress={() => setShowHidden((s) => !s)}
           >
             <Text style={styles.hiddenToggleText}>
-              {showHidden ? t("label.hiddenHide") : t("label.hiddenShow")} ({hiddenSports.length})
+              {showHidden ? t("label.hiddenHide") : t("label.hiddenShow")} ({filteredHiddenSports.length})
             </Text>
             <Text style={styles.hiddenToggleIcon}>{showHidden ? "v" : ">"}</Text>
           </Pressable>
-              {showHidden
-                ? hiddenSports.map((sport) => {
-                    const daily = getRollingStats(logs, sport.id, sport);
+          {showHidden
+            ? filteredHiddenSports.map((sport) => {
+                const daily = getRollingStats(logs, sport.id, sport);
                 const sportLabel = getSportLabel(sport);
                 return (
                   <View
@@ -11894,6 +12311,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 16,
   },
+  workoutHeaderLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
   headerTitleBlock: {
     flex: 1,
     paddingRight: 12,
@@ -11912,14 +12334,19 @@ const styles = StyleSheet.create({
   },
   mainNav: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
+    flexWrap: "nowrap",
+    justifyContent: "space-between",
+    marginBottom: 12,
+    width: "100%",
+  },
+  workoutStartRow: {
     marginBottom: 12,
   },
   mainNavButton: {
-    backgroundColor: COLORS.cardAlt,
+    flex: 1,
+    minWidth: 0,
+    marginHorizontal: 4,
     paddingVertical: 6,
-    paddingHorizontal: 12,
     borderRadius: 999,
     alignItems: "center",
     justifyContent: "center",
@@ -11933,6 +12360,8 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     fontWeight: "700",
     fontSize: 12,
+    textAlign: "center",
+    flexShrink: 1,
   },
   mainNavTextActive: {
     color: COLORS.ink,
@@ -12230,6 +12659,50 @@ const styles = StyleSheet.create({
     color: COLORS.muted,
     marginTop: 10,
     marginBottom: 8,
+  },
+  weightSummaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 12,
+    marginBottom: 12,
+  },
+  weightSummaryColumn: {
+    flex: 1,
+  },
+  weightSummaryLabel: {
+    color: COLORS.muted,
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  weightSummaryValue: {
+    color: COLORS.text,
+    fontSize: 32,
+    fontWeight: "700",
+  },
+  weightHistoryCard: {
+    marginTop: 16,
+    padding: 14,
+    borderRadius: 14,
+    backgroundColor: COLORS.cardAlt,
+  },
+  weightHistoryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(148, 163, 184, 0.2)",
+  },
+  weightHistoryRowLast: {
+    borderBottomWidth: 0,
+  },
+  weightHistoryTime: {
+    color: COLORS.muted,
+    fontSize: 12,
+  },
+  weightHistorySet: {
+    color: COLORS.text,
+    fontWeight: "600",
   },
   counterValue: {
     fontSize: 56,
