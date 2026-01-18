@@ -6027,7 +6027,7 @@ export default function App() {
   }, []);
   const [showIconInput, setShowIconInput] = useState(false);
   const [customSuggestionUsed, setCustomSuggestionUsed] = useState(false);
-  const [inlineInfoKey, setInlineInfoKey] = useState(null);
+  const [infoModalKey, setInfoModalKey] = useState(null);
   const [pendingAiSport, setPendingAiSport] = useState(null);
   const [aiInfoVisible, setAiInfoVisible] = useState(false);
   const [installedApps, setInstalledApps] = useState([]);
@@ -9984,6 +9984,37 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             );
           })}
         </ScrollView>
+        {infoModalKey ? (
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalCard}>
+              <Text style={styles.modalTitle}>
+                {infoModalKey === "type"
+                  ? t("label.typeInfoTitle")
+                  : t("label.difficultyLabel")}
+              </Text>
+              <Text style={styles.modalSubtitle}>
+                {infoModalKey === "type"
+                  ? t("label.typeHelp")
+                  : t("label.difficultyDescription")}
+              </Text>
+              {infoModalKey === "difficulty" ? (
+                <Text style={styles.modalSubtitle}>
+                  {t("label.difficultyFormula")}
+                </Text>
+              ) : null}
+              <View style={styles.modalActions}>
+                <Pressable
+                  style={styles.secondaryButton}
+                  onPress={() => setInfoModalKey(null)}
+                >
+                  <Text style={styles.secondaryButtonText}>
+                    {t("label.close")}
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        ) : null}
         {tutorialActive ? renderTutorialOverlay() : null}
       </SafeAreaView>
     );
@@ -10792,8 +10823,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           if (infoHint) {
             setInfoHint(null);
           }
-          if (inlineInfoKey) {
-            setInlineInfoKey(null);
+          if (infoModalKey) {
+            setInfoModalKey(null);
           }
         }}
       >
@@ -11620,7 +11651,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               <Pressable
                 style={styles.infoButton}
                 onPress={() =>
-                  setInlineInfoKey((prev) => (prev === "type" ? null : "type"))
+                  setInfoModalKey((prev) => (prev === "type" ? null : "type"))
                 }
               >
                 <Text style={styles.infoButtonText}>?</Text>
@@ -11667,16 +11698,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 </Text>
               </Pressable>
             </View>
-            {inlineInfoKey === "type" ? (
-              <View style={styles.inlineInfoTooltip}>
-                <Text style={styles.inlineInfoTooltipTitle}>
-                  {t("label.typeInfoTitle")}
-                </Text>
-                <Text style={styles.inlineInfoTooltipText}>
-                  {t("label.typeHelp")}
-                </Text>
-              </View>
-            ) : null}
             <View style={styles.sliderSection}>
               <View style={styles.difficultyHeaderRow}>
                 <Text style={styles.rateLabel}>{t("label.difficultyLabel")}</Text>
@@ -11687,7 +11708,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                   <Pressable
                     style={styles.infoButton}
                     onPress={() =>
-                      setInlineInfoKey((prev) =>
+                      setInfoModalKey((prev) =>
                         prev === "difficulty" ? null : "difficulty"
                       )
                     }
@@ -11696,19 +11717,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                   </Pressable>
                 </View>
               </View>
-              {inlineInfoKey === "difficulty" ? (
-                <View style={styles.inlineInfoTooltip}>
-                  <Text style={styles.inlineInfoTooltipTitle}>
-                    {t("label.difficultyLabel")}
-                  </Text>
-                  <Text style={styles.inlineInfoTooltipText}>
-                    {t("label.difficultyDescription")}
-                  </Text>
-                  <Text style={styles.inlineInfoTooltipText}>
-                    {t("label.difficultyFormula")}
-                  </Text>
-                </View>
-              ) : null}
               <View style={styles.difficultyBarWrapper}>
                 <View style={styles.difficultyBarTrack}>
                   <View
@@ -12621,24 +12629,6 @@ const styles = StyleSheet.create({
   motivationActionText: {
     color: COLORS.background,
     fontWeight: "700",
-  },
-  inlineInfoTooltip: {
-    marginTop: 8,
-    borderRadius: 12,
-    backgroundColor: COLORS.cardDark,
-    borderWidth: 1,
-    borderColor: COLORS.cardAlt,
-    padding: 12,
-  },
-  inlineInfoTooltipTitle: {
-    color: COLORS.white,
-    fontWeight: "700",
-    marginBottom: 6,
-  },
-  inlineInfoTooltipText: {
-    color: COLORS.muted,
-    fontSize: 13,
-    lineHeight: 18,
   },
   aiInfoWrapper: {
     marginTop: 12,
