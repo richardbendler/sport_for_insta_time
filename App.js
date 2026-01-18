@@ -9984,43 +9984,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             );
           })}
         </ScrollView>
-        {infoModalKey ? (
-          <Pressable
-            style={styles.modalOverlay}
-            onPress={() => setInfoModalKey(null)}
-          >
-            <Pressable
-              style={styles.modalCard}
-              onPress={(event) => event.stopPropagation()}
-            >
-              <Text style={styles.modalTitle}>
-                {infoModalKey === "type"
-                  ? t("label.typeInfoTitle")
-                  : t("label.difficultyLabel")}
-              </Text>
-              <Text style={styles.modalSubtitle}>
-                {infoModalKey === "type"
-                  ? t("label.typeHelp")
-                  : t("label.difficultyDescription")}
-              </Text>
-              {infoModalKey === "difficulty" ? (
-                <Text style={styles.modalSubtitle}>
-                  {t("label.difficultyFormula")}
-                </Text>
-              ) : null}
-              <View style={styles.modalActions}>
-                <Pressable
-                  style={styles.secondaryButton}
-                  onPress={() => setInfoModalKey(null)}
-                >
-                  <Text style={styles.secondaryButtonText}>
-                    {t("label.close")}
-                  </Text>
-                </Pressable>
-              </View>
-            </Pressable>
-          </Pressable>
-        ) : null}
         {tutorialActive ? renderTutorialOverlay() : null}
       </SafeAreaView>
     );
@@ -11785,6 +11748,41 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             </View>
           </View>
         </View>
+      ) : null}
+      {infoModalKey ? (
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setInfoModalKey(null)}
+        >
+          <Pressable
+            style={styles.modalCard}
+            onPress={(event) => event.stopPropagation()}
+          >
+            <Text style={styles.modalTitle}>
+              {infoModalKey === "type"
+                ? t("label.typeInfoTitle")
+                : t("label.difficultyLabel")}
+            </Text>
+            <Text style={styles.modalSubtitle}>
+              {infoModalKey === "type"
+                ? t("label.typeHelp")
+                : t("label.difficultyDescription")}
+            </Text>
+            {infoModalKey === "difficulty" ? (
+              <Text style={styles.modalSubtitle}>
+                {t("label.difficultyFormula")}
+              </Text>
+            ) : null}
+            <View style={styles.modalActions}>
+              <Pressable
+                style={styles.secondaryButton}
+                onPress={() => setInfoModalKey(null)}
+              >
+                <Text style={styles.secondaryButtonText}>{t("label.close")}</Text>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
       ) : null}
       {tutorialActive ? renderTutorialOverlay() : null}
     </SafeAreaView>
