@@ -78,14 +78,11 @@ const AI_EXERCISES = {
 
 const DEFAULT_ICON = "⭐";
 const DEFAULT_DIFFICULTY = 5;
-const DEFAULT_TIME_RATE = 0.2;
-const DEFAULT_REPS_RATE = 1;
+const DEFAULT_TIME_RATE = 0.5;
+const DEFAULT_REPS_RATE = 0.5;
 const ADMIN_SCREEN_TIME_FACTOR = 0.1; // tweak this factor to globally adjust granted Screen Time
 const WEIGHT_SCREEN_TIME_BALANCE = 0.25; // reduces the impact of weight entries after scaling
-const DEFAULT_WEIGHT_RATE = 0.08;
-const TIME_SCREEN_MULTIPLIER = 0.05;
-const REPS_SCREEN_MULTIPLIER = 0.05;
-const WEIGHTED_SCREEN_MULTIPLIER = 0.001;
+const DEFAULT_WEIGHT_RATE = 0.04;
 const WORKOUT_CONTINUE_WINDOW_MS = 30 * 60 * 1000;
 const interpolateTemplate = (template = "", values = {}) =>
   template.replace(/\{\{(\w+)\}\}/g, (_, key) =>
@@ -4373,13 +4370,17 @@ const screenSecondsForStats = (sport, dayStats) => {
     return Math.max(0, Math.floor(dayStats.screenSeconds || 0));
   }
   const difficultyFactor = difficultyLevelForSport(sport);
+  const baseRate = screenSecondsBaseRate(sport);
   if (sport.type === "reps") {
-    const value = (dayStats.reps || 0) * difficultyFactor * REPS_SCREEN_MULTIPLIER;
-    return Math.max(0, scaleScreenSeconds(value));
+    return Math.max(
+      0,
+      scaleScreenSeconds((dayStats.reps || 0) * baseRate * difficultyFactor)
+    );
   }
-  const value =
-    (dayStats.seconds || 0) * difficultyFactor * TIME_SCREEN_MULTIPLIER;
-  return Math.max(0, scaleScreenSeconds(value));
+  return Math.max(
+    0,
+    scaleScreenSeconds((dayStats.seconds || 0) * baseRate * difficultyFactor)
+  );
 };
 
 const screenSecondsForEntry = (sport, entry) => {
@@ -4387,20 +4388,20 @@ const screenSecondsForEntry = (sport, entry) => {
     return 0;
   }
   const difficultyFactor = difficultyLevelForSport(sport);
+  const baseRate = screenSecondsBaseRate(sport);
   if (sport.type === "reps" && sport.weightExercise) {
     const reps = parsePositiveInteger(entry.reps);
     const weight = parsePositiveNumber(entry.weight);
-    const value =
-      weight * reps * difficultyFactor * WEIGHTED_SCREEN_MULTIPLIER;
+    const value = weight * reps * baseRate * difficultyFactor;
     return scaleScreenSeconds(value, WEIGHT_SCREEN_TIME_BALANCE);
   }
   if (sport.type === "reps") {
     const reps = parsePositiveInteger(entry.reps);
-    const value = reps * difficultyFactor * REPS_SCREEN_MULTIPLIER;
+    const value = reps * baseRate * difficultyFactor;
     return scaleScreenSeconds(value);
   }
   const seconds = parsePositiveNumber(entry.seconds);
-  const value = seconds * difficultyFactor * TIME_SCREEN_MULTIPLIER;
+  const value = seconds * baseRate * difficultyFactor;
   return scaleScreenSeconds(value);
 };
 
@@ -4577,6 +4578,17 @@ const defaultScreenSecondsPerUnit = (sport) => {
     return DEFAULT_REPS_RATE;
   }
   return DEFAULT_TIME_RATE;
+};
+
+const screenSecondsBaseRate = (sport) => {
+  if (!sport) {
+    return DEFAULT_TIME_RATE;
+  }
+  const provided = sport.screenSecondsPerUnit;
+  if (Number.isFinite(Number(provided))) {
+    return Math.max(0, Number(provided));
+  }
+  return defaultScreenSecondsPerUnit(sport);
 };
 
 const normalizeSports = (sportList) => {
