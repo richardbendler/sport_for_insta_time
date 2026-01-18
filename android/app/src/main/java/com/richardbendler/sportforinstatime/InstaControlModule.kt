@@ -2,14 +2,21 @@ package com.richardbendler.sportforinstatime
 
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.app.AppOpsManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.usage.UsageStatsManager
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import com.facebook.react.bridge.*
+import com.richardbendler.sportforinstatime.R
 import org.json.JSONArray
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -18,6 +25,10 @@ import java.util.Locale
 
 class InstaControlModule(private val reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
+
+  private val workoutNotificationChannelId = "workout_timer_channel"
+  private val workoutNotificationId = 2002
+  private var workoutNotificationManager: NotificationManager? = null
 
   override fun getName(): String = "InstaControl"
 
@@ -339,5 +350,63 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
   private fun todayKey(): String {
     val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
     return formatter.format(Date())
+  }
+
+  @ReactMethod
+  fun showWorkoutNotification(title: String?, message: String?) {
+    if (Build.VERSION.SDK_INT >= 33) {
+      val status = ContextCompat.checkSelfPermission(
+        reactContext,
+        "android.permission.POST_NOTIFICATIONS"
+      )
+      if (status != PackageManager.PERMISSION_GRANTED) {
+        return
+      }
+    }
+    val manager = getWorkoutNotificationManager()
+    val notification = NotificationCompat.Builder(
+      reactContext,
+      workoutNotificationChannelId
+    )
+      .setSmallIcon(R.mipmap.ic_launcher)
+      .setContentTitle(title ?: reactContext.getString(R.string.app_name))
+      .setContentText(message ?: "")
+      .setOnlyAlertOnce(true)
+      .setOngoing(true)
+      .setPriority(NotificationCompat.PRIORITY_LOW)
+      .build()
+    manager.notify(workoutNotificationId, notification)
+  }
+
+  @ReactMethod
+  fun clearWorkoutNotification() {
+    getWorkoutNotificationManager().cancel(workoutNotificationId)
+  }
+
+  private fun getWorkoutNotificationManager(): NotificationManager {
+    val manager = workoutNotificationManager
+      ?: (reactContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).also {
+        workoutNotificationManager = it
+      }
+    ensureWorkoutNotificationChannel(manager)
+    return manager
+  }
+
+  private fun ensureWorkoutNotificationChannel(manager: NotificationManager) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+      return
+    }
+    if (manager.getNotificationChannel(workoutNotificationChannelId) != null) {
+      return
+    }
+    val channel = NotificationChannel(
+      workoutNotificationChannelId,
+      "Workout timer",
+      NotificationManager.IMPORTANCE_LOW
+    )
+    channel.setSound(null, null)
+    channel.enableVibration(false)
+    channel.setShowBadge(false)
+    manager.createNotificationChannel(channel)
   }
 }
