@@ -231,6 +231,9 @@ const MONTH_LABELS = {
 };
 const DEFAULT_ICON = "⭐";
 const DEFAULT_DIFFICULTY = 5;
+const DEFAULT_TIME_RATE = 0.1;
+const DEFAULT_REPS_RATE = 1;
+const DEFAULT_WEIGHT_RATE = 0.08;
 const interpolateTemplate = (template = "", values = {}) =>
   template.replace(/\{\{(\w+)\}\}/g, (_, key) =>
     Object.prototype.hasOwnProperty.call(values, key) ? values[key] : ""
@@ -4121,10 +4124,11 @@ const STRINGS = {
     "label.repsShort": "Wdh.",
     "label.timeUnit": "Zeit",
     "label.weightExercise": "Gewichtsübung",
-    "label.difficultyLabel": "Schwierigkeitsgrad (1-10)",
-    "label.difficultyDescription": "Jede Einheit erzeugt Screen Time; die Schwierigkeit skaliert sie.",
+    "label.difficultyLabel": "Intensitätsfaktor (1-10)",
+      "label.difficultyDescription":
+        "Der Faktor multipliziert Dauer, Wiederholungen oder Gewicht und legt fest, wie viel Screen Time jede Einheit bringt.",
     "label.difficultyFormula":
-      "Bildschirmzeit = Einheit × Rate × (Schwierigkeitsgrad / 5)",
+      "Formeln: Zeitbasiert = Dauer (s) × Faktor × 0,1 · Ohne Gewicht = Wiederholungen × Faktor × 1 · Mit Gewicht = kg × Wiederholungen × Faktor × 0,08",
     "label.weightEntryButton": "Satz eintragen",
     "label.weightEntryPreview": "Screen Time (Vorschau)",
     "label.weightEntryWeight": "Gewicht (kg)",
@@ -4462,11 +4466,11 @@ const STRINGS = {
     "label.repsShort": "reps",
     "label.timeUnit": "Time",
     "label.weightExercise": "Weight exercise",
-    "label.difficultyLabel": "Difficulty level (1-10)",
-    "label.difficultyDescription":
-      "Difficulty controls how much screen time each unit earns.",
+    "label.difficultyLabel": "Intensity factor (1-10)",
+      "label.difficultyDescription":
+        "The slider multiplies duration, reps or weight so you control how much Screen Time each set earns.",
     "label.difficultyFormula":
-      "Screen Time = Units × Rate × (Difficulty / 5)",
+      "Formulas: Time = seconds × factor × 0.1 · Reps = reps × factor × 1 · Weighted = kg × reps × factor × 0.08",
     "label.weightEntryButton": "Log set",
     "label.weightEntryPreview": "Screen time preview",
     "label.weightEntryWeight": "Weight (kg)",
@@ -4805,11 +4809,11 @@ const STRINGS = {
     "label.repsShort": "rep.",
     "label.timeUnit": "Tiempo",
     "label.weightExercise": "Ejercicio con peso",
-    "label.difficultyLabel": "Nivel de dificultad (1-10)",
-    "label.difficultyDescription":
-      "La dificultad ajusta cuánto tiempo de pantalla gana cada unidad.",
+    "label.difficultyLabel": "Factor de intensidad (1-10)",
+      "label.difficultyDescription":
+        "El deslizador multiplica duración, repeticiones o peso para definir cuánto tiempo de pantalla otorga cada serie.",
     "label.difficultyFormula":
-      "Tiempo de pantalla = Unidades × Ritmo × (Dificultad / 5)",
+      "Fórmulas: Tiempo = segundos × factor × 0,1 · Reps sin peso = rep × factor × 1 · Con peso = kg × rep × factor × 0,08",
     "label.weightEntryButton": "Registrar serie",
     "label.weightEntryPreview": "Tiempo de pantalla (vista previa)",
     "label.weightEntryWeight": "Peso (kg)",
@@ -5144,11 +5148,11 @@ const STRINGS = {
     "label.repsShort": "rép.",
     "label.timeUnit": "Temps",
     "label.weightExercise": "Exercice de force",
-    "label.difficultyLabel": "Niveau de difficulté (1-10)",
-    "label.difficultyDescription":
-      "La difficulté règle combien de temps d’écran génère chaque unité.",
+    "label.difficultyLabel": "Facteur d'intensité (1-10)",
+      "label.difficultyDescription":
+        "Le curseur multiplie durée, répétitions ou poids pour décider du temps d'écran attribué à chaque série.",
     "label.difficultyFormula":
-      "Temps d’écran = Unités × Taux × (Difficulté / 5)",
+      "Formules : Temps = secondes × facteur × 0,1 · Rép. sans poids = rép. × facteur × 1 · Poids = kg × rép. × facteur × 0,08",
     "label.weightEntryButton": "Enregistrer la série",
     "label.weightEntryPreview": "Aperçu du temps écran",
     "label.weightEntryWeight": "Poids (kg)",
@@ -5584,9 +5588,6 @@ const difficultyLevelForSport = (sport) => {
   return clampDifficultyLevel(candidate);
 };
 
-const difficultyScaleForSport = (sport) =>
-  difficultyLevelForSport(sport) / DEFAULT_DIFFICULTY;
-
 const getDefaultRateMinutes = (sportType) => {
   if (sportType === "reps") {
     return 1;
@@ -5604,17 +5605,17 @@ const screenSecondsForStats = (sport, dayStats) => {
   if (sport.weightExercise && sport.type === "reps") {
     return Math.max(0, Math.floor(dayStats.screenSeconds || 0));
   }
-  const rate = sport.screenSecondsPerUnit ?? 0;
-  const difficultyScale = difficultyScaleForSport(sport);
+  const difficultyFactor = difficultyLevelForSport(sport);
+  const baseRate = screenSecondsBaseRate(sport);
   if (sport.type === "reps") {
     return Math.max(
       0,
-      Math.floor((dayStats.reps || 0) * rate * difficultyScale)
+      Math.floor((dayStats.reps || 0) * baseRate * difficultyFactor)
     );
   }
   return Math.max(
     0,
-    Math.floor((dayStats.seconds || 0) * rate * difficultyScale)
+    Math.floor((dayStats.seconds || 0) * baseRate * difficultyFactor)
   );
 };
 
@@ -5622,24 +5623,22 @@ const screenSecondsForEntry = (sport, entry) => {
   if (!sport || !entry) {
     return 0;
   }
-  const difficultyLevel = difficultyLevelForSport(sport);
-  const difficultyScale = difficultyLevel / DEFAULT_DIFFICULTY;
+  const difficultyFactor = difficultyLevelForSport(sport);
+  const baseRate = screenSecondsBaseRate(sport);
   if (sport.type === "reps" && sport.weightExercise) {
+    const reps = parsePositiveInteger(entry.reps);
     const weight = parsePositiveNumber(entry.weight);
-    const value = (weight * (entry.reps || 0) * difficultyLevel) / 50;
+    const value = weight * reps * baseRate * difficultyFactor;
     return Math.max(0, Math.floor(value));
   }
-  const rate = sport.screenSecondsPerUnit ?? 0;
   if (sport.type === "reps") {
-    return Math.max(
-      0,
-      Math.floor((entry.reps || 0) * rate * difficultyScale)
-    );
+    const reps = parsePositiveInteger(entry.reps);
+    const value = reps * baseRate * difficultyFactor;
+    return Math.max(0, Math.floor(value));
   }
-  return Math.max(
-    0,
-    Math.floor((entry.seconds || 0) * rate * difficultyScale)
-  );
+  const seconds = parsePositiveNumber(entry.seconds);
+  const value = seconds * baseRate * difficultyFactor;
+  return Math.max(0, Math.floor(value));
 };
 
 const widgetValueForStats = (sport, dayStats) => {
@@ -5793,12 +5792,39 @@ const defaultIconForSport = (sport) => {
 };
 
 const defaultScreenSecondsPerUnit = (sport) => {
-  if (sport.id === "pushups") return 60;
-  if (sport.id === "pullups") return 90;
-  if (sport.id === "pushups_alt") return 45;
-  if (sport.id === "jogging") return 1.2;
-  if (sport.type === "reps") return 60;
-  return 1;
+  if (!sport) {
+    return DEFAULT_TIME_RATE;
+  }
+  if (sport.weightExercise && sport.type === "reps") {
+    return DEFAULT_WEIGHT_RATE;
+  }
+  if (sport.id === "pushups") {
+    return DEFAULT_REPS_RATE * 1.2;
+  }
+  if (sport.id === "pullups") {
+    return DEFAULT_REPS_RATE * 1.4;
+  }
+  if (sport.id === "pushups_alt") {
+    return DEFAULT_REPS_RATE * 0.85;
+  }
+  if (sport.id === "jogging") {
+    return DEFAULT_TIME_RATE * 1.2;
+  }
+  if (sport.type === "reps") {
+    return DEFAULT_REPS_RATE;
+  }
+  return DEFAULT_TIME_RATE;
+};
+
+const screenSecondsBaseRate = (sport) => {
+  if (!sport) {
+    return DEFAULT_TIME_RATE;
+  }
+  const provided = sport.screenSecondsPerUnit;
+  if (Number.isFinite(Number(provided))) {
+    return Math.max(0, Number(provided));
+  }
+  return defaultScreenSecondsPerUnit(sport);
 };
 
 const normalizeSports = (sportList) => {
@@ -6877,11 +6903,22 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       STORAGE_KEYS.usageSnapshot,
       STORAGE_KEYS.logs,
       STORAGE_KEYS.tutorialSeen,
+      STORAGE_KEYS.workouts,
     ]);
     await saveSports(nextSports);
     await saveStats({});
     await saveLogs({});
     await saveSettings(DEFAULT_SETTINGS);
+    sessionStartRef.current = null;
+    workoutStartRef.current = null;
+    setRunning(false);
+    setSessionSeconds(0);
+    setWorkoutRunning(false);
+    setWorkoutSeconds(0);
+    setWorkoutSessionCount(0);
+    setCurrentWorkout(null);
+    setWorkoutHistory([]);
+    setWorkoutDetailId(null);
     setLanguage(DEFAULT_SETTINGS.language);
     setSelectedSportId(null);
     setStatsSportId(null);
@@ -6909,14 +6946,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       entryCount: 0,
       carryoverSeconds: 0,
     });
-    if (InstaControl?.clearAllScreenTimeEntries) {
-      InstaControl.clearAllScreenTimeEntries();
-      InstaControl?.updateOverallWidgets?.();
-    }
     if (InstaControl?.setControlledApps) {
       InstaControl.setControlledApps([]);
     }
-    refreshUsageState();
+    if (InstaControl?.clearAppData) {
+      InstaControl.clearAppData();
+    }
     if (InstaControl?.clearAllScreenTimeEntries) {
       InstaControl.clearAllScreenTimeEntries();
       InstaControl?.updateOverallWidgets?.();
