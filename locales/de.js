@@ -143,7 +143,7 @@ const de = {
       "label.difficultyDescription":
         "Der Faktor multipliziert Dauer, Wiederholungen oder Gewicht und legt fest, wie viel Screen Time jede Einheit bringt.",
       "label.difficultyFormula":
-        "Formeln:\nZeitbasiert = Dauer (s) × Faktor × 0,1\nOhne Gewicht = Wiederholungen × Faktor × 1\nMit Gewicht = kg × Wiederholungen × Faktor × 0,08",
+        "Formeln:\nZeitbasiert = Dauer (s) × Faktor × 0,05\nOhne Gewicht = Wiederholungen × Faktor × 0,05\nMit Gewicht = kg × Wiederholungen × Faktor × 0,001",
     "label.weightEntryButton": "Satz eintragen",
     "label.weightEntryPreview": "Screen Time (Vorschau)",
     "label.weightEntryWeight": "Gewicht (kg)",
