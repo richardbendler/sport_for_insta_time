@@ -4127,8 +4127,8 @@ const STRINGS = {
     "label.difficultyLabel": "Intensitätsfaktor (1-10)",
       "label.difficultyDescription":
         "Der Faktor multipliziert Dauer, Wiederholungen oder Gewicht und legt fest, wie viel Screen Time jede Einheit bringt.",
-    "label.difficultyFormula":
-      "Formeln:\\nZeitbasiert = Dauer (s) × Faktor × 0,1\\nOhne Gewicht = Wiederholungen × Faktor × 1\\nMit Gewicht = kg × Wiederholungen × Faktor × 0,08",
+      "label.difficultyFormula":
+        "Formeln:\nZeitbasiert = Dauer (s) × Faktor × 0,1\nOhne Gewicht = Wiederholungen × Faktor × 1\nMit Gewicht = kg × Wiederholungen × Faktor × 0,08",
     "label.weightEntryButton": "Satz eintragen",
     "label.weightEntryPreview": "Screen Time (Vorschau)",
     "label.weightEntryWeight": "Gewicht (kg)",
@@ -4469,8 +4469,8 @@ const STRINGS = {
     "label.difficultyLabel": "Intensity factor (1-10)",
       "label.difficultyDescription":
         "The slider multiplies duration, reps or weight so you control how much Screen Time each set earns.",
-    "label.difficultyFormula":
-      "Formulas:\\nTime = seconds × factor × 0.1\\nReps = reps × factor × 1\\nWeighted = kg × reps × factor × 0.08",
+      "label.difficultyFormula":
+        "Formulas:\nTime = seconds × factor × 0.1\nReps = reps × factor × 1\nWeighted = kg × reps × factor × 0.08",
     "label.weightEntryButton": "Log set",
     "label.weightEntryPreview": "Screen time preview",
     "label.weightEntryWeight": "Weight (kg)",
@@ -4812,8 +4812,8 @@ const STRINGS = {
     "label.difficultyLabel": "Factor de intensidad (1-10)",
       "label.difficultyDescription":
         "El deslizador multiplica duración, repeticiones o peso para definir cuánto tiempo de pantalla otorga cada serie.",
-    "label.difficultyFormula":
-      "Fórmulas:\\nTiempo = segundos × factor × 0,1\\nReps sin peso = rep × factor × 1\\nCon peso = kg × rep × factor × 0,08",
+      "label.difficultyFormula":
+        "Fórmulas:\nTiempo = segundos × factor × 0,1\nReps sin peso = rep × factor × 1\nCon peso = kg × rep × factor × 0,08",
     "label.weightEntryButton": "Registrar serie",
     "label.weightEntryPreview": "Tiempo de pantalla (vista previa)",
     "label.weightEntryWeight": "Peso (kg)",
@@ -5151,8 +5151,8 @@ const STRINGS = {
     "label.difficultyLabel": "Facteur d'intensité (1-10)",
       "label.difficultyDescription":
         "Le curseur multiplie durée, répétitions ou poids pour décider du temps d'écran attribué à chaque série.",
-    "label.difficultyFormula":
-      "Formules :\\nTemps = secondes × facteur × 0,1\\nRép. sans poids = rép. × facteur × 1\\nPoids = kg × rép. × facteur × 0,08",
+      "label.difficultyFormula":
+        "Formules :\nTemps = secondes × facteur × 0,1\nRép. sans poids = rép. × facteur × 1\nPoids = kg × rép. × facteur × 0,08",
     "label.weightEntryButton": "Enregistrer la série",
     "label.weightEntryPreview": "Aperçu du temps écran",
     "label.weightEntryWeight": "Poids (kg)",
