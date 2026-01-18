@@ -137,7 +137,7 @@ const en = {
       "label.difficultyDescription":
         "The slider multiplies duration, reps or weight so you control how much Screen Time each set earns.",
       "label.difficultyFormula":
-        "Formulas:\nTime = seconds × factor × 0.1\nReps = reps × factor × 1\nWeighted = kg × reps × factor × 0.08",
+        "Formulas:\nTime = seconds × factor × 0.05\nReps = reps × factor × 0.05\nWeighted = kg × reps × factor × 0.001",
     "label.weightEntryButton": "Log set",
     "label.weightEntryPreview": "Screen time preview",
     "label.weightEntryWeight": "Weight (kg)",

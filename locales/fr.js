@@ -135,7 +135,7 @@ const fr = {
       "label.difficultyDescription":
         "Le curseur multiplie durée, répétitions ou poids pour décider du temps d'écran attribué à chaque série.",
       "label.difficultyFormula":
-        "Formules :\nTemps = secondes × facteur × 0,1\nRép. sans poids = rép. × facteur × 1\nPoids = kg × rép. × facteur × 0,08",
+        "Formules :\nTemps = secondes × facteur × 0,05\nRép. sans poids = rép. × facteur × 0,05\nPoids = kg × rép. × facteur × 0,001",
     "label.weightEntryButton": "Enregistrer la série",
     "label.weightEntryPreview": "Aperçu du temps écran",
     "label.weightEntryWeight": "Poids (kg)",
