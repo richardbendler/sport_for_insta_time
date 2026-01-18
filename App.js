@@ -9985,8 +9985,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           })}
         </ScrollView>
         {infoModalKey ? (
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
+          <Pressable
+            style={styles.modalOverlay}
+            onPress={() => setInfoModalKey(null)}
+          >
+            <Pressable
+              style={styles.modalCard}
+              onPress={(event) => event.stopPropagation()}
+            >
               <Text style={styles.modalTitle}>
                 {infoModalKey === "type"
                   ? t("label.typeInfoTitle")
@@ -10012,8 +10018,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                   </Text>
                 </Pressable>
               </View>
-            </View>
-          </View>
+            </Pressable>
+          </Pressable>
         ) : null}
         {tutorialActive ? renderTutorialOverlay() : null}
       </SafeAreaView>
@@ -10822,9 +10828,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         onTouchStart={() => {
           if (infoHint) {
             setInfoHint(null);
-          }
-          if (infoModalKey) {
-            setInfoModalKey(null);
           }
         }}
       >
