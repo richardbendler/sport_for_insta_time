@@ -6030,6 +6030,7 @@ export default function App() {
   const [infoModalKey, setInfoModalKey] = useState(null);
   const [pendingAiSport, setPendingAiSport] = useState(null);
   const [aiInfoVisible, setAiInfoVisible] = useState(false);
+  const scrollViewRef = useRef(null);
   const [installedApps, setInstalledApps] = useState([]);
   const [appSearch, setAppSearch] = useState("");
   const [appSearchInput, setAppSearchInput] = useState("");
@@ -6889,8 +6890,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   };
 
   const resetAllData = async () => {
-    const nextSports = createDefaultPresetSports();
-    await AsyncStorage.multiRemove([
+  const nextSports = createDefaultPresetSports();
+  const { normalized: normalizedSports } = normalizeSports(nextSports);
+  await AsyncStorage.multiRemove([
       STORAGE_KEYS.sports,
       STORAGE_KEYS.stats,
       STORAGE_KEYS.settings,
@@ -6905,7 +6907,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       STORAGE_KEYS.tutorialSeen,
       STORAGE_KEYS.workouts,
     ]);
-    await saveSports(nextSports);
+  await saveSports(normalizedSports);
     await saveStats({});
     await saveLogs({});
     await saveSettings(DEFAULT_SETTINGS);
@@ -8923,6 +8925,44 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     };
   }, [tutorialActive, tutorialStepIndex, width, height]);
 
+  useEffect(() => {
+    if (
+      !tutorialTarget ||
+      !scrollViewRef.current ||
+      typeof scrollViewRef.current.scrollTo !== "function"
+    ) {
+      return;
+    }
+    let raf = null;
+    let cancelled = false;
+    const ensureVisible = () => {
+      scrollViewRef.current.measureInWindow((scrollX, scrollY, scrollWidth, scrollHeight) => {
+        if (cancelled) {
+          return;
+        }
+        const margin = 32;
+        const targetTop = tutorialTarget.y;
+        const targetBottom = tutorialTarget.y + (tutorialTarget.height || 0);
+        const visibleTop = scrollY + margin;
+        const visibleBottom = scrollY + scrollHeight - margin;
+        if (targetTop >= visibleTop && targetBottom <= visibleBottom) {
+          return;
+        }
+        const centerOffset =
+          targetTop - scrollY - scrollHeight / 2 + (tutorialTarget.height || 0) / 2;
+        const desiredY = Math.max(centerOffset, 0);
+        scrollViewRef.current.scrollTo({ y: desiredY, animated: true });
+      });
+    };
+    raf = requestAnimationFrame(ensureVisible);
+    return () => {
+      cancelled = true;
+      if (raf) {
+        cancelAnimationFrame(raf);
+      }
+    };
+  }, [tutorialTarget, tutorialStepIndex]);
+
   const renderTutorialOverlay = () => {
     if (!tutorialActive || !tutorialStep) {
       return null;
@@ -9477,6 +9517,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       return (
     <SafeAreaView style={styles.container}>
         <ScrollView
+          ref={scrollViewRef}
           contentContainerStyle={styles.scrollContent}
         >
             <View style={styles.headerRow}>
@@ -9565,7 +9606,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             {t("label.deleteAllEntriesGlobal")}
           </Text>
         </Pressable>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView ref={scrollViewRef} contentContainerStyle={styles.scrollContent}>
           <View style={styles.headerRow}>
             <View style={styles.headerTitleBlock}>
               <View style={styles.titleWrap}>
@@ -9787,7 +9828,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       const sortedEntries = [...dayLogs].sort((a, b) => a.ts - b.ts);
       return (
         <SafeAreaView style={styles.container}>
-          <ScrollView contentContainerStyle={styles.scrollContent}>
+          <ScrollView
+            ref={scrollViewRef}
+            contentContainerStyle={styles.scrollContent}
+          >
             <View style={styles.headerRow}>
               <View
                 style={[
@@ -9882,7 +9926,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
     return (
       <SafeAreaView style={styles.container}>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView
+          ref={scrollViewRef}
+          contentContainerStyle={styles.scrollContent}
+        >
           <View style={styles.headerRow}>
             <Pressable
               style={styles.backButton}
@@ -10255,7 +10302,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     );
     return (
       <SafeAreaView style={styles.container}>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView
+          ref={scrollViewRef}
+          contentContainerStyle={styles.scrollContent}
+        >
           <View style={styles.headerRow}>
             <View style={styles.headerTitleBlock}>
               <View style={styles.titleWrap}>
@@ -10440,7 +10490,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     return (
       <SafeAreaView style={styles.container}>
         <ScrollView
-          ref={tutorialAppsScreenRef}
+          ref={(node) => {
+            scrollViewRef.current = node;
+            tutorialAppsScreenRef.current = node;
+          }}
           contentContainerStyle={styles.scrollContent}
         >
           <View style={styles.headerRow}>
@@ -10555,7 +10608,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   if (isSettingsOpen) {
     return (
       <SafeAreaView style={styles.container}>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView
+          ref={scrollViewRef}
+          contentContainerStyle={styles.scrollContent}
+        >
           <View style={styles.headerRow}>
             <View style={styles.headerTitleBlock}>
               <View style={styles.titleWrap}>
@@ -10786,9 +10842,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        onTouchStart={() => {
+        <ScrollView
+          ref={scrollViewRef}
+          contentContainerStyle={styles.scrollContent}
+          onTouchStart={() => {
           if (infoHint) {
             setInfoHint(null);
           }
