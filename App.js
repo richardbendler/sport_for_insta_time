@@ -23,6 +23,14 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Voice from "@react-native-voice/voice";
+import { I18nextProvider, useTranslation } from "react-i18next";
+import i18n from "./i18n";
+import {
+  DEFAULT_WEEKDAY_LABELS,
+  MONTH_LABELS,
+  NUMBER_WORDS,
+  WEEKDAY_LABELS_BY_LANG,
+} from "./locales";
 
 const InstaControl = NativeModules.InstaControl;
 const AI_CAMERA_ENABLED = false;
@@ -58,102 +66,6 @@ const SPEECH_LOCALES = {
   fr: "fr-FR",
 };
 
-const NUMBER_WORDS = {
-  de: [
-    "null",
-    "eins",
-    "ein",
-    "zwei",
-    "drei",
-    "vier",
-    "funf",
-    "sechs",
-    "sieben",
-    "acht",
-    "neun",
-    "zehn",
-    "elf",
-    "zwolf",
-    "dreizehn",
-    "vierzehn",
-    "funfzehn",
-    "sechzehn",
-    "siebzehn",
-    "achtzehn",
-    "neunzehn",
-    "zwanzig",
-  ],
-  en: [
-    "zero",
-    "one",
-    "two",
-    "three",
-    "four",
-    "five",
-    "six",
-    "seven",
-    "eight",
-    "nine",
-    "ten",
-    "eleven",
-    "twelve",
-    "thirteen",
-    "fourteen",
-    "fifteen",
-    "sixteen",
-    "seventeen",
-    "eighteen",
-    "nineteen",
-    "twenty",
-  ],
-  es: [
-    "cero",
-    "uno",
-    "dos",
-    "tres",
-    "cuatro",
-    "cinco",
-    "seis",
-    "siete",
-    "ocho",
-    "nueve",
-    "diez",
-    "once",
-    "doce",
-    "trece",
-    "catorce",
-    "quince",
-    "dieciseis",
-    "diecisiete",
-    "dieciocho",
-    "diecinueve",
-    "veinte",
-  ],
-  fr: [
-    "zero",
-    "un",
-    "deux",
-    "trois",
-    "quatre",
-    "cinq",
-    "six",
-    "sept",
-    "huit",
-    "neuf",
-    "dix",
-    "onze",
-    "douze",
-    "treize",
-    "quatorze",
-    "quinze",
-    "seize",
-    "dixsept",
-    "dixhuit",
-    "dixneuf",
-    "vingt",
-  ],
-};
-
 const AI_EXERCISES = {
   pushups: {
     id: "pushups",
@@ -164,71 +76,6 @@ const AI_EXERCISES = {
   },
 };
 
-const WEEKDAY_LABELS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
-const WEEKDAY_LABELS_BY_LANG = {
-  de: ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"],
-  en: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-  es: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
-  fr: ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"],
-};
-const MONTH_LABELS = {
-  de: [
-    "Januar",
-    "Februar",
-    "März",
-    "April",
-    "Mai",
-    "Juni",
-    "Juli",
-    "August",
-    "September",
-    "Oktober",
-    "November",
-    "Dezember",
-  ],
-  en: [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ],
-  es: [
-    "Enero",
-    "Febrero",
-    "Marzo",
-    "Abril",
-    "Mayo",
-    "Junio",
-    "Julio",
-    "Agosto",
-    "Septiembre",
-    "Octubre",
-    "Noviembre",
-    "Diciembre",
-  ],
-  fr: [
-    "Janvier",
-    "Février",
-    "Mars",
-    "Avril",
-    "Mai",
-    "Juin",
-    "Juillet",
-    "Août",
-    "Septembre",
-    "Octobre",
-    "Novembre",
-    "Décembre",
-  ],
-};
 const DEFAULT_ICON = "⭐";
 const DEFAULT_DIFFICULTY = 5;
 const DEFAULT_TIME_RATE = 0.2;
@@ -236,10 +83,38 @@ const DEFAULT_REPS_RATE = 1;
 const ADMIN_SCREEN_TIME_FACTOR = 0.1; // tweak this factor to globally adjust granted Screen Time
 const WEIGHT_SCREEN_TIME_BALANCE = 0.25; // reduces the impact of weight entries after scaling
 const DEFAULT_WEIGHT_RATE = 0.08;
+const WORKOUT_CONTINUE_WINDOW_MS = 30 * 60 * 1000;
 const interpolateTemplate = (template = "", values = {}) =>
   template.replace(/\{\{(\w+)\}\}/g, (_, key) =>
     Object.prototype.hasOwnProperty.call(values, key) ? values[key] : ""
   );
+
+const getWorkoutEndTime = (session) => {
+  if (!session) {
+    return null;
+  }
+  if (typeof session.endTs === "number" && Number.isFinite(session.endTs)) {
+    return session.endTs;
+  }
+  const startTs =
+    typeof session.startTs === "number" && Number.isFinite(session.startTs)
+      ? session.startTs
+      : 0;
+  const durationMs =
+    typeof session.duration === "number" && Number.isFinite(session.duration)
+      ? session.duration * 1000
+      : 0;
+  return startTs + durationMs;
+};
+
+const isWorkoutRecent = (session) => {
+  const endTime = getWorkoutEndTime(session);
+  if (typeof endTime !== "number" || !Number.isFinite(endTime)) {
+    return false;
+  }
+  const elapsed = Date.now() - endTime;
+  return elapsed >= 0 && elapsed <= WORKOUT_CONTINUE_WINDOW_MS;
+};
 const PRESET_KEYS = {
   pushups: "pushups",
 };
@@ -4216,1399 +4091,7 @@ const SportTitleSlots = ({ sport, sportLabel, onAiPress }) => {
   );
 };
 
-const STRINGS = {
-  de: {
-    "app.title": "Sport für Screen Time",
-    "menu.home": "Sport",
-    "menu.sports": "Deine Sportarten",
-    "menu.apps": "Eingeschränkte Apps bearbeiten",
-    "menu.settings": "Einstellungen",
-    "menu.workout": "Workout",
-    "menu.stats": "Statistik",
-    "menu.language": "Sprache",
-    "menu.preface": "Vorschaltseite",
-    "label.today": "Heute",
-    "label.week": "Woche",
-    "label.month": "Monat",
-    "label.weekScreenTime": "Erspielte Zeit Woche",
-    "label.screenTime": "Erspielte Zeit",
-    "label.screenTimeTitle": "Screen Time",
-    "label.screenTimeHint": "Summe der erspielten Bildschirmzeit aus den letzten 24h.",
-    "label.remaining": "Übrig",
-    "label.remainingHint": "Zeit, die aktuell noch genutzt werden darf.",
-    "label.editEntries": "Einträge bearbeiten",
-    "label.deleteAllEntries": "Alle Einträge (diese Sportart) löschen",
-    "label.deleteAllEntriesGlobal": "Alle Einträge löschen",
-    "label.editSport": "Sportart bearbeiten",
-    "label.editEntry": "Eintrag bearbeiten",
-    "label.dayDetails": "Tagesdetails",
-    "label.noEntries": "Keine Einträge",
-    "label.weightLastSet": "Letzter Satz",
-    "label.weightWorkoutTotal": "Workout gesamt",
-    "label.weightHistory": "Letzte Sätze",
-    "label.weightUnit": "kg",
-    "label.noSportsMatch": "Keine Sportart gefunden",
-    "label.breakdown": "Aufschlüsselung",
-    "label.save": "Speichern",
-    "label.editHint": "Nur verringern möglich.",
-    "label.confirmDeleteAll": "Sicher, dass du alle Einträge löschen willst?",
-    "label.confirmDeleteAllGlobal":
-      "Sicher, dass du wirklich alle Einträge aller Sportarten löschen willst?",
-    "label.overallStats": "Gesamtstatistik",
-    "label.overallStatsHint":
-      "Einträge bearbeiten geht nur in der jeweiligen Sportart über die Statistik.",
-    "label.runningSession": "Laufende Session",
-    "label.workoutTimer": "Workout-Timer",
-    "label.startWorkout": "Workout starten",
-    "label.startWorkoutFirst": "Starte bitte erst ein Workout",
-    "label.endWorkout": "Workout beenden",
-    "label.workoutExercises": "Übungen",
-    "label.workoutHistory": "Vergangene Workouts",
-    "label.workoutRunning": "Workout läuft noch",
-    "label.workoutDetail": "Workout-Details",
-    "label.workoutDuration": "Dauer",
-    "label.availableToday": "Heute verfügbar",
-    "label.used": "Verbraucht",
-    "label.permissions": "Berechtigungen",
-    "label.permissionsIntro":
-      "Damit Screen Time berechnet und Apps blockiert werden können, braucht die App Zugriff. Du wirst jetzt zu den Einstellungen geführt.",
-      "label.gettingStarted": "Erste Schritte",
-      "label.permissionsNeeded": "Diese Berechtigungen sind erforderlich, damit die App funktioniert.",
-    "label.permissionsHint": "Tippe, um alles einzurichten",
-    "label.permissionsReminder":
-      "Aktiviere Zugriffshilfe und Nutzungszugriff, damit eingeschränkte Apps bei Zeitende zuverlässig gesperrt bleiben.",
-      "label.accessibilityTitle": "Zugriffshilfe",
-      "label.accessibilityReason": "N\u00f6tig, um die Vordergrund-App zu erkennen und gesperrte Apps zu blockieren.",
-      "label.accessibilitySteps": "Einstellungen > Zugriffshilfe > Sport for Screen Time > Aktivieren",
-      "label.usageAccessTitle": "Nutzungszugriff",
-      "label.usageAccessReason": "N\u00f6tig, um App-Nutzung zu erkennen und Zeiten zu berechnen.",
-      "label.usageAccessSteps": "Einstellungen > Nutzungszugriff > Sport for Screen Time",
-      "label.notificationsTitle": "Benachrichtigungen",
-      "label.notificationsOptional": "Optional",
-      "label.notificationsReason": "Optional, um an Timer oder Trainings erinnert zu werden.",
-      "label.notificationsSteps": "Einstellungen > Benachrichtigungen > Sport for Screen Time > Erlauben",
-    "label.notificationsButton": "Benachrichtigungen verwalten",
-    "label.notificationsPromptTitle": "Benachrichtigungen",
-    "label.notificationsPromptBody": "Wir nutzen Benachrichtigungen, um dich an Timer oder Trainings zu erinnern. Das ist optional.",
-    "label.notificationsPromptConfirm": "Erlauben",
-    "label.notificationsPromptCancel": "Nicht jetzt",
-    "label.notificationsNotRequired": "Auf dieser Android-Version nicht nötig.",
-    "label.status": "Status",
-    "label.statusOverview": "Status",
-    "label.quickActions": "Quick actions",
-    "label.sectionData": "Data",
-    "label.statusOverview": "Status",
-    "label.quickActions": "Schnellzugriff",
-    "label.sectionData": "Daten",
-    "label.resetData": "App zurücksetzen",
-    "label.resetDataHint": "Löscht Sportarten, Statistik, Logs und Einstellungen.",
-    "label.confirmResetData": "Willst du wirklich alle App-Daten löschen?",
-    "label.carryover": "Übertrag",
-    "label.carryoverHint":
-      "Restzeit aus Übungen, die älter als 24h sind. Sie halbiert sich alle 24h weiter.",
-    "label.usageAccess": "Nutzungszugriff",
-    "label.usageAccessHint":
-      "Damit Apps nach Nutzungszeit sortiert werden k?nnen, braucht die App Nutzungszugriff.",
-    "label.openUsageAccess": "Zugriff erlauben",
-    "label.usageAccessMissing": "Nutzungszugriff fehlt",
-    "label.usageAccessActive": "Nutzungszugriff aktiv",
-    "label.later": "Später",
-    "label.apps": "Apps auswählen",
-    "label.openApps": "Apps verwalten",
-    "label.grayscaleRestrictedApps": "Eingeschränkte Apps in Schwarz-Weiß",
-    "label.grayscaleRestrictedAppsHint":
-      "Zeigt blockierte Apps in der Liste mit einem Schwarz-Weiß-Stil an.",
-    "label.closeApps": "Apps schließen",
-    "label.searchApps": "Apps suchen",
-    "label.searchSports": "Sportarten durchsuchen",
-    "label.noApps": "Keine Apps gefunden.",
-    "label.accessibilityMissing": "Zugriffshilfe fehlt",
-    "label.accessibilityActive": "Zugriffshilfe aktiv",
-    "label.permissionNeeded": "Zugriffshilfe nötig",
-    "label.accessibilityDisclosureTitle": "Zugriffshilfe erforderlich",
-    "label.accessibilityDisclosureBody":
-      "Wir nutzen die Zugriffshilfe, um die Vordergrund-App zu erkennen und gesperrte Apps zu blockieren. Wir lesen oder teilen keine Inhalte aus deinen Apps.",
-    "label.accessibilityDisclosureConfirm": "Zugriff erlauben",
-    "label.accessibilityDisclosureCancel": "Später",
-    "label.storageErrorTitle": "Fehler beim Speichern",
-    "label.storageErrorBody":
-      "Konnte {{context}} nicht speichern. Bitte versuche es später erneut.",
-    "label.hiddenShow": "Versteckte Sportarten anzeigen",
-    "label.hiddenHide": "Versteckte Sportarten verbergen",
-    "label.screenRateReps": "Screen Time pro Wiederholung (Minuten)",
-    "label.screenRateTime": "Screen Time pro Sport-Minute (Minuten)",
-    "label.weekOverview": "Tagesübersicht",
-    "label.weekTotal": "Diese Woche",
-    "label.noSports": "Keine aktiven Sportarten. Füge neue hinzu.",
-    "label.sportSuggestions": "Sportvorlagen",
-    "label.noSportSuggestions": "Keine Vorschläge gefunden.",
-    "label.useAsCustomSport": "Nutze \"{{term}}\" als neue Sportart",
-    "label.todayScreenTime": "Erspielte Zeit",
-    "label.widgets": "Widgets",
-    "label.widget": "Widget",
-    "label.widgetOverall": "Allgemeines Widget",
-    "label.recentActivity": "Letzte Aktivit\u00e4t",
-    "label.recentActivityEmpty": "Keine Eintr\u00e4ge vorhanden.",
-    "label.statsBySport": "Statistik nach Sportart",
-    "label.iconChoose": "Icon wählen",
-    "label.iconPlaceholder": "Ein Icon",
-    "label.addSport": "Neue Sportart",
-    "label.reps": "Wiederholungen",
-    "label.repsShort": "Wdh.",
-    "label.timeUnit": "Zeit",
-    "label.weightExercise": "Gewichtsübung",
-    "label.difficultyLabel": "Intensitätsfaktor (1-10)",
-      "label.difficultyDescription":
-        "Der Faktor multipliziert Dauer, Wiederholungen oder Gewicht und legt fest, wie viel Screen Time jede Einheit bringt.",
-      "label.difficultyFormula":
-        "Formeln:\nZeitbasiert = Dauer (s) × Faktor × 0,1\nOhne Gewicht = Wiederholungen × Faktor × 1\nMit Gewicht = kg × Wiederholungen × Faktor × 0,08",
-    "label.weightEntryButton": "Satz eintragen",
-    "label.weightEntryPreview": "Screen Time (Vorschau)",
-    "label.weightEntryWeight": "Gewicht (kg)",
-    "label.weightEntryReps": "Wiederholungen",
-    "label.timeBased": "Zeitbasiert",
-    "label.typePickerTitle": "Tracking-Modus",
-    "label.typeInfoTitle": "Modus verstehen",
-    "label.typeHelp":
-      "Wiederholungen: für Zählen (z.B. 10 Liegestütze). Zeitbasiert: für Minuten/Sekunden (z.B. 15 Minuten Joggen).",
-    "label.activateNow": "Jetzt aktivieren",
-    "label.loadApps": "Apps laden",
-    "label.androidOnly": "App-Auswahl ist nur auf Android verfügbar.",
-    "label.accessibilityHint":
-      "Aktiviere die Zugriffshilfe, damit Social Apps gesperrt werden können.",
-    "label.settingsHint":
-      "Aktiviere die Zugriffshilfe, damit die App Social Apps blockieren kann, wenn die Zeit aufgebraucht ist.",
-    "label.motivationTitle": "Motivation",
-    "label.motivationSubtitle": "Kleine Impulse, große Wirkung.",
-    "label.motivationDifficultyTitle": "Schwierigkeitsgrad steigern",
-    "label.motivationDifficultyBody":
-      "Heb den Regler an, damit jede Einheit mehr Zeit bringt.",
-    "label.motivationDifficultyAction": "Jetzt anpassen",
-    "label.motivationWorkoutTitle": "Bleib in Bewegung",
-    "label.motivationWorkoutBody":
-      "Starte ein Workout, um an deinem Tagesziel dranzubleiben.",
-    "label.motivationWorkoutAction": "Workout starten",
-    "label.motivationActionDefault": "Los geht's",
-    "label.motivationActionStartSport": "Sport anlegen",
-    "label.motivationActionDifficulty": "Schwierigkeitsgrad erhöhen",
-    "label.motivationActionWorkout": "Workout öffnen",
-    "label.motivationActionStats": "Statistiken ansehen",
-    "label.motivationActionNewSport": "Neuen Sport starten",
-    "label.motivationActionAi": "AI-Training starten",
-    "label.motivationActionWidget": "Widget hinzufügen",
-    "label.motivationActionNotifications": "Erinnerungen aktivieren",
-    "label.motivationActionApps": "Apps einstellen",
-    "label.motivationActionSettings": "Einstellungen öffnen",
-    "label.motivationActionPreface": "Preface anpassen",
-    "label.motivationActionVoice": "Spracheingabe nutzen",
-    "label.motivationActionLanguage": "Sprache ändern",
-    "label.motivationActionTutorial": "Tutorial wiederholen",
-    "label.motivationActionHistory": "Verlauf ansehen",
-    "label.motivationActionLogWeight": "Gewichte eintragen",
-    "label.motivationActionChallenge": "Challenge starten",
-    "label.motivationStartSportTitle": "Erste Sportart anlegen",
-    "label.motivationStartSportBody":
-      "Starte deinen ersten Sport und reduziere deine Appnutzung, um mehr Zeit zu gewinnen.",
-    "label.motivationStatsTitle": "Statistiken checken",
-    "label.motivationStatsBody":
-      "Sieh nach, wie oft du Sport gemacht hast und bleib im Rhythmus.",
-    "label.motivationQuoteStartTitle": "Wusstest du schon?",
-    "label.motivationQuoteStartBody":
-      "Wusstest du, dass schon wenige Einheiten dir Screen Time sichern? Starte jetzt deinen Sport und stelle die Schwierigkeit hoch.",
-    "label.motivationQuoteDifficultyTitle": "Ein Extra-Tipp",
-    "label.motivationQuoteDifficultyBody":
-      "Ein höherer Schwierigkeitsgrad multipliziert deine erspielte Zeit; schiebe den Regler nach oben und geh richtig ran.",
-    "label.motivationQuoteScreenTimeTitle": "Screen Time als Bonus",
-    "label.motivationQuoteScreenTimeBody":
-      "Jede Bewegung verdient extra Zeit fürs Handy — bleib dran und kassier noch mehr.",
-    "label.motivationQuoteFocusTitle": "Fokus auf Bewegung",
-    "label.motivationQuoteFocusBody":
-      "Ein paar Minuten Sport ziehen dich raus vom Bildschirm und rein in deinen Flow.",
-    "label.motivationNewSportTitle": "Weitere Sportart ausprobieren",
-    "label.motivationNewSportBody":
-      "Füge etwas Neues hinzu, damit der Tag abwechslungsreich bleibt.",
-    "label.motivationWidgetTitle": "Widget hinzufügen",
-    "label.motivationWidgetBody":
-      "Leg ein Screen Time-Widget an, um deine Fortschritte sofort zu sehen.",
-    "label.motivationNotificationsTitle": "Erinnerungen aktivieren",
-    "label.motivationNotificationsBody":
-      "Aktiviere Benachrichtigungen und verpasse keine Timer oder Workouts.",
-    "label.motivationAppsTitle": "Apps im Griff behalten",
-    "label.motivationAppsBody":
-      "Die stärkste App hat {{minutes}} Min genutzt. Nutze die App-Auswahl, um sie zu begrenzen.",
-    "label.motivationSettingsTitle": "Einstellungen optimieren",
-    "label.motivationSettingsBody":
-      "Passe die wichtigsten Einstellungen an, damit alles zu deinem Alltag passt.",
-    "label.motivationPrefaceTitle": "Preface anpassen",
-    "label.motivationPrefaceBody":
-      "Stell die Vorschaltseite ein, damit du motiviert startest.",
-    "label.motivationVoiceTitle": "Spracheingabe nutzen",
-    "label.motivationVoiceBody":
-      "Aktiviere Voice, damit du beim Zählen nicht stoppen musst.",
-    "label.motivationLanguageTitle": "Sprache ändern",
-    "label.motivationLanguageBody":
-      "Wähle deine bevorzugte Sprache für die App.",
-    "label.motivationTutorialTitle": "Tutorial wiederholen",
-    "label.motivationTutorialBody":
-      "Starte das Tutorial, wenn du die wichtigsten Bereiche noch einmal sehen willst.",
-    "label.motivationHistoryTitle": "Workout-Verlauf",
-    "label.motivationHistoryBody":
-      "Sieh dir vergangene Workouts an, um den Fortschritt zu feiern.",
-    "label.motivationLogWeightTitle": "Gewichtsbuchungen",
-    "label.motivationLogWeightBody":
-      "Trage Gewichte ein, um die Screen Time genauer zu rechnen.",
-    "label.motivationChallengeTitle": "Neue Challenge",
-    "label.motivationChallengeBody":
-      "Fordere dich selbst mit einer Challenge heraus und bleib dran.",
-    "label.motivationPreviewHint": "Tippe, um die Empfehlung zu öffnen.",
-    "label.motivationCollapsedHint": "Tipps einblenden",
-    "label.aiFeatureTitle": "AI-Training",
-    "label.aiFeatureBody":
-      "Diese Sportart unterstützt AI-Features. Drücke den AI-Button in der Sportart, um das automatische Zählen zu starten.",
-    "label.aiFeatureAction": "AI starten",
-    "label.changeLanguage": "Sprache ändern",
-    "label.prefaceSettings": "Vorschaltseite",
-    "label.prefaceDelay": "Wartezeit (Sekunden)",
-    "label.tapAnywhere": "Tippe irgendwo",
-    "label.voiceOn": "Mikrofon an",
-    "label.voiceOff": "Mikrofon aus",
-    "label.voiceListening": "Hört zu...",
-    "label.voiceIdle": "Bereit",
-    "label.voiceHint": "Zähle laut, die App zählt mit (Mikrofonzugriff nötig, Beta).",
-    "label.voicePermissionMissing": "Mikrofon-Zugriff fehlt",
-    "label.voiceError": "Spracherkennung fehlgeschlagen",
-    "label.voiceUnavailable": "Spracherkennung nicht verfügbar",
-    "label.aiStart": "AI-Zählen starten",
-    "label.aiStop": "AI stoppen",
-    "label.aiHint": "Kamera seitlich platzieren, Oberkörper sichtbar halten.",
-    "label.aiHintInline": "AI zählt Push-ups automatisch (Kamera nötig).",
-    "label.aiPermission": "Kamera-Zugriff fehlt oder wurde verweigert.",
-    "label.aiLoading": "Kamera wird geladen...",
-    "label.aiUnavailable": "AI-Kamera ist vorübergehend deaktiviert.",
-    "label.aiUnavailableInline": "AI-Training ist derzeit deaktiviert.",
-    "label.back": "Zurück",
-    "label.start": "Start",
-    "label.stop": "Stop",
-    "label.track": "Tracken",
-    "label.hide": "Ausblenden",
-    "label.show": "Einblenden",
-    "label.delete": "Löschen",
-    "label.add": "Hinzufügen",
-    "label.active": "Aktiv",
-    "label.off": "Aus",
-    "label.confirmTitle": "Sicher?",
-    "label.confirmDelete": "Sicher, dass du löschen willst?",
-    "label.confirmHide": "Sicher, dass du ausblenden willst?",
-    "label.confirmShow": "Sicher, dass du einblenden willst?",
-    "label.confirm": "Ja",
-    "label.cancel": "Abbrechen",
-    "label.close": "Schließen",
-    "placeholder.sportName": "Name (z.B. Situps)",
-    "language.de": "Deutsch",
-    "language.en": "Englisch",
-    "language.es": "Spanisch",
-    "language.fr": "Französisch",
-    "sport.pushups": "Liegestütze",
-    "sport.pullups": "Klimmzüge",
-    "sport.situps": "Situps",
-    "sport.jogging": "Joggen",
-    "label.tutorial": "Tutorial",
-    "label.tutorialHint": "Kurze Einf\u00fchrung in die wichtigsten Bereiche.",
-    "label.tutorialStart": "Tutorial starten",
-    "tutorial.step.overview.title": "Deine Bildschirmzeit",
-    "tutorial.step.overview.body":
-      "Sieh dir deine Screen-Time-Karten an, tippe für Details oder auf Weiter, um zu starten.",
-    "tutorial.step.openSport.title": "Sportart \u00f6ffnen",
-    "tutorial.step.openSport.body":
-      "Tippe eine Sportkarte an, um den Trackingbereich mit Schieberegler, Modus und Eingaben zu öffnen.",
-    "tutorial.step.addSport.title": "Neue Sportart",
-    "tutorial.step.addSport.body":
-      "Tippe auf +, um einen Sport anzulegen, Typ, Rate und den Schwierigkeitsregler festzulegen.",
-    "tutorial.step.track.title": "Training tracken",
-    "tutorial.step.track.body.reps":
-      "Tippe auf die große Fläche, um eine Wiederholung zu zählen; der Schwierigkeitsgrad steuert die Screen Time.",
-    "tutorial.step.track.body.time":
-      "Tippe auf Start, um den Timer zu starten; Dauer und Schwierigkeit ergeben deine Screen Time.",
-    "tutorial.step.samplePushupInfo.title": "Toll gemacht!",
-    "tutorial.step.samplePushupInfo.body":
-      "Nur zur Info: Der Probestütz wird gleich wieder entfernt, er war nur fürs Tutorial gedacht.",
-    "tutorial.step.back.title": "Zur\u00fcck zur \u00dcbersicht",
-    "tutorial.step.back.body":
-      "Tippe auf Zurück, um zur Sportübersicht zurückzukehren und andere Sportarten zu prüfen.",
-    "tutorial.step.openSettings.title": "Einstellungen \u00f6ffnen",
-    "tutorial.step.openSettings.body":
-      "Tippe unten auf Einstellungen, um Apps, Berechtigungen und mehr zu konfigurieren.",
-    "tutorial.step.openApps.title": "Eingeschr\u00e4nkte Apps",
-    "tutorial.step.openApps.body":
-      "Tippe auf Apps, um auszuw\u00e4hlen, welche Anwendungen eingeschr\u00e4nkt bleiben.",
-    "tutorial.step.openAppsInfo.title": "Apps ausw\u00e4hlen",
-    "tutorial.step.openAppsInfo.body":
-      "W\u00e4hle eine App aus der Liste, damit sie eingeschr\u00e4nkt wird, und tippe danach auf Zur\u00fcck, um mit dem Tutorial weiterzumachen.",
-    "tutorial.step.chooseAppAction.title": "App w\u00e4hlen",
-    "tutorial.step.chooseAppAction.body":
-      "Tippe auf eine App, die du einschr\u00e4nken willst, und dr\u00fccke dann Zur\u00fcck, um zum Tutorial zur\u00fcckzukehren.",
-    "tutorial.step.finish.title": "Fertig",
-    "tutorial.step.finish.body":
-      "Tippe auf Weiter, um das Tutorial abzuschließen. Du kannst es jederzeit über den Tutorial-Button oben rechts im Tab 'Sport' im Hauptmenü starten.",
-    "tutorial.step.singleExercises.title": "Sport",
-    "tutorial.step.singleExercises.body":
-      "Im Sport-Tab liegen deine Sportarten; tippe eine an, um zu starten, oder tippe auf Weiter.",
-    "tutorial.step.workout.title": "Sport-Tab",
-    "tutorial.step.workout.body":
-      "Tippe oben auf \"Start Workout\", um die Workout-Ansicht zu öffnen; hier startest du Sessions und siehst vergangene Workouts.",
-    "tutorial.step.workoutDetail.title": "Workout-Details",
-    "tutorial.step.workoutDetail.body":
-      "Hier steuerst du das Workout-Timer-Panel und kannst Trainingseinheiten starten oder stoppen. Tippe auf Weiter, um fortzufahren.",
-    "tutorial.step.stats.title": "Stats-Tab",
-    "tutorial.step.stats.body":
-      "Tippe unten auf Stats, um deine Auswertungen aufzurufen; hier findest du Tages- und Wochenwerte.",
-    "tutorial.step.statsDetail.title": "Stats-Übersicht",
-    "tutorial.step.statsDetail.body":
-      "In dieser Karte siehst du schnelle Aktionen und Filter. Tippe auf Weiter, um zur Einstellungen-Übersicht zu wechseln.",
-    "tutorial.cta.next": "Weiter",
-    "tutorial.cta.skip": "\u00dcberspringen",
-    "tutorial.cta.exit": "Tutorial abbrechen",
-    "tutorial.cta.done": "Fertig",
-  },
-  en: {
-    "app.title": "Sport for Screen Time",
-    "menu.home": "Sport",
-    "menu.sports": "Your sports",
-    "menu.apps": "Edit restricted apps",
-    "menu.settings": "Settings",
-    "menu.workout": "Workout",
-    "menu.stats": "Stats",
-    "menu.language": "Language",
-    "menu.preface": "Preface screen",
-    "label.today": "Today",
-    "label.week": "Week",
-    "label.month": "Month",
-    "label.weekScreenTime": "Earned time week",
-    "label.screenTime": "Earned time",
-    "label.screenTimeTitle": "Screen Time",
-    "label.screenTimeHint": "Total earned screen time from the last 24h.",
-    "label.remaining": "Remaining",
-    "label.remainingHint": "Time that is still available to use.",
-    "label.editEntries": "Edit entries",
-    "label.deleteAllEntries": "Delete entries (this sport)",
-    "label.deleteAllEntriesGlobal": "Delete all entries",
-    "label.editSport": "Edit sport",
-    "label.editEntry": "Edit entry",
-    "label.dayDetails": "Day details",
-    "label.noEntries": "No entries",
-    "label.weightLastSet": "Last set",
-    "label.weightWorkoutTotal": "Workout total",
-    "label.weightHistory": "Recent sets",
-    "label.weightUnit": "kg",
-    "label.noSportsMatch": "No sports found",
-    "label.breakdown": "Breakdown",
-    "label.save": "Save",
-    "label.editHint": "Only reducing is possible.",
-    "label.confirmDeleteAll": "Are you sure you want to delete all entries?",
-    "label.confirmDeleteAllGlobal":
-      "Are you sure you want to delete all entries for all sports?",
-    "label.overallStats": "Overall stats",
-    "label.overallStatsHint":
-      "To edit entries, open a sport from the main menu and then its stats.",
-    "label.runningSession": "Running session",
-    "label.workoutTimer": "Workout timer",
-    "label.startWorkout": "Start workout",
-    "label.startWorkoutFirst": "Please start a workout first.",
-    "label.endWorkout": "End workout",
-    "label.workoutExercises": "Exercises",
-    "label.workoutHistory": "Past workouts",
-    "label.workoutRunning": "Workout running",
-    "label.workoutDetail": "Workout details",
-    "label.workoutDuration": "Duration",
-    "label.availableToday": "Available today",
-    "label.used": "Used",
-    "label.permissions": "Permissions",
-    "label.permissionsIntro":
-      "To track screen time and block apps, the app needs access. You'll be sent to settings now.",
-      "label.gettingStarted": "Getting started",
-      "label.permissionsNeeded": "These permissions are required for the app to work.",
-    "label.permissionsHint": "Tap to set everything up",
-    "label.permissionsReminder":
-      "Enable Accessibility and Usage Access so restricted apps stay blocked when your earned time runs out.",
-      "label.accessibilityTitle": "Accessibility",
-      "label.accessibilityReason": "Needed to detect the foreground app and block restricted apps.",
-      "label.accessibilitySteps": "Settings > Accessibility > Sport for Screen Time > Enable",
-      "label.usageAccessTitle": "Usage access",
-      "label.usageAccessReason": "Needed to read app usage and calculate time.",
-      "label.usageAccessSteps": "Settings > Usage access > Sport for Screen Time",
-      "label.notificationsTitle": "Notifications",
-      "label.notificationsOptional": "Optional",
-      "label.notificationsReason": "Optional, for timer or training reminders.",
-      "label.notificationsSteps": "Settings > Notifications > Sport for Screen Time > Allow",
-    "label.notificationsButton": "Manage notifications",
-    "label.notificationsPromptTitle": "Notifications",
-    "label.notificationsPromptBody": "We use notifications to remind you about timers or training. This is optional.",
-    "label.notificationsPromptConfirm": "Allow",
-    "label.notificationsPromptCancel": "Not now",
-    "label.notificationsNotRequired": "Not required on this Android version.",
-    "label.status": "Status",
-    "label.resetData": "Reset app data",
-    "label.resetDataHint": "Deletes sports, stats, logs, and settings.",
-    "label.confirmResetData": "Are you sure you want to delete all app data?",
-    "label.carryover": "Carryover",
-    "label.carryoverHint":
-      "Remaining time from sessions older than 24h. It halves every 24h after that.",
-    "label.usageAccess": "Usage access",
-    "label.usageAccessHint":
-      "Allow usage access so apps can be sorted by usage time.",
-    "label.openUsageAccess": "Allow access",
-    "label.usageAccessMissing": "Usage access missing",
-    "label.usageAccessActive": "Usage access active",
-    "label.later": "Later",
-    "label.apps": "Choose apps",
-    "label.openApps": "Manage apps",
-    "label.grayscaleRestrictedApps": "Show restricted apps in monochrome",
-    "label.grayscaleRestrictedAppsHint":
-      "Render restricted apps in the list with a black-and-white style.",
-    "label.closeApps": "Close apps",
-    "label.searchApps": "Search apps",
-    "label.searchSports": "Search sports",
-    "label.noApps": "No apps found.",
-    "label.accessibilityMissing": "Accessibility missing",
-    "label.accessibilityActive": "Accessibility active",
-    "label.permissionNeeded": "Accessibility required",
-    "label.accessibilityDisclosureTitle": "Accessibility required",
-    "label.accessibilityDisclosureBody":
-      "We use Accessibility to detect which app is in the foreground and to block restricted apps when your earned screen time is used up. We do not read or share any content from your apps.",
-    "label.accessibilityDisclosureConfirm": "Allow access",
-    "label.accessibilityDisclosureCancel": "Not now",
-    "label.storageErrorTitle": "Save failed",
-    "label.storageErrorBody":
-      "Could not save {{context}}. Please try again later.",
-    "label.hiddenShow": "Show hidden sports",
-    "label.hiddenHide": "Hide hidden sports",
-    "label.screenRateReps": "Screen Time per rep (minutes)",
-    "label.screenRateTime": "Screen Time per sport minute (minutes)",
-    "label.weekOverview": "Daily overview",
-    "label.weekTotal": "This week",
-    "label.noSports": "No active sports. Add new ones.",
-    "label.sportSuggestions": "Sport templates",
-    "label.noSportSuggestions": "No suggestions found.",
-    "label.useAsCustomSport": "Use \"{{term}}\" as custom sport",
-    "label.todayScreenTime": "Earned time",
-    "label.widgets": "Widgets",
-    "label.widget": "Widget",
-    "label.widgetOverall": "General widget",
-    "label.recentActivity": "Recent activity",
-    "label.recentActivityEmpty": "No recent entries yet.",
-    "label.statsBySport": "Stats by sport",
-    "label.iconChoose": "Choose icon",
-    "label.iconPlaceholder": "One icon",
-    "label.addSport": "New sport",
-    "label.reps": "Repetitions",
-    "label.repsShort": "reps",
-    "label.timeUnit": "Time",
-    "label.weightExercise": "Weight exercise",
-    "label.difficultyLabel": "Intensity factor (1-10)",
-      "label.difficultyDescription":
-        "The slider multiplies duration, reps or weight so you control how much Screen Time each set earns.",
-      "label.difficultyFormula":
-        "Formulas:\nTime = seconds × factor × 0.1\nReps = reps × factor × 1\nWeighted = kg × reps × factor × 0.08",
-    "label.weightEntryButton": "Log set",
-    "label.weightEntryPreview": "Screen time preview",
-    "label.weightEntryWeight": "Weight (kg)",
-    "label.weightEntryReps": "Reps",
-    "label.timeBased": "Time-based",
-    "label.typePickerTitle": "Tracking mode",
-    "label.typeInfoTitle": "How modes work",
-    "label.typeHelp":
-      "Repetitions: for counting sets (e.g. 10 push-ups). Time-based: for minutes/seconds (e.g. 15 minutes jogging).",
-    "label.activateNow": "Enable now",
-    "label.loadApps": "Load apps",
-    "label.androidOnly": "App selection is Android-only.",
-    "label.accessibilityHint": "Enable accessibility to block social apps.",
-    "label.settingsHint":
-      "Enable accessibility so the app can block social apps when time is up.",
-    "label.motivationTitle": "Motivation",
-    "label.motivationSubtitle": "Fresh pushes that keep you moving.",
-    "label.motivationDifficultyTitle": "Raise the difficulty",
-    "label.motivationDifficultyBody":
-      "A little more challenge earns more screen time for the same effort.",
-    "label.motivationDifficultyAction": "Adjust now",
-    "label.motivationWorkoutTitle": "Keep moving",
-    "label.motivationWorkoutBody":
-      "Kick off a workout to keep today's momentum.",
-    "label.motivationWorkoutAction": "Start workout",
-    "label.motivationActionDefault": "Go for it",
-    "label.motivationActionStartSport": "Add a sport",
-    "label.motivationActionDifficulty": "Raise difficulty",
-    "label.motivationActionWorkout": "Open workout",
-    "label.motivationActionStats": "View stats",
-    "label.motivationActionNewSport": "Try a new sport",
-    "label.motivationActionAi": "Start AI training",
-    "label.motivationActionWidget": "Add a widget",
-    "label.motivationActionNotifications": "Enable reminders",
-    "label.motivationActionApps": "Pick apps",
-    "label.motivationActionSettings": "Open settings",
-    "label.motivationActionPreface": "Adjust the preface",
-    "label.motivationActionVoice": "Use voice input",
-    "label.motivationActionLanguage": "Change language",
-    "label.motivationActionTutorial": "Rerun the tutorial",
-    "label.motivationActionHistory": "View history",
-    "label.motivationActionLogWeight": "Log weights",
-    "label.motivationActionChallenge": "Start a challenge",
-    "label.motivationStartSportTitle": "Set up your first sport",
-    "label.motivationStartSportBody":
-      "Log a sport and cut down on apps to earn more screen time.",
-    "label.motivationStatsTitle": "Check your stats",
-    "label.motivationStatsBody":
-      "Review your entries to see how far you've come.",
-    "label.motivationQuoteStartTitle": "Fun fact",
-    "label.motivationQuoteStartBody":
-      "Did you know that each unit multiplies your earned time? Start a sport and raise the difficulty to pull ahead.",
-    "label.motivationQuoteDifficultyTitle": "Quick reminder",
-    "label.motivationQuoteDifficultyBody":
-      "A slightly higher difficulty boosts the time each rep gives you—nudge the slider up and go for it.",
-    "label.motivationQuoteScreenTimeTitle": "Screen time as a bonus",
-    "label.motivationQuoteScreenTimeBody":
-      "Every move earns you extra phone minutes — keep going to cash in.",
-    "label.motivationQuoteFocusTitle": "Focus on movement",
-    "label.motivationQuoteFocusBody":
-      "A few more sport minutes pull you away from the screen and into momentum.",
-    "label.motivationNewSportTitle": "Add a new sport",
-    "label.motivationNewSportBody":
-      "Bring variety into your training by creating another sport.",
-    "label.motivationWidgetTitle": "Add a widget",
-    "label.motivationWidgetBody":
-      "Pin the widget to track your screen time at a glance.",
-    "label.motivationNotificationsTitle": "Enable reminders",
-    "label.motivationNotificationsBody":
-      "Allow notifications so you never miss a timer or workout.",
-    "label.motivationAppsTitle": "Tame your apps",
-    "label.motivationAppsBody":
-      "Your top app used {{minutes}} min. Block it to stay focused.",
-    "label.motivationSettingsTitle": "Fine-tune settings",
-    "label.motivationSettingsBody":
-      "Adjust core settings so the app works with your routine.",
-    "label.motivationPrefaceTitle": "Adjust the preface",
-    "label.motivationPrefaceBody":
-      "Set the preface timer to get into the right mindset.",
-    "label.motivationVoiceTitle": "Try voice input",
-    "label.motivationVoiceBody":
-      "Enable voice counting to keep your hands free.",
-    "label.motivationLanguageTitle": "Change language",
-    "label.motivationLanguageBody": "Pick a language that feels right.",
-    "label.motivationTutorialTitle": "Rerun the tutorial",
-    "label.motivationTutorialBody":
-      "Replay the tutorial to meet the app again from the beginning.",
-    "label.motivationHistoryTitle": "Workout history",
-    "label.motivationHistoryBody":
-      "Open past workouts to celebrate what you already did.",
-    "label.motivationLogWeightTitle": "Log weights",
-    "label.motivationLogWeightBody":
-      "Enter weights to get more accurate Screen Time numbers.",
-    "label.motivationChallengeTitle": "Start a challenge",
-    "label.motivationChallengeBody":
-      "Set a new challenge to push yourself a little further.",
-    "label.motivationPreviewHint": "Tap to expand the suggestion",
-    "label.motivationCollapsedHint": "Show tips",
-    "label.aiFeatureTitle": "AI training",
-    "label.aiFeatureBody":
-      "This sport supports AI features. Tap the AI button inside the sport to start automatic counting.",
-    "label.aiFeatureAction": "Start AI",
-    "label.changeLanguage": "Change language",
-    "label.prefaceSettings": "Preface screen",
-    "label.prefaceDelay": "Wait time (seconds)",
-    "label.tapAnywhere": "Tap anywhere",
-    "label.voiceOn": "Mic on",
-    "label.voiceOff": "Mic off",
-    "label.voiceListening": "Listening...",
-    "label.voiceIdle": "Ready",
-    "label.voiceHint": "Say numbers out loud to count (microphone access required, beta).",
-    "label.voicePermissionMissing": "Microphone access missing",
-    "label.voiceError": "Speech recognition failed",
-    "label.voiceUnavailable": "Speech recognition unavailable",
-    "label.aiStart": "Start AI counting",
-    "label.aiStop": "Stop AI",
-    "label.aiHint": "Place the camera sideways and keep your upper body visible.",
-    "label.aiHintInline": "AI counts push-ups automatically (camera required).",
-    "label.aiPermission": "Camera access is missing or denied.",
-    "label.aiLoading": "Loading camera...",
-    "label.aiUnavailable": "AI camera is temporarily unavailable.",
-    "label.aiUnavailableInline": "AI training is temporarily unavailable.",
-    "label.back": "Back",
-    "label.start": "Start",
-    "label.stop": "Stop",
-    "label.track": "Track",
-    "label.hide": "Hide",
-    "label.show": "Show",
-    "label.delete": "Delete",
-    "label.add": "Add",
-    "label.active": "On",
-    "label.off": "Off",
-    "label.confirmTitle": "Are you sure?",
-    "label.confirmDelete": "Are you sure you want to delete?",
-    "label.confirmHide": "Are you sure you want to hide it?",
-    "label.confirmShow": "Are you sure you want to show it?",
-    "label.confirm": "Yes",
-    "label.cancel": "Cancel",
-    "label.close": "Close",
-    "placeholder.sportName": "Name (e.g. Situps)",
-    "language.de": "German",
-    "language.en": "English",
-    "language.es": "Spanish",
-    "language.fr": "French",
-    "sport.pushups": "Push-ups",
-    "sport.pullups": "Pull-ups",
-    "sport.situps": "Situps",
-    "sport.jogging": "Jogging",
-    "label.tutorial": "Tutorial",
-    "label.tutorialHint": "Short walkthrough of the main areas.",
-    "label.tutorialStart": "Start tutorial",
-    "tutorial.step.overview.title": "Your screen time",
-    "tutorial.step.overview.body":
-      "Track earned time, remaining allotment, and carryover here; tap the cards for more detail or hit Next.",
-    "tutorial.step.openSport.title": "Open a sport",
-    "tutorial.step.openSport.body":
-      "Tap any sport card to open the tracking area with the difficulty slider, mode toggle, and logging fields.",
-    "tutorial.step.addSport.title": "Add a sport",
-    "tutorial.step.addSport.body":
-      "Tap + to add a sport, pick reps or time mode, and use the slider to match effort.",
-    "tutorial.step.track.title": "Track a session",
-    "tutorial.step.track.body.reps":
-      "Tap the big area once to log a rep; the difficulty level decides how much Screen Time you earn.",
-    "tutorial.step.track.body.time":
-      "Tap Start to begin a timer; stop it when you finish so duration and difficulty produce Screen Time.",
-    "tutorial.step.samplePushupInfo.title": "Nice work!",
-    "tutorial.step.samplePushupInfo.body":
-      "Quick note: this sample push-up will be deleted again since it’s only for the tutorial.",
-    "tutorial.step.back.title": "Back to overview",
-    "tutorial.step.back.body":
-      "Tap Back to return to your sports list and review other cards.",
-    "tutorial.step.openSettings.title": "Open settings",
-    "tutorial.step.openSettings.body":
-      "Tap Settings in the bottom nav to manage apps, permissions, and preface delay.",
-    "tutorial.step.openApps.title": "Restricted apps",
-    "tutorial.step.openApps.body":
-      "Tap Apps to pick which applications should be restricted once the time is up.",
-    "tutorial.step.openAppsInfo.title": "Choose apps",
-    "tutorial.step.openAppsInfo.body":
-      "Select an app to restrict it and then tap Back to return to the tutorial.",
-    "tutorial.step.chooseAppAction.title": "Pick an app",
-    "tutorial.step.chooseAppAction.body":
-      "Tap an app you’d like to restrict and then tap Back to return to the tutorial.",
-    "tutorial.step.finish.title": "All set",
-    "tutorial.step.finish.body":
-      "Tap Next to finish the tutorial. You can restart it anytime from the main menu by tapping the Tutorial button in the top-right of the Sport tab.",
-    "tutorial.step.singleExercises.title": "Sport",
-    "tutorial.step.singleExercises.body":
-      "The Sport tab keeps your sports ready; tap one to start tracking or tap Next to continue.",
-    "tutorial.step.workout.title": "Sport tab",
-    "tutorial.step.workout.body":
-      "Tap Start Workout at the top of the Sport tab to open the workout view; start sessions and see past workouts here.",
-    "tutorial.step.workoutDetail.title": "Workout details",
-    "tutorial.step.workoutDetail.body":
-      "This panel controls the workout timer and lets you start or stop sessions. Tap Next to keep going.",
-    "tutorial.step.stats.title": "Stats tab",
-    "tutorial.step.stats.body":
-      "Tap Stats in the bottom nav to view your earned time and entries overview.",
-    "tutorial.step.statsDetail.title": "Stats overview",
-    "tutorial.step.statsDetail.body":
-      "Use these cards and filters to inspect daily and weekly stats. Tap Next to proceed.",
-    "tutorial.cta.next": "Next",
-    "tutorial.cta.skip": "Skip",
-    "tutorial.cta.exit": "Exit tutorial",
-    "tutorial.cta.done": "Done",
-  },
-  es: {
-    "app.title": "Deporte por tiempo de pantalla",
-    "menu.home": "Deporte",
-    "menu.sports": "Tus deportes",
-    "menu.apps": "Editar apps restringidas",
-    "menu.settings": "Ajustes",
-    "menu.workout": "Workout",
-    "menu.stats": "Estadísticas",
-    "menu.language": "Idioma",
-    "menu.preface": "Pantalla previa",
-    "label.today": "Hoy",
-    "label.week": "Semana",
-    "label.month": "Mes",
-    "label.weekScreenTime": "Tiempo ganado semanal",
-    "label.screenTime": "Tiempo ganado",
-    "label.screenTimeTitle": "Tiempo de pantalla",
-    "label.screenTimeHint": "Tiempo total ganado en las ultimas 24h.",
-    "label.remaining": "Restante",
-    "label.remainingHint": "Tiempo que aun puedes usar.",
-    "label.editEntries": "Editar entradas",
-    "label.deleteAllEntries": "Borrar entradas (este deporte)",
-    "label.deleteAllEntriesGlobal": "Borrar todas",
-    "label.editSport": "Editar deporte",
-    "label.editEntry": "Editar entrada",
-    "label.dayDetails": "Detalles del día",
-    "label.noEntries": "Sin entradas",
-    "label.weightLastSet": "Última serie",
-    "label.weightWorkoutTotal": "Total del entrenamiento",
-    "label.weightHistory": "Series recientes",
-    "label.weightUnit": "kg",
-    "label.noSportsMatch": "No se encontraron deportes",
-    "label.breakdown": "Desglose",
-    "label.save": "Guardar",
-    "label.editHint": "Solo se puede reducir.",
-    "label.confirmDeleteAll": "¿Seguro que quieres borrar todas las entradas?",
-    "label.confirmDeleteAllGlobal":
-      "¿Seguro que quieres borrar todas las entradas de todos los deportes?",
-    "label.overallStats": "Estadísticas generales",
-    "label.overallStatsHint":
-      "Para editar entradas, abre un deporte y luego su estadística.",
-    "label.runningSession": "Sesión activa",
-    "label.workoutTimer": "Temporizador de entrenamiento",
-    "label.startWorkout": "Iniciar entrenamiento",
-    "label.startWorkoutFirst": "Por favor inicia primero un entrenamiento.",
-    "label.endWorkout": "Finalizar entrenamiento",
-    "label.workoutExercises": "Ejercicios",
-    "label.workoutHistory": "Entrenamientos anteriores",
-    "label.workoutRunning": "Entrenamiento activo",
-    "label.workoutDetail": "Detalles del entrenamiento",
-    "label.workoutDuration": "Duración",
-    "label.availableToday": "Disponible hoy",
-    "label.used": "Usado",
-    "label.permissions": "Permisos",
-    "label.permissionsIntro":
-      "Para medir el tiempo de pantalla y bloquear apps, la app necesita acceso. Ahora te llevaremos a ajustes.",
-      "label.gettingStarted": "Comencemos",
-      "label.permissionsNeeded": "Estos permisos son necesarios para que la app funcione.",
-      "label.permissionsHint": "Toca para configurarlo todo",
-      "label.permissionsReminder":
-        "Activa accesibilidad y acceso de uso para que las apps restringidas sigan bloqueadas cuando se acabe el tiempo ganado.",
-      "label.accessibilityTitle": "Accesibilidad",
-      "label.accessibilityReason": "Necesario para detectar la app en primer plano y bloquear apps restringidas.",
-      "label.accessibilitySteps": "Configuraci\u00f3n > Accesibilidad > Sport for Screen Time > Activar",
-      "label.usageAccessTitle": "Acceso de uso",
-      "label.usageAccessReason": "Necesario para leer el uso de apps y calcular el tiempo.",
-      "label.usageAccessSteps": "Configuraci\u00f3n > Acceso de uso > Sport for Screen Time",
-      "label.notificationsTitle": "Notificaciones",
-      "label.notificationsOptional": "Opcional",
-      "label.notificationsReason": "Opcional, para recordatorios del temporizador o entrenamiento.",
-      "label.notificationsSteps": "Configuraci\u00f3n > Notificaciones > Sport for Screen Time > Permitir",
-    "label.notificationsButton": "Administrar notificaciones",
-    "label.notificationsPromptTitle": "Notificaciones",
-    "label.notificationsPromptBody": "Usamos notificaciones para recordarte temporizadores o entrenamientos. Es opcional.",
-    "label.notificationsPromptConfirm": "Permitir",
-    "label.notificationsPromptCancel": "Ahora no",
-    "label.notificationsNotRequired": "No requerido en esta version de Android.",
-    "label.status": "Estado",
-    "label.statusOverview": "Estado",
-    "label.quickActions": "Acciones rapidas",
-    "label.sectionData": "Datos",
-    "label.resetData": "Restablecer app",
-    "label.resetDataHint": "Borra deportes, estadisticas, logs y ajustes.",
-    "label.confirmResetData": "Seguro que quieres borrar todos los datos?",
-    "label.carryover": "Arrastre",
-    "label.carryoverHint":
-      "Tiempo restante de sesiones anteriores a 24h. Se reduce a la mitad cada 24h.",
-    "label.usageAccess": "Acceso de uso",
-    "label.usageAccessHint":
-      "Permite el acceso de uso para ordenar las apps por tiempo de uso.",
-    "label.openUsageAccess": "Permitir acceso",
-    "label.usageAccessMissing": "Acceso de uso faltante",
-    "label.usageAccessActive": "Acceso de uso activo",
-    "label.later": "Más tarde",
-    "label.apps": "Elegir apps",
-    "label.openApps": "Gestionar apps",
-    "label.grayscaleRestrictedApps": "Mostrar apps restringidas en escala de grises",
-    "label.grayscaleRestrictedAppsHint":
-      "Aplica un estilo en blanco y negro a las apps restringidas en la lista.",
-    "label.closeApps": "Cerrar apps",
-    "label.searchApps": "Buscar apps",
-    "label.searchSports": "Buscar deportes",
-    "label.noApps": "No se encontraron apps.",
-    "label.accessibilityMissing": "Accesibilidad desactivada",
-    "label.accessibilityActive": "Accesibilidad activa",
-    "label.permissionNeeded": "Accesibilidad requerida",
-    "label.accessibilityDisclosureTitle": "Accesibilidad necesaria",
-    "label.accessibilityDisclosureBody":
-      "Usamos Accesibilidad para detectar qu\u00e9 app est\u00e1 en primer plano y bloquear apps restringidas cuando se acaba tu tiempo ganado. No leemos ni compartimos contenido de tus apps.",
-    "label.accessibilityDisclosureConfirm": "Permitir acceso",
-    "label.accessibilityDisclosureCancel": "M\u00e1s tarde",
-    "label.storageErrorTitle": "Error al guardar",
-    "label.storageErrorBody":
-      "No se pudo guardar {{context}}. Intenta de nuevo más tarde.",
-    "label.hiddenShow": "Mostrar deportes ocultos",
-    "label.hiddenHide": "Ocultar deportes ocultos",
-    "label.screenRateReps": "Tiempo de pantalla por repetición (minutos)",
-    "label.screenRateTime": "Tiempo de pantalla por minuto de deporte (minutos)",
-    "label.weekOverview": "Resumen diario",
-    "label.weekTotal": "Esta semana",
-    "label.noSports": "No hay deportes activos. Añade nuevos.",
-    "label.sportSuggestions": "Plantillas deportivas",
-    "label.noSportSuggestions": "No se encontraron sugerencias.",
-    "label.useAsCustomSport": "Usar \"{{term}}\" como deporte personalizado",
-    "label.todayScreenTime": "Tiempo ganado",
-    "label.widgets": "Widgets",
-    "label.widget": "Widget",
-    "label.widgetOverall": "Widget general",
-    "label.recentActivity": "Actividad reciente",
-    "label.recentActivityEmpty": "No hay registros recientes.",
-    "label.statsBySport": "Estadisticas por deporte",
-    "label.iconChoose": "Elegir icono",
-    "label.iconPlaceholder": "Un icono",
-    "label.addSport": "Nuevo deporte",
-    "label.reps": "Repeticiones",
-    "label.repsShort": "rep.",
-    "label.timeUnit": "Tiempo",
-    "label.weightExercise": "Ejercicio con peso",
-    "label.difficultyLabel": "Factor de intensidad (1-10)",
-      "label.difficultyDescription":
-        "El deslizador multiplica duración, repeticiones o peso para definir cuánto tiempo de pantalla otorga cada serie.",
-      "label.difficultyFormula":
-        "Fórmulas:\nTiempo = segundos × factor × 0,1\nReps sin peso = rep × factor × 1\nCon peso = kg × rep × factor × 0,08",
-    "label.weightEntryButton": "Registrar serie",
-    "label.weightEntryPreview": "Tiempo de pantalla (vista previa)",
-    "label.weightEntryWeight": "Peso (kg)",
-    "label.weightEntryReps": "Repeticiones",
-    "label.timeBased": "Por tiempo",
-    "label.typePickerTitle": "Modo de seguimiento",
-    "label.typeInfoTitle": "Cómo funcionan los modos",
-    "label.typeHelp":
-      "Repeticiones: para contar series (p. ej. 10 flexiones). Tiempo: para minutos/segundos (p. ej. 15 minutos).",
-    "label.activateNow": "Activar ahora",
-    "label.loadApps": "Cargar apps",
-    "label.androidOnly": "La selección de apps es solo para Android.",
-    "label.accessibilityHint":
-      "Activa la accesibilidad para bloquear apps sociales.",
-    "label.settingsHint":
-      "Activa la accesibilidad para que la app bloquee redes sociales cuando se acabe el tiempo.",
-    "label.motivationTitle": "Motivación",
-    "label.motivationSubtitle": "Impulsos pequeños que mantienen el ritmo.",
-    "label.motivationDifficultyTitle": "Aumenta la dificultad",
-    "label.motivationDifficultyBody":
-      "Más dificultad te da más tiempo de pantalla por esfuerzo.",
-    "label.motivationDifficultyAction": "Ajustar ahora",
-    "label.motivationWorkoutTitle": "Sigue en movimiento",
-    "label.motivationWorkoutBody":
-      "Inicia un entrenamiento para mantener el impulso.",
-    "label.motivationWorkoutAction": "Iniciar entrenamiento",
-    "label.motivationActionDefault": "Vamos",
-    "label.motivationActionStartSport": "Agrega un deporte",
-    "label.motivationActionDifficulty": "Aumenta la dificultad",
-    "label.motivationActionWorkout": "Abrir Workout",
-    "label.motivationActionStats": "Ver estadísticas",
-    "label.motivationActionNewSport": "Prueba otro deporte",
-    "label.motivationActionAi": "Iniciar AI",
-    "label.motivationActionWidget": "Añadir widget",
-    "label.motivationActionNotifications": "Activa recordatorios",
-    "label.motivationActionApps": "Elige apps",
-    "label.motivationActionSettings": "Abrir ajustes",
-    "label.motivationActionPreface": "Ajustar el prefacio",
-    "label.motivationActionVoice": "Usar voz",
-    "label.motivationActionLanguage": "Cambiar idioma",
-    "label.motivationActionTutorial": "Repite el tutorial",
-    "label.motivationActionHistory": "Ver historial",
-    "label.motivationActionLogWeight": "Registra pesos",
-    "label.motivationActionChallenge": "Iniciar desafío",
-    "label.motivationStartSportTitle": "Agrega tu primer deporte",
-    "label.motivationStartSportBody":
-      "Crea un deporte y reduce el uso de apps para ganar más tiempo.",
-    "label.motivationStatsTitle": "Revisa tus estadísticas",
-    "label.motivationStatsBody":
-      "Mira tus registros para ver tu progreso.",
-    "label.motivationQuoteStartTitle": "Dato curioso",
-    "label.motivationQuoteStartBody":
-      "¿Sabías que cada unidad suma más tiempo de pantalla? Crea un deporte ahora y sube la dificultad para multiplicar tu recompensa.",
-    "label.motivationQuoteDifficultyTitle": "Consejo rápido",
-    "label.motivationQuoteDifficultyBody":
-      "Aumentar un poco la dificultad hace que cada repetición valga más. Sube el regulador y sigue adelante.",
-    "label.motivationQuoteScreenTimeTitle": "Tiempo de pantalla como premio",
-    "label.motivationQuoteScreenTimeBody":
-      "Cada movimiento te da minutos extra en el móvil — sigue así para cobrarlos.",
-    "label.motivationQuoteFocusTitle": "Concéntrate en moverte",
-    "label.motivationQuoteFocusBody":
-      "Unos minutos de deporte te alejan de la pantalla y te ponen en ritmo.",
-    "label.motivationNewSportTitle": "Añade otra disciplina",
-    "label.motivationNewSportBody":
-      "Varía tu rutina creando un nuevo deporte.",
-    "label.motivationWidgetTitle": "Añade un widget",
-    "label.motivationWidgetBody":
-      "Fija el widget para ver tu Screen Time al instante.",
-    "label.motivationNotificationsTitle": "Activa recordatorios",
-    "label.motivationNotificationsBody":
-      "Permite notificaciones para no perder temporizadores o entrenos.",
-    "label.motivationAppsTitle": "Controla tus apps",
-    "label.motivationAppsBody":
-      "Tu app principal usó {{minutes}} min. Limítala para concentrarte.",
-    "label.motivationSettingsTitle": "Ajusta la configuración",
-    "label.motivationSettingsBody":
-      "Modifica las opciones clave para que funcione contigo.",
-    "label.motivationPrefaceTitle": "Prefacio",
-    "label.motivationPrefaceBody":
-      "Configura la pantalla inicial para empezar con el pie derecho.",
-    "label.motivationVoiceTitle": "Usa la voz",
-    "label.motivationVoiceBody":
-      "Activa el conteo por voz y mantén las manos libres.",
-    "label.motivationLanguageTitle": "Cambia el idioma",
-    "label.motivationLanguageBody": "Escoge el idioma que prefieras.",
-    "label.motivationTutorialTitle": "Repite el tutorial",
-    "label.motivationTutorialBody":
-      "Vuelve a ver el tutorial para repasar lo esencial.",
-    "label.motivationHistoryTitle": "Historial de entrenos",
-    "label.motivationHistoryBody":
-      "Consulta entrenos pasados y celebra lo logrado.",
-    "label.motivationLogWeightTitle": "Registra pesos",
-    "label.motivationLogWeightBody":
-      "Añade pesos para que el Screen Time sea más preciso.",
-    "label.motivationChallengeTitle": "Nuevos retos",
-    "label.motivationChallengeBody":
-      "Inicia un reto adicional para desafiarte más.",
-    "label.motivationPreviewHint": "Toca para ver la sugerencia",
-    "label.motivationCollapsedHint": "Mostrar consejos",
-    "label.aiFeatureTitle": "Entrenamiento AI",
-    "label.aiFeatureBody":
-      "Este deporte admite funciones de IA. Pulsa el botón de IA dentro del deporte para iniciar el conteo automático.",
-    "label.aiFeatureAction": "Iniciar IA",
-    "label.changeLanguage": "Cambiar idioma",
-    "label.prefaceSettings": "Pantalla previa",
-    "label.prefaceDelay": "Tiempo de espera (segundos)",
-    "label.tapAnywhere": "Toca en cualquier lugar",
-    "label.voiceOn": "Microfono activado",
-    "label.voiceOff": "Microfono desactivado",
-    "label.voiceListening": "Escuchando...",
-    "label.voiceIdle": "Listo",
-    "label.voiceHint": "Di numeros en voz alta para contar (requiere microfono, beta).",
-    "label.voicePermissionMissing": "Falta acceso al microfono",
-    "label.voiceError": "Fallo de reconocimiento de voz",
-    "label.voiceUnavailable": "Reconocimiento de voz no disponible",
-    "label.aiStart": "Iniciar conteo AI",
-    "label.aiStop": "Detener AI",
-    "label.aiHint": "Coloca la camara de lado y mantente visible.",
-    "label.aiHintInline": "AI cuenta flexiones automaticamente (camara necesaria).",
-    "label.aiPermission": "Falta acceso a la camara.",
-    "label.aiLoading": "Cargando camara...",
-    "label.aiUnavailable": "La camara AI no esta disponible.",
-    "label.aiUnavailableInline": "AI temporalmente desactivado.",
-    "label.back": "Atrás",
-    "label.start": "Iniciar",
-    "label.stop": "Parar",
-    "label.track": "Registrar",
-    "label.hide": "Ocultar",
-    "label.show": "Mostrar",
-    "label.delete": "Eliminar",
-    "label.add": "Añadir",
-    "label.active": "Activado",
-    "label.off": "Desactivado",
-    "label.confirmTitle": "¿Seguro?",
-    "label.confirmDelete": "¿Seguro que quieres eliminar?",
-    "label.confirmHide": "¿Seguro que quieres ocultar?",
-    "label.confirmShow": "¿Seguro que quieres mostrar?",
-    "label.confirm": "Sí",
-    "label.cancel": "Cancelar",
-    "label.close": "Cerrar",
-    "placeholder.sportName": "Nombre (p. ej. Situps)",
-    "language.de": "Alemán",
-    "language.en": "Inglés",
-    "language.es": "Español",
-    "language.fr": "Francés",
-    "sport.pushups": "Flexiones",
-    "sport.pullups": "Dominadas",
-    "sport.situps": "Abdominales",
-    "sport.jogging": "Trote",
-    "label.tutorial": "Tutorial",
-    "label.tutorialHint": "Guia corta de las secciones principales.",
-    "label.tutorialStart": "Iniciar tutorial",
-    "tutorial.step.overview.title": "Tu tiempo de pantalla",
-    "tutorial.step.overview.body":
-      "Aquí ves el tiempo ganado, lo restante y el arrastre; toca las tarjetas para detalles o pulsa Siguiente.",
-    "tutorial.step.openSport.title": "Abrir un deporte",
-    "tutorial.step.openSport.body":
-      "Toca una tarjeta para abrir el área de seguimiento con el deslizador de dificultad, el modo y los campos de registro.",
-    "tutorial.step.addSport.title": "Anadir un deporte",
-    "tutorial.step.addSport.body":
-      "Toca + para añadir un deporte, elige repeticiones o tiempo y ajusta la dificultad.",
-    "tutorial.step.track.title": "Registrar sesion",
-    "tutorial.step.track.body.reps":
-      "Toca el área grande una vez para sumar una repetición; el nivel de dificultad decide cuánto tiempo ganas.",
-    "tutorial.step.track.body.time":
-      "Toca Iniciar para comenzar el temporizador; deténlo cuando termines para que duración y dificultad sumen el tiempo de pantalla.",
-    "tutorial.step.samplePushupInfo.title": "¡Bien hecho!",
-    "tutorial.step.samplePushupInfo.body":
-      "Para que lo sepas: esta flexión de prueba se eliminará porque solo era para el tutorial.",
-    "tutorial.step.back.title": "Volver al inicio",
-    "tutorial.step.back.body":
-      "Toca Atrás para regresar a la lista y revisar otras tarjetas.",
-    "tutorial.step.openSettings.title": "Abrir ajustes",
-    "tutorial.step.openSettings.body":
-      "Toca Ajustes en la barra inferior para gestionar apps, permisos y tiempos de preámbulo.",
-    "tutorial.step.openApps.title": "Apps restringidas",
-    "tutorial.step.openApps.body":
-      "Toca Apps para elegir qué aplicaciones se restringen cuando se acaba el tiempo.",
-    "tutorial.step.openAppsInfo.title": "Elige apps",
-    "tutorial.step.openAppsInfo.body":
-      "Selecciona una app para restringirla y luego pulsa Atrás para volver al tutorial.",
-    "tutorial.step.chooseAppAction.title": "Selecciona una app",
-    "tutorial.step.chooseAppAction.body":
-      "Pulsa una app que quieras restringir y luego pulsa Atrás para regresar al tutorial.",
-    "tutorial.step.finish.title": "Listo",
-    "tutorial.step.finish.body":
-      "Pulsa Siguiente para terminar el tutorial. Puedes reiniciarlo desde el menú principal tocando el botón Tutorial arriba a la derecha en 'Sport'.",
-    "tutorial.step.singleExercises.title": "Sport",
-    "tutorial.step.singleExercises.body":
-      "La pestaña Sport reúne tus deportes; toca uno para comenzar o pulsa Siguiente para continuar.",
-    "tutorial.step.workout.title": "Pestaña Sport",
-    "tutorial.step.workout.body":
-      "Toca Start Workout en la parte superior de la pestaña Sport para abrir la vista de entrenamiento; aquí cronometras sesiones y ves entrenamientos pasados.",
-    "tutorial.step.workoutDetail.title": "Detalles del workout",
-    "tutorial.step.workoutDetail.body":
-      "Este panel controla el temporizador y te deja iniciar o parar sesiones. Pulsa Siguiente para continuar.",
-    "tutorial.step.stats.title": "Pestaña Stats",
-    "tutorial.step.stats.body":
-      "Toca Stats en la barra inferior para ver tus estadísticas diarias y semanales.",
-    "tutorial.step.statsDetail.title": "Resumen de Stats",
-    "tutorial.step.statsDetail.body":
-      "Estas tarjetas y filtros muestran tus valores rápidos. Pulsa Siguiente para seguir.",
-    "tutorial.cta.next": "Siguiente",
-    "tutorial.cta.skip": "Saltar",
-    "tutorial.cta.exit": "Salir del tutorial",
-    "tutorial.cta.done": "Listo",
-  },
-  fr: {
-    "app.title": "Sport pour le temps d’écran",
-    "menu.home": "Sport",
-    "menu.sports": "Tes sports",
-    "menu.apps": "Modifier les apps restreintes",
-    "menu.settings": "Reglages",
-    "menu.workout": "Workout",
-    "menu.stats": "Statistiques",
-    "menu.language": "Langue",
-    "menu.preface": "Ecran preface",
-    "label.today": "Aujourd'hui",
-    "label.week": "Semaine",
-    "label.month": "Mois",
-    "label.weekScreenTime": "Temps gagné hebdo",
-    "label.screenTime": "Temps gagné",
-    "label.screenTimeTitle": "Temps d'ecran",
-    "label.screenTimeHint": "Temps total gagne pendant les dernieres 24h.",
-    "label.remaining": "Restant",
-    "label.remainingHint": "Temps encore disponible a utiliser.",
-    "label.editEntries": "Modifier les entrées",
-    "label.deleteAllEntries": "Supprimer (ce sport)",
-    "label.deleteAllEntriesGlobal": "Supprimer tout",
-    "label.editSport": "Modifier le sport",
-    "label.editEntry": "Modifier l’entrée",
-    "label.dayDetails": "Détails du jour",
-    "label.noEntries": "Aucune entrée",
-    "label.weightLastSet": "Dernière série",
-    "label.weightWorkoutTotal": "Total de l'entraînement",
-    "label.weightHistory": "Séries récentes",
-    "label.weightUnit": "kg",
-    "label.noSportsMatch": "Aucun sport trouvé",
-    "label.breakdown": "Detail",
-    "label.save": "Enregistrer",
-    "label.editHint": "Réduction uniquement.",
-    "label.confirmDeleteAll": "Confirmer la suppression de toutes les entrées ?",
-    "label.confirmDeleteAllGlobal":
-      "Confirmer la suppression de toutes les entrées de tous les sports ?",
-    "label.overallStats": "Statistiques globales",
-    "label.overallStatsHint":
-      "Pour modifier des entrées, ouvrez un sport puis sa statistique.",
-    "label.runningSession": "Session en cours",
-    "label.workoutTimer": "Minuteur d'entraînement",
-    "label.startWorkout": "Démarrer l'entraînement",
-    "label.startWorkoutFirst": "Commence d'abord un entraînement.",
-    "label.endWorkout": "Terminer l'entraînement",
-    "label.workoutExercises": "Exercices",
-    "label.workoutHistory": "Entraînements passés",
-    "label.workoutRunning": "Entraînement en cours",
-    "label.workoutDetail": "Détails de l'entraînement",
-    "label.workoutDuration": "Durée",
-    "label.availableToday": "Disponible aujourd'hui",
-    "label.used": "Utilisé",
-    "label.permissions": "Autorisations",
-    "label.permissionsIntro":
-      "Pour suivre le temps d’écran et bloquer des apps, l’app a besoin d’accès. Vous allez être redirigé vers les réglages.",
-      "label.gettingStarted": "Bien d\u00e9marrer",
-      "label.permissionsNeeded": "Ces autorisations sont n\u00e9cessaires pour que l\u2019app fonctionne.",
-      "label.permissionsHint": "Appuie pour tout configurer",
-      "label.permissionsReminder":
-        "Active l'accessibilité et l'accès à l'utilisation afin que les apps restreintes restent bloquées quand le temps gagné est écoulé.",
-      "label.storageErrorTitle": "Erreur de sauvegarde",
-      "label.storageErrorBody":
-        "Impossible d'enregistrer {{context}}. Réessaie plus tard.",
-      "label.accessibilityTitle": "Accessibilit\u00e9",
-      "label.accessibilityReason": "N\u00e9cessaire pour d\u00e9tecter l\u2019app au premier plan et bloquer les apps restreintes.",
-      "label.accessibilitySteps": "R\u00e9glages > Accessibilit\u00e9 > Sport for Screen Time > Activer",
-      "label.usageAccessTitle": "Acc\u00e8s d\u2019utilisation",
-      "label.usageAccessReason": "N\u00e9cessaire pour lire l\u2019utilisation des apps et calculer le temps.",
-      "label.usageAccessSteps": "R\u00e9glages > Acc\u00e8s d\u2019utilisation > Sport for Screen Time",
-      "label.notificationsTitle": "Notifications",
-      "label.notificationsOptional": "Optionnel",
-      "label.notificationsReason": "Optionnel, pour des rappels de minuterie ou d\u2019entra\u00eenement.",
-      "label.notificationsSteps": "R\u00e9glages > Notifications > Sport for Screen Time > Autoriser",
-    "label.notificationsButton": "Gerer les notifications",
-    "label.notificationsPromptTitle": "Notifications",
-    "label.notificationsPromptBody": "Nous utilisons les notifications pour te rappeler les minuteries ou les entra?nements. C’est optionnel.",
-    "label.notificationsPromptConfirm": "Autoriser",
-    "label.notificationsPromptCancel": "Pas maintenant",
-    "label.notificationsNotRequired": "Pas requis sur cette version d'Android.",
-    "label.status": "Statut",
-    "label.statusOverview": "Statut",
-    "label.quickActions": "Actions rapides",
-    "label.sectionData": "Donnees",
-    "label.resetData": "Reinitialiser l'app",
-    "label.resetDataHint": "Supprime sports, stats, logs et reglages.",
-    "label.confirmResetData": "Confirmer la suppression de toutes les donnees?",
-    "label.carryover": "Report",
-    "label.carryoverHint":
-      "Temps restant des sessions de plus de 24h. Il est divise par deux toutes les 24h.",
-    "label.usageAccess": "Acces d'utilisation",
-    "label.usageAccessHint":
-      "Autorisez l'acces d'utilisation pour trier les apps par temps d'usage.",
-    "label.openUsageAccess": "Autoriser l\u2019acc\u00e8s",
-    "label.usageAccessMissing": "Acces d'utilisation manquant",
-    "label.usageAccessActive": "Acces d'utilisation actif",
-    "label.later": "Plus tard",
-    "label.apps": "Choisir les apps",
-    "label.openApps": "Gerer les apps",
-    "label.grayscaleRestrictedApps": "Afficher les apps restreintes en niveaux de gris",
-    "label.grayscaleRestrictedAppsHint":
-      "Applique un style noir et blanc aux apps restreintes dans la liste.",
-    "label.closeApps": "Fermer les apps",
-    "label.searchApps": "Rechercher des apps",
-    "label.searchSports": "Rechercher des sports",
-    "label.noApps": "Aucune app trouvee.",
-    "label.accessibilityMissing": "Accessibilité inactive",
-    "label.accessibilityActive": "Accessibilité active",
-    "label.permissionNeeded": "Accessibilité requise",
-    "label.hiddenShow": "Afficher les sports cachés",
-    "label.hiddenHide": "Masquer les sports cachés",
-    "label.screenRateReps": "Temps d’écran par répétition (minutes)",
-    "label.screenRateTime": "Temps d’écran par minute de sport (minutes)",
-    "label.weekOverview": "Aperçu quotidien",
-    "label.weekTotal": "Cette semaine",
-    "label.noSports": "Aucun sport actif. Ajoutez-en.",
-    "label.sportSuggestions": "Modèles sportifs",
-    "label.noSportSuggestions": "Aucune suggestion trouvée.",
-    "label.useAsCustomSport": "Utiliser \"{{term}}\" comme sport personnalisé",
-    "label.todayScreenTime": "Temps gagné",
-    "label.widgets": "Widgets",
-    "label.widget": "Widget",
-    "label.widgetOverall": "Widget general",
-    "label.recentActivity": "Activite recente",
-    "label.recentActivityEmpty": "Aucune entree recente.",
-    "label.statsBySport": "Stats par sport",
-    "label.iconChoose": "Choisir une icône",
-    "label.iconPlaceholder": "Une icône",
-    "label.addSport": "Nouveau sport",
-    "label.reps": "Répétitions",
-    "label.repsShort": "rép.",
-    "label.timeUnit": "Temps",
-    "label.weightExercise": "Exercice de force",
-    "label.difficultyLabel": "Facteur d'intensité (1-10)",
-      "label.difficultyDescription":
-        "Le curseur multiplie durée, répétitions ou poids pour décider du temps d'écran attribué à chaque série.",
-      "label.difficultyFormula":
-        "Formules :\nTemps = secondes × facteur × 0,1\nRép. sans poids = rép. × facteur × 1\nPoids = kg × rép. × facteur × 0,08",
-    "label.weightEntryButton": "Enregistrer la série",
-    "label.weightEntryPreview": "Aperçu du temps écran",
-    "label.weightEntryWeight": "Poids (kg)",
-    "label.weightEntryReps": "Répétitions",
-    "label.timeBased": "Basé sur le temps",
-    "label.typePickerTitle": "Mode de suivi",
-    "label.typeInfoTitle": "Comment fonctionnent les modes",
-    "label.typeHelp":
-      "Repetitions: pour compter les series (ex. 10 pompes). Temps: pour minutes/secondes (ex. 15 minutes).",
-    "label.activateNow": "Activer",
-    "label.loadApps": "Charger les apps",
-    "label.androidOnly": "La sélection des apps est uniquement sur Android.",
-    "label.accessibilityHint":
-      "Activez l’accessibilité pour bloquer les apps sociales.",
-    "label.settingsHint":
-      "Activez l’accessibilité pour que l’app bloque les apps sociales quand le temps est écoulé.",
-        "label.motivationTitle": "Motivation",
-    "label.motivationSubtitle": "Un petit boost pour rester actif.",
-    "label.motivationDifficultyTitle": "Augmente la difficult?",
-    "label.motivationDifficultyBody":
-      "Un peu plus de difficult? rapporte plus de temps d'?cran.",
-    "label.motivationDifficultyAction": "Ajuster maintenant",
-    "label.motivationWorkoutTitle": "Reste actif",
-    "label.motivationWorkoutBody":
-      "Lance un entra?nement pour garder le cap.",
-    "label.motivationWorkoutAction": "D?marrer l'entra?nement",
-    "label.motivationActionDefault": "Allons-y",
-    "label.motivationActionStartSport": "Ajoute un sport",
-    "label.motivationActionDifficulty": "Monte la difficulté",
-    "label.motivationActionWorkout": "Ouvre Workout",
-    "label.motivationActionStats": "Voir les stats",
-    "label.motivationActionNewSport": "Teste un nouveau sport",
-    "label.motivationActionAi": "Lance l’AI",
-    "label.motivationActionWidget": "Ajoute un widget",
-    "label.motivationActionNotifications": "Active les rappels",
-    "label.motivationActionApps": "Choisis des apps",
-    "label.motivationActionSettings": "Ouvre les réglages",
-    "label.motivationActionPreface": "Ajuste l’intro",
-    "label.motivationActionVoice": "Utilise la voix",
-    "label.motivationActionLanguage": "Change la langue",
-    "label.motivationActionTutorial": "Revoir le tutoriel",
-    "label.motivationActionHistory": "Voir l’historique",
-    "label.motivationActionLogWeight": "Enregistre les poids",
-    "label.motivationActionChallenge": "Lance un défi",
-    "label.motivationStartSportTitle": "Crée ton premier sport",
-    "label.motivationStartSportBody":
-      "Ajoute un sport et réduis l’usage des apps pour gagner du temps.",
-    "label.motivationStatsTitle": "Consulte les stats",
-    "label.motivationStatsBody":
-      "Regarde tes entrées pour voir tes progrès.",
-    "label.motivationQuoteStartTitle": "Petit retour",
-    "label.motivationQuoteStartBody":
-      "Tu savais que quelques unités suffisent pour accumuler du temps d'écran ? Lance un sport et relève la difficulté.",
-    "label.motivationQuoteDifficultyTitle": "Astuce rapide",
-    "label.motivationQuoteDifficultyBody":
-      "Un peu plus de difficulté augmente la valeur de chaque répétition. Monte le curseur et fonce.",
-    "label.motivationQuoteScreenTimeTitle": "Du temps d'écran en bonus",
-    "label.motivationQuoteScreenTimeBody":
-      "Chaque mouvement te rapporte des minutes supplémentaires sur ton téléphone — continue comme ça.",
-    "label.motivationQuoteFocusTitle": "Concentre-toi sur le mouvement",
-    "label.motivationQuoteFocusBody":
-      "Quelques minutes de sport te sortent de l'écran et te lancent dans ton élan.",
-    "label.motivationNewSportTitle": "Ajoute un autre sport",
-    "label.motivationNewSportBody":
-      "Diversifie ton entraînement avec une nouvelle activité.",
-    "label.motivationWidgetTitle": "Ajoute un widget",
-    "label.motivationWidgetBody":
-      "Ajoute le widget pour suivre ton Screen Time rapidement.",
-    "label.motivationNotificationsTitle": "Active les rappels",
-    "label.motivationNotificationsBody":
-      "Autorise les notifications pour ne rien manquer.",
-    "label.motivationAppsTitle": "Maîtrise tes apps",
-    "label.motivationAppsBody":
-      "Ton app principale a utilisé {{minutes}} min. Bloque-la pour rester focus.",
-    "label.motivationSettingsTitle": "Affinez les réglages",
-    "label.motivationSettingsBody":
-      "Ajuste les paramètres pour que l’app colle à ton rythme.",
-    "label.motivationPrefaceTitle": "Ajuste l’intro",
-    "label.motivationPrefaceBody":
-      "Configure l’écran de préface pour bien démarrer.",
-    "label.motivationVoiceTitle": "Utilise la voix",
-    "label.motivationVoiceBody":
-      "Active la saisie vocale pour garder les mains libres.",
-    "label.motivationLanguageTitle": "Change la langue",
-    "label.motivationLanguageBody": "Choisis la langue qui te convient.",
-    "label.motivationTutorialTitle": "Revoir le tutoriel",
-    "label.motivationTutorialBody":
-      "Reprends le tutoriel pour te remettre à niveau.",
-    "label.motivationHistoryTitle": "Historique d’entraînements",
-    "label.motivationHistoryBody":
-      "Ouvre les anciens entraînements pour célébrer tes succès.",
-    "label.motivationLogWeightTitle": "Enregistre les poids",
-    "label.motivationLogWeightBody":
-      "Ajoute les charges pour des temps d’écran plus précis.",
-    "label.motivationChallengeTitle": "Lance un défi",
-    "label.motivationChallengeBody":
-      "Crée un défi pour te pousser un peu plus loin.",
-    "label.motivationPreviewHint": "Touchez pour voir la recommandation",
-    "label.motivationCollapsedHint": "Afficher les conseils",
-    "label.aiFeatureTitle": "Entra?nement AI",
-    "label.aiFeatureBody":
-      "Ce sport peut utiliser les fonctions AI. Appuie sur le bouton AI dans le sport pour lancer le comptage automatique.",
-    "label.aiFeatureAction": "Démarrer AI",
-"label.changeLanguage": "Changer de langue",
-    "label.prefaceSettings": "Ecran preface",
-    "label.prefaceDelay": "Delai (secondes)",
-    "label.tapAnywhere": "Touchez n’importe où",
-    "label.voiceOn": "Micro actif",
-    "label.voiceOff": "Micro inactif",
-    "label.voiceListening": "Ecoute...",
-    "label.voiceIdle": "Pret",
-    "label.voiceHint": "Dis les numeros a voix haute pour compter (micro requis, beta).",
-    "label.voicePermissionMissing": "Acces micro manquant",
-    "label.voiceError": "Echec de reconnaissance vocale",
-    "label.voiceUnavailable": "Reconnaissance vocale indisponible",
-    "label.aiStart": "Demarrer AI",
-    "label.aiStop": "Arreter AI",
-    "label.aiHint": "Place la camera de cote et reste visible.",
-    "label.aiHintInline": "AI compte les pompes automatiquement (camera requise).",
-    "label.aiPermission": "Acces camera manquant.",
-    "label.aiLoading": "Chargement de la camera...",
-    "label.aiUnavailable": "La camera AI est temporairement indisponible.",
-    "label.aiUnavailableInline": "AI temporairement desactive.",
-    "label.back": "Retour",
-    "label.start": "Démarrer",
-    "label.stop": "Arrêter",
-    "label.track": "Suivre",
-    "label.hide": "Masquer",
-    "label.show": "Afficher",
-    "label.delete": "Supprimer",
-    "label.add": "Ajouter",
-    "label.active": "Activé",
-    "label.off": "Désactivé",
-    "label.confirmTitle": "Confirmer",
-    "label.confirmDelete": "Confirmer la suppression ?",
-    "label.confirmHide": "Confirmer le masquage ?",
-    "label.confirmShow": "Confirmer l’affichage ?",
-    "label.confirm": "Oui",
-    "label.cancel": "Annuler",
-    "label.close": "Fermer",
-    "placeholder.sportName": "Nom (ex. Situps)",
-    "language.de": "Allemand",
-    "language.en": "Anglais",
-    "language.es": "Espagnol",
-    "language.fr": "Français",
-    "sport.pushups": "Pompes",
-    "sport.pullups": "Tractions",
-    "sport.situps": "Abdos",
-    "sport.jogging": "Jogging",
-    "label.tutorial": "Tutoriel",
-    "label.tutorialHint": "Courte visite des zones principales.",
-    "label.tutorialStart": "Demarrer le tutoriel",
-    "tutorial.step.overview.title": "Ton temps d'ecran",
-    "tutorial.step.overview.body":
-      "Ici tu vois le temps gagné, le temps restant et le report; touche les cartes pour plus de détails ou appuie sur Suivant.",
-    "tutorial.step.openSport.title": "Ouvrir un sport",
-    "tutorial.step.openSport.body":
-      "Touche une carte pour ouvrir la zone de suivi avec le curseur de difficulté, le mode et les champs de saisie.",
-    "tutorial.step.addSport.title": "Ajouter un sport",
-    "tutorial.step.addSport.body":
-      "Touche + pour ajouter un sport, choisis répétitions ou temps et règle la difficulté.",
-    "tutorial.step.track.title": "Suivre une session",
-    "tutorial.step.track.body.reps":
-      "Touche une fois la grande zone pour compter une répétition; le niveau de difficulté détermine ton temps d'écran.",
-    "tutorial.step.track.body.time":
-      "Touche Démarrer pour lancer le minuteur; arrête-le quand tu as fini afin que durée et difficulté s'additionnent.",
-    "tutorial.step.samplePushupInfo.title": "Bien joué !",
-    "tutorial.step.samplePushupInfo.body":
-      "Juste pour info : cette pompe de démonstration va être supprimée, elle n’était utilisée que pour le tutoriel.",
-    "tutorial.step.back.title": "Retour a la liste",
-    "tutorial.step.back.body":
-      "Touche Retour pour revenir à la liste et consulter d'autres sports.",
-    "tutorial.step.openSettings.title": "Ouvrir les reglages",
-    "tutorial.step.openSettings.body":
-      "Touche Réglages dans la barre inférieure pour gérer apps, permissions et délais de préface.",
-    "tutorial.step.openApps.title": "Apps restreintes",
-    "tutorial.step.openApps.body":
-      "Touche Apps pour choisir quelles applications seront restreintes une fois le temps écoulé.",
-    "tutorial.step.openAppsInfo.title": "Choisissez des apps",
-    "tutorial.step.openAppsInfo.body":
-      "Sélectionnez une app pour la restreindre, puis appuyez sur Retour pour revenir au tutoriel.",
-    "tutorial.step.chooseAppAction.title": "Choisissez une app",
-    "tutorial.step.chooseAppAction.body":
-      "Touchez une app que vous souhaitez restreindre, puis appuyez sur Retour pour revenir au tutoriel.",
-    "tutorial.step.finish.title": "Termine",
-    "tutorial.step.finish.body":
-      "Touchez Suivant pour terminer le tutoriel. Tu peux le relancer depuis le menu principal en touchant le bouton Tutoriel en haut à droite de 'Sport'.",
-    "tutorial.step.singleExercises.title": "Sport",
-    "tutorial.step.singleExercises.body":
-      "L'onglet Sport rassemble tes sports ; touche-en un pour commencer ou appuie sur Suivant pour continuer.",
-    "tutorial.step.workout.title": "Onglet Sport",
-    "tutorial.step.workout.body":
-      "Touchez Start Workout en haut de l'onglet Sport pour ouvrir la vue workout ; tu lances des sessions et consultes les entraînements passés ici.",
-    "tutorial.step.workoutDetail.title": "Détails du workout",
-    "tutorial.step.workoutDetail.body":
-      "Ce panneau gère le minuteur et te permet de lancer ou arrêter les séances. Appuie sur Suivant pour poursuivre.",
-    "tutorial.step.stats.title": "Onglet Stats",
-    "tutorial.step.stats.body":
-      "Touche Stats dans la barre inférieure pour consulter ton aperçu d'activité.",
-    "tutorial.step.statsDetail.title": "Vue d'ensemble des stats",
-    "tutorial.step.statsDetail.body":
-      "Ces cartes et filtres montrent tes totaux journaliers et hebdomadaires. Appuie sur Suivant pour continuer.",
-    "tutorial.cta.next": "Suivant",
-    "tutorial.cta.skip": "Passer",
-    "tutorial.cta.exit": "Quitter le tutoriel",
-    "tutorial.cta.done": "Termine",
-  },
-};
+
 
 const todayKey = () => new Date().toISOString().slice(0, 10);
 
@@ -5626,14 +4109,14 @@ const startOfWeek = (date) => {
 
 const getWeekKeys = () => {
   const start = startOfWeek(new Date());
-  return Array.from({ length: 7 }, (_, index) => {
-    const entry = new Date(start);
-    entry.setDate(start.getDate() + index);
-    return {
-      key: dateKeyFromDate(entry),
-      label: WEEKDAY_LABELS[index],
-    };
-  });
+    return Array.from({ length: 7 }, (_, index) => {
+      const entry = new Date(start);
+      entry.setDate(start.getDate() + index);
+      return {
+        key: dateKeyFromDate(entry),
+        label: DEFAULT_WEEKDAY_LABELS[index],
+      };
+    });
 };
 
 const parseDateKey = (key) => {
@@ -6261,6 +4744,7 @@ const AiCameraScreen = ({ onClose, repsValue, t }) => (
 
 export default function App() {
   const { width, height } = useWindowDimensions();
+  const { t } = useTranslation();
   const [sports, setSports] = useState([]);
   const [stats, setStats] = useState({});
   const [logs, setLogs] = useState({});
@@ -6405,10 +4889,6 @@ export default function App() {
   });
   const tutorialFingerScale = useRef(new Animated.Value(1)).current;
 
-  const t = (key) => {
-    const dict = STRINGS[language] || STRINGS.de;
-    return dict[key] ?? STRINGS.de[key] ?? key;
-  };
   useEffect(() => {
     const pulse = Animated.loop(
       Animated.sequence([
@@ -6525,6 +5005,13 @@ export default function App() {
 
   useEffect(() => {
     languageRef.current = language;
+  }, [language]);
+
+  useEffect(() => {
+    if (!language) {
+      return;
+    }
+    i18n.changeLanguage(language);
   }, [language]);
 
   useEffect(() => {
@@ -6748,6 +5235,19 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       }
     };
   }, [workoutRunning]);
+
+  const notificationsSupported =
+    Platform.OS === "android" && Number(Platform.Version) >= 33;
+
+  useEffect(() => {
+    if (!notificationsSupported || !notificationsGranted || !workoutRunning) {
+      InstaControl?.clearWorkoutNotification?.();
+      return;
+    }
+    const title = t("label.workoutRunning");
+    const timerText = formatSeconds(workoutSeconds);
+    InstaControl?.showWorkoutNotification?.(title, timerText);
+  }, [notificationsSupported, notificationsGranted, workoutRunning, workoutSeconds, t]);
 
   useEffect(() => {
     if (!isAppActive) {
@@ -8135,6 +6635,29 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setWorkoutDetailId(null);
   };
 
+  const handleContinueWorkout = useCallback(
+    (session) => {
+      if (workoutRunning || !session) {
+        return;
+      }
+      const now = Date.now();
+      const exercises = (session.exercises || []).map((entry) => ({
+        ...entry,
+      }));
+      setCurrentWorkout({
+        id: `workout-${now}`,
+        startTs: now,
+        exercises,
+      });
+      workoutStartRef.current = now;
+      setWorkoutSeconds(0);
+      setWorkoutSessionCount(0);
+      setWorkoutRunning(true);
+      setWorkoutDetailId(null);
+    },
+    [workoutRunning]
+  );
+
   const handleWorkoutStop = () => {
     if (!workoutRunning) {
       return;
@@ -8777,8 +7300,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     return groups;
   }, [logs, sports]);
   const micIcon = "\uD83C\uDFA4";
-  const notificationsSupported =
-    Platform.OS === "android" && Number(Platform.Version) >= 33;
   const tooltipWidth =
     infoCardWidth > 0 ? Math.min(220, Math.max(180, infoCardWidth - 24)) : 200;
 
@@ -9816,7 +8337,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     usageState.carryoverSeconds,
     rollingEarnedSeconds,
   ]);
-  if (aiSession && aiSport) {
+  const renderAppContent = () => {
+    if (aiSession && aiSport) {
     return (
       <AiCameraScreen
         onClose={stopAiSession}
@@ -9830,7 +8352,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       Object.keys(sportStats || {}).forEach((key) => acc.add(key));
       return acc;
     }, new Set());
-    const weekdayLabels = WEEKDAY_LABELS_BY_LANG[language] || WEEKDAY_LABELS;
+    const weekdayLabels =
+      WEEKDAY_LABELS_BY_LANG[language] || DEFAULT_WEEKDAY_LABELS;
     const dayTotals = Object.entries(stats || {}).reduce((acc, [sportId, sportStats]) => {
       const sport = sports.find((entry) => entry.id === sportId);
       if (!sport) {
@@ -10126,7 +8649,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     const sportStats = stats[statsSport.id] || {};
     const sportKeys = new Set(Object.keys(sportStats || {}));
     const months = getMonthsForCalendar(sportKeys);
-    const weekdayLabels = WEEKDAY_LABELS_BY_LANG[language] || WEEKDAY_LABELS;
+    const weekdayLabels =
+      WEEKDAY_LABELS_BY_LANG[language] || DEFAULT_WEEKDAY_LABELS;
     const editUnitLabel =
       statsSport.type === "reps" ? repsShort : t("label.timeUnit");
 
@@ -10818,6 +9342,21 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                     {t("label.screenTime")}:{" "}
                     {formatScreenTime(session.screenSeconds || 0)}
                   </Text>
+                  {isWorkoutRecent(session) ? (
+                    <Pressable
+                      style={[
+                        styles.workoutHistoryContinueButton,
+                        workoutRunning &&
+                          styles.workoutHistoryContinueButtonDisabled,
+                      ]}
+                      onPress={() => handleContinueWorkout(session)}
+                      disabled={workoutRunning}
+                    >
+                      <Text style={styles.workoutHistoryContinueButtonText}>
+                        {t("label.continueWorkout")}
+                      </Text>
+                    </Pressable>
+                  ) : null}
                 </View>
               ))}
             </View>
@@ -12261,7 +10800,15 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       {tutorialActive ? renderTutorialOverlay() : null}
     </SafeAreaView>
   );
+};
+
+  return (
+    <I18nextProvider i18n={i18n}>
+      {renderAppContent()}
+    </I18nextProvider>
+  );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -13929,6 +12476,22 @@ const styles = StyleSheet.create({
     color: COLORS.muted,
     fontSize: 12,
     marginTop: 6,
+  },
+  workoutHistoryContinueButton: {
+    marginTop: 8,
+    borderRadius: 999,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    alignItems: "center",
+    backgroundColor: COLORS.accent,
+  },
+  workoutHistoryContinueButtonDisabled: {
+    opacity: 0.6,
+  },
+  workoutHistoryContinueButtonText: {
+    color: COLORS.white,
+    fontWeight: "700",
+    fontSize: 12,
   },
   workoutHistoryRowMain: {
     flexDirection: "row",
