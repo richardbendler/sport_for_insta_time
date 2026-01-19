@@ -83,7 +83,7 @@ cp /pfad/zur/app-release.apk /mnt/c/Users/<DEIN_USER>/Desktop/
 - Widgets: pro Sport und ein Gesamtwidget fuer erspielte Zeit
 - Tutorial mit Highlighting, jederzeit in den Einstellungen startbar
 - Mehrsprachig (DE/EN/ES/FR)
-- Optional: Benachrichtigungen (Android 13+), Mikrofon (Sprachzaehlung), Kamera (AI)
+- Optional: Benachrichtigungen (Android 13+), Mikrofon (Sprachzaehlung), Kamera
 
 ## Zeit-Logik
 - Wiederholungen: je Sport frei definierbare Umrechnung in Sekunden erspielter Zeit
@@ -108,7 +108,7 @@ bei Ablauf der erspielten Zeit eine Sperrseite anzuzeigen.
 - Zugriffshilfe (Accessibility) und Usage Access fuer den App-Blocker
 - Benachrichtigungen (Android 13+) optional
 - Mikrofon (Sprachzaehlung) optional
-- Kamera (AI-Tracking) optional
+- Kamera optional
 
 ## Entwicklung (Android)
 Ein Dev Build ist notwendig (Expo Go auf Android 14 hat Einschraenkungen).

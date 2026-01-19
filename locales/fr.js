@@ -168,7 +168,6 @@ const fr = {
     "label.motivationActionWorkout": "Ouvre Workout",
     "label.motivationActionStats": "Voir les stats",
     "label.motivationActionNewSport": "Teste un nouveau sport",
-    "label.motivationActionAi": "Lance l’AI",
     "label.motivationActionWidget": "Ajoute un widget",
     "label.motivationActionNotifications": "Active les rappels",
     "label.motivationActionApps": "Choisis des apps",
@@ -235,30 +234,18 @@ const fr = {
       "Crée un défi pour te pousser un peu plus loin.",
     "label.motivationPreviewHint": "Touchez pour voir la recommandation",
     "label.motivationCollapsedHint": "Afficher les conseils",
-    "label.aiFeatureTitle": "Entra?nement AI",
-    "label.aiFeatureBody":
-      "Ce sport peut utiliser les fonctions AI. Appuie sur le bouton AI dans le sport pour lancer le comptage automatique.",
-    "label.aiFeatureAction": "Démarrer AI",
-"label.changeLanguage": "Changer de langue",
+    "label.changeLanguage": "Changer de langue",
     "label.prefaceSettings": "Ecran preface",
     "label.prefaceDelay": "Delai (secondes)",
     "label.tapAnywhere": "Touchez n’importe où",
     "label.voiceOn": "Micro actif",
     "label.voiceOff": "Micro inactif",
     "label.voiceListening": "Ecoute...",
-    "label.voiceIdle": "Pret",
+    "label.voiceIdle": "Démarrer le comptage micro",
     "label.voiceHint": "Dis les numeros a voix haute pour compter (micro requis, beta).",
     "label.voicePermissionMissing": "Acces micro manquant",
     "label.voiceError": "Echec de reconnaissance vocale",
     "label.voiceUnavailable": "Reconnaissance vocale indisponible",
-    "label.aiStart": "Demarrer AI",
-    "label.aiStop": "Arreter AI",
-    "label.aiHint": "Place la camera de cote et reste visible.",
-    "label.aiHintInline": "AI compte les pompes automatiquement (camera requise).",
-    "label.aiPermission": "Acces camera manquant.",
-    "label.aiLoading": "Chargement de la camera...",
-    "label.aiUnavailable": "La camera AI est temporairement indisponible.",
-    "label.aiUnavailableInline": "AI temporairement desactive.",
     "label.back": "Retour",
     "label.start": "Démarrer",
     "label.stop": "Arrêter",
@@ -297,6 +284,27 @@ const fr = {
     "tutorial.step.addSport.title": "Ajouter un sport",
     "tutorial.step.addSport.body":
       "Touche + pour ajouter un sport, choisis répétitions ou temps et règle la difficulté.",
+    "tutorial.step.createSport.title": "Créer un sport",
+    "tutorial.step.createSport.body":
+      "Donne-lui un nom, choisis répétitions ou temps, ajuste la difficulté et enregistre pour pouvoir le suivre.",
+    "tutorial.step.createSportName.title": "Nomme ton sport",
+    "tutorial.step.createSportName.body":
+      "Choisis un nom qui décrit le mouvement que tu veux suivre.",
+    "tutorial.step.createSportIcon.title": "Choisis une icône",
+    "tutorial.step.createSportIcon.body":
+      "Sélectionne une icône pour repérer facilement la carte.",
+    "tutorial.step.createSportType.title": "Choisis un mode",
+    "tutorial.step.createSportType.body":
+      "Alterne entre répétitions et temps selon ce que tu comptes.",
+    "tutorial.step.createSportDifficulty.title": "Ajuste la difficulté",
+    "tutorial.step.createSportDifficulty.body":
+      "Glisse le curseur pour définir combien de temps d'écran rapporte chaque mouvement.",
+    "tutorial.step.createSportWeight.title": "Active les poids",
+    "tutorial.step.createSportWeight.body":
+      "Active cette option si tu utilises des poids afin que l'app ajuste la récompense.",
+    "tutorial.step.createSportSave.title": "Enregistre ton sport",
+    "tutorial.step.createSportSave.body":
+      "Appuie sur Enregistrer pour garder ces réglages et continuer le tutoriel.",
     "tutorial.step.track.title": "Suivre une session",
     "tutorial.step.track.body.reps":
       "Touche une fois la grande zone pour compter une répétition; le niveau de difficulté détermine ton temps d'écran.",
