@@ -929,7 +929,7 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "face_pulls",
     labels: {
-      de: "Face Pulls",
+      de: "Face-Pulls",
       en: "Face Pulls",
       es: "Pulls de cara",
       fr: "Face pulls",
@@ -1048,8 +1048,8 @@ const RAW_STANDARD_SPORTS = [
     labels: {
       de: "Rack Pulls",
       en: "Rack Pulls",
-      es: "Rack Pulls",
-      fr: "Rack Pulls",
+      es: "Elevaciones desde el rack",
+      fr: "Rack pulls",
     },
     icon: "??",
     type: "reps",
@@ -1061,8 +1061,8 @@ const RAW_STANDARD_SPORTS = [
     labels: {
       de: "Good Mornings",
       en: "Good Mornings",
-      es: "Good Mornings",
-      fr: "Good Mornings",
+      es: "Buenos días",
+      fr: "Good mornings",
     },
     icon: "??",
     type: "reps",
@@ -1072,10 +1072,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "cable_pullovers",
     labels: {
-      de: "Cable Pullovers",
+      de: "Kabel-Pullovers",
       en: "Cable Pullovers",
-      es: "Cable Pullovers",
-      fr: "Cable Pullovers",
+      es: "Pullover en polea",
+      fr: "Pull-overs à la poulie",
     },
     icon: "?",
     type: "reps",
@@ -1085,10 +1085,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "back_extensions",
     labels: {
-      de: "Back Extensions",
+      de: "Rückenstrecker",
       en: "Back Extensions",
-      es: "Back Extensions",
-      fr: "Back Extensions",
+      es: "Extensiones de espalda",
+      fr: "Extensions du dos",
     },
     icon: "??",
     type: "reps",
@@ -1098,10 +1098,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "back_squat",
     labels: {
-      de: "Back Squat",
+      de: "Langhantel-Kniebeuge",
       en: "Back Squat",
-      es: "Back Squat",
-      fr: "Back Squat",
+      es: "Sentadilla espalda",
+      fr: "Squat arrière",
     },
     icon: "???",
     type: "reps",
@@ -1111,10 +1111,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "front_squat",
     labels: {
-      de: "Front Squat",
+      de: "Vorderer Kniebeuge",
       en: "Front Squat",
-      es: "Front Squat",
-      fr: "Front Squat",
+      es: "Sentadilla frontal",
+      fr: "Squat avant",
     },
     icon: "???",
     type: "reps",
@@ -1124,10 +1124,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "goblet_squat",
     labels: {
-      de: "Goblet Squat",
+      de: "Goblet-Kniebeuge",
       en: "Goblet Squat",
-      es: "Goblet Squat",
-      fr: "Goblet Squat",
+      es: "Sentadilla goblet",
+      fr: "Goblet squat",
     },
     icon: "??",
     type: "reps",
@@ -1137,10 +1137,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "bulgarian_split_squat",
     labels: {
-      de: "Bulgarian Split Squat",
+      de: "Bulgarische Ausfallschritte",
       en: "Bulgarian Split Squat",
-      es: "Bulgarian Split Squat",
-      fr: "Bulgarian Split Squat",
+      es: "Zancadas búlgaras",
+      fr: "Fente bulgare",
     },
     icon: "??",
     type: "reps",
@@ -1150,10 +1150,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "walking_lunges",
     labels: {
-      de: "Walking Lunges",
+      de: "Laufende Ausfallschritte",
       en: "Walking Lunges",
-      es: "Walking Lunges",
-      fr: "Walking Lunges",
+      es: "Zancadas caminando",
+      fr: "Fentes marchées",
     },
     icon: "??",
     type: "reps",
@@ -1163,10 +1163,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "reverse_lunges",
     labels: {
-      de: "Reverse Lunges",
+      de: "Rückwärts-Ausfallschritte",
       en: "Reverse Lunges",
-      es: "Reverse Lunges",
-      fr: "Reverse Lunges",
+      es: "Zancadas hacia atrás",
+      fr: "Fentes arrière",
     },
     icon: "??",
     type: "reps",
@@ -1176,10 +1176,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "lateral_lunges",
     labels: {
-      de: "Lateral Lunges",
+      de: "Seitliche Ausfallschritte",
       en: "Lateral Lunges",
-      es: "Lateral Lunges",
-      fr: "Lateral Lunges",
+      es: "Zancadas laterales",
+      fr: "Fentes latérales",
     },
     icon: "??",
     type: "reps",
@@ -1189,10 +1189,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "curtsy_lunges",
     labels: {
-      de: "Curtsy Lunges",
+      de: "Verbeugungs-Ausfallschritte",
       en: "Curtsy Lunges",
-      es: "Curtsy Lunges",
-      fr: "Curtsy Lunges",
+      es: "Zancadas reverencia",
+      fr: "Fentes révérence",
     },
     icon: "??",
     type: "reps",
@@ -1215,10 +1215,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "box_step_ups",
     labels: {
-      de: "Box Step-ups",
+      de: "Box-Step-ups",
       en: "Box Step-ups",
-      es: "Box Step-ups",
-      fr: "Box Step-ups",
+      es: "Step-ups con cajón",
+      fr: "Step-ups sur box",
     },
     icon: "??",
     type: "reps",
@@ -1230,8 +1230,8 @@ const RAW_STANDARD_SPORTS = [
     labels: {
       de: "Pistol Squat",
       en: "Pistol Squat",
-      es: "Pistol Squat",
-      fr: "Pistol Squat",
+      es: "Sentadilla pistol",
+      fr: "Pistol squat",
     },
     icon: "?",
     type: "reps",
@@ -1241,10 +1241,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "sumo_squat",
     labels: {
-      de: "Sumo Squat",
+      de: "Sumo-Kniebeuge",
       en: "Sumo Squat",
-      es: "Sumo Squat",
-      fr: "Sumo Squat",
+      es: "Sentadilla sumo",
+      fr: "Sumo squat",
     },
     icon: "??",
     type: "reps",
@@ -1256,8 +1256,8 @@ const RAW_STANDARD_SPORTS = [
     labels: {
       de: "Hack Squat",
       en: "Hack Squat",
-      es: "Hack Squat",
-      fr: "Hack Squat",
+      es: "Sentadilla hack",
+      fr: "Hack squat",
     },
     icon: "???",
     type: "reps",
@@ -1267,10 +1267,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "zercher_squat",
     labels: {
-      de: "Zercher Squat",
+      de: "Zercher-Kniebeuge",
       en: "Zercher Squat",
-      es: "Zercher Squat",
-      fr: "Zercher Squat",
+      es: "Sentadilla Zercher",
+      fr: "Zercher squat",
     },
     icon: "???",
     type: "reps",
