@@ -142,7 +142,7 @@ const es = {
       "label.difficultyFormula":
         "Fórmulas:\nTiempo cronometrado = segundos × adminFactor_time × dificultad\nRepeticiones = repeticiones × adminFactor_reps × dificultad\nDeportes con peso = kg × repeticiones × dificultad × adminFactor_weighted",
     "label.weightExerciseInfoTitle": "Ejercicios con peso",
-    "label.weightExerciseInfoBody": "Activa esto para series con peso adicional; el tiempo de pantalla se calcula como kg × repeticiones × dificultad × adminFactor_weighted."
+    "label.weightExerciseInfoBody": "Activa esto para series con peso adicional; el tiempo de pantalla se calcula como kg × repeticiones × dificultad × adminFactor_weighted.",
     "label.weightEntryButton": "Registrar serie",
     "label.weightEntryPreview": "Tiempo de pantalla (vista previa)",
     "label.weightEntryWeight": "Peso (kg)",
