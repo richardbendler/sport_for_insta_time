@@ -396,10 +396,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "pushups",
     labels: {
-      de: "Push-ups",
+      de: "Liegestütze",
       en: "Push-ups",
-      es: "Push-ups",
-      fr: "Push-ups",
+      es: "Flexiones",
+      fr: "Pompes",
     },
     icon: "???",
     type: "reps",
@@ -409,10 +409,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "diamond_push_ups",
     labels: {
-      de: "Diamond Push-ups",
+      de: "Diamant-Liegestütze",
       en: "Diamond Push-ups",
-      es: "Diamond Push-ups",
-      fr: "Diamond Push-ups",
+      es: "Flexiones diamante",
+      fr: "Pompes diamant",
     },
     icon: "???",
     type: "reps",
@@ -422,10 +422,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "clap_push_ups",
     labels: {
-      de: "Clap Push-ups",
+      de: "Klatsch-Liegestütze",
       en: "Clap Push-ups",
-      es: "Clap Push-ups",
-      fr: "Clap Push-ups",
+      es: "Flexiones con palmada",
+      fr: "Pompes claquées",
     },
     icon: "??",
     type: "reps",
@@ -435,10 +435,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "archer_push_ups",
     labels: {
-      de: "Archer Push-ups",
+      de: "Archer-Liegestütze",
       en: "Archer Push-ups",
-      es: "Archer Push-ups",
-      fr: "Archer Push-ups",
+      es: "Flexiones arqueras",
+      fr: "Pompes archer",
     },
     icon: "??",
     type: "reps",
@@ -448,10 +448,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "staggered_push_ups",
     labels: {
-      de: "Staggered Push-ups",
+      de: "Asymmetrische Liegestütze",
       en: "Staggered Push-ups",
-      es: "Staggered Push-ups",
-      fr: "Staggered Push-ups",
+      es: "Flexiones escalonadas",
+      fr: "Pompes décalées",
     },
     icon: "??",
     type: "reps",
@@ -461,10 +461,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "pike_push_ups",
     labels: {
-      de: "Pike Push-ups",
+      de: "Pike-Liegestütze",
       en: "Pike Push-ups",
-      es: "Pike Push-ups",
-      fr: "Pike Push-ups",
+      es: "Flexiones en pica",
+      fr: "Pompes en V",
     },
     icon: "??",
     type: "reps",
@@ -474,10 +474,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "planche_push_ups",
     labels: {
-      de: "Planche Push-ups",
+      de: "Planche-Liegestütze",
       en: "Planche Push-ups",
-      es: "Planche Push-ups",
-      fr: "Planche Push-ups",
+      es: "Flexiones plancha",
+      fr: "Pompes planche",
     },
     icon: "??",
     type: "reps",
@@ -487,10 +487,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "handstand_push_ups",
     labels: {
-      de: "Handstand Push-ups",
+      de: "Handstand-Liegestütze",
       en: "Handstand Push-ups",
-      es: "Handstand Push-ups",
-      fr: "Handstand Push-ups",
+      es: "Flexiones de pino",
+      fr: "Pompes en équilibre sur les mains",
     },
     icon: "??",
     type: "reps",
@@ -500,10 +500,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "one_arm_push_ups",
     labels: {
-      de: "One-arm Push-ups",
+      de: "Einarmige Liegestütze",
       en: "One-arm Push-ups",
-      es: "One-arm Push-ups",
-      fr: "One-arm Push-ups",
+      es: "Flexiones a una mano",
+      fr: "Pompes à un bras",
     },
     icon: "??",
     type: "reps",
