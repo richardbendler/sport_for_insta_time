@@ -140,7 +140,9 @@ const es = {
       "label.difficultyDescription":
         "El deslizador multiplica duración, repeticiones o peso para definir cuánto tiempo de pantalla otorga cada serie.",
       "label.difficultyFormula":
-        "Fórmulas:\nTiempo = segundos × factor × 0,05\nReps sin peso = rep × factor × 0,05\nCon peso = kg × rep × factor × 0,001",
+        "Fórmulas:\nTiempo cronometrado = segundos × adminFactor_time × dificultad\nRepeticiones = repeticiones × adminFactor_reps × dificultad\nDeportes con peso = kg × repeticiones × dificultad × adminFactor_weighted",
+    "label.weightExerciseInfoTitle": "Ejercicios con peso",
+    "label.weightExerciseInfoBody": "Activa esto para series con peso adicional; el tiempo de pantalla se calcula como kg × repeticiones × dificultad × adminFactor_weighted."
     "label.weightEntryButton": "Registrar serie",
     "label.weightEntryPreview": "Tiempo de pantalla (vista previa)",
     "label.weightEntryWeight": "Peso (kg)",

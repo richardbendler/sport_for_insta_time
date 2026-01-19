@@ -135,7 +135,9 @@ const fr = {
       "label.difficultyDescription":
         "Le curseur multiplie durée, répétitions ou poids pour décider du temps d'écran attribué à chaque série.",
       "label.difficultyFormula":
-        "Formules :\nTemps = secondes × facteur × 0,05\nRép. sans poids = rép. × facteur × 0,05\nPoids = kg × rép. × facteur × 0,001",
+        "Formules :\nBasé sur le temps = secondes × adminFactor_time × difficulté\nBasé sur les répétitions = répétitions × adminFactor_reps × difficulté\nSports avec charges = kg × répétitions × difficulté × adminFactor_weighted",
+    "label.weightExerciseInfoTitle": "Exercices avec poids",
+    "label.weightExerciseInfoBody": "Activez ceci pour les series avec charges supplementaires ; le temps d'ecran se calcule comme kg \u00d7 repetitions \u00d7 difficulte \u00d7 adminFactor_weighted."
     "label.weightEntryButton": "Enregistrer la série",
     "label.weightEntryPreview": "Aperçu du temps écran",
     "label.weightEntryWeight": "Poids (kg)",

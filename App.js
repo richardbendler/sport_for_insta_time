@@ -71,8 +71,9 @@ const DEFAULT_ICON = "⭐";
 const DEFAULT_DIFFICULTY = 5;
 const DEFAULT_TIME_RATE = 0.5;
 const DEFAULT_REPS_RATE = 0.5;
-const ADMIN_SCREEN_TIME_FACTOR = 0.2; // tweak this factor to globally adjust granted Screen Time
-const WEIGHT_SCREEN_TIME_BALANCE = 0.01; // reduces the impact of weight entries after scaling
+const ADMIN_FACTOR_TIME = 0.05; // tweak this factor to globally adjust granted Screen Time for non-reps sports
+const ADMIN_FACTOR_REPS = 1.1; // dedicated admin factor for reps-based screen time
+const ADMIN_FACTOR_WEIGHTED = 0.01; // base admin multiplier applied only for weighted reps entries
 const DEFAULT_WEIGHT_RATE = 0.04;
 const WORKOUT_CONTINUE_WINDOW_MS = 30 * 60 * 1000;
 const TUTORIAL_STRONG_HIGHLIGHT = "rgba(249, 115, 22, 0.2)";
@@ -4011,19 +4012,25 @@ const matchLabelScore = (
   searchCompact
 ) => {
   if (!searchLower && !searchCompact) {
-    return 0;
+    return { score: 0, index: 0 };
   }
-  if (searchLower && normalizedLabel.startsWith(searchLower)) {
-    return 0;
+  if (searchLower) {
+    if (normalizedLabel.startsWith(searchLower)) {
+      return { score: 0, index: 0 };
+    }
+    const normalizedIndex = normalizedLabel.indexOf(searchLower);
+    if (normalizedIndex !== -1) {
+      return { score: 2, index: normalizedIndex };
+    }
   }
-  if (searchCompact && compactLabel.startsWith(searchCompact)) {
-    return 1;
-  }
-  if (searchLower && normalizedLabel.includes(searchLower)) {
-    return 2;
-  }
-  if (searchCompact && compactLabel.includes(searchCompact)) {
-    return 3;
+  if (searchCompact) {
+    if (compactLabel.startsWith(searchCompact)) {
+      return { score: 1, index: 0 };
+    }
+    const compactIndex = compactLabel.indexOf(searchCompact);
+    if (compactIndex !== -1) {
+      return { score: 3, index: compactIndex };
+    }
   }
   return null;
 };
@@ -4035,27 +4042,31 @@ const getSportMatchScore = (
   language = "en"
 ) => {
   const candidates = getLabelCandidates(entry, language);
-  let bestScore = null;
+  let bestMatch = null;
   for (const candidate of candidates) {
     const normalizedLabel = normalizeTextForSearch(candidate);
     const compactLabel = stripNonAlphanumeric(normalizedLabel);
-    const score = matchLabelScore(
+    const match = matchLabelScore(
       normalizedLabel,
       compactLabel,
       searchLower,
       searchCompact
     );
-    if (score === null) {
+    if (match === null) {
       continue;
     }
-    if (bestScore === null || score < bestScore) {
-      bestScore = score;
-      if (score === 0) {
+    if (
+      !bestMatch ||
+      match.score < bestMatch.score ||
+      (match.score === bestMatch.score && match.index < bestMatch.index)
+    ) {
+      bestMatch = match;
+      if (match.score === 0 && match.index === 0) {
         break;
       }
     }
   }
-  return bestScore;
+  return bestMatch;
 };
 
 const doesSportMatchSearchTerm = (entry, searchLower, language = "en") => {
@@ -4408,24 +4419,6 @@ const getDefaultRateMinutes = (sportType) => {
 const generateLogId = () =>
   `log_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
 
-const getAdminFactorForSport = (sport) => {
-  if (sport?.id === "pushups") {
-    return ADMIN_SCREEN_TIME_FACTOR * 9;
-  }
-  if (sport?.weightExercise) {
-    return ADMIN_SCREEN_TIME_FACTOR * 60;
-  }
-  if (sport?.type === "reps") {
-    return ADMIN_SCREEN_TIME_FACTOR * 12;
-  }
-  return ADMIN_SCREEN_TIME_FACTOR;
-};
-
-const scaleScreenSeconds = (value, balance = 1, sport = null) => {
-  const factor = getAdminFactorForSport(sport);
-  return Math.max(0, Math.round(value * factor * balance));
-};
-
 const screenSecondsForStats = (sport, dayStats) => {
   if (!sport || !dayStats) {
     return 0;
@@ -4433,48 +4426,34 @@ const screenSecondsForStats = (sport, dayStats) => {
   if (sport.weightExercise && sport.type === "reps") {
     return Math.max(0, Math.floor(dayStats.screenSeconds || 0));
   }
-  const difficultyFactor = difficultyLevelForSport(sport);
-  const baseRate = screenSecondsBaseRate(sport);
+  const userFactor = difficultyLevelForSport(sport);
   if (sport.type === "reps") {
-    return Math.max(
-      0,
-      scaleScreenSeconds(
-        (dayStats.reps || 0) * baseRate * difficultyFactor,
-        1,
-        sport
-      )
-    );
+    const value = (dayStats.reps || 0) * ADMIN_FACTOR_REPS * userFactor;
+    return Math.max(0, Math.round(value));
   }
-  return Math.max(
-    0,
-    scaleScreenSeconds(
-      (dayStats.seconds || 0) * baseRate * difficultyFactor,
-      1,
-      sport
-    )
-  );
+  const value = (dayStats.seconds || 0) * ADMIN_FACTOR_TIME * userFactor;
+  return Math.max(0, Math.round(value));
 };
 
 const screenSecondsForEntry = (sport, entry) => {
   if (!sport || !entry) {
     return 0;
   }
-  const difficultyFactor = difficultyLevelForSport(sport);
-  const baseRate = screenSecondsBaseRate(sport);
+  const userFactor = difficultyLevelForSport(sport);
   if (sport.type === "reps" && sport.weightExercise) {
     const reps = parsePositiveInteger(entry.reps);
     const weight = parsePositiveNumber(entry.weight);
-    const value = weight * reps * difficultyFactor;
-    return scaleScreenSeconds(value, WEIGHT_SCREEN_TIME_BALANCE, sport);
+    const value = weight * reps * userFactor * ADMIN_FACTOR_WEIGHTED;
+    return Math.max(0, Math.round(value));
   }
   if (sport.type === "reps") {
     const reps = parsePositiveInteger(entry.reps);
-    const value = reps * baseRate * difficultyFactor;
-    return scaleScreenSeconds(value, 1, sport);
+    const value = reps * ADMIN_FACTOR_REPS * userFactor;
+    return Math.max(0, Math.round(value));
   }
   const seconds = parsePositiveNumber(entry.seconds);
-  const value = seconds * baseRate * difficultyFactor;
-  return scaleScreenSeconds(value, 1, sport);
+  const value = seconds * ADMIN_FACTOR_TIME * userFactor;
+  return Math.max(0, Math.round(value));
 };
 
 const widgetValueForStats = (sport, dayStats) => {
@@ -4650,17 +4629,6 @@ const defaultScreenSecondsPerUnit = (sport) => {
     return DEFAULT_REPS_RATE;
   }
   return DEFAULT_TIME_RATE;
-};
-
-const screenSecondsBaseRate = (sport) => {
-  if (!sport) {
-    return DEFAULT_TIME_RATE;
-  }
-  const provided = sport.screenSecondsPerUnit;
-  if (Number.isFinite(Number(provided))) {
-    return Math.max(0, Number(provided));
-  }
-  return defaultScreenSecondsPerUnit(sport);
 };
 
 const normalizeSports = (sportList) => {
@@ -4989,21 +4957,24 @@ export default function App() {
     }
     const searchCompact = stripNonAlphanumeric(normalizedSportSearch);
     const scoredMatches = STANDARD_SPORTS.map((entry) => {
-      const score = getSportMatchScore(
+      const match = getSportMatchScore(
         entry,
         normalizedSportSearch,
         searchCompact,
         language
       );
-      if (score === null) {
+      if (match === null) {
         return null;
       }
-      return { entry, score };
+      return { entry, match };
     })
       .filter(Boolean)
       .sort((a, b) => {
-        if (a.score !== b.score) {
-          return a.score - b.score;
+        if (a.match.score !== b.match.score) {
+          return a.match.score - b.match.score;
+        }
+        if (a.match.index !== b.match.index) {
+          return a.match.index - b.match.index;
         }
         const labelA = getStandardSportLabel(a.entry, language);
         const labelB = getStandardSportLabel(b.entry, language);
@@ -5046,6 +5017,7 @@ export default function App() {
     setShowIconInput(false);
     setNewName(trimmedSportSearch);
     setCustomSuggestionUsed(true);
+    setNewDifficultyLevel(DEFAULT_DIFFICULTY);
   };
 
   useEffect(() => {
@@ -5723,10 +5695,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       STORAGE_KEYS.sports,
       STORAGE_KEYS.stats,
       STORAGE_KEYS.settings,
-      STORAGE_KEYS.permissions,
-      STORAGE_KEYS.accessibilityDisclosure,
-      STORAGE_KEYS.usagePermissions,
-      STORAGE_KEYS.notificationsPermissions,
       STORAGE_KEYS.carryover,
       STORAGE_KEYS.carryoverDay,
       STORAGE_KEYS.usageSnapshot,
@@ -5755,10 +5723,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setOverallStatsOpen(false);
     setOverallDayKey(null);
     setStatsEditMode(false);
-    setPermissionsPrompted(false);
-    setUsagePermissionsPrompted(false);
-    setAccessibilityDisclosureAccepted(false);
-    setNotificationsPrompted(false);
+    setPermissionsPrompted(true);
+    setUsagePermissionsPrompted(true);
+    setAccessibilityDisclosureAccepted(true);
+    setNotificationsPrompted(true);
     setPrefaceDelayInput(String(DEFAULT_SETTINGS.prefaceDelaySeconds));
     setShowLanguageMenu(false);
     setInstalledApps([]);
@@ -9844,28 +9812,7 @@ const getSpeechLocale = () => {
           {renderTutorialHeaderButton()}
         </View>
         {renderMainNav("home")}
-        <View style={styles.workoutStartRow}>
-          <Pressable
-            ref={tutorialWorkoutStartRef}
-            style={[styles.primaryButton, styles.fullWidthButton]}
-            onPress={openWorkout}
-          >
-            <Text style={styles.primaryButtonText}>
-              {t("label.startWorkout")}
-            </Text>
-          </Pressable>
-        </View>
         {renderWorkoutBanner()}
-        <TextInput
-          style={styles.searchInput}
-          autoCorrect={false}
-          autoCapitalize="none"
-          placeholder={t("label.searchSports")}
-          placeholderTextColor="#7a7a7a"
-          value={sportSearch}
-          onChangeText={setSportSearch}
-          clearButtonMode="while-editing"
-        />
         {showMotivationBlock ? (
           <View
             style={[
@@ -10005,6 +9952,27 @@ const getSpeechLocale = () => {
               )}
           </View>
         ) : null}
+        <View style={styles.workoutStartRow}>
+          <Pressable
+            ref={tutorialWorkoutStartRef}
+            style={[styles.primaryButton, styles.fullWidthButton]}
+            onPress={openWorkout}
+          >
+            <Text style={styles.primaryButtonText}>
+              {t("label.startWorkout")}
+            </Text>
+          </Pressable>
+        </View>
+        <TextInput
+          style={styles.searchInput}
+          autoCorrect={false}
+          autoCapitalize="none"
+          placeholder={t("label.searchSports")}
+          placeholderTextColor="#7a7a7a"
+          value={sportSearch}
+          onChangeText={setSportSearch}
+          clearButtonMode="while-editing"
+        />
         <Modal
           visible={accessibilityDisclosureVisible}
           transparent
@@ -10781,6 +10749,12 @@ const getSpeechLocale = () => {
                     {t("label.weightExercise")}
                   </Text>
                 </Pressable>
+                <Pressable
+                  style={styles.infoButton}
+                  onPress={() => setInfoModalKey((prev) => prev === "weight" ? null : "weight")}
+                >
+                  <Text style={styles.infoButtonText}>?</Text>
+                </Pressable>
               </View>
             ) : null}
             <View style={styles.modalActions}>
@@ -10819,12 +10793,16 @@ const getSpeechLocale = () => {
             <Text style={styles.modalTitle}>
               {infoModalKey === "type"
                 ? t("label.typeInfoTitle")
-                : t("label.difficultyLabel")}
+                : infoModalKey === "difficulty"
+                ? t("label.difficultyLabel")
+                : t("label.weightExerciseInfoTitle")}
             </Text>
             <Text style={styles.modalSubtitle}>
               {infoModalKey === "type"
                 ? t("label.typeHelp")
-                : t("label.difficultyDescription")}
+                : infoModalKey === "difficulty"
+                ? t("label.difficultyDescription")
+                : t("label.weightExerciseInfoBody")}
             </Text>
             {infoModalKey === "difficulty" ? (
               <Text style={styles.modalSubtitle}>
@@ -12105,6 +12083,10 @@ const styles = StyleSheet.create({
   },
   weightToggleRow: {
     marginBottom: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
   },
   weightToggleButton: {
     flexDirection: "row",
