@@ -33,8 +33,6 @@ import {
 } from "./locales";
 
 const InstaControl = NativeModules.InstaControl;
-const AI_CAMERA_ENABLED = false;
-
 const STORAGE_KEYS = {
   sports: "@sports_v1",
   stats: "@stats_v1",
@@ -66,24 +64,18 @@ const SPEECH_LOCALES = {
   fr: "fr-FR",
 };
 
-const AI_EXERCISES = {
-  pushups: {
-    id: "pushups",
-    minConfidence: 0.5,
-    upAngle: 160,
-    downAngle: 95,
-    minRepMs: 700,
-  },
-};
+const normalizeSpeechLocale = (locale) =>
+  typeof locale === "string" ? locale.replace(/-/g, "_") : "";
 
 const DEFAULT_ICON = "⭐";
 const DEFAULT_DIFFICULTY = 5;
 const DEFAULT_TIME_RATE = 0.5;
 const DEFAULT_REPS_RATE = 0.5;
-const ADMIN_SCREEN_TIME_FACTOR = 0.1; // tweak this factor to globally adjust granted Screen Time
-const WEIGHT_SCREEN_TIME_BALANCE = 0.25; // reduces the impact of weight entries after scaling
+const ADMIN_SCREEN_TIME_FACTOR = 0.2; // tweak this factor to globally adjust granted Screen Time
+const WEIGHT_SCREEN_TIME_BALANCE = 0.01; // reduces the impact of weight entries after scaling
 const DEFAULT_WEIGHT_RATE = 0.04;
 const WORKOUT_CONTINUE_WINDOW_MS = 30 * 60 * 1000;
+const TUTORIAL_STRONG_HIGHLIGHT = "rgba(249, 115, 22, 0.2)";
 const interpolateTemplate = (template = "", values = {}) =>
   template.replace(/\{\{(\w+)\}\}/g, (_, key) =>
     Object.prototype.hasOwnProperty.call(values, key) ? values[key] : ""
@@ -115,11 +107,9 @@ const isWorkoutRecent = (session) => {
   const elapsed = Date.now() - endTime;
   return elapsed >= 0 && elapsed <= WORKOUT_CONTINUE_WINDOW_MS;
 };
-const PRESET_KEYS = {
-  pushups: "pushups",
-};
+const PRESET_KEYS = {};
 const STANDARD_SPORT_TRANSLATIONS = {
-  push_ups: {
+  pushups: {
     de: "Liegestütze",
     en: "Push-ups",
     es: "Flexiones",
@@ -403,7 +393,7 @@ const RAW_STANDARD_SPORTS = [
     difficultyLevel: 5,
   },
   {
-    id: "push_ups",
+    id: "pushups",
     labels: {
       de: "Push-ups",
       en: "Push-ups",
@@ -3981,25 +3971,102 @@ const STANDARD_SPORTS = RAW_STANDARD_SPORTS.map((sport) => ({
 }));
 const getStandardSportLabel = (entry, language) =>
   entry.labels?.[language] || entry.labels?.en || entry.id;
-const doesSportMatchSearchTerm = (entry, searchLower) => {
+
+const normalizeTextForSearch = (value) =>
+  String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
+const stripNonAlphanumeric = (value) => value.replace(/[^a-z0-9]+/g, "");
+
+const getLabelCandidates = (entry, language = "en") => {
   const labels = entry.labels || {};
-  return Object.values(labels).some(
-    (label) => label && label.toLowerCase().includes(searchLower)
-  );
+  const seen = new Set();
+  const candidates = [];
+  const addLabel = (text) => {
+    if (!text || typeof text !== "string") {
+      return;
+    }
+    const trimmed = text.trim();
+    if (!trimmed || seen.has(trimmed)) {
+      return;
+    }
+    seen.add(trimmed);
+    candidates.push(trimmed);
+  };
+  addLabel(labels?.[language]);
+  addLabel(labels?.en);
+  Object.values(labels || {}).forEach(addLabel);
+  addLabel(entry.name);
+  addLabel(entry.id);
+  return candidates;
 };
 
-const createDefaultPresetSports = () => {
-  const now = Date.now();
-  return [
-    {
-      id: "pushups",
-      name: "Pushups",
-      type: "reps",
-      hidden: false,
-      createdAt: now,
-    },
-  ];
+const matchLabelScore = (
+  normalizedLabel,
+  compactLabel,
+  searchLower,
+  searchCompact
+) => {
+  if (!searchLower && !searchCompact) {
+    return 0;
+  }
+  if (searchLower && normalizedLabel.startsWith(searchLower)) {
+    return 0;
+  }
+  if (searchCompact && compactLabel.startsWith(searchCompact)) {
+    return 1;
+  }
+  if (searchLower && normalizedLabel.includes(searchLower)) {
+    return 2;
+  }
+  if (searchCompact && compactLabel.includes(searchCompact)) {
+    return 3;
+  }
+  return null;
 };
+
+const getSportMatchScore = (
+  entry,
+  searchLower,
+  searchCompact,
+  language = "en"
+) => {
+  const candidates = getLabelCandidates(entry, language);
+  let bestScore = null;
+  for (const candidate of candidates) {
+    const normalizedLabel = normalizeTextForSearch(candidate);
+    const compactLabel = stripNonAlphanumeric(normalizedLabel);
+    const score = matchLabelScore(
+      normalizedLabel,
+      compactLabel,
+      searchLower,
+      searchCompact
+    );
+    if (score === null) {
+      continue;
+    }
+    if (bestScore === null || score < bestScore) {
+      bestScore = score;
+      if (score === 0) {
+        break;
+      }
+    }
+  }
+  return bestScore;
+};
+
+const doesSportMatchSearchTerm = (entry, searchLower, language = "en") => {
+  if (!searchLower) {
+    return true;
+  }
+  const searchCompact = stripNonAlphanumeric(searchLower);
+  return getSportMatchScore(entry, searchLower, searchCompact, language) !== null;
+};
+
+const createDefaultPresetSports = () => [];
 
 const PRESET_IDS_TO_REMOVE = new Set(["pullups", "pushups_alt", "jogging"]);
 
@@ -4041,7 +4108,7 @@ const COLORS = {
   white: "#f8fafc",
 };
 
-const SportTitleSlots = ({ sport, sportLabel, onAiPress }) => {
+const SportTitleSlots = ({ sport, sportLabel }) => {
   const [leftWidth, setLeftWidth] = useState(0);
   const [rightWidth, setRightWidth] = useState(0);
   const slotWidth = Math.max(leftWidth, rightWidth);
@@ -4068,25 +4135,7 @@ const SportTitleSlots = ({ sport, sportLabel, onAiPress }) => {
       <View
         style={[styles.titleSideSlot, slotStyle]}
         onLayout={handleRightLayout}
-      >
-        {sport.supportsAi ? (
-          onAiPress ? (
-            <Pressable
-              style={styles.aiBadge}
-              onPress={onAiPress}
-              hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
-            >
-              <Text style={styles.aiBadgeText}>AI</Text>
-            </Pressable>
-          ) : (
-            <View style={styles.aiBadge}>
-              <Text style={styles.aiBadgeText}>AI</Text>
-            </View>
-          )
-        ) : (
-          <View style={styles.aiBadgePlaceholder} />
-        )}
-      </View>
+      />
     </View>
   );
 };
@@ -4359,8 +4408,23 @@ const getDefaultRateMinutes = (sportType) => {
 const generateLogId = () =>
   `log_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
 
-const scaleScreenSeconds = (value, balance = 1) =>
-  Math.max(0, Math.floor(value * ADMIN_SCREEN_TIME_FACTOR * balance));
+const getAdminFactorForSport = (sport) => {
+  if (sport?.id === "pushups") {
+    return ADMIN_SCREEN_TIME_FACTOR * 9;
+  }
+  if (sport?.weightExercise) {
+    return ADMIN_SCREEN_TIME_FACTOR * 60;
+  }
+  if (sport?.type === "reps") {
+    return ADMIN_SCREEN_TIME_FACTOR * 12;
+  }
+  return ADMIN_SCREEN_TIME_FACTOR;
+};
+
+const scaleScreenSeconds = (value, balance = 1, sport = null) => {
+  const factor = getAdminFactorForSport(sport);
+  return Math.max(0, Math.round(value * factor * balance));
+};
 
 const screenSecondsForStats = (sport, dayStats) => {
   if (!sport || !dayStats) {
@@ -4374,12 +4438,20 @@ const screenSecondsForStats = (sport, dayStats) => {
   if (sport.type === "reps") {
     return Math.max(
       0,
-      scaleScreenSeconds((dayStats.reps || 0) * baseRate * difficultyFactor)
+      scaleScreenSeconds(
+        (dayStats.reps || 0) * baseRate * difficultyFactor,
+        1,
+        sport
+      )
     );
   }
   return Math.max(
     0,
-    scaleScreenSeconds((dayStats.seconds || 0) * baseRate * difficultyFactor)
+    scaleScreenSeconds(
+      (dayStats.seconds || 0) * baseRate * difficultyFactor,
+      1,
+      sport
+    )
   );
 };
 
@@ -4392,17 +4464,17 @@ const screenSecondsForEntry = (sport, entry) => {
   if (sport.type === "reps" && sport.weightExercise) {
     const reps = parsePositiveInteger(entry.reps);
     const weight = parsePositiveNumber(entry.weight);
-    const value = weight * reps * baseRate * difficultyFactor;
-    return scaleScreenSeconds(value, WEIGHT_SCREEN_TIME_BALANCE);
+    const value = weight * reps * difficultyFactor;
+    return scaleScreenSeconds(value, WEIGHT_SCREEN_TIME_BALANCE, sport);
   }
   if (sport.type === "reps") {
     const reps = parsePositiveInteger(entry.reps);
     const value = reps * baseRate * difficultyFactor;
-    return scaleScreenSeconds(value);
+    return scaleScreenSeconds(value, 1, sport);
   }
   const seconds = parsePositiveNumber(entry.seconds);
   const value = seconds * baseRate * difficultyFactor;
-  return scaleScreenSeconds(value);
+  return scaleScreenSeconds(value, 1, sport);
 };
 
 const widgetValueForStats = (sport, dayStats) => {
@@ -4600,7 +4672,6 @@ const normalizeSports = (sportList) => {
       name = "Situps";
       changed = true;
     }
-    const supportsAi = sport.supportsAi ?? Boolean(getAiModeForSport(sport));
     const difficultyLevel = difficultyLevelForSport(sport);
     const next = {
       ...sport,
@@ -4610,8 +4681,7 @@ const normalizeSports = (sportList) => {
       screenSecondsPerUnit:
         sport.screenSecondsPerUnit ?? defaultScreenSecondsPerUnit(sport),
       difficultyLevel,
-      supportsAi,
-      nonDeletable: supportsAi,
+      nonDeletable: sport.nonDeletable ?? false,
     };
     if (
       !sport.icon ||
@@ -4679,16 +4749,6 @@ const extractNumberToken = (value, lang) => {
   return found;
 };
 
-const getAiModeForSport = (sport) => {
-  if (!sport) {
-    return null;
-  }
-  if (sport.id === "pushups") {
-    return "pushups";
-  }
-  return null;
-};
-
 const angleBetween = (a, b, c) => {
   if (!a || !b || !c) {
     return null;
@@ -4721,26 +4781,6 @@ const pickElbowAngle = (landmarks, side, minConfidence) => {
   }
   return angleBetween(shoulder, elbow, wrist);
 };
-
-const AiCameraScreen = ({ onClose, repsValue, t }) => (
-  <SafeAreaView style={styles.aiScreen}>
-    <View style={styles.aiHeader}>
-      <Text style={styles.aiCounter}>{repsValue}</Text>
-      <Pressable style={styles.aiStopButton} onPress={onClose}>
-        <Text style={styles.aiStopText}>{t("label.aiStop")}</Text>
-      </Pressable>
-    </View>
-    <View style={styles.aiPermission}>
-      <Text style={styles.aiPermissionText}>{t("label.aiUnavailable")}</Text>
-      <Pressable style={styles.primaryButton} onPress={onClose}>
-        <Text style={styles.primaryButtonText}>{t("label.back")}</Text>
-      </Pressable>
-    </View>
-    <View style={styles.aiFooter}>
-      <Text style={styles.aiHint}>{t("label.aiUnavailableInline")}</Text>
-    </View>
-  </SafeAreaView>
-);
 
 export default function App() {
   const { width, height } = useWindowDimensions();
@@ -4794,8 +4834,6 @@ export default function App() {
   const [showIconInput, setShowIconInput] = useState(false);
   const [customSuggestionUsed, setCustomSuggestionUsed] = useState(false);
   const [infoModalKey, setInfoModalKey] = useState(null);
-  const [pendingAiSport, setPendingAiSport] = useState(null);
-  const [aiInfoVisible, setAiInfoVisible] = useState(false);
   const scrollViewRef = useRef(null);
   const [installedApps, setInstalledApps] = useState([]);
   const [appSearch, setAppSearch] = useState("");
@@ -4836,6 +4874,8 @@ export default function App() {
   const [tutorialTarget, setTutorialTarget] = useState(null);
   const [tutorialCardHeight, setTutorialCardHeight] = useState(0);
   const [tutorialSeen, setTutorialSeen] = useState(false);
+  const [tutorialWaitingForSportCreation, setTutorialWaitingForSportCreation] =
+    useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
 
   const [sessionSeconds, setSessionSeconds] = useState(0);
@@ -4846,7 +4886,6 @@ export default function App() {
   const [isAppActive, setIsAppActive] = useState(
     AppState.currentState === "active"
   );
-  const [aiSession, setAiSession] = useState(null);
   const [weightEntryWeight, setWeightEntryWeight] = useState("");
   const [weightEntryReps, setWeightEntryReps] = useState("");
   const intervalRef = useRef(null);
@@ -4873,6 +4912,12 @@ export default function App() {
   const tutorialStatsNavRef = useRef(null);
   const tutorialWorkoutTimerRef = useRef(null);
   const tutorialAddSportRef = useRef(null);
+  const tutorialSportNameRef = useRef(null);
+  const tutorialSportIconRef = useRef(null);
+  const tutorialSportTypeRef = useRef(null);
+  const tutorialSportDifficultyRef = useRef(null);
+  const tutorialSportWeightRef = useRef(null);
+  const tutorialSportSaveRef = useRef(null);
   const tutorialSettingsCardRef = useRef(null);
   const tutorialStatsSummaryRef = useRef(null);
   const tutorialOverlayRef = useRef(null);
@@ -4937,14 +4982,34 @@ export default function App() {
       : t("label.voiceIdle")
     : "";
   const trimmedSportSearch = newName.trim();
-  const normalizedSportSearch = trimmedSportSearch.toLowerCase();
+  const normalizedSportSearch = normalizeTextForSearch(trimmedSportSearch);
   const standardSportSuggestions = useMemo(() => {
     if (!normalizedSportSearch) {
       return STANDARD_SPORTS;
     }
-    return STANDARD_SPORTS.filter((entry) =>
-      doesSportMatchSearchTerm(entry, normalizedSportSearch)
-    ).slice(0, 6);
+    const searchCompact = stripNonAlphanumeric(normalizedSportSearch);
+    const scoredMatches = STANDARD_SPORTS.map((entry) => {
+      const score = getSportMatchScore(
+        entry,
+        normalizedSportSearch,
+        searchCompact,
+        language
+      );
+      if (score === null) {
+        return null;
+      }
+      return { entry, score };
+    })
+      .filter(Boolean)
+      .sort((a, b) => {
+        if (a.score !== b.score) {
+          return a.score - b.score;
+        }
+        const labelA = getStandardSportLabel(a.entry, language);
+        const labelB = getStandardSportLabel(b.entry, language);
+        return labelA.localeCompare(labelB);
+      });
+    return scoredMatches.slice(0, 6).map((item) => item.entry);
   }, [language, normalizedSportSearch]);
   const showCustomSuggestionButton =
     trimmedSportSearch.length > 0 && standardSportSuggestions.length === 0;
@@ -4981,26 +5046,6 @@ export default function App() {
     setShowIconInput(false);
     setNewName(trimmedSportSearch);
     setCustomSuggestionUsed(true);
-  };
-
-  const handleAiButtonPress = (sport) => {
-    setPendingAiSport(sport);
-    setAiInfoVisible(true);
-  };
-
-  const handleCloseAiInfo = () => {
-    setPendingAiSport(null);
-    setAiInfoVisible(false);
-  };
-
-  const handleConfirmAiInfo = () => {
-    if (!pendingAiSport) {
-      handleCloseAiInfo();
-      return;
-    }
-    setAiInfoVisible(false);
-    startAiSession(pendingAiSport);
-    setPendingAiSport(null);
   };
 
   useEffect(() => {
@@ -5821,7 +5866,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           icon,
           screenSecondsPerUnit,
           presetKey: keepPresetKey,
-          supportsAi: sport.supportsAi,
           weightExercise: weightMode,
           difficultyLevel: parsedDifficulty,
           standardSportId: selectedStandardSportId ?? sport.standardSportId,
@@ -5842,6 +5886,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         standardSportId: selectedStandardSportId ?? undefined,
       };
       await saveSports([newSport, ...sports]);
+      if (tutorialActive && tutorialStep?.id === "createSportSave") {
+        setTutorialWaitingForSportCreation(true);
+        maybeAdvanceTutorial("saveSport");
+      }
     }
     closeSportModal();
   };
@@ -5925,8 +5973,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
     const state = await InstaControl.getUsageState();
     if (state) {
+      const noAppsControlled =
+        !settings?.controlledApps || settings.controlledApps.length === 0;
+      const fallbackRemaining = noAppsControlled
+        ? rollingScreenSecondsTotal(logs, sports)
+        : 0;
       setUsageState({
-        remainingSeconds: state.remainingSeconds || 0,
+        remainingSeconds:
+          Math.max(state.remainingSeconds || 0, fallbackRemaining),
         usedSeconds: state.usedSeconds || 0,
         day: state.day || todayKey(),
         remainingBySport: state.remainingBySport || {},
@@ -6302,15 +6356,20 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     await maybePromptNotifications();
   };
 
-  const renderTutorialHeaderButton = () => (
-    <Pressable
-      ref={tutorialHeaderButtonRef}
-      style={styles.tutorialHeaderButton}
-      onPress={startTutorial}
-    >
-      <Text style={styles.tutorialHeaderText}>{t("label.tutorial")}</Text>
-    </Pressable>
-  );
+  const renderTutorialHeaderButton = () => {
+    if (!completedGettingStarted) {
+      return null;
+    }
+    return (
+      <Pressable
+        ref={tutorialHeaderButtonRef}
+        style={styles.tutorialHeaderButton}
+        onPress={startTutorial}
+      >
+        <Text style={styles.tutorialHeaderText}>{t("label.tutorial")}</Text>
+      </Pressable>
+    );
+  };
 
   const MainNavIcon = ({ type, active }) => {
     const strokeColor = active ? COLORS.background : COLORS.muted;
@@ -6778,7 +6837,13 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
   };
 
-  const getSpeechLocale = () => SPEECH_LOCALES[language] || "en-US";
+const getSpeechLocale = () => {
+  const preferred = normalizeSpeechLocale(SPEECH_LOCALES[language]);
+  if (preferred) {
+    return preferred;
+  }
+  return normalizeSpeechLocale("en-US");
+};
 
   const cleanupTutorialSamplePushup = useCallback(
     (sport, entry) => {
@@ -6864,23 +6929,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       };
     }
     maybeAdvanceTutorial("trackAction");
-  };
-
-  const startAiSession = (sport) => {
-    if (!AI_CAMERA_ENABLED) {
-      Alert.alert(t("label.aiUnavailable"), t("label.aiUnavailableInline"));
-      return;
-    }
-    const mode = getAiModeForSport(sport);
-    if (!mode) {
-      return;
-    }
-    setVoiceEnabled(false);
-    setAiSession({ sportId: sport.id, mode });
-  };
-
-  const stopAiSession = () => {
-    setAiSession(null);
   };
 
   const ensureAudioPermission = async () => {
@@ -7031,14 +7079,22 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
 
   const handleVoiceError = (event) => {
     setListeningState(false);
-    if (voiceEnabledRef.current) {
-      const message =
-        typeof event?.error?.message === "string" &&
-        event.error.message.trim().length > 0
-          ? event.error.message
-          : t("label.voiceError");
-      setVoiceError(message);
+    if (!voiceEnabledRef.current) {
+      return;
     }
+    const error = event?.error;
+    const errorCode = error?.code;
+    const trimmedMessage =
+      typeof error?.message === "string" ? error.message.trim() : "";
+    const languageUnsupported = errorCode === "10" || errorCode === "11";
+    if (languageUnsupported) {
+      setVoiceError(t("label.voiceUnavailable"));
+      setVoiceEnabled(false);
+      return;
+    }
+    const message =
+      trimmedMessage.length > 0 ? trimmedMessage : t("label.voiceError");
+    setVoiceError(message);
   };
 
   const handleVoiceEnd = () => {
@@ -7054,23 +7110,23 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
 
   const activeSports = sports.filter((sport) => !sport.hidden);
   const hiddenSports = sports.filter((sport) => sport.hidden);
-  const normalizedSportSearchTerm = sportSearch.trim().toLowerCase();
+  const normalizedSportSearchTerm = normalizeTextForSearch(sportSearch);
   const filteredActiveSports = useMemo(() => {
     if (!normalizedSportSearchTerm) {
       return activeSports;
     }
     return activeSports.filter((sport) =>
-      doesSportMatchSearchTerm(sport, normalizedSportSearchTerm)
+      doesSportMatchSearchTerm(sport, normalizedSportSearchTerm, language)
     );
-  }, [activeSports, normalizedSportSearchTerm]);
+  }, [activeSports, normalizedSportSearchTerm, language]);
   const filteredHiddenSports = useMemo(() => {
     if (!normalizedSportSearchTerm) {
       return hiddenSports;
     }
     return hiddenSports.filter((sport) =>
-      doesSportMatchSearchTerm(sport, normalizedSportSearchTerm)
+      doesSportMatchSearchTerm(sport, normalizedSportSearchTerm, language)
     );
-  }, [hiddenSports, normalizedSportSearchTerm]);
+  }, [hiddenSports, normalizedSportSearchTerm, language]);
   const selectedSport = sports.find((sport) => sport.id === selectedSportId);
   const tutorialSportId = activeSports[0]?.id;
   const motivationSport = activeSports[0] ?? null;
@@ -7115,9 +7171,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     return getRecentWeightEntriesForSport(logs, selectedSport.id);
   }, [logs, selectedSport?.id]);
   const statsSport = sports.find((sport) => sport.id === statsSportId);
-  const aiSport = aiSession
-    ? sports.find((sport) => sport.id === aiSession.sportId)
-    : null;
   const rollingEarnedSeconds = useMemo(
     () => rollingScreenSecondsTotal(logs, sports),
     [logs, sports]
@@ -7183,6 +7236,64 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         targetRef: tutorialAddSportRef,
         actionId: "openAddSport",
         requiresAction: true,
+      });
+      steps.push({
+        id: "createSport",
+        titleKey: "tutorial.step.createSport.title",
+        bodyKey: "tutorial.step.createSport.body",
+        hideHighlight: true,
+        centerCard: true,
+        requiresAction: false,
+        blocksTouches: false,
+      });
+      steps.push({
+        id: "createSportName",
+        titleKey: "tutorial.step.createSportName.title",
+        bodyKey: "tutorial.step.createSportName.body",
+        targetRef: tutorialSportNameRef,
+        highlightColor: TUTORIAL_STRONG_HIGHLIGHT,
+        blocksTouches: false,
+      });
+      steps.push({
+        id: "createSportIcon",
+        titleKey: "tutorial.step.createSportIcon.title",
+        bodyKey: "tutorial.step.createSportIcon.body",
+        targetRef: tutorialSportIconRef,
+        highlightColor: TUTORIAL_STRONG_HIGHLIGHT,
+        blocksTouches: false,
+      });
+      steps.push({
+        id: "createSportType",
+        titleKey: "tutorial.step.createSportType.title",
+        bodyKey: "tutorial.step.createSportType.body",
+        targetRef: tutorialSportTypeRef,
+        highlightColor: TUTORIAL_STRONG_HIGHLIGHT,
+        blocksTouches: false,
+      });
+      steps.push({
+        id: "createSportDifficulty",
+        titleKey: "tutorial.step.createSportDifficulty.title",
+        bodyKey: "tutorial.step.createSportDifficulty.body",
+        targetRef: tutorialSportDifficultyRef,
+        highlightColor: TUTORIAL_STRONG_HIGHLIGHT,
+        blocksTouches: false,
+      });
+      steps.push({
+        id: "createSportWeight",
+        titleKey: "tutorial.step.createSportWeight.title",
+        bodyKey: "tutorial.step.createSportWeight.body",
+        targetRef: tutorialSportWeightRef,
+        highlightColor: TUTORIAL_STRONG_HIGHLIGHT,
+        blocksTouches: false,
+      });
+      steps.push({
+        id: "createSportSave",
+        titleKey: "tutorial.step.createSportSave.title",
+        bodyKey: "tutorial.step.createSportSave.body",
+        targetRef: tutorialSportSaveRef,
+        actionId: "saveSport",
+        requiresAction: true,
+        blocksTouches: false,
       });
     }
     steps.push({
@@ -7271,6 +7382,17 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   const isTutorialLastStep =
     tutorialStepIndex !== null &&
     tutorialStepIndex === tutorialSteps.length - 1;
+  useEffect(() => {
+    if (
+      !tutorialWaitingForSportCreation ||
+      !tutorialActive ||
+      activeSports.length === 0
+    ) {
+      return;
+    }
+    setTutorialWaitingForSportCreation(false);
+    setTutorialStepIndex(1);
+  }, [activeSports.length, tutorialActive, tutorialWaitingForSportCreation]);
   const recentActivityGroups = useMemo(() => {
     const groups = [];
     sports.forEach((sport) => {
@@ -7403,18 +7525,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         action: () => openSportModal(),
       },
       {
-        id: "ai",
-        icon: "AI",
-        titleKey: "label.aiFeatureTitle",
-        bodyKey: "label.aiFeatureBody",
-        actionLabelKey: "label.motivationActionAi",
-        action: () =>
-          defaultSport
-            ? handleAiButtonPress(defaultSport)
-            : showMotivationAlert("label.aiFeatureTitle", "label.aiFeatureBody"),
-        disabled: !defaultSport,
-      },
-      {
         id: "widget",
         icon: "Widget",
         titleKey: "label.motivationWidgetTitle",
@@ -7515,7 +7625,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     ];
   }, [
     activeSports,
-    handleAiButtonPress,
     handleIncreaseDifficulty,
     openAppsSettings,
     openNotificationSettings,
@@ -7751,6 +7860,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     isSettingsOpen,
     selectedSportId,
     activeSports.length,
+    isSportModalOpen,
   ]);
   useEffect(() => {
     lastTutorialTargetRef.current = null;
@@ -7850,6 +7960,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     const paddingByStep = {
       "tutorial.step.track.title": 8,
       "tutorial.step.addSport.title": 10,
+      "tutorial.step.createSportName.title": 6,
+      "tutorial.step.createSportIcon.title": 6,
+      "tutorial.step.createSportType.title": 6,
+      "tutorial.step.createSportDifficulty.title": 6,
+      "tutorial.step.createSportWeight.title": 6,
+      "tutorial.step.createSportSave.title": 8,
     };
     const highlightPadding =
       paddingByStep[tutorialStep.titleKey] ?? basePadding;
@@ -7984,9 +8100,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     const shouldBlockTouches =
       tutorialStep.blocksTouches ?? !tutorialStep.requiresAction;
     const showPointer = tutorialStep.requiresAction && hasEffectiveTarget;
-    const highlightBackground = tutorialStep.requiresAction
-      ? "rgba(249, 115, 22, 0.12)"
-      : "rgba(249, 115, 22, 0.06)";
+    const highlightBackground =
+      tutorialStep.highlightColor ??
+      (tutorialStep.requiresAction
+        ? "rgba(249, 115, 22, 0.12)"
+        : "rgba(249, 115, 22, 0.06)");
     const defaultMaskColor = tutorialStep.requiresAction
       ? "rgba(2, 6, 23, 0.72)"
       : "rgba(2, 6, 23, 0.54)";
@@ -8097,8 +8215,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                   backgroundColor: highlightBackground,
                 },
               ]}
-              pointerEvents={shouldBlockTouches ? "auto" : "none"}
-              {...(shouldBlockTouches ? blockingResponder : {})}
+              pointerEvents="none"
             />
           ) : null}
         {showPointer ? (
@@ -8177,13 +8294,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   }, [logs, selectedSport]);
 
   const workoutDisplayReps = workoutTrackingMode ? workoutSessionCount : todayStats.reps;
-
-  const aiTodayStats = useMemo(() => {
-    if (!aiSport) {
-      return { reps: 0, seconds: 0 };
-    }
-    return getRollingStats(logs, aiSport.id, aiSport);
-  }, [logs, aiSport]);
 
   useEffect(() => {
     selectedSportRef.current = selectedSport || null;
@@ -8338,16 +8448,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     rollingEarnedSeconds,
   ]);
   const renderAppContent = () => {
-    if (aiSession && aiSport) {
-    return (
-      <AiCameraScreen
-        onClose={stopAiSession}
-        repsValue={aiTodayStats.reps}
-        t={t}
-      />
-    );
-  }
-  if (overallStatsOpen) {
+    if (overallStatsOpen) {
     const allKeys = Object.values(stats || {}).reduce((acc, sportStats) => {
       Object.keys(sportStats || {}).forEach((key) => acc.add(key));
       return acc;
@@ -8461,7 +8562,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               })
             )}
           </ScrollView>
-          {tutorialActive ? renderTutorialOverlay() : null}
         </SafeAreaView>
       );
     }
@@ -8632,7 +8732,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             </View>
           </View>
         ) : null}
-        {tutorialActive ? renderTutorialOverlay() : null}
       </SafeAreaView>
     );
   }
@@ -8903,7 +9002,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             );
           })}
         </ScrollView>
-        {tutorialActive ? renderTutorialOverlay() : null}
       </SafeAreaView>
     );
   }
@@ -9005,92 +9103,37 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             <View style={styles.voiceRow}>
               <Pressable
                 style={[
-                  styles.secondaryButton,
                   styles.voiceButton,
                   voiceEnabled && styles.voiceButtonActive,
                 ]}
                 onPress={toggleVoice}
               >
-                <Text
-                  style={[
-                    styles.secondaryButtonText,
-                    voiceEnabled && styles.voiceButtonTextActive,
-                  ]}
-                >
-                  {micIcon} {voiceEnabled ? t("label.voiceOn") : t("label.voiceOff")}
-                </Text>
-              </Pressable>
-              <Text style={styles.voiceHint}>{t("label.voiceHint")}</Text>
-              {voiceStatusText ? (
-                <Text
-                  style={[
-                    styles.voiceStatus,
-                    voiceError && styles.voiceStatusError,
-                  ]}
-                >
-                  {voiceStatusText}
-                </Text>
-              ) : null}
-            </View>
-            {selectedSport.supportsAi || selectedSport.id === "pushups" ? (
-              <View style={styles.aiInfoWrapper}>
-                <View style={styles.aiRow}>
-                  <View style={styles.aiRowBadge}>
-                    <View style={styles.aiBadge}>
-                      <Text style={styles.aiBadgeText}>AI</Text>
-                    </View>
-                    <Text style={styles.aiBadgeLabel}>{t("label.aiHint")}</Text>
-                  </View>
-                  <Pressable
+                <View style={styles.voiceButtonContent}>
+                  <Text style={styles.voiceButtonIcon}>{micIcon}</Text>
+                  <Text
                     style={[
-                      styles.secondaryButton,
-                      styles.aiButton,
-                      !AI_CAMERA_ENABLED && styles.aiButtonDisabled,
+                      styles.voiceButtonLabel,
+                      voiceEnabled && styles.voiceButtonLabelActive,
                     ]}
-                    onPress={() => handleAiButtonPress(selectedSport)}
                   >
-                    <Text style={styles.secondaryButtonText}>
-                      {t("label.aiStart")}
-                    </Text>
-                  </Pressable>
-                  <Text style={styles.aiHintInline}>
-                    {t(
-                      AI_CAMERA_ENABLED
-                        ? "label.aiHintInline"
-                        : "label.aiUnavailableInline"
-                    )}
+                    {voiceEnabled
+                      ? t("label.voiceListening")
+                      : t("label.voiceIdle")}
                   </Text>
                 </View>
-                {aiInfoVisible ? (
-                  <View style={styles.inlineInfoPopup}>
-                    <Text style={styles.inlineInfoPopupTitle}>
-                      {t("label.aiFeatureTitle")}
-                    </Text>
-                    <Text style={styles.inlineInfoPopupText}>
-                      {t("label.aiFeatureBody")}
-                    </Text>
-                    <View style={styles.modalActions}>
-                      <Pressable
-                        style={styles.secondaryButton}
-                        onPress={handleCloseAiInfo}
-                      >
-                        <Text style={styles.secondaryButtonText}>
-                          {t("label.close")}
-                        </Text>
-                      </Pressable>
-                      <Pressable
-                        style={styles.primaryButton}
-                        onPress={handleConfirmAiInfo}
-                      >
-                        <Text style={styles.primaryButtonText}>
-                          {t("label.aiFeatureAction")}
-                        </Text>
-                      </Pressable>
-                    </View>
-                  </View>
+                {voiceStatusText ? (
+                  <Text
+                    style={[
+                      styles.voiceButtonStatus,
+                      voiceError && styles.voiceButtonStatusError,
+                    ]}
+                  >
+                    {voiceStatusText}
+                  </Text>
                 ) : null}
-              </View>
-            ) : null}
+              </Pressable>
+              <Text style={styles.voiceHint}>{t("label.voiceHint")}</Text>
+            </View>
           </Pressable>
         ) : isWeightMode ? (
           <View style={styles.weightEntryArea} ref={tutorialTrackingAreaRef}>
@@ -9200,7 +9243,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             ) : null}
           </View>
         )}
-        {tutorialActive ? renderTutorialOverlay() : null}
       </SafeAreaView>
     );
   }
@@ -9413,7 +9455,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             </View>
           </Modal>
         </ScrollView>
-        {tutorialActive ? renderTutorialOverlay() : null}
       </SafeAreaView>
     );
   }
@@ -9532,7 +9573,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             </>
           )}
         </ScrollView>
-        {tutorialActive ? renderTutorialOverlay() : null}
       </SafeAreaView>
     );
   }
@@ -9767,7 +9807,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             </Text>
           </View>
         </ScrollView>
-        {tutorialActive ? renderTutorialOverlay() : null}
       </SafeAreaView>
     );
   }
@@ -10040,11 +10079,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                     </Pressable>
                   </View>
                   <View style={styles.sportTopTitleCenter}>
-                    <SportTitleSlots
-                      sport={sport}
-                      sportLabel={sportLabel}
-                      onAiPress={() => handleAiButtonPress(sport)}
-                    />
+                    <SportTitleSlots sport={sport} sportLabel={sportLabel} />
                   </View>
                   <View style={styles.sportTopIconsRight}>
                     <Pressable
@@ -10194,11 +10229,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                         </Pressable>
                       </View>
                       <View style={styles.sportTopTitleCenter}>
-                        <SportTitleSlots
-                          sport={sport}
-                          sportLabel={sportLabel}
-                          onAiPress={() => handleAiButtonPress(sport)}
-                        />
+                        <SportTitleSlots sport={sport} sportLabel={sportLabel} />
                       </View>
                       <View style={styles.sportTopIconsRight}>
                         <Pressable
@@ -10346,41 +10377,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       
 
     </ScrollView>
-    <Modal
-      visible={aiInfoVisible}
-      transparent
-      animationType="fade"
-      onRequestClose={handleCloseAiInfo}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.inlineInfoPopup}>
-          <Text style={styles.inlineInfoPopupTitle}>
-            {t("label.aiFeatureTitle")}
-          </Text>
-          <Text style={styles.inlineInfoPopupText}>
-            {t("label.aiFeatureBody")}
-          </Text>
-          <View style={styles.modalActions}>
-            <Pressable
-              style={styles.secondaryButton}
-              onPress={handleCloseAiInfo}
-            >
-              <Text style={styles.secondaryButtonText}>
-                {t("label.close")}
-              </Text>
-            </Pressable>
-            <Pressable
-              style={styles.primaryButton}
-              onPress={handleConfirmAiInfo}
-            >
-              <Text style={styles.primaryButtonText}>
-                {t("label.aiFeatureAction")}
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-      </View>
-    </Modal>
           <View style={styles.fixedTimers}>
         <Pressable
           style={[styles.infoCard, styles.infoCardNoAlpha, styles.infoCardMain]}
@@ -10517,112 +10513,118 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             <Text style={styles.modalTitle}>
               {editingSportId ? t("label.editSport") : t("label.addSport")}
             </Text>
-            <TextInput
-              style={styles.searchInput}
-              value={newName}
-              onChangeText={handleSportNameChange}
-              placeholder={t("label.searchSports")}
-              placeholderTextColor="#7a7a7a"
-            />
-            {!editingSportId ? (
-              <View style={styles.standardSuggestionWindow}>
-                <Text style={styles.suggestionsHeader}>
-                  {t("label.sportSuggestions")}
-                </Text>
-                <View style={styles.suggestionListContainer}>
-                  <ScrollView
-                    contentContainerStyle={styles.suggestionList}
-                    showsVerticalScrollIndicator={false}
-                  >
-                    {standardSportSuggestions.length > 0 ? (
-                      standardSportSuggestions.map((entry) => {
-                        const label = getStandardSportLabel(entry, language);
-                        const isActive = entry.id === selectedStandardSportId;
-                        return (
-                          <Pressable
-                            key={entry.id}
-                            style={[
-                              styles.suggestionItem,
-                              isActive && styles.suggestionItemActive,
-                            ]}
-                            onPress={() => applyStandardSport(entry)}
-                          >
-                            <View style={styles.suggestionMain}>
-                              <Text style={styles.suggestionIcon}>
-                                {entry.icon || DEFAULT_ICON}
-                              </Text>
-                              <View>
-                                <Text style={styles.suggestionLabel}>{label}</Text>
-                                <Text style={styles.suggestionMeta}>
-                                  {entry.type === "reps"
-                                    ? t("label.reps")
-                                    : t("label.timeBased")}
+            <View style={styles.createSportField} ref={tutorialSportNameRef}>
+              <TextInput
+                style={styles.searchInput}
+                value={newName}
+                onChangeText={handleSportNameChange}
+                placeholder={t("label.searchSports")}
+                placeholderTextColor="#7a7a7a"
+              />
+              {!editingSportId ? (
+                <View style={styles.standardSuggestionWindow}>
+                  <Text style={styles.suggestionsHeader}>
+                    {t("label.sportSuggestions")}
+                  </Text>
+                  <View style={styles.suggestionListContainer}>
+                    <ScrollView
+                      contentContainerStyle={styles.suggestionList}
+                      showsVerticalScrollIndicator={false}
+                    >
+                      {standardSportSuggestions.length > 0 ? (
+                        standardSportSuggestions.map((entry) => {
+                          const label = getStandardSportLabel(entry, language);
+                          const isActive = entry.id === selectedStandardSportId;
+                          return (
+                            <Pressable
+                              key={entry.id}
+                              style={[
+                                styles.suggestionItem,
+                                isActive && styles.suggestionItemActive,
+                              ]}
+                              onPress={() => applyStandardSport(entry)}
+                            >
+                              <View style={styles.suggestionMain}>
+                                <Text style={styles.suggestionIcon}>
+                                  {entry.icon || DEFAULT_ICON}
                                 </Text>
+                                <View>
+                                  <Text style={styles.suggestionLabel}>{label}</Text>
+                                  <Text style={styles.suggestionMeta}>
+                                    {entry.type === "reps"
+                                      ? t("label.reps")
+                                      : t("label.timeBased")}
+                                  </Text>
+                                </View>
                               </View>
-                            </View>
-                          </Pressable>
-                        );
-                      })
-                    ) : (
-                      <Text style={styles.helperText}>
-                        {t("label.noSportSuggestions")}
-                      </Text>
-                    )}
-                  </ScrollView>
+                            </Pressable>
+                          );
+                        })
+                      ) : (
+                        <Text style={styles.helperText}>
+                          {t("label.noSportSuggestions")}
+                        </Text>
+                      )}
+                    </ScrollView>
+                  </View>
+                  {showCustomSuggestionButton ? (
+                    <Pressable
+                      style={({ pressed }) => [
+                        styles.customSuggestionButton,
+                        (pressed || customSuggestionUsed) &&
+                          styles.customSuggestionButtonActive,
+                      ]}
+                      onPress={handleUseSearchAsCustom}
+                    >
+                      {({ pressed }) => (
+                        <Text
+                          style={[
+                            styles.customSuggestionButtonText,
+                            (pressed || customSuggestionUsed) &&
+                              styles.customSuggestionButtonTextActive,
+                          ]}
+                        >
+                          {customSuggestionLabel}
+                        </Text>
+                      )}
+                    </Pressable>
+                  ) : null}
                 </View>
-                {showCustomSuggestionButton ? (
-                <Pressable
-                    style={({ pressed }) => [
-                      styles.customSuggestionButton,
-                      (pressed || customSuggestionUsed) && styles.customSuggestionButtonActive,
-                    ]}
-                    onPress={handleUseSearchAsCustom}
-                  >
-                    {({ pressed }) => (
-                      <Text
-                        style={[
-                          styles.customSuggestionButtonText,
-                          (pressed || customSuggestionUsed) && styles.customSuggestionButtonTextActive,
-                        ]}
-                      >
-                        {customSuggestionLabel}
+              ) : null}
+            </View>
+            <View style={styles.createSportField} ref={tutorialSportIconRef}>
+              {isCustomSportMode ? (
+                <>
+                  <View style={styles.iconRow}>
+                    <Pressable
+                      style={styles.secondaryButton}
+                      onPress={() => setShowIconInput((prev) => !prev)}
+                    >
+                      <Text style={styles.secondaryButtonText}>
+                        {t("label.iconChoose")}
                       </Text>
-                    )}
-                  </Pressable>
-                ) : null}
-              </View>
-            ) : null}
-            {isCustomSportMode ? (
-              <>
+                    </Pressable>
+                    <Text style={styles.iconPreview}>{newIcon || DEFAULT_ICON}</Text>
+                  </View>
+                  {showIconInput ? (
+                    <TextInput
+                      style={styles.input}
+                      value={newIcon}
+                      onChangeText={(text) => setNewIcon(normalizeIcon(text))}
+                      placeholder={t("label.iconPlaceholder")}
+                      placeholderTextColor="#7a7a7a"
+                      maxLength={2}
+                    />
+                  ) : null}
+                </>
+              ) : (
                 <View style={styles.iconRow}>
-                  <Pressable
-                    style={styles.secondaryButton}
-                    onPress={() => setShowIconInput((prev) => !prev)}
-                  >
-                    <Text style={styles.secondaryButtonText}>
-                      {t("label.iconChoose")}
-                    </Text>
-                  </Pressable>
-                  <Text style={styles.iconPreview}>{newIcon || DEFAULT_ICON}</Text>
+                  <Text style={styles.helperText}>
+                    {t("label.iconPlaceholder")}: {newIcon || DEFAULT_ICON}
+                  </Text>
                 </View>
-                {showIconInput ? (
-                  <TextInput
-                    style={styles.input}
-                    value={newIcon}
-                    onChangeText={(text) => setNewIcon(normalizeIcon(text))}
-                    placeholder={t("label.iconPlaceholder")}
-                    placeholderTextColor="#7a7a7a"
-                    maxLength={2}
-                  />
-                ) : null}
-              </>
-            ) : (
-              <View style={styles.iconRow}>
-                <Text style={styles.helperText}>
-                  {t("label.iconPlaceholder")}: {newIcon || DEFAULT_ICON}
-                </Text>
-              </View>
-            )}
+              )}
+            </View>
             <View style={styles.typeHeaderRow}>
               <Text style={styles.typeHeaderTitle}>
                 {t("label.typePickerTitle")}
@@ -10636,48 +10638,53 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 <Text style={styles.infoButtonText}>?</Text>
               </Pressable>
             </View>
-            <View style={styles.typeRow}>
-              <Pressable
-                style={[
-                  styles.typeButton,
-                  newType === "reps" && styles.typeButtonActive,
-                ]}
-                onPress={() => {
-                  setNewType("reps");
-                  setNewRateMinutes(String(getDefaultRateMinutes("reps")));
-                }}
-              >
-                <Text
+            <View style={styles.createSportField} ref={tutorialSportTypeRef}>
+              <View style={styles.typeRow}>
+                <Pressable
                   style={[
-                    styles.typeButtonText,
-                    newType === "reps" && styles.typeButtonTextActive,
+                    styles.typeButton,
+                    newType === "reps" && styles.typeButtonActive,
                   ]}
+                  onPress={() => {
+                    setNewType("reps");
+                    setNewRateMinutes(String(getDefaultRateMinutes("reps")));
+                  }}
                 >
-                  {t("label.reps")}
-                </Text>
-              </Pressable>
-              <Pressable
-                style={[
-                  styles.typeButton,
-                  newType === "time" && styles.typeButtonActive,
-                ]}
-                onPress={() => {
-                  setNewType("time");
-                  setNewRateMinutes(String(getDefaultRateMinutes("time")));
-                  setNewWeightExercise(false);
-                }}
-              >
-                <Text
+                  <Text
+                    style={[
+                      styles.typeButtonText,
+                      newType === "reps" && styles.typeButtonTextActive,
+                    ]}
+                  >
+                    {t("label.reps")}
+                  </Text>
+                </Pressable>
+                <Pressable
                   style={[
-                    styles.typeButtonText,
-                    newType === "time" && styles.typeButtonTextActive,
+                    styles.typeButton,
+                    newType === "time" && styles.typeButtonActive,
                   ]}
+                  onPress={() => {
+                    setNewType("time");
+                    setNewRateMinutes(String(getDefaultRateMinutes("time")));
+                    setNewWeightExercise(false);
+                  }}
                 >
-                  {t("label.timeBased")}
-                </Text>
-              </Pressable>
+                  <Text
+                    style={[
+                      styles.typeButtonText,
+                      newType === "time" && styles.typeButtonTextActive,
+                    ]}
+                  >
+                    {t("label.timeBased")}
+                  </Text>
+                </Pressable>
+              </View>
             </View>
-            <View style={styles.sliderSection}>
+            <View
+              style={[styles.sliderSection, styles.createSportField]}
+              ref={tutorialSportDifficultyRef}
+            >
               <View style={styles.difficultyHeaderRow}>
                 <Text style={styles.rateLabel}>{t("label.difficultyLabel")}</Text>
                 <View style={styles.difficultyHeaderActions}>
@@ -10724,7 +10731,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               </View>
             </View>
             {newType === "reps" ? (
-              <View style={styles.weightToggleRow}>
+              <View style={styles.weightToggleRow} ref={tutorialSportWeightRef}>
                 <Pressable
                   style={[
                     styles.weightToggleButton,
@@ -10755,7 +10762,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               >
                 <Text style={styles.secondaryButtonText}>{t("label.cancel")}</Text>
               </Pressable>
-              <Pressable style={styles.primaryButton} onPress={saveSportModal}>
+              <Pressable
+                style={styles.primaryButton}
+                onPress={saveSportModal}
+                ref={tutorialSportSaveRef}
+              >
                 <Text style={styles.primaryButtonText}>{t("label.save")}</Text>
               </Pressable>
             </View>
@@ -10797,14 +10808,20 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           </Pressable>
         </Pressable>
       ) : null}
-      {tutorialActive ? renderTutorialOverlay() : null}
     </SafeAreaView>
   );
 };
 
   return (
     <I18nextProvider i18n={i18n}>
-      {renderAppContent()}
+      <View style={{ flex: 1 }}>
+        {renderAppContent()}
+        {tutorialActive ? (
+          <View style={styles.tutorialPortal} pointerEvents="box-none">
+            {renderTutorialOverlay()}
+          </View>
+        ) : null}
+      </View>
     </I18nextProvider>
   );
 }
@@ -11272,57 +11289,55 @@ const styles = StyleSheet.create({
   voiceRow: {
     marginTop: 16,
     alignItems: "center",
+    width: "100%",
     gap: 8,
   },
   voiceButton: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    width: "100%",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.25)",
+    backgroundColor: "rgba(15, 23, 42, 0.7)",
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
   },
   voiceButtonActive: {
-    backgroundColor: COLORS.accentDark,
+    borderColor: COLORS.accent,
+    backgroundColor: COLORS.accent,
   },
-  voiceButtonTextActive: {
+  voiceButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  voiceButtonIcon: {
+    fontSize: 26,
+  },
+  voiceButtonLabel: {
+    color: COLORS.text,
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  voiceButtonLabelActive: {
     color: COLORS.white,
   },
-  voiceStatus: {
+  voiceButtonStatus: {
+    marginTop: 4,
     color: COLORS.muted,
+    fontSize: 13,
     textAlign: "center",
+  },
+  voiceButtonStatusError: {
+    color: COLORS.danger,
   },
   voiceHint: {
     color: COLORS.muted,
     textAlign: "center",
-    fontSize: 12,
-  },
-  aiRow: {
-    marginTop: 16,
-    alignItems: "center",
-    gap: 6,
-  },
-  aiButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  aiButtonDisabled: {
-    backgroundColor: COLORS.cardAlt,
-    opacity: 0.7,
-  },
-  aiRowBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginBottom: 4,
-  },
-  aiBadgeLabel: {
-    color: COLORS.muted,
-    fontSize: 12,
-  },
-  aiHintInline: {
-    color: COLORS.muted,
-    textAlign: "center",
-    fontSize: 12,
-  },
-  voiceStatusError: {
-    color: COLORS.danger,
+    fontSize: 13,
+    maxWidth: "70%",
   },
   timerRow: {
     flexDirection: "row",
@@ -11408,29 +11423,6 @@ const styles = StyleSheet.create({
   sportCounterCenter: {
     alignItems: "center",
     justifyContent: "center",
-  },
-  aiBadge: {
-    borderWidth: 1,
-    borderColor: COLORS.accent,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-    minWidth: 32,
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "row",
-  },
-  aiBadgeText: {
-    color: COLORS.accent,
-    fontSize: 10,
-    fontWeight: "700",
-    letterSpacing: 0.6,
-    lineHeight: 14,
-    textAlign: "center",
-  },
-  aiBadgePlaceholder: {
-    width: 0,
-    height: 0,
   },
   sportIcon: {
     fontSize: 18,
@@ -11648,6 +11640,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     width: "100%",
+  },
+  tutorialPortal: {
+    ...StyleSheet.absoluteFillObject,
+    pointerEvents: "box-none",
+    zIndex: 50,
   },
   modalTitle: {
     color: COLORS.text,
@@ -12883,67 +12880,6 @@ const styles = StyleSheet.create({
   },
   languageOptionTextActive: {
     color: COLORS.olive,
-  },
-  aiScreen: {
-    flex: 1,
-    backgroundColor: "#000",
-  },
-  aiCamera: {
-    flex: 1,
-  },
-  aiHeader: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    zIndex: 10,
-    backgroundColor: "rgba(0, 0, 0, 0.35)",
-  },
-  aiCounter: {
-    color: COLORS.white,
-    fontSize: 52,
-    fontWeight: "700",
-  },
-  aiStopButton: {
-    backgroundColor: COLORS.danger,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  aiStopText: {
-    color: COLORS.white,
-    fontWeight: "700",
-  },
-  aiFooter: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: "rgba(0, 0, 0, 0.35)",
-    alignItems: "center",
-  },
-  aiHint: {
-    color: COLORS.muted,
-    textAlign: "center",
-    fontSize: 12,
-  },
-  aiPermission: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 12,
-    padding: 24,
-  },
-  aiPermissionText: {
-    color: COLORS.muted,
-    textAlign: "center",
   },
   tutorialOverlay: {
     ...StyleSheet.absoluteFillObject,

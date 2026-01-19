@@ -173,7 +173,6 @@ const es = {
     "label.motivationActionWorkout": "Abrir Workout",
     "label.motivationActionStats": "Ver estadísticas",
     "label.motivationActionNewSport": "Prueba otro deporte",
-    "label.motivationActionAi": "Iniciar AI",
     "label.motivationActionWidget": "Añadir widget",
     "label.motivationActionNotifications": "Activa recordatorios",
     "label.motivationActionApps": "Elige apps",
@@ -240,10 +239,6 @@ const es = {
       "Inicia un reto adicional para desafiarte más.",
     "label.motivationPreviewHint": "Toca para ver la sugerencia",
     "label.motivationCollapsedHint": "Mostrar consejos",
-    "label.aiFeatureTitle": "Entrenamiento AI",
-    "label.aiFeatureBody":
-      "Este deporte admite funciones de IA. Pulsa el botón de IA dentro del deporte para iniciar el conteo automático.",
-    "label.aiFeatureAction": "Iniciar IA",
     "label.changeLanguage": "Cambiar idioma",
     "label.prefaceSettings": "Pantalla previa",
     "label.prefaceDelay": "Tiempo de espera (segundos)",
@@ -251,19 +246,11 @@ const es = {
     "label.voiceOn": "Microfono activado",
     "label.voiceOff": "Microfono desactivado",
     "label.voiceListening": "Escuchando...",
-    "label.voiceIdle": "Listo",
+    "label.voiceIdle": "Iniciar conteo por micrófono",
     "label.voiceHint": "Di numeros en voz alta para contar (requiere microfono, beta).",
     "label.voicePermissionMissing": "Falta acceso al microfono",
     "label.voiceError": "Fallo de reconocimiento de voz",
     "label.voiceUnavailable": "Reconocimiento de voz no disponible",
-    "label.aiStart": "Iniciar conteo AI",
-    "label.aiStop": "Detener AI",
-    "label.aiHint": "Coloca la camara de lado y mantente visible.",
-    "label.aiHintInline": "AI cuenta flexiones automaticamente (camara necesaria).",
-    "label.aiPermission": "Falta acceso a la camara.",
-    "label.aiLoading": "Cargando camara...",
-    "label.aiUnavailable": "La camara AI no esta disponible.",
-    "label.aiUnavailableInline": "AI temporalmente desactivado.",
     "label.back": "Atrás",
     "label.start": "Iniciar",
     "label.stop": "Parar",
@@ -302,6 +289,27 @@ const es = {
     "tutorial.step.addSport.title": "Anadir un deporte",
     "tutorial.step.addSport.body":
       "Toca + para añadir un deporte, elige repeticiones o tiempo y ajusta la dificultad.",
+    "tutorial.step.createSport.title": "Crear un deporte",
+    "tutorial.step.createSport.body":
+      "Dale un nombre, selecciona repeticiones o tiempo, ajusta la dificultad y pulsa Guardar para poder registrarlo.",
+    "tutorial.step.createSportName.title": "Nombra tu deporte",
+    "tutorial.step.createSportName.body":
+      "Escribe un nombre que describa el movimiento que vas a registrar.",
+    "tutorial.step.createSportIcon.title": "Elige un icono",
+    "tutorial.step.createSportIcon.body":
+      "Selecciona un icono que haga fácil reconocer la tarjeta.",
+    "tutorial.step.createSportType.title": "Escoge un modo",
+    "tutorial.step.createSportType.body":
+      "Cambia entre repeticiones y tiempo según lo que vayas a contar.",
+    "tutorial.step.createSportDifficulty.title": "Ajusta la dificultad",
+    "tutorial.step.createSportDifficulty.body":
+      "Mueve el regulador para decidir cuánto tiempo de pantalla gana cada repetición o minuto.",
+    "tutorial.step.createSportWeight.title": "Cuenta los pesos",
+    "tutorial.step.createSportWeight.body":
+      "Activa esta opción si entrenas con pesas para que la recompensa escale.",
+    "tutorial.step.createSportSave.title": "Guarda el deporte",
+    "tutorial.step.createSportSave.body":
+      "Pulsa Guardar para conservar esta configuración y seguir el tutorial.",
     "tutorial.step.track.title": "Registrar sesion",
     "tutorial.step.track.body.reps":
       "Toca el área grande una vez para sumar una repetición; el nivel de dificultad decide cuánto tiempo ganas.",

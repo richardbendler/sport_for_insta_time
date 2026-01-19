@@ -176,7 +176,6 @@ const de = {
     "label.motivationActionWorkout": "Workout öffnen",
     "label.motivationActionStats": "Statistiken ansehen",
     "label.motivationActionNewSport": "Neuen Sport starten",
-    "label.motivationActionAi": "AI-Training starten",
     "label.motivationActionWidget": "Widget hinzufügen",
     "label.motivationActionNotifications": "Erinnerungen aktivieren",
     "label.motivationActionApps": "Apps einstellen",
@@ -244,10 +243,6 @@ const de = {
       "Fordere dich selbst mit einer Challenge heraus und bleib dran.",
     "label.motivationPreviewHint": "Tippe, um die Empfehlung zu öffnen.",
     "label.motivationCollapsedHint": "Tipps einblenden",
-    "label.aiFeatureTitle": "AI-Training",
-    "label.aiFeatureBody":
-      "Diese Sportart unterstützt AI-Features. Drücke den AI-Button in der Sportart, um das automatische Zählen zu starten.",
-    "label.aiFeatureAction": "AI starten",
     "label.changeLanguage": "Sprache ändern",
     "label.prefaceSettings": "Vorschaltseite",
     "label.prefaceDelay": "Wartezeit (Sekunden)",
@@ -255,19 +250,11 @@ const de = {
     "label.voiceOn": "Mikrofon an",
     "label.voiceOff": "Mikrofon aus",
     "label.voiceListening": "Hört zu...",
-    "label.voiceIdle": "Bereit",
+    "label.voiceIdle": "Mikrofonzählung starten",
     "label.voiceHint": "Zähle laut, die App zählt mit (Mikrofonzugriff nötig, Beta).",
     "label.voicePermissionMissing": "Mikrofon-Zugriff fehlt",
     "label.voiceError": "Spracherkennung fehlgeschlagen",
     "label.voiceUnavailable": "Spracherkennung nicht verfügbar",
-    "label.aiStart": "AI-Zählen starten",
-    "label.aiStop": "AI stoppen",
-    "label.aiHint": "Kamera seitlich platzieren, Oberkörper sichtbar halten.",
-    "label.aiHintInline": "AI zählt Push-ups automatisch (Kamera nötig).",
-    "label.aiPermission": "Kamera-Zugriff fehlt oder wurde verweigert.",
-    "label.aiLoading": "Kamera wird geladen...",
-    "label.aiUnavailable": "AI-Kamera ist vorübergehend deaktiviert.",
-    "label.aiUnavailableInline": "AI-Training ist derzeit deaktiviert.",
     "label.back": "Zurück",
     "label.start": "Start",
     "label.stop": "Stop",
@@ -306,6 +293,27 @@ const de = {
     "tutorial.step.addSport.title": "Neue Sportart",
     "tutorial.step.addSport.body":
       "Tippe auf +, um einen Sport anzulegen, Typ, Rate und den Schwierigkeitsregler festzulegen.",
+    "tutorial.step.createSport.title": "Sportart erstellen",
+    "tutorial.step.createSport.body":
+      "Gib einen Namen ein, wähle Wiederholungen oder Zeitmodus, passe den Schwierigkeitsgrad an und speichere die Sportart.",
+    "tutorial.step.createSportName.title": "Sport benennen",
+    "tutorial.step.createSportName.body":
+      "Gib einen Namen ein, der beschreibt, welchen Move die Karte trackt.",
+    "tutorial.step.createSportIcon.title": "Icon wählen",
+    "tutorial.step.createSportIcon.body":
+      "Wähle ein Icon, damit sich die Sportkarte schnell erkennt.",
+    "tutorial.step.createSportType.title": "Modus wählen",
+    "tutorial.step.createSportType.body":
+      "Wechsle zwischen Wiederholungen und Zeit je nachdem, was du zählen willst.",
+    "tutorial.step.createSportDifficulty.title": "Schwierigkeit einstellen",
+    "tutorial.step.createSportDifficulty.body":
+      "Passe den Regler an, damit jede Rep oder Minute die passende Bildschirmzeit bringt.",
+    "tutorial.step.createSportWeight.title": "Gewichte berücksichtigen",
+    "tutorial.step.createSportWeight.body":
+      "Schalte diese Option ein, wenn du mit Gewichten trainierst, damit der Bonus skaliert.",
+    "tutorial.step.createSportSave.title": "Sport speichern",
+    "tutorial.step.createSportSave.body":
+      "Tippe auf Speichern, um die Sportart mit diesen Einstellungen abzulegen.",
     "tutorial.step.track.title": "Training tracken",
     "tutorial.step.track.body.reps":
       "Tippe auf die große Fläche, um eine Wiederholung zu zählen; der Schwierigkeitsgrad steuert die Screen Time.",

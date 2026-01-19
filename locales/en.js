@@ -169,7 +169,6 @@ const en = {
     "label.motivationActionWorkout": "Open workout",
     "label.motivationActionStats": "View stats",
     "label.motivationActionNewSport": "Try a new sport",
-    "label.motivationActionAi": "Start AI training",
     "label.motivationActionWidget": "Add a widget",
     "label.motivationActionNotifications": "Enable reminders",
     "label.motivationActionApps": "Pick apps",
@@ -236,10 +235,6 @@ const en = {
       "Set a new challenge to push yourself a little further.",
     "label.motivationPreviewHint": "Tap to expand the suggestion",
     "label.motivationCollapsedHint": "Show tips",
-    "label.aiFeatureTitle": "AI training",
-    "label.aiFeatureBody":
-      "This sport supports AI features. Tap the AI button inside the sport to start automatic counting.",
-    "label.aiFeatureAction": "Start AI",
     "label.changeLanguage": "Change language",
     "label.prefaceSettings": "Preface screen",
     "label.prefaceDelay": "Wait time (seconds)",
@@ -247,19 +242,11 @@ const en = {
     "label.voiceOn": "Mic on",
     "label.voiceOff": "Mic off",
     "label.voiceListening": "Listening...",
-    "label.voiceIdle": "Ready",
+    "label.voiceIdle": "Start mic counting",
     "label.voiceHint": "Say numbers out loud to count (microphone access required, beta).",
     "label.voicePermissionMissing": "Microphone access missing",
     "label.voiceError": "Speech recognition failed",
     "label.voiceUnavailable": "Speech recognition unavailable",
-    "label.aiStart": "Start AI counting",
-    "label.aiStop": "Stop AI",
-    "label.aiHint": "Place the camera sideways and keep your upper body visible.",
-    "label.aiHintInline": "AI counts push-ups automatically (camera required).",
-    "label.aiPermission": "Camera access is missing or denied.",
-    "label.aiLoading": "Loading camera...",
-    "label.aiUnavailable": "AI camera is temporarily unavailable.",
-    "label.aiUnavailableInline": "AI training is temporarily unavailable.",
     "label.back": "Back",
     "label.start": "Start",
     "label.stop": "Stop",
@@ -298,6 +285,27 @@ const en = {
     "tutorial.step.addSport.title": "Add a sport",
     "tutorial.step.addSport.body":
       "Tap + to add a sport, pick reps or time mode, and use the slider to match effort.",
+    "tutorial.step.createSport.title": "Create a sport",
+    "tutorial.step.createSport.body":
+      "We'll step through every setting for this sport before you save it.",
+    "tutorial.step.createSportName.title": "Name your sport",
+    "tutorial.step.createSportName.body":
+      "Type a label that reminds you which movement this card tracks.",
+    "tutorial.step.createSportIcon.title": "Pick an icon",
+    "tutorial.step.createSportIcon.body":
+      "Choose an icon that makes the sport card easy to spot.",
+    "tutorial.step.createSportType.title": "Choose a mode",
+    "tutorial.step.createSportType.body":
+      "Select reps for countable moves or time for duration-based sessions.",
+    "tutorial.step.createSportDifficulty.title": "Set difficulty",
+    "tutorial.step.createSportDifficulty.body":
+      "Adjust the slider so each rep or minute rewards the right amount of screen time.",
+    "tutorial.step.createSportWeight.title": "Track weights",
+    "tutorial.step.createSportWeight.body":
+      "Toggle this on when training with weights so the reward scales with the effort.",
+    "tutorial.step.createSportSave.title": "Save your sport",
+    "tutorial.step.createSportSave.body":
+      "Tap Save to keep these settings and continue the tutorial.",
     "tutorial.step.track.title": "Track a session",
     "tutorial.step.track.body.reps":
       "Tap the big area once to log a rep; the difficulty level decides how much Screen Time you earn.",
