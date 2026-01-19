@@ -269,7 +269,7 @@ const RAW_STANDARD_SPORTS = [
       de: "Beinpresse",
       en: "Leg press",
       es: "Prensa de piernas",
-      fr: "Presse à cuisses",
+      fr: "Presse ? cuisses",
     },
     icon: "🦵",
     type: "reps",
@@ -941,11 +941,11 @@ const RAW_STANDARD_SPORTS = [
   },
   {
     id: "reverse_flyes",
-    labels: {
-      de: "Reverse Flyes",
+        labels: {
+      de: "Reverse-Fliegende",
       en: "Reverse Flyes",
       es: "Aperturas inversas",
-      fr: "Écartés inversés",
+      fr: "?cart?s invers?s",
     },
     icon: "???",
     type: "reps",
@@ -1045,7 +1045,7 @@ const RAW_STANDARD_SPORTS = [
   },
   {
     id: "rack_pulls",
-    labels: {
+        labels: {
       de: "Rack Pulls",
       en: "Rack Pulls",
       es: "Elevaciones desde el rack",
@@ -1061,7 +1061,7 @@ const RAW_STANDARD_SPORTS = [
     labels: {
       de: "Good Mornings",
       en: "Good Mornings",
-      es: "Buenos días",
+      es: "Buenos d?as",
       fr: "Good mornings",
     },
     icon: "??",
@@ -1075,7 +1075,7 @@ const RAW_STANDARD_SPORTS = [
       de: "Kabel-Pullovers",
       en: "Cable Pullovers",
       es: "Pullover en polea",
-      fr: "Pull-overs à la poulie",
+      fr: "Pull-overs ? la poulie",
     },
     icon: "?",
     type: "reps",
@@ -1085,7 +1085,7 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "back_extensions",
     labels: {
-      de: "Rückenstrecker",
+      de: "R?ckenstrecker",
       en: "Back Extensions",
       es: "Extensiones de espalda",
       fr: "Extensions du dos",
@@ -1100,8 +1100,8 @@ const RAW_STANDARD_SPORTS = [
     labels: {
       de: "Langhantel-Kniebeuge",
       en: "Back Squat",
-      es: "Sentadilla espalda",
-      fr: "Squat arrière",
+      es: "Sentadilla espaldas",
+      fr: "Squat arri?re",
     },
     icon: "???",
     type: "reps",
@@ -1139,7 +1139,7 @@ const RAW_STANDARD_SPORTS = [
     labels: {
       de: "Bulgarische Ausfallschritte",
       en: "Bulgarian Split Squat",
-      es: "Zancadas búlgaras",
+      es: "Zancadas b?lgaras",
       fr: "Fente bulgare",
     },
     icon: "??",
@@ -1153,7 +1153,7 @@ const RAW_STANDARD_SPORTS = [
       de: "Laufende Ausfallschritte",
       en: "Walking Lunges",
       es: "Zancadas caminando",
-      fr: "Fentes marchées",
+      fr: "Fentes march?es",
     },
     icon: "??",
     type: "reps",
@@ -1163,10 +1163,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "reverse_lunges",
     labels: {
-      de: "Rückwärts-Ausfallschritte",
+      de: "R?ckw?rts-Ausfallschritte",
       en: "Reverse Lunges",
-      es: "Zancadas hacia atrás",
-      fr: "Fentes arrière",
+      es: "Zancadas hacia atr?s",
+      fr: "Fentes arri?re",
     },
     icon: "??",
     type: "reps",
@@ -1179,7 +1179,7 @@ const RAW_STANDARD_SPORTS = [
       de: "Seitliche Ausfallschritte",
       en: "Lateral Lunges",
       es: "Zancadas laterales",
-      fr: "Fentes latérales",
+      fr: "Fentes lat?rales",
     },
     icon: "??",
     type: "reps",
@@ -1192,7 +1192,7 @@ const RAW_STANDARD_SPORTS = [
       de: "Verbeugungs-Ausfallschritte",
       en: "Curtsy Lunges",
       es: "Zancadas reverencia",
-      fr: "Fentes révérence",
+      fr: "Fentes r?v?rence",
     },
     icon: "??",
     type: "reps",
@@ -1217,7 +1217,7 @@ const RAW_STANDARD_SPORTS = [
     labels: {
       de: "Box-Step-ups",
       en: "Box Step-ups",
-      es: "Step-ups con cajón",
+      es: "Step-ups con caj?n",
       fr: "Step-ups sur box",
     },
     icon: "??",
@@ -1306,10 +1306,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "leg_extension",
     labels: {
-      de: "Leg Extension",
+      de: "Beinstrecker",
       en: "Leg Extension",
-      es: "Leg Extension",
-      fr: "Leg Extension",
+      es: "Extensi?n de piernas",
+      fr: "Extension des jambes",
     },
     icon: "??",
     type: "reps",
@@ -1319,10 +1319,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "leg_curl",
     labels: {
-      de: "Leg Curl",
+      de: "Beinbeuger",
       en: "Leg Curl",
-      es: "Leg Curl",
-      fr: "Leg Curl",
+      es: "Curl femoral",
+      fr: "Curl jambes",
     },
     icon: "??",
     type: "reps",
@@ -1332,10 +1332,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "nordic_ham_curl",
     labels: {
-      de: "Nordic Ham Curl",
+      de: "Nordic-Ham-Curl",
       en: "Nordic Ham Curl",
-      es: "Nordic Ham Curl",
-      fr: "Nordic Ham Curl",
+      es: "Curl n?rdico de isquiotibiales",
+      fr: "Curl nordique des ischio-jambiers",
     },
     icon: "??",
     type: "reps",
@@ -1345,10 +1345,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "glute_bridge",
     labels: {
-      de: "Glute Bridge",
+      de: "Glute-Bridge",
       en: "Glute Bridge",
-      es: "Glute Bridge",
-      fr: "Glute Bridge",
+      es: "Puente de gl?teo",
+      fr: "Pont fessier",
     },
     icon: "??",
     type: "reps",
@@ -1371,10 +1371,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "cable_pull_through",
     labels: {
-      de: "Cable Pull Through",
+      de: "Kabel-Pull-Through",
       en: "Cable Pull Through",
-      es: "Cable Pull Through",
-      fr: "Cable Pull Through",
+      es: "Cable pull through",
+      fr: "Cable pull through",
     },
     icon: "??",
     type: "reps",
@@ -1384,10 +1384,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "standing_calf_raise",
     labels: {
-      de: "Standing Calf Raise",
+      de: "Stehende Wadenheben",
       en: "Standing Calf Raise",
-      es: "Standing Calf Raise",
-      fr: "Standing Calf Raise",
+      es: "Elevaciones de gemelos de pie",
+      fr: "?l?vations mollets debout",
     },
     icon: "?",
     type: "reps",
@@ -1397,10 +1397,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "seated_calf_raise",
     labels: {
-      de: "Seated Calf Raise",
+      de: "Sitzendes Wadenheben",
       en: "Seated Calf Raise",
-      es: "Seated Calf Raise",
-      fr: "Seated Calf Raise",
+      es: "Elevaciones de gemelos sentado",
+      fr: "?l?vations mollets assis",
     },
     icon: "??",
     type: "reps",
@@ -1410,10 +1410,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "donkey_calf_raise",
     labels: {
-      de: "Donkey Calf Raise",
+      de: "Esel-Wadenheben",
       en: "Donkey Calf Raise",
-      es: "Donkey Calf Raise",
-      fr: "Donkey Calf Raise",
+      es: "Elevaciones de gemelos en burro",
+      fr: "?l?vations mollets ? dos d??ne",
     },
     icon: "???",
     type: "reps",
@@ -1423,10 +1423,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "farmer_s_walk",
     labels: {
-      de: "Farmer's Walk",
-      en: "Farmer's Walk",
-      es: "Farmer's Walk",
-      fr: "Farmer's Walk",
+      de: "Farmer?s Walk",
+      en: "Farmer?s Walk",
+      es: "Caminata del granjero",
+      fr: "Farmer?s walk",
     },
     icon: "???",
     type: "reps",
@@ -1436,10 +1436,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "weighted_carries",
     labels: {
-      de: "Weighted Carries",
+      de: "Gewichtstragen",
       en: "Weighted Carries",
-      es: "Weighted Carries",
-      fr: "Weighted Carries",
+      es: "Transportes con peso",
+      fr: "Port?s lest?s",
     },
     icon: "??",
     type: "reps",
@@ -1449,10 +1449,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "overhead_press",
     labels: {
-      de: "Overhead Press",
+      de: "?berkopfdr?cken",
       en: "Overhead Press",
-      es: "Overhead Press",
-      fr: "Overhead Press",
+      es: "Press militar",
+      fr: "D?velopp? militaire",
     },
     icon: "??",
     type: "reps",
@@ -1462,10 +1462,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_shoulder_press",
     labels: {
-      de: "Dumbbell Shoulder Press",
+      de: "Kurzhantel-Schulterdr?cken",
       en: "Dumbbell Shoulder Press",
-      es: "Dumbbell Shoulder Press",
-      fr: "Dumbbell Shoulder Press",
+      es: "Press militar con mancuernas",
+      fr: "D?velopp? ?paules halt?res",
     },
     icon: "??",
     type: "reps",
@@ -1475,10 +1475,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "seated_military_press",
     labels: {
-      de: "Seated Military Press",
+      de: "Sitzendes Schulterdr?cken",
       en: "Seated Military Press",
-      es: "Seated Military Press",
-      fr: "Seated Military Press",
+      es: "Press militar sentado",
+      fr: "D?velopp? ?paules assis",
     },
     icon: "??",
     type: "reps",
@@ -1490,8 +1490,8 @@ const RAW_STANDARD_SPORTS = [
     labels: {
       de: "Arnold Press",
       en: "Arnold Press",
-      es: "Arnold Press",
-      fr: "Arnold Press",
+      es: "Press Arnold",
+      fr: "Arnold press",
     },
     icon: "??",
     type: "reps",
@@ -1514,10 +1514,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "single_arm_landmine_press",
     labels: {
-      de: "Single-Arm Landmine Press",
+      de: "Landmine-Press einarmig",
       en: "Single-Arm Landmine Press",
-      es: "Single-Arm Landmine Press",
-      fr: "Single-Arm Landmine Press",
+      es: "Press landmine a un brazo",
+      fr: "Landmine unilat?ral",
     },
     icon: "??",
     type: "reps",
@@ -1527,10 +1527,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_lateral_raise",
     labels: {
-      de: "Dumbbell Lateral Raise",
+      de: "Kurzhantel-Seitheben",
       en: "Dumbbell Lateral Raise",
-      es: "Dumbbell Lateral Raise",
-      fr: "Dumbbell Lateral Raise",
+      es: "Elevaciones laterales con mancuernas",
+      fr: "?l?vations lat?rales halt?res",
     },
     icon: "??",
     type: "reps",
@@ -1540,10 +1540,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "cable_lateral_raise",
     labels: {
-      de: "Cable Lateral Raise",
+      de: "Kabel-Seitheben",
       en: "Cable Lateral Raise",
-      es: "Cable Lateral Raise",
-      fr: "Cable Lateral Raise",
+      es: "Elevaciones laterales en polea",
+      fr: "?l?vations lat?rales ? la poulie",
     },
     icon: "?",
     type: "reps",
