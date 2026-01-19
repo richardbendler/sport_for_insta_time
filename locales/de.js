@@ -143,9 +143,10 @@ const de = {
       "label.difficultyDescription":
         "Der Faktor multipliziert Dauer, Wiederholungen oder Gewicht und legt fest, wie viel Screen Time jede Einheit bringt.",
       "label.difficultyFormula":
-        "Formeln:\nZeitbasiert = Dauer (s) × Faktor × 0,05\nOhne Gewicht = Wiederholungen × Faktor × 0,05\nMit Gewicht = kg × Wiederholungen × Faktor × 0,001",
-    "label.weightEntryButton": "Satz eintragen",
-    "label.weightEntryPreview": "Screen Time (Vorschau)",
+        "Formeln:\nZeitbasiert = Sekunden × adminFactor_time × Intensität\nWiederholungen = Wiederholungen × adminFactor_reps × Intensität\nSportarten mit Gewichten = kg × Wiederholungen × Intensität × adminFactor_weighted",
+    "label.weightExerciseInfoTitle": "Gewichtsuebungen",
+    "label.weightExerciseInfoBody": "Aktiviere das bei Ubungen mit zusatzlichem Gewicht; die Screen Time berechnet sich als kg × Wiederholungen × Intensitat × adminFactor_weighted.",
+"label.weightEntryPreview": "Screen Time (Vorschau)",
     "label.weightEntryWeight": "Gewicht (kg)",
     "label.weightEntryReps": "Wiederholungen",
     "label.timeBased": "Zeitbasiert",
