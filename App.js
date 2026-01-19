@@ -10513,7 +10513,11 @@ const getSpeechLocale = () => {
             <Text style={styles.modalTitle}>
               {editingSportId ? t("label.editSport") : t("label.addSport")}
             </Text>
-            <View style={styles.createSportField} ref={tutorialSportNameRef}>
+            <View
+              style={styles.createSportField}
+              ref={tutorialSportNameRef}
+              collapsable={false}
+            >
               <TextInput
                 style={styles.searchInput}
                 value={newName}
@@ -10592,7 +10596,11 @@ const getSpeechLocale = () => {
                 </View>
               ) : null}
             </View>
-            <View style={styles.createSportField} ref={tutorialSportIconRef}>
+            <View
+              style={styles.createSportField}
+              ref={tutorialSportIconRef}
+              collapsable={false}
+            >
               {isCustomSportMode ? (
                 <>
                   <View style={styles.iconRow}>
@@ -10638,7 +10646,11 @@ const getSpeechLocale = () => {
                 <Text style={styles.infoButtonText}>?</Text>
               </Pressable>
             </View>
-            <View style={styles.createSportField} ref={tutorialSportTypeRef}>
+            <View
+              style={styles.createSportField}
+              ref={tutorialSportTypeRef}
+              collapsable={false}
+            >
               <View style={styles.typeRow}>
                 <Pressable
                   style={[
@@ -10684,6 +10696,7 @@ const getSpeechLocale = () => {
             <View
               style={[styles.sliderSection, styles.createSportField]}
               ref={tutorialSportDifficultyRef}
+              collapsable={false}
             >
               <View style={styles.difficultyHeaderRow}>
                 <Text style={styles.rateLabel}>{t("label.difficultyLabel")}</Text>
@@ -10731,7 +10744,11 @@ const getSpeechLocale = () => {
               </View>
             </View>
             {newType === "reps" ? (
-              <View style={styles.weightToggleRow} ref={tutorialSportWeightRef}>
+              <View
+                style={styles.weightToggleRow}
+                ref={tutorialSportWeightRef}
+                collapsable={false}
+              >
                 <Pressable
                   style={[
                     styles.weightToggleButton,
@@ -10766,6 +10783,7 @@ const getSpeechLocale = () => {
                 style={styles.primaryButton}
                 onPress={saveSportModal}
                 ref={tutorialSportSaveRef}
+                collapsable={false}
               >
                 <Text style={styles.primaryButtonText}>{t("label.save")}</Text>
               </Pressable>
@@ -10817,9 +10835,16 @@ const getSpeechLocale = () => {
       <View style={{ flex: 1 }}>
         {renderAppContent()}
         {tutorialActive ? (
-          <View style={styles.tutorialPortal} pointerEvents="box-none">
-            {renderTutorialOverlay()}
-          </View>
+          <Modal
+            visible={tutorialActive}
+            transparent
+            animationType="none"
+            onRequestClose={() => {}}
+          >
+            <View style={styles.tutorialPortal} pointerEvents="box-none">
+              {renderTutorialOverlay()}
+            </View>
+          </Modal>
         ) : null}
       </View>
     </I18nextProvider>
