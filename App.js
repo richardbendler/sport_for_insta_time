@@ -916,10 +916,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "trx_row",
     labels: {
-      de: "TRX Row",
+      de: "TRX-Rudern",
       en: "TRX Row",
-      es: "TRX Row",
-      fr: "TRX Row",
+      es: "Remo en TRX",
+      fr: "Rowing TRX",
     },
     icon: "?",
     type: "time",
@@ -931,8 +931,8 @@ const RAW_STANDARD_SPORTS = [
     labels: {
       de: "Face Pulls",
       en: "Face Pulls",
-      es: "Face Pulls",
-      fr: "Face Pulls",
+      es: "Pulls de cara",
+      fr: "Face pulls",
     },
     icon: "??",
     type: "reps",
@@ -944,8 +944,8 @@ const RAW_STANDARD_SPORTS = [
     labels: {
       de: "Reverse Flyes",
       en: "Reverse Flyes",
-      es: "Reverse Flyes",
-      fr: "Reverse Flyes",
+      es: "Aperturas inversas",
+      fr: "Écartés inversés",
     },
     icon: "???",
     type: "reps",
@@ -955,10 +955,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "straight_arm_pulldown",
     labels: {
-      de: "Straight-Arm Pulldown",
+      de: "Strecken am Latziehen",
       en: "Straight-Arm Pulldown",
-      es: "Straight-Arm Pulldown",
-      fr: "Straight-Arm Pulldown",
+      es: "Jalón con brazos rectos",
+      fr: "Tirage bras tendus",
     },
     icon: "???",
     type: "reps",
@@ -968,10 +968,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "deadlift",
     labels: {
-      de: "Deadlift",
+      de: "Kreuzheben",
       en: "Deadlift",
-      es: "Deadlift",
-      fr: "Deadlift",
+      es: "Peso muerto",
+      fr: "Soulevé de terre",
     },
     icon: "??",
     type: "reps",
@@ -981,10 +981,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "romanian_deadlift",
     labels: {
-      de: "Romanian Deadlift",
+      de: "Rumänisches Kreuzheben",
       en: "Romanian Deadlift",
-      es: "Romanian Deadlift",
-      fr: "Romanian Deadlift",
+      es: "Peso muerto rumano",
+      fr: "Soulevé de terre roumain",
     },
     icon: "??",
     type: "reps",
@@ -994,10 +994,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "sumo_deadlift",
     labels: {
-      de: "Sumo Deadlift",
+      de: "Sumo-Kreuzheben",
       en: "Sumo Deadlift",
-      es: "Sumo Deadlift",
-      fr: "Sumo Deadlift",
+      es: "Peso muerto sumo",
+      fr: "Soulevé de terre sumo",
     },
     icon: "??",
     type: "reps",
@@ -1007,10 +1007,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "trap_bar_deadlift",
     labels: {
-      de: "Trap Bar Deadlift",
+      de: "Trap-Bar-Kreuzheben",
       en: "Trap Bar Deadlift",
-      es: "Trap Bar Deadlift",
-      fr: "Trap Bar Deadlift",
+      es: "Peso muerto en trap bar",
+      fr: "Soulevé de terre à la trap bar",
     },
     icon: "??",
     type: "reps",
@@ -1020,10 +1020,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "kettlebell_deadlift",
     labels: {
-      de: "Kettlebell Deadlift",
+      de: "Kettlebell-Kreuzheben",
       en: "Kettlebell Deadlift",
-      es: "Kettlebell Deadlift",
-      fr: "Kettlebell Deadlift",
+      es: "Peso muerto con kettlebell",
+      fr: "Soulevé de terre avec kettlebell",
     },
     icon: "??",
     type: "reps",
@@ -1033,10 +1033,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "single_leg_romanian_deadlift",
     labels: {
-      de: "Single-Leg Romanian Deadlift",
+      de: "Einbeiniges rumänisches Kreuzheben",
       en: "Single-Leg Romanian Deadlift",
-      es: "Single-Leg Romanian Deadlift",
-      fr: "Single-Leg Romanian Deadlift",
+      es: "Peso muerto rumano a una pierna",
+      fr: "Soulevé de terre roumain sur une jambe",
     },
     icon: "??",
     type: "reps",
