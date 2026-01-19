@@ -786,10 +786,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "close_grip_lat_pulldown",
     labels: {
-      de: "Close-Grip Lat Pulldown",
+      de: "Latziehen mit engem Griff",
       en: "Close-Grip Lat Pulldown",
-      es: "Close-Grip Lat Pulldown",
-      fr: "Close-Grip Lat Pulldown",
+      es: "Jalón al pecho agarre estrecho",
+      fr: "Tirage vertical prise serrée",
     },
     icon: "???",
     type: "reps",
@@ -799,10 +799,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "single_arm_lat_pulldown",
     labels: {
-      de: "Single-Arm Lat Pulldown",
+      de: "Einarmiges Latziehen",
       en: "Single-Arm Lat Pulldown",
-      es: "Single-Arm Lat Pulldown",
-      fr: "Single-Arm Lat Pulldown",
+      es: "Jalón al pecho a un brazo",
+      fr: "Tirage vertical unilatéral",
     },
     icon: "???",
     type: "reps",
@@ -812,10 +812,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "seated_cable_row",
     labels: {
-      de: "Seated Cable Row",
+      de: "Sitzendes Kabelrudern",
       en: "Seated Cable Row",
-      es: "Seated Cable Row",
-      fr: "Seated Cable Row",
+      es: "Remo sentado en polea",
+      fr: "Rameur assis à la poulie",
     },
     icon: "??",
     type: "time",
@@ -825,10 +825,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "bent_over_barbell_row",
     labels: {
-      de: "Bent-Over Barbell Row",
+      de: "Langhantel-Rudern",
       en: "Bent-Over Barbell Row",
-      es: "Bent-Over Barbell Row",
-      fr: "Bent-Over Barbell Row",
+      es: "Remo con barra",
+      fr: "Rowing barre",
     },
     icon: "??",
     type: "time",
@@ -838,10 +838,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_row",
     labels: {
-      de: "Dumbbell Row",
+      de: "Kurzhantelrudern",
       en: "Dumbbell Row",
-      es: "Dumbbell Row",
-      fr: "Dumbbell Row",
+      es: "Remo con mancuerna",
+      fr: "Rowing haltère",
     },
     icon: "??",
     type: "time",
@@ -851,10 +851,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "t_bar_row",
     labels: {
-      de: "T-Bar Row",
+      de: "T-Bar-Rudern",
       en: "T-Bar Row",
-      es: "T-Bar Row",
-      fr: "T-Bar Row",
+      es: "Remo en T-Bar",
+      fr: "Rowing T-Bar",
     },
     icon: "??",
     type: "time",
@@ -864,10 +864,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "chest_supported_row",
     labels: {
-      de: "Chest-Supported Row",
+      de: "Brustgestütztes Rudern",
       en: "Chest-Supported Row",
-      es: "Chest-Supported Row",
-      fr: "Chest-Supported Row",
+      es: "Remo apoyado en pecho",
+      fr: "Rowing buste appuyé",
     },
     icon: "??",
     type: "time",
@@ -877,10 +877,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "meadows_row",
     labels: {
-      de: "Meadows Row",
+      de: "Meadows-Rudern",
       en: "Meadows Row",
-      es: "Meadows Row",
-      fr: "Meadows Row",
+      es: "Remo Meadows",
+      fr: "Rowing Meadows",
     },
     icon: "??",
     type: "time",
@@ -890,10 +890,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "inverted_row",
     labels: {
-      de: "Inverted Row",
+      de: "Umgekehrtes Rudern",
       en: "Inverted Row",
-      es: "Inverted Row",
-      fr: "Inverted Row",
+      es: "Remo invertido",
+      fr: "Rowing inversé",
     },
     icon: "??",
     type: "time",
@@ -903,10 +903,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "ring_row",
     labels: {
-      de: "Ring Row",
+      de: "Ringrudern",
       en: "Ring Row",
-      es: "Ring Row",
-      fr: "Ring Row",
+      es: "Remo en anillas",
+      fr: "Rowing aux anneaux",
     },
     icon: "??",
     type: "time",
