@@ -7244,7 +7244,7 @@ const getSpeechLocale = () => {
         hideHighlight: true,
         centerCard: true,
         requiresAction: false,
-        blocksTouches: false,
+        blocksTouches: true,
         renderInModal: true,
       });
       steps.push({
@@ -7253,7 +7253,7 @@ const getSpeechLocale = () => {
         bodyKey: "tutorial.step.createSportName.body",
         targetRef: tutorialSportNameRef,
         highlightColor: TUTORIAL_STRONG_HIGHLIGHT,
-        blocksTouches: false,
+        blocksTouches: true,
         renderInModal: true,
       });
       steps.push({
@@ -7262,7 +7262,7 @@ const getSpeechLocale = () => {
         bodyKey: "tutorial.step.createSportIcon.body",
         targetRef: tutorialSportIconRef,
         highlightColor: TUTORIAL_STRONG_HIGHLIGHT,
-        blocksTouches: false,
+        blocksTouches: true,
         renderInModal: true,
       });
       steps.push({
@@ -7271,7 +7271,7 @@ const getSpeechLocale = () => {
         bodyKey: "tutorial.step.createSportType.body",
         targetRef: tutorialSportTypeRef,
         highlightColor: TUTORIAL_STRONG_HIGHLIGHT,
-        blocksTouches: false,
+        blocksTouches: true,
         renderInModal: true,
       });
       steps.push({
@@ -7280,7 +7280,7 @@ const getSpeechLocale = () => {
         bodyKey: "tutorial.step.createSportDifficulty.body",
         targetRef: tutorialSportDifficultyRef,
         highlightColor: TUTORIAL_STRONG_HIGHLIGHT,
-        blocksTouches: false,
+        blocksTouches: true,
         renderInModal: true,
       });
       steps.push({
@@ -7289,7 +7289,7 @@ const getSpeechLocale = () => {
         bodyKey: "tutorial.step.createSportWeight.body",
         targetRef: tutorialSportWeightRef,
         highlightColor: TUTORIAL_STRONG_HIGHLIGHT,
-        blocksTouches: false,
+        blocksTouches: true,
         renderInModal: true,
       });
       steps.push({
@@ -7299,7 +7299,9 @@ const getSpeechLocale = () => {
         targetRef: tutorialSportSaveRef,
         actionId: "saveSport",
         requiresAction: true,
-        blocksTouches: false,
+        blocksTouches: true,
+        centerCard: false,
+        cardDock: "top",
         renderInModal: true,
       });
     }
