@@ -7245,6 +7245,7 @@ const getSpeechLocale = () => {
         centerCard: true,
         requiresAction: false,
         blocksTouches: false,
+        renderInModal: true,
       });
       steps.push({
         id: "createSportName",
@@ -7253,6 +7254,7 @@ const getSpeechLocale = () => {
         targetRef: tutorialSportNameRef,
         highlightColor: TUTORIAL_STRONG_HIGHLIGHT,
         blocksTouches: false,
+        renderInModal: true,
       });
       steps.push({
         id: "createSportIcon",
@@ -7261,6 +7263,7 @@ const getSpeechLocale = () => {
         targetRef: tutorialSportIconRef,
         highlightColor: TUTORIAL_STRONG_HIGHLIGHT,
         blocksTouches: false,
+        renderInModal: true,
       });
       steps.push({
         id: "createSportType",
@@ -7269,6 +7272,7 @@ const getSpeechLocale = () => {
         targetRef: tutorialSportTypeRef,
         highlightColor: TUTORIAL_STRONG_HIGHLIGHT,
         blocksTouches: false,
+        renderInModal: true,
       });
       steps.push({
         id: "createSportDifficulty",
@@ -7277,6 +7281,7 @@ const getSpeechLocale = () => {
         targetRef: tutorialSportDifficultyRef,
         highlightColor: TUTORIAL_STRONG_HIGHLIGHT,
         blocksTouches: false,
+        renderInModal: true,
       });
       steps.push({
         id: "createSportWeight",
@@ -7285,6 +7290,7 @@ const getSpeechLocale = () => {
         targetRef: tutorialSportWeightRef,
         highlightColor: TUTORIAL_STRONG_HIGHLIGHT,
         blocksTouches: false,
+        renderInModal: true,
       });
       steps.push({
         id: "createSportSave",
@@ -7294,6 +7300,7 @@ const getSpeechLocale = () => {
         actionId: "saveSport",
         requiresAction: true,
         blocksTouches: false,
+        renderInModal: true,
       });
     }
     steps.push({
@@ -7382,6 +7389,10 @@ const getSpeechLocale = () => {
   const isTutorialLastStep =
     tutorialStepIndex !== null &&
     tutorialStepIndex === tutorialSteps.length - 1;
+  const tutorialOverlayInRoot =
+    tutorialActive && !tutorialStep?.renderInModal;
+  const tutorialOverlayInModal =
+    tutorialActive && tutorialStep?.renderInModal && isSportModalOpen;
   useEffect(() => {
     if (
       !tutorialWaitingForSportCreation ||
@@ -10789,6 +10800,11 @@ const getSpeechLocale = () => {
               </Pressable>
             </View>
           </View>
+          {tutorialOverlayInModal ? (
+            <View style={styles.tutorialPortal} pointerEvents="box-none">
+              {renderTutorialOverlay()}
+            </View>
+          ) : null}
         </View>
       ) : null}
       {infoModalKey ? (
@@ -10834,17 +10850,10 @@ const getSpeechLocale = () => {
     <I18nextProvider i18n={i18n}>
       <View style={{ flex: 1 }}>
         {renderAppContent()}
-        {tutorialActive ? (
-          <Modal
-            visible={tutorialActive}
-            transparent
-            animationType="none"
-            onRequestClose={() => {}}
-          >
-            <View style={styles.tutorialPortal} pointerEvents="box-none">
-              {renderTutorialOverlay()}
-            </View>
-          </Modal>
+        {tutorialOverlayInRoot ? (
+          <View style={styles.tutorialPortal} pointerEvents="box-none">
+            {renderTutorialOverlay()}
+          </View>
         ) : null}
       </View>
     </I18nextProvider>
