@@ -201,10 +201,10 @@ const RAW_STANDARD_SPORTS = [
 ﻿  {
     id: "barbell_bench_press",
     labels: {
-      de: "Barbell Bench Press",
+      de: "Langhantel-Bankdrücken",
       en: "Barbell Bench Press",
-      es: "Barbell Bench Press",
-      fr: "Barbell Bench Press",
+      es: "Press de banca con barra",
+      fr: "Développé couché à la barre",
     },
     icon: "???",
     type: "reps",
@@ -214,10 +214,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_bench_press",
     labels: {
-      de: "Dumbbell Bench Press",
+      de: "Kurzhantel-Bankdrücken",
       en: "Dumbbell Bench Press",
-      es: "Dumbbell Bench Press",
-      fr: "Dumbbell Bench Press",
+      es: "Press de banca con mancuernas",
+      fr: "Développé couché avec haltères",
     },
     icon: "??",
     type: "reps",
@@ -227,10 +227,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "incline_barbell_bench_press",
     labels: {
-      de: "Incline Barbell Bench Press",
+      de: "Schrägbankdrücken mit Langhantel",
       en: "Incline Barbell Bench Press",
-      es: "Incline Barbell Bench Press",
-      fr: "Incline Barbell Bench Press",
+      es: "Press de banca inclinado con barra",
+      fr: "Développé incliné à la barre",
     },
     icon: "??",
     type: "reps",
@@ -240,10 +240,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "incline_dumbbell_bench_press",
     labels: {
-      de: "Incline Dumbbell Bench Press",
+      de: "Schrägbankdrücken mit Kurzhanteln",
       en: "Incline Dumbbell Bench Press",
-      es: "Incline Dumbbell Bench Press",
-      fr: "Incline Dumbbell Bench Press",
+      es: "Press inclinado con mancuernas",
+      fr: "Développé incliné aux haltères",
     },
     icon: "??",
     type: "reps",
@@ -305,10 +305,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "decline_barbell_bench_press",
     labels: {
-      de: "Decline Barbell Bench Press",
+      de: "Negativbankdrücken mit Langhantel",
       en: "Decline Barbell Bench Press",
-      es: "Decline Barbell Bench Press",
-      fr: "Decline Barbell Bench Press",
+      es: "Press de banca declinado con barra",
+      fr: "Développé décliné à la barre",
     },
     icon: "??",
     type: "reps",
@@ -318,10 +318,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "decline_dumbbell_bench_press",
     labels: {
-      de: "Decline Dumbbell Bench Press",
+      de: "Negativbankdrücken mit Kurzhanteln",
       en: "Decline Dumbbell Bench Press",
-      es: "Decline Dumbbell Bench Press",
-      fr: "Decline Dumbbell Bench Press",
+      es: "Press declinado con mancuernas",
+      fr: "Développé décliné aux haltères",
     },
     icon: "??",
     type: "reps",
@@ -331,10 +331,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "close_grip_bench_press",
     labels: {
-      de: "Close-Grip Bench Press",
+      de: "Bankdrücken mit engem Griff",
       en: "Close-Grip Bench Press",
-      es: "Close-Grip Bench Press",
-      fr: "Close-Grip Bench Press",
+      es: "Press de banca agarre cerrado",
+      fr: "Développé couché prise serrée",
     },
     icon: "??",
     type: "reps",
@@ -344,10 +344,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "floor_press",
     labels: {
-      de: "Floor Press",
+      de: "Boden-Press",
       en: "Floor Press",
-      es: "Floor Press",
-      fr: "Floor Press",
+      es: "Press de banca en el suelo",
+      fr: "Développé couché au sol",
     },
     icon: "??",
     type: "reps",
@@ -357,10 +357,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_flyes",
     labels: {
-      de: "Dumbbell Flyes",
+      de: "Kurzhantel-Fliegende",
       en: "Dumbbell Flyes",
-      es: "Dumbbell Flyes",
-      fr: "Dumbbell Flyes",
+      es: "Aperturas con mancuernas",
+      fr: "Écarté avec haltères",
     },
     icon: "??",
     type: "reps",
@@ -370,10 +370,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "cable_flyes",
     labels: {
-      de: "Cable Flyes",
+      de: "Kabelzug-Fliegende",
       en: "Cable Flyes",
-      es: "Cable Flyes",
-      fr: "Cable Flyes",
+      es: "Aperturas en polea",
+      fr: "Écarté à la poulie",
     },
     icon: "?",
     type: "reps",
