@@ -7300,8 +7300,6 @@ const getSpeechLocale = () => {
         actionId: "saveSport",
         requiresAction: true,
         blocksTouches: true,
-        centerCard: false,
-        cardDock: "top",
         renderInModal: true,
       });
     }
