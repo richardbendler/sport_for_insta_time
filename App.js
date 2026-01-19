@@ -708,10 +708,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "pull_ups",
     labels: {
-      de: "Pull-ups",
+      de: "Klimmzüge",
       en: "Pull-ups",
-      es: "Pull-ups",
-      fr: "Pull-ups",
+      es: "Dominadas",
+      fr: "Tractions",
     },
     icon: "??",
     type: "reps",
