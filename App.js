@@ -1046,7 +1046,7 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "rack_pulls",
         labels: {
-      de: "Rack Pulls",
+      de: "Rack-Ziehen",
       en: "Rack Pulls",
       es: "Elevaciones desde el rack",
       fr: "Rack pulls",
@@ -1059,7 +1059,7 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "good_mornings",
     labels: {
-      de: "Good Mornings",
+      de: "Good-Morning-?bung",
       en: "Good Mornings",
       es: "Buenos d?as",
       fr: "Good mornings",
@@ -1202,7 +1202,7 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "step_ups",
     labels: {
-      de: "Step-ups",
+      de: "Stufensteigen",
       en: "Step-ups",
       es: "Step-ups",
       fr: "Step-ups",
@@ -1228,7 +1228,7 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "pistol_squat",
     labels: {
-      de: "Pistol Squat",
+      de: "Einbeinige Kniebeuge",
       en: "Pistol Squat",
       es: "Sentadilla pistol",
       fr: "Pistol squat",
@@ -1254,7 +1254,7 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "hack_squat",
     labels: {
-      de: "Hack Squat",
+      de: "Hack-Kniebeuge",
       en: "Hack Squat",
       es: "Sentadilla hack",
       fr: "Hack squat",
@@ -1280,7 +1280,7 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "olympic_squat",
     labels: {
-      de: "Olympic Squat",
+      de: "Olympische Kniebeuge",
       en: "Olympic Squat",
       es: "Olympic Squat",
       fr: "Olympic Squat",
@@ -1293,7 +1293,7 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "leg_press",
     labels: {
-      de: "Leg Press",
+      de: "Beinpresse",
       en: "Leg Press",
       es: "Leg Press",
       fr: "Leg Press",
@@ -1358,7 +1358,7 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "hip_thrust",
     labels: {
-      de: "Hip Thrust",
+      de: "H?ftsto?",
       en: "Hip Thrust",
       es: "Hip Thrust",
       fr: "Hip Thrust",
@@ -1423,7 +1423,7 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "farmer_s_walk",
     labels: {
-      de: "Farmer?s Walk",
+      de: "Farmer-Walk",
       en: "Farmer?s Walk",
       es: "Caminata del granjero",
       fr: "Farmer?s walk",
@@ -1488,7 +1488,7 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "arnold_press",
     labels: {
-      de: "Arnold Press",
+      de: "Arnold-Press",
       en: "Arnold Press",
       es: "Press Arnold",
       fr: "Arnold press",
@@ -1501,7 +1501,7 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "push_press",
     labels: {
-      de: "Push Press",
+      de: "Powerdr?cken",
       en: "Push Press",
       es: "Push Press",
       fr: "Push Press",
@@ -1553,7 +1553,7 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "incline_dumbbell_lateral_raise",
     labels: {
-      de: "Incline Dumbbell Lateral Raise",
+      de: "Schr?gbank-Seitheben",
       en: "Incline Dumbbell Lateral Raise",
       es: "Incline Dumbbell Lateral Raise",
       fr: "Incline Dumbbell Lateral Raise",
@@ -1566,7 +1566,7 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "front_raise",
     labels: {
-      de: "Front Raise",
+      de: "Frontheben",
       en: "Front Raise",
       es: "Front Raise",
       fr: "Front Raise",
@@ -1579,7 +1579,7 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "cable_front_raise",
     labels: {
-      de: "Cable Front Raise",
+      de: "Kabel-Frontheben",
       en: "Cable Front Raise",
       es: "Cable Front Raise",
       fr: "Cable Front Raise",
@@ -1592,7 +1592,7 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "reverse_fly",
     labels: {
-      de: "Reverse Fly",
+      de: "Reverse-Seitheben",
       en: "Reverse Fly",
       es: "Reverse Fly",
       fr: "Reverse Fly",
@@ -1605,7 +1605,7 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_shrugs",
     labels: {
-      de: "Dumbbell Shrugs",
+      de: "Kurzhantel-Shrugs",
       en: "Dumbbell Shrugs",
       es: "Dumbbell Shrugs",
       fr: "Dumbbell Shrugs",
@@ -1618,7 +1618,7 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "barbell_shrugs",
     labels: {
-      de: "Barbell Shrugs",
+      de: "Langhantel-Shrugs",
       en: "Barbell Shrugs",
       es: "Barbell Shrugs",
       fr: "Barbell Shrugs",
@@ -1631,7 +1631,7 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "upright_row",
     labels: {
-      de: "Upright Row",
+      de: "Aufrechtes Rudern",
       en: "Upright Row",
       es: "Upright Row",
       fr: "Upright Row",
@@ -1644,7 +1644,7 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "cuban_press",
     labels: {
-      de: "Cuban Press",
+      de: "Cuban-Press",
       en: "Cuban Press",
       es: "Cuban Press",
       fr: "Cuban Press",
@@ -1657,7 +1657,7 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "scaption_raise",
     labels: {
-      de: "Scaption Raise",
+      de: "Scaption-Heben",
       en: "Scaption Raise",
       es: "Scaption Raise",
       fr: "Scaption Raise",
@@ -1670,10 +1670,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "plate_raise",
     labels: {
-      de: "Plate Raise",
+      de: "Plattenheben",
       en: "Plate Raise",
-      es: "Plate Raise",
-      fr: "Plate Raise",
+      es: "Elevación de disco",
+      fr: "Élévation de disque",
     },
     icon: "??",
     type: "reps",
@@ -1683,10 +1683,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "y_raise",
     labels: {
-      de: "Y Raise",
+      de: "Y-Heben",
       en: "Y Raise",
-      es: "Y Raise",
-      fr: "Y Raise",
+      es: "Elevación en Y",
+      fr: "Élévation en Y",
     },
     icon: "??",
     type: "reps",
@@ -1696,10 +1696,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "barbell_curl",
     labels: {
-      de: "Barbell Curl",
+      de: "Langhantel-Curl",
       en: "Barbell Curl",
-      es: "Barbell Curl",
-      fr: "Barbell Curl",
+      es: "Curl con barra",
+      fr: "Curl à la barre",
     },
     icon: "?",
     type: "reps",
@@ -1709,10 +1709,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_curl",
     labels: {
-      de: "Dumbbell Curl",
+      de: "Kurzhantel-Curl",
       en: "Dumbbell Curl",
-      es: "Dumbbell Curl",
-      fr: "Dumbbell Curl",
+      es: "Curl con mancuernas",
+      fr: "Curl avec haltères",
     },
     icon: "??",
     type: "reps",
@@ -1722,10 +1722,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "hammer_curl",
     labels: {
-      de: "Hammer Curl",
+      de: "Hammer-Curl",
       en: "Hammer Curl",
-      es: "Hammer Curl",
-      fr: "Hammer Curl",
+      es: "Curl tipo martillo",
+      fr: "Curl marteau",
     },
     icon: "???",
     type: "reps",
@@ -1735,10 +1735,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "incline_dumbbell_curl",
     labels: {
-      de: "Incline Dumbbell Curl",
+      de: "Schrägbank-Kurzhantel-Curl",
       en: "Incline Dumbbell Curl",
-      es: "Incline Dumbbell Curl",
-      fr: "Incline Dumbbell Curl",
+      es: "Curl inclinado con mancuernas",
+      fr: "Curl incliné avec haltères",
     },
     icon: "???",
     type: "reps",
@@ -1748,10 +1748,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "concentration_curl",
     labels: {
-      de: "Concentration Curl",
+      de: "Konzentrationscurl",
       en: "Concentration Curl",
-      es: "Concentration Curl",
-      fr: "Concentration Curl",
+      es: "Curl de concentración",
+      fr: "Curl de concentration",
     },
     icon: "??",
     type: "reps",
@@ -1761,10 +1761,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "preacher_curl",
     labels: {
-      de: "Preacher Curl",
+      de: "Scott-Curl",
       en: "Preacher Curl",
-      es: "Preacher Curl",
-      fr: "Preacher Curl",
+      es: "Curl en banco Scott",
+      fr: "Curl sur banc Scott",
     },
     icon: "??",
     type: "reps",
@@ -1774,10 +1774,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "cable_curl",
     labels: {
-      de: "Cable Curl",
+      de: "Kabelcurl",
       en: "Cable Curl",
-      es: "Cable Curl",
-      fr: "Cable Curl",
+      es: "Curl en polea",
+      fr: "Curl à la poulie",
     },
     icon: "??",
     type: "reps",
@@ -1787,10 +1787,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "ez_bar_curl",
     labels: {
-      de: "EZ-Bar Curl",
+      de: "EZ-Stangen-Curl",
       en: "EZ-Bar Curl",
-      es: "EZ-Bar Curl",
-      fr: "EZ-Bar Curl",
+      es: "Curl con barra EZ",
+      fr: "Curl à la barre EZ",
     },
     icon: "??",
     type: "reps",
@@ -1800,10 +1800,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "reverse_curl",
     labels: {
-      de: "Reverse Curl",
+      de: "Untergriff-Curl",
       en: "Reverse Curl",
-      es: "Reverse Curl",
-      fr: "Reverse Curl",
+      es: "Curl invertido",
+      fr: "Curl inversé",
     },
     icon: "??",
     type: "reps",
@@ -1813,10 +1813,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "zottman_curl",
     labels: {
-      de: "Zottman Curl",
+      de: "Zottman-Curl",
       en: "Zottman Curl",
-      es: "Zottman Curl",
-      fr: "Zottman Curl",
+      es: "Curl Zottman",
+      fr: "Curl Zottman",
     },
     icon: "??",
     type: "reps",
@@ -1826,10 +1826,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "cable_rope_hammer_curl",
     labels: {
-      de: "Cable Rope Hammer Curl",
+      de: "Kabelseil-Hammer-Curl",
       en: "Cable Rope Hammer Curl",
-      es: "Cable Rope Hammer Curl",
-      fr: "Cable Rope Hammer Curl",
+      es: "Hammer Curl en polea con cuerda",
+      fr: "Curl marteau à la poulie avec corde",
     },
     icon: "??",
     type: "time",
@@ -1839,10 +1839,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "tricep_pushdown",
     labels: {
-      de: "Tricep Pushdown",
+      de: "Trizepsdrücken am Kabel",
       en: "Tricep Pushdown",
-      es: "Tricep Pushdown",
-      fr: "Tricep Pushdown",
+      es: "Extensión de tríceps en polea",
+      fr: "Extension des triceps à la poulie",
     },
     icon: "??",
     type: "reps",
@@ -1852,10 +1852,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "overhead_tricep_extension",
     labels: {
-      de: "Overhead Tricep Extension",
+      de: "Trizepsdrücken über Kopf",
       en: "Overhead Tricep Extension",
-      es: "Overhead Tricep Extension",
-      fr: "Overhead Tricep Extension",
+      es: "Extensión de tríceps por encima de la cabeza",
+      fr: "Extension des triceps au-dessus de la tête",
     },
     icon: "?",
     type: "reps",
@@ -1865,10 +1865,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "skull_crushers",
     labels: {
-      de: "Skull Crushers",
+      de: "Skull Crushers (liegend)",
       en: "Skull Crushers",
-      es: "Skull Crushers",
-      fr: "Skull Crushers",
+      es: "Skull Crushers (tumbado)",
+      fr: "Skull Crushers (allongé)",
     },
     icon: "??",
     type: "reps",
@@ -1878,10 +1878,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "rope_tricep_pushdown",
     labels: {
-      de: "Rope Tricep Pushdown",
+      de: "Trizepsdrücken mit Seil",
       en: "Rope Tricep Pushdown",
-      es: "Rope Tricep Pushdown",
-      fr: "Rope Tricep Pushdown",
+      es: "Extensión de tríceps con cuerda",
+      fr: "Extension des triceps à la corde",
     },
     icon: "???",
     type: "time",
@@ -1891,10 +1891,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "v_bar_pushdown",
     labels: {
-      de: "V-Bar Pushdown",
+      de: "Trizepsdrücken mit V-Stange",
       en: "V-Bar Pushdown",
-      es: "V-Bar Pushdown",
-      fr: "V-Bar Pushdown",
+      es: "Extensión de tríceps con barra en V",
+      fr: "Extension des triceps avec barre en V",
     },
     icon: "???",
     type: "reps",
@@ -1904,10 +1904,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dips_tricep_focus",
     labels: {
-      de: "Dips (Tricep Focus)",
+      de: "Dips mit Trizeps-Fokus",
       en: "Dips (Tricep Focus)",
-      es: "Dips (Tricep Focus)",
-      fr: "Dips (Tricep Focus)",
+      es: "Fondos enfocados en tríceps",
+      fr: "Dips ciblant les triceps",
     },
     icon: "??",
     type: "reps",
@@ -1917,10 +1917,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "tricep_kickbacks",
     labels: {
-      de: "Tricep Kickbacks",
+      de: "Trizeps-Kickbacks",
       en: "Tricep Kickbacks",
-      es: "Tricep Kickbacks",
-      fr: "Tricep Kickbacks",
+      es: "Patada de tríceps",
+      fr: "Kickbacks triceps",
     },
     icon: "??",
     type: "reps",
@@ -1930,10 +1930,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_tricep_kickback",
     labels: {
-      de: "Dumbbell Tricep Kickback",
+      de: "Kurzhantel-Trizeps-Kickback",
       en: "Dumbbell Tricep Kickback",
-      es: "Dumbbell Tricep Kickback",
-      fr: "Dumbbell Tricep Kickback",
+      es: "Patada de tríceps con mancuernas",
+      fr: "Kickback triceps avec haltère",
     },
     icon: "??",
     type: "reps",
@@ -1943,10 +1943,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "bicep_21s",
     labels: {
-      de: "Bicep 21s",
+      de: "Bizeps 21er",
       en: "Bicep 21s",
-      es: "Bicep 21s",
-      fr: "Bicep 21s",
+      es: "Bíceps 21s",
+      fr: "Biceps 21s",
     },
     icon: "??",
     type: "reps",
@@ -1956,10 +1956,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "cable_rope_tricep_extension",
     labels: {
-      de: "Cable Rope Tricep Extension",
+      de: "Trizepsverlängerung am Kabel mit Seil",
       en: "Cable Rope Tricep Extension",
-      es: "Cable Rope Tricep Extension",
-      fr: "Cable Rope Tricep Extension",
+      es: "Extensión de tríceps en polea con cuerda",
+      fr: "Extension des triceps à la poulie avec corde",
     },
     icon: "??",
     type: "time",
@@ -1969,10 +1969,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "lateral_band_walk",
     labels: {
-      de: "Lateral Band Walk",
+      de: "Seitliche Bandgänge",
       en: "Lateral Band Walk",
-      es: "Lateral Band Walk",
-      fr: "Lateral Band Walk",
+      es: "Caminata lateral con banda",
+      fr: "Marche latérale avec bande",
     },
     icon: "??",
     type: "reps",
@@ -1982,10 +1982,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "glute_kickbacks",
     labels: {
-      de: "Glute Kickbacks",
+      de: "Gluteus-Kickbacks",
       en: "Glute Kickbacks",
-      es: "Glute Kickbacks",
-      fr: "Glute Kickbacks",
+      es: "Patadas de glúteo",
+      fr: "Kickbacks fessiers",
     },
     icon: "??",
     type: "reps",
@@ -1995,10 +1995,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "clamshells",
     labels: {
-      de: "Clamshells",
+      de: "Muschelübung",
       en: "Clamshells",
-      es: "Clamshells",
-      fr: "Clamshells",
+      es: "Ejercicio de almeja",
+      fr: "Coquillage",
     },
     icon: "??",
     type: "reps",
@@ -2008,10 +2008,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "side_lying_hip_abductions",
     labels: {
-      de: "Side-Lying Hip Abductions",
+      de: "Seitliche Hüftabduktion im Liegen",
       en: "Side-Lying Hip Abductions",
-      es: "Side-Lying Hip Abductions",
-      fr: "Side-Lying Hip Abductions",
+      es: "Abducciones de cadera laterales en decúbito",
+      fr: "Abductions de hanche latérales allongées",
     },
     icon: "?",
     type: "reps",
@@ -2021,10 +2021,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "fire_hydrant",
     labels: {
-      de: "Fire Hydrant",
+      de: "Feuerhydrant-Übung",
       en: "Fire Hydrant",
-      es: "Fire Hydrant",
-      fr: "Fire Hydrant",
+      es: "Elevación de cadera fire hydrant",
+      fr: "Abduction de hanche quadrupède (fire hydrant)",
     },
     icon: "??",
     type: "reps",
@@ -2034,10 +2034,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "hip_abductions_machine",
     labels: {
-      de: "Hip Abductions Machine",
+      de: "Abduktionsmaschine",
       en: "Hip Abductions Machine",
-      es: "Hip Abductions Machine",
-      fr: "Hip Abductions Machine",
+      es: "Máquina de abducción de cadera",
+      fr: "Machine d'abduction de hanche",
     },
     icon: "???",
     type: "reps",
@@ -2047,10 +2047,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "hip_adductions_machine",
     labels: {
-      de: "Hip Adductions Machine",
+      de: "Adduktionsmaschine",
       en: "Hip Adductions Machine",
-      es: "Hip Adductions Machine",
-      fr: "Hip Adductions Machine",
+      es: "Máquina de aducción de cadera",
+      fr: "Machine d'adduction de hanche",
     },
     icon: "???",
     type: "reps",
@@ -2060,10 +2060,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "cable_abduction",
     labels: {
-      de: "Cable Abduction",
+      de: "Kabelabduktion",
       en: "Cable Abduction",
-      es: "Cable Abduction",
-      fr: "Cable Abduction",
+      es: "Abducción en polea",
+      fr: "Abduction à la poulie",
     },
     icon: "??",
     type: "reps",
@@ -2073,10 +2073,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "cable_adduction",
     labels: {
-      de: "Cable Adduction",
+      de: "Kabeladduktion",
       en: "Cable Adduction",
-      es: "Cable Adduction",
-      fr: "Cable Adduction",
+      es: "Aducción en polea",
+      fr: "Adduction à la poulie",
     },
     icon: "??",
     type: "reps",
@@ -2086,10 +2086,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "reverse_hypers",
     labels: {
-      de: "Reverse Hypers",
+      de: "Reverse Hypers (Rückenstrecker)",
       en: "Reverse Hypers",
-      es: "Reverse Hypers",
-      fr: "Reverse Hypers",
+      es: "Reverse Hypers (hiperextensiones reversas)",
+      fr: "Reverse Hypers (hyperextensions inversées)",
     },
     icon: "??",
     type: "reps",
@@ -2099,10 +2099,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "abductor_walk",
     labels: {
-      de: "Abductor Walk",
+      de: "Abduktor-Gang",
       en: "Abductor Walk",
-      es: "Abductor Walk",
-      fr: "Abductor Walk",
+      es: "Caminata de abductores",
+      fr: "Marche des abducteurs",
     },
     icon: "??",
     type: "reps",
@@ -2112,10 +2112,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "glute_bridge_march",
     labels: {
-      de: "Glute Bridge March",
+      de: "Hüftbrücke im Marsch",
       en: "Glute Bridge March",
-      es: "Glute Bridge March",
-      fr: "Glute Bridge March",
+      es: "Marcha de puente de glúteos",
+      fr: "Pont fessier marche",
     },
     icon: "??",
     type: "reps",
@@ -2125,10 +2125,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "single_leg_glute_bridge",
     labels: {
-      de: "Single-Leg Glute Bridge",
+      de: "Einbeinige Hüftbrücke",
       en: "Single-Leg Glute Bridge",
-      es: "Single-Leg Glute Bridge",
-      fr: "Single-Leg Glute Bridge",
+      es: "Puente de glúteos a una pierna",
+      fr: "Pont fessier sur une jambe",
     },
     icon: "??",
     type: "reps",
@@ -2138,10 +2138,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "weighted_step_downs",
     labels: {
-      de: "Weighted Step-downs",
+      de: "Gewichtete Step-downs",
       en: "Weighted Step-downs",
-      es: "Weighted Step-downs",
-      fr: "Weighted Step-downs",
+      es: "Descensos con peso",
+      fr: "Step-downs avec poids",
     },
     icon: "??",
     type: "reps",
@@ -2151,10 +2151,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "plank",
     labels: {
-      de: "Plank",
+      de: "Planke",
       en: "Plank",
-      es: "Plank",
-      fr: "Plank",
+      es: "Plancha",
+      fr: "Planche",
     },
     icon: "??",
     type: "time",
@@ -2164,10 +2164,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "side_plank",
     labels: {
-      de: "Side Plank",
+      de: "Seitstütz",
       en: "Side Plank",
-      es: "Side Plank",
-      fr: "Side Plank",
+      es: "Plancha lateral",
+      fr: "Planche latérale",
     },
     icon: "?",
     type: "time",
@@ -2177,10 +2177,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "reverse_plank",
     labels: {
-      de: "Reverse Plank",
+      de: "Umgekehrte Planke",
       en: "Reverse Plank",
-      es: "Reverse Plank",
-      fr: "Reverse Plank",
+      es: "Plancha inversa",
+      fr: "Planche inversée",
     },
     icon: "??",
     type: "time",
@@ -2190,10 +2190,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "plank_shoulder_tap",
     labels: {
-      de: "Plank Shoulder Tap",
+      de: "Planke mit Schulterklopfen",
       en: "Plank Shoulder Tap",
-      es: "Plank Shoulder Tap",
-      fr: "Plank Shoulder Tap",
+      es: "Plancha con toques de hombros",
+      fr: "Planche avec tapotements d'épaules",
     },
     icon: "???",
     type: "time",
@@ -2203,10 +2203,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "hollow_hold",
     labels: {
-      de: "Hollow Hold",
+      de: "Hohlkörperhaltung",
       en: "Hollow Hold",
-      es: "Hollow Hold",
-      fr: "Hollow Hold",
+      es: "Sostén hueco",
+      fr: "Position creuse",
     },
     icon: "???",
     type: "reps",
@@ -2216,10 +2216,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "boat_pose",
     labels: {
-      de: "Boat Pose",
+      de: "Bootshaltung",
       en: "Boat Pose",
-      es: "Boat Pose",
-      fr: "Boat Pose",
+      es: "Postura del barco",
+      fr: "Posture du bateau",
     },
     icon: "??",
     type: "reps",
@@ -2229,10 +2229,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dead_bug",
     labels: {
-      de: "Dead Bug",
+      de: "Dead-Bug-Übung",
       en: "Dead Bug",
-      es: "Dead Bug",
-      fr: "Dead Bug",
+      es: "Ejercicio Dead Bug",
+      fr: "Exercice Dead Bug",
     },
     icon: "??",
     type: "reps",
@@ -2242,10 +2242,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "bird_dog",
     labels: {
-      de: "Bird Dog",
+      de: "Vogel-Hund-Übung",
       en: "Bird Dog",
-      es: "Bird Dog",
-      fr: "Bird Dog",
+      es: "Ejercicio Bird Dog",
+      fr: "Exercice Bird Dog",
     },
     icon: "??",
     type: "reps",
@@ -2255,10 +2255,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "russian_twist",
     labels: {
-      de: "Russian Twist",
+      de: "Russischer Twist",
       en: "Russian Twist",
-      es: "Russian Twist",
-      fr: "Russian Twist",
+      es: "Giro ruso",
+      fr: "Rotation russe",
     },
     icon: "??",
     type: "reps",
@@ -2268,10 +2268,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "bicycle_crunch",
     labels: {
-      de: "Bicycle Crunch",
+      de: "Fahrrad-Crunch",
       en: "Bicycle Crunch",
-      es: "Bicycle Crunch",
-      fr: "Bicycle Crunch",
+      es: "Crunch con bicicleta",
+      fr: "Crunch vélo",
     },
     icon: "??",
     type: "time",
@@ -2281,10 +2281,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "reverse_crunch",
     labels: {
-      de: "Reverse Crunch",
+      de: "Reverse-Crunch",
       en: "Reverse Crunch",
-      es: "Reverse Crunch",
-      fr: "Reverse Crunch",
+      es: "Crunch invertido",
+      fr: "Crunch inversé",
     },
     icon: "??",
     type: "time",
@@ -2294,10 +2294,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "hanging_leg_raise",
     labels: {
-      de: "Hanging Leg Raise",
+      de: "Hängendes Beinheben",
       en: "Hanging Leg Raise",
-      es: "Hanging Leg Raise",
-      fr: "Hanging Leg Raise",
+      es: "Elevaciones de piernas colgado",
+      fr: "Relevés de jambes suspendu",
     },
     icon: "??",
     type: "reps",
@@ -2307,10 +2307,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "toes_to_bar",
     labels: {
-      de: "Toes to Bar",
+      de: "Zehen zur Stange",
       en: "Toes to Bar",
-      es: "Toes to Bar",
-      fr: "Toes to Bar",
+      es: "Dedos a la barra",
+      fr: "Orteils à la barre",
     },
     icon: "??",
     type: "reps",
@@ -2320,10 +2320,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "ab_wheel_rollout",
     labels: {
-      de: "Ab Wheel Rollout",
+      de: "Ab-Wheel-Rollout",
       en: "Ab Wheel Rollout",
-      es: "Ab Wheel Rollout",
-      fr: "Ab Wheel Rollout",
+      es: "Rodillo abdominal",
+      fr: "Rollout avec roue abdo",
     },
     icon: "?",
     type: "reps",
@@ -2333,10 +2333,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "cable_woodchopper",
     labels: {
-      de: "Cable Woodchopper",
+      de: "Kabel-Holzhacker",
       en: "Cable Woodchopper",
-      es: "Cable Woodchopper",
-      fr: "Cable Woodchopper",
+      es: "Cortadora de madera en polea",
+      fr: "Woodchopper à la poulie",
     },
     icon: "??",
     type: "reps",
@@ -2346,10 +2346,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "cable_pallof_press",
     labels: {
-      de: "Cable Pallof Press",
+      de: "Pallof-Press am Kabel",
       en: "Cable Pallof Press",
-      es: "Cable Pallof Press",
-      fr: "Cable Pallof Press",
+      es: "Press Pallof en polea",
+      fr: "Pallof press à la poulie",
     },
     icon: "???",
     type: "reps",
@@ -2359,10 +2359,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "medicine_ball_slam",
     labels: {
-      de: "Medicine Ball Slam",
+      de: "Medizinball-Slam",
       en: "Medicine Ball Slam",
-      es: "Medicine Ball Slam",
-      fr: "Medicine Ball Slam",
+      es: "Lanzamiento de balón medicinal",
+      fr: "Slams au ballon médical",
     },
     icon: "???",
     type: "reps",
@@ -2372,10 +2372,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "medicine_ball_woodchopper",
     labels: {
-      de: "Medicine Ball Woodchopper",
+      de: "Medizinball-Holzhacker",
       en: "Medicine Ball Woodchopper",
-      es: "Medicine Ball Woodchopper",
-      fr: "Medicine Ball Woodchopper",
+      es: "Woodchopper con balón medicinal",
+      fr: "Woodchopper au ballon médical",
     },
     icon: "??",
     type: "reps",
@@ -2385,10 +2385,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "medicine_ball_rotational_throw",
     labels: {
-      de: "Medicine Ball Rotational Throw",
+      de: "Rotationswurf mit Medizinball",
       en: "Medicine Ball Rotational Throw",
-      es: "Medicine Ball Rotational Throw",
-      fr: "Medicine Ball Rotational Throw",
+      es: "Lanzamiento rotacional con balón medicinal",
+      fr: "Lancer rotatif au ballon médical",
     },
     icon: "??",
     type: "time",
@@ -2398,10 +2398,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "mountain_climbers",
     labels: {
-      de: "Mountain Climbers",
+      de: "Bergsteiger",
       en: "Mountain Climbers",
-      es: "Mountain Climbers",
-      fr: "Mountain Climbers",
+      es: "Escaladores",
+      fr: "Mountain climbers",
     },
     icon: "??",
     type: "time",
@@ -2411,10 +2411,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "flutter_kicks",
     labels: {
-      de: "Flutter Kicks",
+      de: "Schnelle Bein-Kicks",
       en: "Flutter Kicks",
-      es: "Flutter Kicks",
-      fr: "Flutter Kicks",
+      es: "Patadas rápidas (Flutter Kicks)",
+      fr: "Battements rapides (Flutter Kicks)",
     },
     icon: "??",
     type: "reps",
@@ -2424,10 +2424,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "windshield_wipers",
     labels: {
-      de: "Windshield Wipers",
+      de: "Scheibenwischer",
       en: "Windshield Wipers",
-      es: "Windshield Wipers",
-      fr: "Windshield Wipers",
+      es: "Limpiaparabrisas",
+      fr: "Essuie-glaces",
     },
     icon: "??",
     type: "reps",
@@ -2437,10 +2437,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "l_sit",
     labels: {
-      de: "L-Sit",
+      de: "L-Sitz",
       en: "L-Sit",
       es: "L-Sit",
-      fr: "L-Sit",
+      fr: "Position en L",
     },
     icon: "??",
     type: "reps",
@@ -2450,10 +2450,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "v_sit",
     labels: {
-      de: "V-Sit",
+      de: "V-Sitz",
       en: "V-Sit",
       es: "V-Sit",
-      fr: "V-Sit",
+      fr: "Position en V",
     },
     icon: "??",
     type: "reps",
@@ -2463,10 +2463,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dragon_flag",
     labels: {
-      de: "Dragon Flag",
+      de: "Dragon Flag (Drachenflagge)",
       en: "Dragon Flag",
-      es: "Dragon Flag",
-      fr: "Dragon Flag",
+      es: "Bandera del dragón",
+      fr: "Drapeau du dragon",
     },
     icon: "??",
     type: "reps",
@@ -2476,10 +2476,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "kneeling_ab_wheel",
     labels: {
-      de: "Kneeling Ab Wheel",
+      de: "Ab-Roller (knieend)",
       en: "Kneeling Ab Wheel",
-      es: "Kneeling Ab Wheel",
-      fr: "Kneeling Ab Wheel",
+      es: "Rodillo abdominal de rodillas",
+      fr: "Roulette abdominale à genoux",
     },
     icon: "?",
     type: "reps",
@@ -2489,10 +2489,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "captain_s_chair_knee_raise",
     labels: {
-      de: "Captain's Chair Knee Raise",
+      de: "Knieheben am Captain's Chair",
       en: "Captain's Chair Knee Raise",
-      es: "Captain's Chair Knee Raise",
-      fr: "Captain's Chair Knee Raise",
+      es: "Elevación de rodillas en Captain's Chair",
+      fr: "Relevé de genoux sur Captain's Chair",
     },
     icon: "??",
     type: "reps",
@@ -2502,10 +2502,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "standing_cable_crunch",
     labels: {
-      de: "Standing Cable Crunch",
+      de: "Stehender Kabel-Crunch",
       en: "Standing Cable Crunch",
-      es: "Standing Cable Crunch",
-      fr: "Standing Cable Crunch",
+      es: "Crunch de pie en polea",
+      fr: "Crunch debout à la poulie",
     },
     icon: "???",
     type: "time",
@@ -2515,10 +2515,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "stability_ball_crunch",
     labels: {
-      de: "Stability Ball Crunch",
+      de: "Crunch auf dem Gymnastikball",
       en: "Stability Ball Crunch",
-      es: "Stability Ball Crunch",
-      fr: "Stability Ball Crunch",
+      es: "Crunch con balón suizo",
+      fr: "Crunch sur ballon de stabilité",
     },
     icon: "???",
     type: "time",
@@ -2528,10 +2528,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "stability_ball_rollout",
     labels: {
-      de: "Stability Ball Rollout",
+      de: "Rollout mit Gymnastikball",
       en: "Stability Ball Rollout",
-      es: "Stability Ball Rollout",
-      fr: "Stability Ball Rollout",
+      es: "Rodillo con balón suizo",
+      fr: "Rollout avec ballon de stabilité",
     },
     icon: "??",
     type: "reps",
@@ -2541,10 +2541,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "stability_ball_jackknife",
     labels: {
-      de: "Stability Ball Jackknife",
+      de: "Jackknife auf dem Gymnastikball",
       en: "Stability Ball Jackknife",
-      es: "Stability Ball Jackknife",
-      fr: "Stability Ball Jackknife",
+      es: "Jackknife con balón suizo",
+      fr: "Jackknife sur ballon de stabilité",
     },
     icon: "??",
     type: "reps",
@@ -2554,10 +2554,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "turkish_get_up_bodyweight",
     labels: {
-      de: "Turkish Get-Up (bodyweight)",
+      de: "Turkish Get-Up (Eigengewicht)",
       en: "Turkish Get-Up (bodyweight)",
-      es: "Turkish Get-Up (bodyweight)",
-      fr: "Turkish Get-Up (bodyweight)",
+      es: "Turkish Get-Up con peso corporal",
+      fr: "Turkish Get-Up au poids du corps",
     },
     icon: "??",
     type: "reps",
@@ -2567,10 +2567,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "turkish_get_up_kettlebell",
     labels: {
-      de: "Turkish Get-Up (kettlebell)",
+      de: "Turkish Get-Up mit Kettlebell",
       en: "Turkish Get-Up (kettlebell)",
-      es: "Turkish Get-Up (kettlebell)",
-      fr: "Turkish Get-Up (kettlebell)",
+      es: "Turkish Get-Up con kettlebell",
+      fr: "Turkish Get-Up avec kettlebell",
     },
     icon: "??",
     type: "reps",
@@ -2580,10 +2580,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "single_arm_overhead_carry",
     labels: {
-      de: "Single-Arm Overhead Carry",
+      de: "Einarmiges Overhead-Carry",
       en: "Single-Arm Overhead Carry",
-      es: "Single-Arm Overhead Carry",
-      fr: "Single-Arm Overhead Carry",
+      es: "Carga aérea con un brazo",
+      fr: "Transport avec un bras au-dessus de la tête",
     },
     icon: "??",
     type: "time",
@@ -2593,10 +2593,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "farmer_carry_dumbbell",
     labels: {
-      de: "Farmer Carry (dumbbell)",
+      de: "Farmers Walk mit Kurzhanteln",
       en: "Farmer Carry (dumbbell)",
-      es: "Farmer Carry (dumbbell)",
-      fr: "Farmer Carry (dumbbell)",
+      es: "Farmer Carry con mancuernas",
+      fr: "Farmer Carry avec haltères",
     },
     icon: "??",
     type: "time",
@@ -2606,10 +2606,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "suitcase_carry",
     labels: {
-      de: "Suitcase Carry",
+      de: "Koffertrage",
       en: "Suitcase Carry",
-      es: "Suitcase Carry",
-      fr: "Suitcase Carry",
+      es: "Caminata con maleta",
+      fr: "Transport type valise",
     },
     icon: "??",
     type: "time",
@@ -2619,10 +2619,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "waiter_s_carry",
     labels: {
-      de: "Waiter's Carry",
+      de: "Kellnertrage",
       en: "Waiter's Carry",
-      es: "Waiter's Carry",
-      fr: "Waiter's Carry",
+      es: "Transporte estilo camarero",
+      fr: "Transport façon serveur",
     },
     icon: "??",
     type: "time",
@@ -2632,10 +2632,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "yoke_carry",
     labels: {
-      de: "Yoke Carry",
+      de: "Jochtrage",
       en: "Yoke Carry",
-      es: "Yoke Carry",
-      fr: "Yoke Carry",
+      es: "Carga con yugo",
+      fr: "Transport avec joug",
     },
     icon: "?",
     type: "time",
@@ -2645,10 +2645,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "sled_push",
     labels: {
-      de: "Sled Push",
+      de: "Schlitten schieben",
       en: "Sled Push",
-      es: "Sled Push",
-      fr: "Sled Push",
+      es: "Empuje de trineo",
+      fr: "Poussée de traîneau",
     },
     icon: "??",
     type: "reps",
@@ -2658,10 +2658,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "sled_pull",
     labels: {
-      de: "Sled Pull",
+      de: "Schlitten ziehen",
       en: "Sled Pull",
-      es: "Sled Pull",
-      fr: "Sled Pull",
+      es: "Tirón de trineo",
+      fr: "Tirage de traîneau",
     },
     icon: "???",
     type: "reps",
@@ -2671,10 +2671,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "sprint_intervals",
     labels: {
-      de: "Sprint Intervals",
+      de: "Sprintintervalle",
       en: "Sprint Intervals",
-      es: "Sprint Intervals",
-      fr: "Sprint Intervals",
+      es: "Intervalos de sprint",
+      fr: "Intervalles de sprint",
     },
     icon: "???",
     type: "time",
@@ -2684,10 +2684,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "hill_sprints",
     labels: {
-      de: "Hill Sprints",
+      de: "Hügel-Sprints",
       en: "Hill Sprints",
-      es: "Hill Sprints",
-      fr: "Hill Sprints",
+      es: "Sprints en cuestas",
+      fr: "Sprints en côte",
     },
     icon: "??",
     type: "time",
@@ -2697,10 +2697,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "treadmill_run",
     labels: {
-      de: "Treadmill Run",
+      de: "Laufbandlauf",
       en: "Treadmill Run",
-      es: "Treadmill Run",
-      fr: "Treadmill Run",
+      es: "Carrera en cinta",
+      fr: "Course sur tapis roulant",
     },
     icon: "??",
     type: "time",
@@ -2710,10 +2710,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "outdoor_run",
     labels: {
-      de: "Outdoor Run",
+      de: "Lauf im Freien",
       en: "Outdoor Run",
-      es: "Outdoor Run",
-      fr: "Outdoor Run",
+      es: "Carrera al aire libre",
+      fr: "Course extérieure",
     },
     icon: "??",
     type: "time",
@@ -2723,10 +2723,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "cycling_stationary",
     labels: {
-      de: "Cycling (stationary)",
+      de: "Radfahren (Ergometer)",
       en: "Cycling (stationary)",
-      es: "Cycling (stationary)",
-      fr: "Cycling (stationary)",
+      es: "Ciclismo (ergómetro)",
+      fr: "Cyclisme (vélo d'appartement)",
     },
     icon: "??",
     type: "time",
@@ -2736,10 +2736,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "cycling_outdoor",
     labels: {
-      de: "Cycling (outdoor)",
+      de: "Radfahren draußen",
       en: "Cycling (outdoor)",
-      es: "Cycling (outdoor)",
-      fr: "Cycling (outdoor)",
+      es: "Ciclismo al aire libre",
+      fr: "Cyclisme extérieur",
     },
     icon: "??",
     type: "time",
@@ -2749,10 +2749,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "rowing_machine",
     labels: {
-      de: "Rowing Machine",
+      de: "Rudergerät",
       en: "Rowing Machine",
-      es: "Rowing Machine",
-      fr: "Rowing Machine",
+      es: "Remo en máquina",
+      fr: "Rameur",
     },
     icon: "??",
     type: "time",
@@ -2762,10 +2762,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "assault_bike",
     labels: {
-      de: "Assault Bike",
+      de: "Airbike",
       en: "Assault Bike",
-      es: "Assault Bike",
-      fr: "Assault Bike",
+      es: "Bicicleta de asalto",
+      fr: "Vélo Assault",
     },
     icon: "??",
     type: "time",
@@ -2775,10 +2775,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "stair_climber",
     labels: {
-      de: "Stair Climber",
+      de: "Stepper",
       en: "Stair Climber",
-      es: "Stair Climber",
-      fr: "Stair Climber",
+      es: "Escaladora",
+      fr: "Escalier mécanique",
     },
     icon: "??",
     type: "time",
@@ -2788,10 +2788,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "jump_rope",
     labels: {
-      de: "Jump Rope",
+      de: "Seilspringen",
       en: "Jump Rope",
-      es: "Jump Rope",
-      fr: "Jump Rope",
+      es: "Saltar la cuerda",
+      fr: "Saut à la corde",
     },
     icon: "?",
     type: "time",
@@ -2801,10 +2801,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "battle_ropes",
     labels: {
-      de: "Battle Ropes",
+      de: "Kampfspeil",
       en: "Battle Ropes",
-      es: "Battle Ropes",
-      fr: "Battle Ropes",
+      es: "Cuerdas de batalla",
+      fr: "Cordes ondulatoires",
     },
     icon: "??",
     type: "time",
@@ -2814,10 +2814,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "jumping_jacks",
     labels: {
-      de: "Jumping Jacks",
+      de: "Hampelmann",
       en: "Jumping Jacks",
-      es: "Jumping Jacks",
-      fr: "Jumping Jacks",
+      es: "Saltos de tijera",
+      fr: "Sauts écartés",
     },
     icon: "???",
     type: "time",
@@ -2827,10 +2827,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "high_knees",
     labels: {
-      de: "High Knees",
+      de: "Kniehebeläufe",
       en: "High Knees",
-      es: "High Knees",
-      fr: "High Knees",
+      es: "Rodillas altas",
+      fr: "Montées de genoux",
     },
     icon: "???",
     type: "time",
@@ -2840,10 +2840,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "butt_kicks",
     labels: {
-      de: "Butt Kicks",
+      de: "Fersenläufe",
       en: "Butt Kicks",
-      es: "Butt Kicks",
-      fr: "Butt Kicks",
+      es: "Patadas al glúteo",
+      fr: "Talons-fesses",
     },
     icon: "??",
     type: "time",
@@ -2853,10 +2853,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "skipping_drills",
     labels: {
-      de: "Skipping Drills",
+      de: "Seilspring-Drills",
       en: "Skipping Drills",
-      es: "Skipping Drills",
-      fr: "Skipping Drills",
+      es: "Ejercicios de salto con cuerda",
+      fr: "Exercices de corde à sauter",
     },
     icon: "??",
     type: "time",
@@ -2866,10 +2866,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "agility_ladder_drills",
     labels: {
-      de: "Agility Ladder Drills",
+      de: "Koordinationsleiter-Drills",
       en: "Agility Ladder Drills",
-      es: "Agility Ladder Drills",
-      fr: "Agility Ladder Drills",
+      es: "Ejercicios de escalera de agilidad",
+      fr: "Exercices d'échelle d'agilité",
     },
     icon: "??",
     type: "time",
@@ -2879,10 +2879,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "broad_jump",
     labels: {
-      de: "Broad Jump",
+      de: "Weitsprung",
       en: "Broad Jump",
-      es: "Broad Jump",
-      fr: "Broad Jump",
+      es: "Salto de longitud",
+      fr: "Saut en longueur",
     },
     icon: "??",
     type: "time",
@@ -2892,10 +2892,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "box_jump",
     labels: {
-      de: "Box Jump",
+      de: "Boxjump",
       en: "Box Jump",
-      es: "Box Jump",
-      fr: "Box Jump",
+      es: "Salto al cajón",
+      fr: "Saut sur box",
     },
     icon: "??",
     type: "time",
@@ -2905,10 +2905,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "depth_jump",
     labels: {
-      de: "Depth Jump",
+      de: "Tiefsprung",
       en: "Depth Jump",
-      es: "Depth Jump",
-      fr: "Depth Jump",
+      es: "Salto de profundidad",
+      fr: "Saut de profondeur",
     },
     icon: "??",
     type: "time",
@@ -2918,10 +2918,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "weighted_jump_squats",
     labels: {
-      de: "Weighted Jump Squats",
+      de: "Gewichtete Sprungkniebeugen",
       en: "Weighted Jump Squats",
-      es: "Weighted Jump Squats",
-      fr: "Weighted Jump Squats",
+      es: "Sentadillas con salto con peso",
+      fr: "Squats sautés lestés",
     },
     icon: "??",
     type: "time",
@@ -2931,10 +2931,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "burpees",
     labels: {
-      de: "Burpees",
+      de: "Burpees (Ganzkörper)",
       en: "Burpees",
-      es: "Burpees",
-      fr: "Burpees",
+      es: "Burpees (cuerpo completo)",
+      fr: "Burpees (corps entier)",
     },
     icon: "??",
     type: "time",
@@ -2944,10 +2944,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "bear_crawls",
     labels: {
-      de: "Bear Crawls",
+      de: "Bärenkrabbeln",
       en: "Bear Crawls",
-      es: "Bear Crawls",
-      fr: "Bear Crawls",
+      es: "Gateo del oso",
+      fr: "Rampement de l'ours",
     },
     icon: "?",
     type: "time",
@@ -2957,10 +2957,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "crab_walks",
     labels: {
-      de: "Crab Walks",
+      de: "Krabbelbewegungen",
       en: "Crab Walks",
-      es: "Crab Walks",
-      fr: "Crab Walks",
+      es: "Marcha del cangrejo",
+      fr: "Marche du crabe",
     },
     icon: "??",
     type: "reps",
@@ -2970,10 +2970,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "shuttle_runs",
     labels: {
-      de: "Shuttle Runs",
+      de: "Shuttle-Läufe",
       en: "Shuttle Runs",
-      es: "Shuttle Runs",
-      fr: "Shuttle Runs",
+      es: "Carreras de ida y vuelta",
+      fr: "Courtes navettes",
     },
     icon: "???",
     type: "time",
@@ -2983,10 +2983,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "cone_drills",
     labels: {
-      de: "Cone Drills",
+      de: "Kegel-Drills",
       en: "Cone Drills",
-      es: "Cone Drills",
-      fr: "Cone Drills",
+      es: "Ejercicios con conos",
+      fr: "Exercices de cônes",
     },
     icon: "???",
     type: "time",
@@ -2996,10 +2996,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "plyo_push_ups",
     labels: {
-      de: "Plyo Push-ups",
+      de: "Plyo-Liegestütze",
       en: "Plyo Push-ups",
-      es: "Plyo Push-ups",
-      fr: "Plyo Push-ups",
+      es: "Flexiones pliométricas",
+      fr: "Pompes pliométriques",
     },
     icon: "??",
     type: "reps",
@@ -3009,10 +3009,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "clap_pull_ups",
     labels: {
-      de: "Clap Pull-ups",
+      de: "Klatsch-Klimmzüge",
       en: "Clap Pull-ups",
-      es: "Clap Pull-ups",
-      fr: "Clap Pull-ups",
+      es: "Dominadas con palmada",
+      fr: "Tractions claquées",
     },
     icon: "??",
     type: "reps",
@@ -3022,7 +3022,7 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "muscle_ups",
     labels: {
-      de: "Muscle-ups",
+      de: "Muscle-Ups (Kombination)",
       en: "Muscle-ups",
       es: "Muscle-ups",
       fr: "Muscle-ups",
@@ -3035,10 +3035,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "ring_muscle_ups",
     labels: {
-      de: "Ring Muscle-ups",
+      de: "Ring-Muscle-Ups",
       en: "Ring Muscle-ups",
-      es: "Ring Muscle-ups",
-      fr: "Ring Muscle-ups",
+      es: "Muscle-ups en anillas",
+      fr: "Muscle-ups aux anneaux",
     },
     icon: "??",
     type: "reps",
@@ -3048,10 +3048,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "heaving_slams",
     labels: {
-      de: "Heaving Slams",
+      de: "Schwere Ballwürfe",
       en: "Heaving Slams",
-      es: "Heaving Slams",
-      fr: "Heaving Slams",
+      es: "Lanzamientos pesados",
+      fr: "Lancers lourds",
     },
     icon: "??",
     type: "reps",
@@ -3061,10 +3061,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "battle_rope_alternating_waves",
     labels: {
-      de: "Battle Rope Alternating Waves",
+      de: "Battle Rope (wechselnde Wellen)",
       en: "Battle Rope Alternating Waves",
-      es: "Battle Rope Alternating Waves",
-      fr: "Battle Rope Alternating Waves",
+      es: "Cuerdas de batalla ondulantes alternas",
+      fr: "Cordes ondulatoires alternées",
     },
     icon: "??",
     type: "time",
@@ -3074,10 +3074,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "speed_skaters",
     labels: {
-      de: "Speed Skaters",
+      de: "Speed-Skater-Sprünge",
       en: "Speed Skaters",
-      es: "Speed Skaters",
-      fr: "Speed Skaters",
+      es: "Patinadores rápidos",
+      fr: "Patineurs rapides",
     },
     icon: "??",
     type: "reps",
@@ -3087,10 +3087,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "jump_lunges",
     labels: {
-      de: "Jump Lunges",
+      de: "Sprung-Ausfallschritte",
       en: "Jump Lunges",
-      es: "Jump Lunges",
-      fr: "Jump Lunges",
+      es: "Zancadas con salto",
+      fr: "Fentes sautées",
     },
     icon: "??",
     type: "time",
@@ -3100,10 +3100,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "kettlebell_swing",
     labels: {
-      de: "Kettlebell Swing",
+      de: "Kettlebell-Schwung",
       en: "Kettlebell Swing",
-      es: "Kettlebell Swing",
-      fr: "Kettlebell Swing",
+      es: "Balanceo con kettlebell",
+      fr: "Balancé avec kettlebell",
     },
     icon: "?",
     type: "reps",
@@ -3113,10 +3113,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "kettlebell_clean",
     labels: {
-      de: "Kettlebell Clean",
+      de: "Kettlebell-Clean",
       en: "Kettlebell Clean",
-      es: "Kettlebell Clean",
-      fr: "Kettlebell Clean",
+      es: "Clean con kettlebell",
+      fr: "Clean avec kettlebell",
     },
     icon: "??",
     type: "reps",
@@ -3126,10 +3126,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "kettlebell_snatch",
     labels: {
-      de: "Kettlebell Snatch",
+      de: "Kettlebell-Snatch",
       en: "Kettlebell Snatch",
-      es: "Kettlebell Snatch",
-      fr: "Kettlebell Snatch",
+      es: "Snatch con kettlebell",
+      fr: "Snatch avec kettlebell",
     },
     icon: "???",
     type: "time",
@@ -3139,10 +3139,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "kettlebell_turkish_get_up",
     labels: {
-      de: "Kettlebell Turkish Get-Up",
+      de: "Turkish Get-Up mit Kettlebell",
       en: "Kettlebell Turkish Get-Up",
-      es: "Kettlebell Turkish Get-Up",
-      fr: "Kettlebell Turkish Get-Up",
+      es: "Turkish Get-Up con kettlebell",
+      fr: "Turkish Get-Up avec kettlebell",
     },
     icon: "???",
     type: "reps",
@@ -3152,10 +3152,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "kettlebell_goblet_squat",
     labels: {
-      de: "Kettlebell Goblet Squat",
+      de: "Goblet Squat mit Kettlebell",
       en: "Kettlebell Goblet Squat",
-      es: "Kettlebell Goblet Squat",
-      fr: "Kettlebell Goblet Squat",
+      es: "Sentadilla goblet con kettlebell",
+      fr: "Goblet squat avec kettlebell",
     },
     icon: "??",
     type: "reps",
@@ -3165,10 +3165,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "kettlebell_deadlift_2",
     labels: {
-      de: "Kettlebell Deadlift",
+      de: "Kettlebell-Kreuzheben",
       en: "Kettlebell Deadlift",
-      es: "Kettlebell Deadlift",
-      fr: "Kettlebell Deadlift",
+      es: "Peso muerto con kettlebell",
+      fr: "Soulevé de terre avec kettlebell",
     },
     icon: "??",
     type: "reps",
@@ -3178,10 +3178,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "kettlebell_bulgarian_split_squat",
     labels: {
-      de: "Kettlebell Bulgarian Split Squat",
+      de: "Bulgarische Split Squats mit Kettlebell",
       en: "Kettlebell Bulgarian Split Squat",
-      es: "Kettlebell Bulgarian Split Squat",
-      fr: "Kettlebell Bulgarian Split Squat",
+      es: "Split squat búlgaro con kettlebell",
+      fr: "Split squat bulgare avec kettlebell",
     },
     icon: "??",
     type: "reps",
@@ -3191,10 +3191,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "kettlebell_shoulder_press",
     labels: {
-      de: "Kettlebell Shoulder Press",
+      de: "Kettlebell-Schulterdrücken",
       en: "Kettlebell Shoulder Press",
-      es: "Kettlebell Shoulder Press",
-      fr: "Kettlebell Shoulder Press",
+      es: "Press militar con kettlebell",
+      fr: "Développé épaules avec kettlebell",
     },
     icon: "??",
     type: "reps",
@@ -3204,10 +3204,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "kettlebell_renegade_row",
     labels: {
-      de: "Kettlebell Renegade Row",
+      de: "Renegade Row mit Kettlebell",
       en: "Kettlebell Renegade Row",
-      es: "Kettlebell Renegade Row",
-      fr: "Kettlebell Renegade Row",
+      es: "Remo renegado con kettlebell",
+      fr: "Row renegade avec kettlebell",
     },
     icon: "??",
     type: "time",
@@ -3217,10 +3217,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "kettlebell_halo",
     labels: {
-      de: "Kettlebell Halo",
+      de: "Kettlebell-Halo-Kreis",
       en: "Kettlebell Halo",
-      es: "Kettlebell Halo",
-      fr: "Kettlebell Halo",
+      es: "Halo con kettlebell",
+      fr: "Halo avec kettlebell",
     },
     icon: "??",
     type: "reps",
@@ -3230,10 +3230,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "kettlebell_windmill",
     labels: {
-      de: "Kettlebell Windmill",
+      de: "Kettlebell-Windmühle",
       en: "Kettlebell Windmill",
-      es: "Kettlebell Windmill",
-      fr: "Kettlebell Windmill",
+      es: "Windmill con kettlebell",
+      fr: "Windmill avec kettlebell",
     },
     icon: "??",
     type: "reps",
@@ -3243,10 +3243,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "kettlebell_farmer_carry",
     labels: {
-      de: "Kettlebell Farmer Carry",
+      de: "Farmers Walk mit Kettlebell",
       en: "Kettlebell Farmer Carry",
-      es: "Kettlebell Farmer Carry",
-      fr: "Kettlebell Farmer Carry",
+      es: "Farmers Walk con kettlebell",
+      fr: "Farmers Carry avec kettlebell",
     },
     icon: "??",
     type: "time",
@@ -3256,10 +3256,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "kettlebell_reverse_lunge",
     labels: {
-      de: "Kettlebell Reverse Lunge",
+      de: "Reverse Lunge mit Kettlebell",
       en: "Kettlebell Reverse Lunge",
-      es: "Kettlebell Reverse Lunge",
-      fr: "Kettlebell Reverse Lunge",
+      es: "Zancada inversa con kettlebell",
+      fr: "Fente arrière avec kettlebell",
     },
     icon: "?",
     type: "reps",
@@ -3269,10 +3269,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "kettlebell_high_pull",
     labels: {
-      de: "Kettlebell High Pull",
+      de: "High Pull mit Kettlebell",
       en: "Kettlebell High Pull",
-      es: "Kettlebell High Pull",
-      fr: "Kettlebell High Pull",
+      es: "High Pull con kettlebell",
+      fr: "High Pull avec kettlebell",
     },
     icon: "??",
     type: "reps",
@@ -3282,10 +3282,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "kettlebell_single_leg_deadlift",
     labels: {
-      de: "Kettlebell Single-Leg Deadlift",
+      de: "Einbeinige Kettlebell-Kreuzheben",
       en: "Kettlebell Single-Leg Deadlift",
-      es: "Kettlebell Single-Leg Deadlift",
-      fr: "Kettlebell Single-Leg Deadlift",
+      es: "Peso muerto a una pierna con kettlebell",
+      fr: "Soulevé jambes tendues sur une jambe avec kettlebell",
     },
     icon: "???",
     type: "reps",
@@ -3295,10 +3295,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "kettlebell_sumo_deadlift_high_pull",
     labels: {
-      de: "Kettlebell Sumo Deadlift High Pull",
+      de: "Sumo-Kreuzheben mit High Pull",
       en: "Kettlebell Sumo Deadlift High Pull",
-      es: "Kettlebell Sumo Deadlift High Pull",
-      fr: "Kettlebell Sumo Deadlift High Pull",
+      es: "Peso muerto sumo con high pull",
+      fr: "Soulevé sumo avec high pull",
     },
     icon: "???",
     type: "reps",
@@ -3308,10 +3308,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "kettlebell_figure_eight",
     labels: {
-      de: "Kettlebell Figure Eight",
+      de: "Figure-Eight mit Kettlebell",
       en: "Kettlebell Figure Eight",
-      es: "Kettlebell Figure Eight",
-      fr: "Kettlebell Figure Eight",
+      es: "Figura ocho con kettlebell",
+      fr: "Figure huit avec kettlebell",
     },
     icon: "??",
     type: "reps",
@@ -3321,10 +3321,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_romanian_deadlift",
     labels: {
-      de: "Dumbbell Romanian Deadlift",
+      de: "Rumänisches Kreuzheben mit Kurzhantel",
       en: "Dumbbell Romanian Deadlift",
-      es: "Dumbbell Romanian Deadlift",
-      fr: "Dumbbell Romanian Deadlift",
+      es: "Peso muerto rumano con mancuernas",
+      fr: "Soulevé roumain avec haltères",
     },
     icon: "??",
     type: "reps",
@@ -3334,10 +3334,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_step_up",
     labels: {
-      de: "Dumbbell Step-up",
+      de: "Step-up mit Kurzhantel",
       en: "Dumbbell Step-up",
-      es: "Dumbbell Step-up",
-      fr: "Dumbbell Step-up",
+      es: "Step-up con mancuernas",
+      fr: "Step-up avec haltère",
     },
     icon: "??",
     type: "reps",
@@ -3347,10 +3347,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_bulgarian_split_squat",
     labels: {
-      de: "Dumbbell Bulgarian Split Squat",
+      de: "Bulgarische Split Squats mit Kurzhanteln",
       en: "Dumbbell Bulgarian Split Squat",
-      es: "Dumbbell Bulgarian Split Squat",
-      fr: "Dumbbell Bulgarian Split Squat",
+      es: "Split squat búlgaro con mancuernas",
+      fr: "Split squat bulgare avec haltères",
     },
     icon: "??",
     type: "reps",
@@ -3360,10 +3360,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_lateral_lunge",
     labels: {
-      de: "Dumbbell Lateral Lunge",
+      de: "Seitlicher Ausfallschritt mit Kurzhantel",
       en: "Dumbbell Lateral Lunge",
-      es: "Dumbbell Lateral Lunge",
-      fr: "Dumbbell Lateral Lunge",
+      es: "Zancada lateral con mancuernas",
+      fr: "Fente latérale avec haltères",
     },
     icon: "??",
     type: "reps",
@@ -3373,10 +3373,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_thruster",
     labels: {
-      de: "Dumbbell Thruster",
+      de: "Thruster mit Kurzhanteln",
       en: "Dumbbell Thruster",
-      es: "Dumbbell Thruster",
-      fr: "Dumbbell Thruster",
+      es: "Thruster con mancuernas",
+      fr: "Thruster avec haltères",
     },
     icon: "??",
     type: "time",
@@ -3386,10 +3386,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_bent_over_row",
     labels: {
-      de: "Dumbbell Bent-Over Row",
+      de: "Kurzhantel-Rudern vorgebeugt",
       en: "Dumbbell Bent-Over Row",
-      es: "Dumbbell Bent-Over Row",
-      fr: "Dumbbell Bent-Over Row",
+      es: "Remo inclinado con mancuernas",
+      fr: "Rowing incliné avec haltères",
     },
     icon: "??",
     type: "time",
@@ -3399,10 +3399,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_pullover",
     labels: {
-      de: "Dumbbell Pullover",
+      de: "Kurzhantel-Pullover",
       en: "Dumbbell Pullover",
-      es: "Dumbbell Pullover",
-      fr: "Dumbbell Pullover",
+      es: "Pullover con mancuernas",
+      fr: "Pullover avec haltères",
     },
     icon: "??",
     type: "reps",
@@ -3412,10 +3412,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_skull_crusher",
     labels: {
-      de: "Dumbbell Skull Crusher",
+      de: "Kurzhantel-Skullcrusher",
       en: "Dumbbell Skull Crusher",
-      es: "Dumbbell Skull Crusher",
-      fr: "Dumbbell Skull Crusher",
+      es: "Skullcrusher con mancuernas",
+      fr: "Skullcrusher avec haltères",
     },
     icon: "?",
     type: "reps",
@@ -3425,10 +3425,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_hammer_curl",
     labels: {
-      de: "Dumbbell Hammer Curl",
+      de: "Hammer-Curl mit Kurzhantel",
       en: "Dumbbell Hammer Curl",
-      es: "Dumbbell Hammer Curl",
-      fr: "Dumbbell Hammer Curl",
+      es: "Hammer curl con mancuernas",
+      fr: "Hammer curl avec haltères",
     },
     icon: "??",
     type: "reps",
@@ -3438,10 +3438,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_zottman_curl",
     labels: {
-      de: "Dumbbell Zottman Curl",
+      de: "Zottman-Curl mit Kurzhantel",
       en: "Dumbbell Zottman Curl",
-      es: "Dumbbell Zottman Curl",
-      fr: "Dumbbell Zottman Curl",
+      es: "Zottman curl con mancuernas",
+      fr: "Zottman curl avec haltères",
     },
     icon: "???",
     type: "reps",
@@ -3451,10 +3451,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_tricep_kickback_2",
     labels: {
-      de: "Dumbbell Tricep Kickback",
+      de: "Kurzhantel-Trizeps-Kickback (Variante)",
       en: "Dumbbell Tricep Kickback",
-      es: "Dumbbell Tricep Kickback",
-      fr: "Dumbbell Tricep Kickback",
+      es: "Patada de tríceps con mancuernas (variante)",
+      fr: "Kickback triceps avec haltère (variante)",
     },
     icon: "???",
     type: "reps",
@@ -3464,10 +3464,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_chest_supported_row",
     labels: {
-      de: "Dumbbell Chest Supported Row",
+      de: "Brustabgestütztes Kurzhantel-Rudern",
       en: "Dumbbell Chest Supported Row",
-      es: "Dumbbell Chest Supported Row",
-      fr: "Dumbbell Chest Supported Row",
+      es: "Remo apoyado en pecho con mancuernas",
+      fr: "Rowing supporté poitrine avec haltères",
     },
     icon: "??",
     type: "time",
@@ -3477,10 +3477,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_reverse_fly",
     labels: {
-      de: "Dumbbell Reverse Fly",
+      de: "Reverse Fly mit Kurzhanteln",
       en: "Dumbbell Reverse Fly",
-      es: "Dumbbell Reverse Fly",
-      fr: "Dumbbell Reverse Fly",
+      es: "Pájaro invertido con mancuernas",
+      fr: "Reverse fly avec haltères",
     },
     icon: "??",
     type: "reps",
@@ -3490,10 +3490,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_sumo_deadlift",
     labels: {
-      de: "Dumbbell Sumo Deadlift",
+      de: "Sumo-Deadlift mit Kurzhanteln",
       en: "Dumbbell Sumo Deadlift",
-      es: "Dumbbell Sumo Deadlift",
-      fr: "Dumbbell Sumo Deadlift",
+      es: "Peso muerto sumo con mancuernas",
+      fr: "Soulevé sumo avec haltères",
     },
     icon: "??",
     type: "reps",
@@ -3503,10 +3503,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_bulgarian_split_jump",
     labels: {
-      de: "Dumbbell Bulgarian Split Jump",
+      de: "Bulgarische Split Jumps mit Kurzhanteln",
       en: "Dumbbell Bulgarian Split Jump",
-      es: "Dumbbell Bulgarian Split Jump",
-      fr: "Dumbbell Bulgarian Split Jump",
+      es: "Split jump búlgaro con mancuernas",
+      fr: "Split jump bulgare avec haltères",
     },
     icon: "??",
     type: "time",
@@ -3516,10 +3516,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_single_arm_bench_press",
     labels: {
-      de: "Dumbbell Single Arm Bench Press",
+      de: "Einarmiges Bankdrücken mit Kurzhantel",
       en: "Dumbbell Single Arm Bench Press",
-      es: "Dumbbell Single Arm Bench Press",
-      fr: "Dumbbell Single Arm Bench Press",
+      es: "Press de banca unilateral con mancuernas",
+      fr: "Développé unilatéral avec haltère",
     },
     icon: "??",
     type: "reps",
@@ -3529,10 +3529,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_incline_fly",
     labels: {
-      de: "Dumbbell Incline Fly",
+      de: "Schrägbank-Fliegende mit Kurzhanteln",
       en: "Dumbbell Incline Fly",
-      es: "Dumbbell Incline Fly",
-      fr: "Dumbbell Incline Fly",
+      es: "Aperturas inclinadas con mancuernas",
+      fr: "Écarté incliné avec haltères",
     },
     icon: "??",
     type: "reps",
@@ -3542,10 +3542,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_decline_fly",
     labels: {
-      de: "Dumbbell Decline Fly",
+      de: "Negativbank-Fliegende mit Kurzhanteln",
       en: "Dumbbell Decline Fly",
-      es: "Dumbbell Decline Fly",
-      fr: "Dumbbell Decline Fly",
+      es: "Aperturas declinadas con mancuernas",
+      fr: "Écarté décliné avec haltères",
     },
     icon: "??",
     type: "reps",
@@ -3555,10 +3555,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_concentration_curl",
     labels: {
-      de: "Dumbbell Concentration Curl",
+      de: "Konzentrationscurl mit Kurzhantel",
       en: "Dumbbell Concentration Curl",
-      es: "Dumbbell Concentration Curl",
-      fr: "Dumbbell Concentration Curl",
+      es: "Curl de concentración con mancuernas",
+      fr: "Curl de concentration avec haltère",
     },
     icon: "??",
     type: "reps",
@@ -3568,10 +3568,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "dumbbell_farmer_walk",
     labels: {
-      de: "Dumbbell Farmer Walk",
+      de: "Farmers Walk mit Kurzhanteln",
       en: "Dumbbell Farmer Walk",
-      es: "Dumbbell Farmer Walk",
-      fr: "Dumbbell Farmer Walk",
+      es: "Farmer Walk con mancuernas",
+      fr: "Farmer walk avec haltères",
     },
     icon: "?",
     type: "reps",
@@ -3581,10 +3581,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "cable_hip_thrust",
     labels: {
-      de: "Cable Hip Thrust",
+      de: "Hip-Thrust am Kabel",
       en: "Cable Hip Thrust",
-      es: "Cable Hip Thrust",
-      fr: "Cable Hip Thrust",
+      es: "Hip thrust en polea",
+      fr: "Hip thrust à la poulie",
     },
     icon: "??",
     type: "reps",
@@ -3594,10 +3594,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "cable_leg_curl",
     labels: {
-      de: "Cable Leg Curl",
+      de: "Beinbeuger am Kabel",
       en: "Cable Leg Curl",
-      es: "Cable Leg Curl",
-      fr: "Cable Leg Curl",
+      es: "Curl de piernas en polea",
+      fr: "Flexion des jambes à la poulie",
     },
     icon: "???",
     type: "reps",
@@ -3607,10 +3607,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "cable_leg_extension",
     labels: {
-      de: "Cable Leg Extension",
+      de: "Beinstrecker am Kabel",
       en: "Cable Leg Extension",
-      es: "Cable Leg Extension",
-      fr: "Cable Leg Extension",
+      es: "Extensión de piernas en polea",
+      fr: "Extension des jambes à la poulie",
     },
     icon: "???",
     type: "reps",
@@ -3620,10 +3620,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "cable_straight_leg_deadlift",
     labels: {
-      de: "Cable Straight-Leg Deadlift",
+      de: "Kabel-Kreuzheben mit gestrecktem Bein",
       en: "Cable Straight-Leg Deadlift",
-      es: "Cable Straight-Leg Deadlift",
-      fr: "Cable Straight-Leg Deadlift",
+      es: "Peso muerto con piernas rígidas en polea",
+      fr: "Soulevé de terre jambes tendues à la poulie",
     },
     icon: "??",
     type: "reps",
@@ -3633,10 +3633,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "cable_reverse_lunge",
     labels: {
-      de: "Cable Reverse Lunge",
+      de: "Kabel-Reverse-Lunge",
       en: "Cable Reverse Lunge",
-      es: "Cable Reverse Lunge",
-      fr: "Cable Reverse Lunge",
+      es: "Zancada inversa en polea",
+      fr: "Fente arrière à la poulie",
     },
     icon: "??",
     type: "reps",
@@ -3646,10 +3646,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "cable_split_squat",
     labels: {
-      de: "Cable Split Squat",
+      de: "Split Squat am Kabel",
       en: "Cable Split Squat",
-      es: "Cable Split Squat",
-      fr: "Cable Split Squat",
+      es: "Split squat en polea",
+      fr: "Split squat à la poulie",
     },
     icon: "??",
     type: "reps",
@@ -3659,7 +3659,7 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "pilates_hundred",
     labels: {
-      de: "Pilates Hundred",
+      de: "Pilates Hundred (Atemübung)",
       en: "Pilates Hundred",
       es: "Pilates Hundred",
       fr: "Pilates Hundred",
@@ -3672,10 +3672,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "pilates_roll_up",
     labels: {
-      de: "Pilates Roll-up",
+      de: "Pilates Roll-up (Wirbelsäule)",
       en: "Pilates Roll-up",
-      es: "Pilates Roll-up",
-      fr: "Pilates Roll-up",
+      es: "Roll-Up de pilates",
+      fr: "Roll-up pilates",
     },
     icon: "??",
     type: "time",
@@ -3685,10 +3685,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "pilates_leg_circle",
     labels: {
-      de: "Pilates Leg Circle",
+      de: "Pilates-Beinkreise",
       en: "Pilates Leg Circle",
-      es: "Pilates Leg Circle",
-      fr: "Pilates Leg Circle",
+      es: "Círculos de piernas pilates",
+      fr: "Cercles de jambes pilates",
     },
     icon: "??",
     type: "time",
@@ -3698,10 +3698,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "pilates_spine_stretch",
     labels: {
-      de: "Pilates Spine Stretch",
+      de: "Pilates Wirbelsäulen-Dehnung",
       en: "Pilates Spine Stretch",
-      es: "Pilates Spine Stretch",
-      fr: "Pilates Spine Stretch",
+      es: "Estiramiento de columna pilates",
+      fr: "Étirement de la colonne pilates",
     },
     icon: "??",
     type: "time",
@@ -3711,10 +3711,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "yoga_sun_salutation",
     labels: {
-      de: "Yoga Sun Salutation",
+      de: "Sonnengruß",
       en: "Yoga Sun Salutation",
-      es: "Yoga Sun Salutation",
-      fr: "Yoga Sun Salutation",
+      es: "Saludo al sol",
+      fr: "Salutation au soleil",
     },
     icon: "??",
     type: "time",
@@ -3724,10 +3724,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "yoga_warrior_ii_flow",
     labels: {
-      de: "Yoga Warrior II Flow",
+      de: "Krieger II Flow",
       en: "Yoga Warrior II Flow",
-      es: "Yoga Warrior II Flow",
-      fr: "Yoga Warrior II Flow",
+      es: "Flujo Guerrero II",
+      fr: "Flow Guerrier II",
     },
     icon: "?",
     type: "time",
@@ -3737,10 +3737,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "yoga_chair_pose",
     labels: {
-      de: "Yoga Chair Pose",
+      de: "Stuhlhaltung",
       en: "Yoga Chair Pose",
-      es: "Yoga Chair Pose",
-      fr: "Yoga Chair Pose",
+      es: "Postura de la silla",
+      fr: "Posture de la chaise",
     },
     icon: "??",
     type: "time",
@@ -3750,10 +3750,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "yoga_boat_pose_flow",
     labels: {
-      de: "Yoga Boat Pose Flow",
+      de: "Bootshaltung-Flow",
       en: "Yoga Boat Pose Flow",
-      es: "Yoga Boat Pose Flow",
-      fr: "Yoga Boat Pose Flow",
+      es: "Flow de postura del barco",
+      fr: "Flow de posture du bateau",
     },
     icon: "???",
     type: "time",
@@ -3763,10 +3763,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "yoga_downward_dog_to_plank",
     labels: {
-      de: "Yoga Downward Dog to Plank",
+      de: "Herabschauender Hund zur Planke",
       en: "Yoga Downward Dog to Plank",
-      es: "Yoga Downward Dog to Plank",
-      fr: "Yoga Downward Dog to Plank",
+      es: "Perro mirando hacia abajo a plancha",
+      fr: "Chien tête en bas vers planche",
     },
     icon: "???",
     type: "time",
@@ -3776,10 +3776,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "yoga_crescent_lunge",
     labels: {
-      de: "Yoga Crescent Lunge",
+      de: "Mondlunge",
       en: "Yoga Crescent Lunge",
-      es: "Yoga Crescent Lunge",
-      fr: "Yoga Crescent Lunge",
+      es: "Zancada creciente",
+      fr: "Fente croissante",
     },
     icon: "??",
     type: "time",
@@ -3789,10 +3789,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "yoga_pigeon_pose_flow",
     labels: {
-      de: "Yoga Pigeon Pose Flow",
+      de: "Taubenhaltung-Flow",
       en: "Yoga Pigeon Pose Flow",
-      es: "Yoga Pigeon Pose Flow",
-      fr: "Yoga Pigeon Pose Flow",
+      es: "Flow de postura de la paloma",
+      fr: "Flow de posture du pigeon",
     },
     icon: "??",
     type: "time",
@@ -3802,10 +3802,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "yoga_bridge_pose_flow",
     labels: {
-      de: "Yoga Bridge Pose Flow",
+      de: "Brückenhaltung-Flow",
       en: "Yoga Bridge Pose Flow",
-      es: "Yoga Bridge Pose Flow",
-      fr: "Yoga Bridge Pose Flow",
+      es: "Flow de puente",
+      fr: "Flow de pont",
     },
     icon: "??",
     type: "time",
@@ -3815,10 +3815,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "yoga_cat_cow_stretch",
     labels: {
-      de: "Yoga Cat-Cow Stretch",
+      de: "Katze-Kuh-Dehnung",
       en: "Yoga Cat-Cow Stretch",
-      es: "Yoga Cat-Cow Stretch",
-      fr: "Yoga Cat-Cow Stretch",
+      es: "Estiramiento gato-vaca",
+      fr: "Étirement chat-vache",
     },
     icon: "??",
     type: "time",
@@ -3828,10 +3828,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "yoga_thread_the_needle",
     labels: {
-      de: "Yoga Thread the Needle",
+      de: "Faden durch die Nadel",
       en: "Yoga Thread the Needle",
-      es: "Yoga Thread the Needle",
-      fr: "Yoga Thread the Needle",
+      es: "Hilvana la aguja",
+      fr: "Passez le fil dans l'aiguille",
     },
     icon: "??",
     type: "time",
