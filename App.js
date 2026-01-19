@@ -383,10 +383,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "standing_cable_chest_press",
     labels: {
-      de: "Standing Cable Chest Press",
+      de: "Stehende Kabel-Brustpresse",
       en: "Standing Cable Chest Press",
-      es: "Standing Cable Chest Press",
-      fr: "Standing Cable Chest Press",
+      es: "Press de pecho de pie en polea",
+      fr: "Presse poitrine debout à la poulie",
     },
     icon: "??",
     type: "reps",
@@ -513,10 +513,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "ring_push_ups",
     labels: {
-      de: "Ring Push-ups",
+      de: "Ring-Liegestütze",
       en: "Ring Push-ups",
-      es: "Ring Push-ups",
-      fr: "Ring Push-ups",
+      es: "Flexiones en anillas",
+      fr: "Pompes aux anneaux",
     },
     icon: "??",
     type: "reps",
@@ -526,10 +526,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "weighted_push_ups",
     labels: {
-      de: "Weighted Push-ups",
+      de: "Liegestütze mit Zusatzgewicht",
       en: "Weighted Push-ups",
-      es: "Weighted Push-ups",
-      fr: "Weighted Push-ups",
+      es: "Flexiones con peso",
+      fr: "Pompes lestées",
     },
     icon: "?",
     type: "reps",
@@ -539,10 +539,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "incline_push_ups",
     labels: {
-      de: "Incline Push-ups",
+      de: "Schrägbank-Liegestütze",
       en: "Incline Push-ups",
-      es: "Incline Push-ups",
-      fr: "Incline Push-ups",
+      es: "Flexiones inclinadas",
+      fr: "Pompes inclinées",
     },
     icon: "??",
     type: "reps",
@@ -552,10 +552,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "decline_push_ups",
     labels: {
-      de: "Decline Push-ups",
+      de: "Negativ-Liegestütze",
       en: "Decline Push-ups",
-      es: "Decline Push-ups",
-      fr: "Decline Push-ups",
+      es: "Flexiones declinadas",
+      fr: "Pompes déclinées",
     },
     icon: "???",
     type: "reps",
@@ -643,10 +643,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "medicine_ball_push_ups",
     labels: {
-      de: "Medicine Ball Push-ups",
+      de: "Liegestütze mit Medizinball",
       en: "Medicine Ball Push-ups",
-      es: "Medicine Ball Push-ups",
-      fr: "Medicine Ball Push-ups",
+      es: "Flexiones con balón medicinal",
+      fr: "Pompes avec médecine-ball",
     },
     icon: "???",
     type: "reps",
@@ -656,10 +656,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "chest_dips",
     labels: {
-      de: "Chest Dips",
+      de: "Brust-Dips",
       en: "Chest Dips",
-      es: "Chest Dips",
-      fr: "Chest Dips",
+      es: "Fondos para pecho",
+      fr: "Dips pour la poitrine",
     },
     icon: "??",
     type: "reps",
@@ -669,10 +669,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "ring_dips",
     labels: {
-      de: "Ring Dips",
+      de: "Ring-Dips",
       en: "Ring Dips",
-      es: "Ring Dips",
-      fr: "Ring Dips",
+      es: "Fondos en anillas",
+      fr: "Dips aux anneaux",
     },
     icon: "??",
     type: "reps",
@@ -682,10 +682,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "assisted_dips",
     labels: {
-      de: "Assisted Dips",
+      de: "Unterstützte Dips",
       en: "Assisted Dips",
-      es: "Assisted Dips",
-      fr: "Assisted Dips",
+      es: "Fondos asistidos",
+      fr: "Dips assistés",
     },
     icon: "??",
     type: "reps",
@@ -695,10 +695,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "bench_dips",
     labels: {
-      de: "Bench Dips",
+      de: "Bankdips",
       en: "Bench Dips",
-      es: "Bench Dips",
-      fr: "Bench Dips",
+      es: "Fondos en banco",
+      fr: "Dips au banc",
     },
     icon: "??",
     type: "reps",
@@ -721,10 +721,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "chin_ups",
     labels: {
-      de: "Chin-ups",
+      de: "Kinnzüge",
       en: "Chin-ups",
-      es: "Chin-ups",
-      fr: "Chin-ups",
+      es: "Dominadas con agarre supino",
+      fr: "Tractions en supination",
     },
     icon: "??",
     type: "reps",
@@ -734,10 +734,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "neutral_grip_pull_ups",
     labels: {
-      de: "Neutral Grip Pull-ups",
+      de: "Klimmzüge mit neutralem Griff",
       en: "Neutral Grip Pull-ups",
-      es: "Neutral Grip Pull-ups",
-      fr: "Neutral Grip Pull-ups",
+      es: "Dominadas con agarre neutro",
+      fr: "Tractions prise neutre",
     },
     icon: "??",
     type: "reps",
@@ -747,10 +747,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "commando_pull_ups",
     labels: {
-      de: "Commando Pull-ups",
+      de: "Commando-Klimmzüge",
       en: "Commando Pull-ups",
-      es: "Commando Pull-ups",
-      fr: "Commando Pull-ups",
+      es: "Dominadas tipo commando",
+      fr: "Tractions commando",
     },
     icon: "??",
     type: "reps",
@@ -760,10 +760,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "wide_grip_pull_ups",
     labels: {
-      de: "Wide-Grip Pull-ups",
+      de: "Klimmzüge mit weitem Griff",
       en: "Wide-Grip Pull-ups",
-      es: "Wide-Grip Pull-ups",
-      fr: "Wide-Grip Pull-ups",
+      es: "Dominadas agarre amplio",
+      fr: "Tractions prise large",
     },
     icon: "?",
     type: "reps",
@@ -773,10 +773,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "lat_pulldown",
     labels: {
-      de: "Lat Pulldown",
+      de: "Latziehen",
       en: "Lat Pulldown",
-      es: "Lat Pulldown",
-      fr: "Lat Pulldown",
+      es: "Jalón al pecho",
+      fr: "Tirage vertical",
     },
     icon: "??",
     type: "reps",
