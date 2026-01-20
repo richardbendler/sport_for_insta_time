@@ -20,6 +20,8 @@ import {
   Alert,
   Modal,
   useWindowDimensions,
+  FlatList,
+  InteractionManager,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Voice from "@react-native-voice/voice";
@@ -68,7 +70,12 @@ const normalizeSpeechLocale = (locale) =>
   typeof locale === "string" ? locale.replace(/-/g, "_") : "";
 
 const DEFAULT_ICON = "⭐";
-const DEFAULT_DIFFICULTY = 5;
+const USER_FACTOR_OPTIONS = [1, 2, 3, 5, 8, 12, 19, 28, 40, 55, 70, 85, 100];
+const DEFAULT_DIFFICULTY = 40;
+const DEFAULT_DIFFICULTY_INDEX = Math.max(
+  0,
+  USER_FACTOR_OPTIONS.indexOf(DEFAULT_DIFFICULTY)
+);
 const DEFAULT_TIME_RATE = 0.5;
 const DEFAULT_REPS_RATE = 0.5;
 const ADMIN_FACTOR_TIME = 0.05; // tweak this factor to globally adjust granted Screen Time for non-reps sports
@@ -4012,24 +4019,32 @@ const matchLabelScore = (
   searchCompact
 ) => {
   if (!searchLower && !searchCompact) {
-    return { score: 0, index: 0 };
+    return { score: 0, index: 0, candidate: normalizedLabel };
   }
   if (searchLower) {
     if (normalizedLabel.startsWith(searchLower)) {
-      return { score: 0, index: 0 };
+      return { score: 0, index: 0, candidate: normalizedLabel };
     }
     const normalizedIndex = normalizedLabel.indexOf(searchLower);
     if (normalizedIndex !== -1) {
-      return { score: 2, index: normalizedIndex };
+      return {
+        score: 2,
+        index: normalizedIndex,
+        candidate: normalizedLabel,
+      };
     }
   }
   if (searchCompact) {
     if (compactLabel.startsWith(searchCompact)) {
-      return { score: 1, index: 0 };
+      return { score: 1, index: 0, candidate: normalizedLabel };
     }
     const compactIndex = compactLabel.indexOf(searchCompact);
     if (compactIndex !== -1) {
-      return { score: 3, index: compactIndex };
+      return {
+        score: 3,
+        index: compactIndex,
+        candidate: normalizedLabel,
+      };
     }
   }
   return null;
@@ -4069,12 +4084,39 @@ const getSportMatchScore = (
   return bestMatch;
 };
 
-const doesSportMatchSearchTerm = (entry, searchLower, language = "en") => {
+const scoreAndSortSportsBySearch = (sportsList, searchLower, language = "en") => {
   if (!searchLower) {
-    return true;
+    return sportsList;
   }
   const searchCompact = stripNonAlphanumeric(searchLower);
-  return getSportMatchScore(entry, searchLower, searchCompact, language) !== null;
+  const scored = sportsList
+    .map((sport) => ({
+      sport,
+      match: getSportMatchScore(sport, searchLower, searchCompact, language),
+    }))
+    .filter((item) => item.match)
+    .sort((a, b) => {
+      const scoreDiff = a.match.score - b.match.score;
+      if (scoreDiff !== 0) {
+        return scoreDiff;
+      }
+      const indexDiff = a.match.index - b.match.index;
+      if (indexDiff !== 0) {
+        return indexDiff;
+      }
+      const distanceA =
+        Math.abs((a.match.candidate?.length || 0) - searchLower.length);
+      const distanceB =
+        Math.abs((b.match.candidate?.length || 0) - searchLower.length);
+      if (distanceA !== distanceB) {
+        return distanceA - distanceB;
+      }
+      const nameA = String(a.sport.name || a.sport.id || "");
+      const nameB = String(b.sport.name || b.sport.id || "");
+      return nameA.localeCompare(nameB);
+    })
+    .map(({ sport }) => sport);
+  return scored;
 };
 
 const createDefaultPresetSports = () => [];
@@ -4124,6 +4166,7 @@ const SportTitleSlots = ({ sport, sportLabel }) => {
   const [rightWidth, setRightWidth] = useState(0);
   const slotWidth = Math.max(leftWidth, rightWidth);
   const slotStyle = slotWidth ? { width: slotWidth } : undefined;
+  const categoryLabel = deriveSportCategory(sport);
 
   const handleLeftLayout = useCallback(
     (event) => setLeftWidth(event.nativeEvent.layout.width),
@@ -4134,15 +4177,21 @@ const SportTitleSlots = ({ sport, sportLabel }) => {
     []
   );
 
-
   return (
     <View style={styles.sportTitleCenterRow}>
       <View style={[styles.titleSideSlot, slotStyle]} onLayout={handleLeftLayout}>
         <Text style={styles.sportIcon}>{sport.icon || DEFAULT_ICON}</Text>
       </View>
-      <Text style={styles.sportName} numberOfLines={1}>
-        {sportLabel}
-      </Text>
+      <View style={styles.sportTitleTextColumn}>
+        <Text style={styles.sportName} numberOfLines={1}>
+          {sportLabel}
+        </Text>
+        {categoryLabel ? (
+          <Text style={styles.sportCategory} numberOfLines={1}>
+            {categoryLabel}
+          </Text>
+        ) : null}
+      </View>
       <View
         style={[styles.titleSideSlot, slotStyle]}
         onLayout={handleRightLayout}
@@ -4298,9 +4347,7 @@ const getRollingStats = (logs, sportId, sport) => {
       }
       reps += entry.reps || 0;
       seconds += entry.seconds || 0;
-      screenSeconds += sport
-        ? screenSecondsForEntry(sport, entry)
-        : entry.screenSeconds || 0;
+      screenSeconds += resolveEntryScreenSeconds(sport, entry);
     });
   });
   return { reps, seconds, screenSeconds };
@@ -4387,13 +4434,28 @@ const parsePositiveInteger = (value) => {
   return Math.max(0, parsed);
 };
 
-const clampDifficultyLevel = (value) => {
-  const parsed = Number.parseFloat(value);
+const getDifficultyOptionIndex = (value) => {
+  const parsed = Number.parseFloat(String(value));
   if (!Number.isFinite(parsed)) {
-    return DEFAULT_DIFFICULTY;
+    return DEFAULT_DIFFICULTY_INDEX;
   }
-  return Math.max(1, Math.min(10, parsed));
+  let closestIndex = 0;
+  let smallestDistance = Infinity;
+  USER_FACTOR_OPTIONS.forEach((option, index) => {
+    const distance = Math.abs(option - parsed);
+    if (distance < smallestDistance) {
+      smallestDistance = distance;
+      closestIndex = index;
+    }
+  });
+  return closestIndex;
 };
+
+const clampDifficultyIndex = (index) =>
+  Math.max(0, Math.min(USER_FACTOR_OPTIONS.length - 1, index));
+
+const clampDifficultyLevel = (value) =>
+  USER_FACTOR_OPTIONS[getDifficultyOptionIndex(value)];
 
 const difficultyLevelForSport = (sport) => {
   if (!sport) {
@@ -4405,8 +4467,37 @@ const difficultyLevelForSport = (sport) => {
       ? Number(sport.weightFactor)
       : undefined;
   const candidate =
-    sport.difficultyLevel ?? fallbackWeightFactor ?? DEFAULT_DIFFICULTY;
-  return clampDifficultyLevel(candidate);
+    Number.isFinite(Number(sport.difficultyLevel)) &&
+    sport.difficultyLevel !== undefined
+      ? Number(sport.difficultyLevel)
+      : undefined;
+  const selected = candidate ?? fallbackWeightFactor ?? DEFAULT_DIFFICULTY;
+  return clampDifficultyLevel(selected);
+};
+
+const defaultCategoryForSport = (sport) => {
+  if (!sport) {
+    return "General";
+  }
+  if (sport.type === "time") {
+    return "Cardio";
+  }
+  if (sport.weightExercise) {
+    return "Strength (Weighted)";
+  }
+  return "Strength";
+};
+
+const deriveSportCategory = (sport) => {
+  if (!sport) {
+    return defaultCategoryForSport(sport);
+  }
+  const explicitCategory =
+    typeof sport.category === "string" ? sport.category.trim() : "";
+  if (explicitCategory) {
+    return explicitCategory;
+  }
+  return defaultCategoryForSport(sport);
 };
 
 const getDefaultRateMinutes = (sportType) => {
@@ -4456,6 +4547,16 @@ const screenSecondsForEntry = (sport, entry) => {
   return Math.max(0, Math.round(value));
 };
 
+const resolveEntryScreenSeconds = (sport, entry) => {
+  if (!entry) {
+    return 0;
+  }
+  if (Number.isFinite(entry.screenSeconds) && entry.screenSeconds >= 0) {
+    return entry.screenSeconds;
+  }
+  return screenSecondsForEntry(sport, entry);
+};
+
 const widgetValueForStats = (sport, dayStats) => {
   if (!sport) {
     return "0";
@@ -4480,7 +4581,7 @@ const rollingScreenSecondsTotal = (logs, sports) => {
         if (!entry || !entry.ts || entry.ts < cutoff) {
           return;
         }
-        totalSeconds += screenSecondsForEntry(sport, entry);
+        totalSeconds += resolveEntryScreenSeconds(sport, entry);
       });
     });
   });
@@ -4541,7 +4642,7 @@ const buildStatsFromLogs = (logs, sports = []) => {
         0
       );
       const screenSeconds = dayEntries.reduce(
-        (sum, entry) => sum + screenSecondsForEntry(sport, entry),
+        (sum, entry) => sum + resolveEntryScreenSeconds(sport, entry),
         0
       );
       if (reps <= 0 && seconds <= 0 && screenSeconds <= 0) {
@@ -4641,6 +4742,7 @@ const normalizeSports = (sportList) => {
       changed = true;
     }
     const difficultyLevel = difficultyLevelForSport(sport);
+    const category = deriveSportCategory(sport);
     const next = {
       ...sport,
       name,
@@ -4649,6 +4751,7 @@ const normalizeSports = (sportList) => {
       screenSecondsPerUnit:
         sport.screenSecondsPerUnit ?? defaultScreenSecondsPerUnit(sport),
       difficultyLevel,
+      category,
       nonDeletable: sport.nonDeletable ?? false,
     };
     if (
@@ -4788,6 +4891,7 @@ export default function App() {
   const [newIcon, setNewIcon] = useState("");
   const [newRateMinutes, setNewRateMinutes] = useState("1");
   const [newWeightExercise, setNewWeightExercise] = useState(false);
+  const [newCategory, setNewCategory] = useState("");
   const [newDifficultyLevel, setNewDifficultyLevel] = useState(
     DEFAULT_DIFFICULTY
   );
@@ -4795,10 +4899,16 @@ export default function App() {
   const [isCustomSportMode, setIsCustomSportMode] = useState(true);
   const adjustDifficultyLevel = useCallback((delta) => {
     setNewDifficultyLevel((current) => {
-      const next = Math.max(1, Math.min(10, current + delta));
-      return next;
+      const currentIndex = getDifficultyOptionIndex(current);
+      const nextIndex = clampDifficultyIndex(currentIndex + delta);
+      return USER_FACTOR_OPTIONS[nextIndex];
     });
   }, []);
+  const newDifficultyIndex = getDifficultyOptionIndex(newDifficultyLevel);
+  const difficultyFillPercent =
+    (newDifficultyIndex /
+      Math.max(1, USER_FACTOR_OPTIONS.length - 1)) *
+    100;
   const [showIconInput, setShowIconInput] = useState(false);
   const [customSuggestionUsed, setCustomSuggestionUsed] = useState(false);
   const [infoModalKey, setInfoModalKey] = useState(null);
@@ -4851,6 +4961,9 @@ export default function App() {
   const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [voiceListening, setVoiceListening] = useState(false);
   const [voiceError, setVoiceError] = useState(null);
+  const [manualTimeMinutes, setManualTimeMinutes] = useState("");
+  const [manualTimeSeconds, setManualTimeSeconds] = useState("");
+  const [manualRepsInput, setManualRepsInput] = useState("");
   const [isAppActive, setIsAppActive] = useState(
     AppState.currentState === "active"
   );
@@ -5005,7 +5118,10 @@ export default function App() {
     );
     setNewIcon(entry.icon || DEFAULT_ICON);
     setNewWeightExercise(!!entry.weightExercise);
-    setNewDifficultyLevel(entry.difficultyLevel ?? DEFAULT_DIFFICULTY);
+    setNewDifficultyLevel(
+      clampDifficultyLevel(entry.difficultyLevel ?? DEFAULT_DIFFICULTY)
+    );
+    setNewCategory(deriveSportCategory(entry));
     setShowIconInput(false);
     setSelectedStandardSportId(entry.id);
     setIsCustomSportMode(false);
@@ -5018,6 +5134,10 @@ export default function App() {
     setNewName(trimmedSportSearch);
     setCustomSuggestionUsed(true);
     setNewDifficultyLevel(DEFAULT_DIFFICULTY);
+    setNewCategory(deriveSportCategory({
+      type: newType,
+      weightExercise: newWeightExercise,
+    }));
   };
 
   useEffect(() => {
@@ -5340,7 +5460,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         0
       );
       const screenSecondsTotal = dayEntries.reduce(
-        (sum, entry) => sum + screenSecondsForEntry(sport, entry),
+        (sum, entry) => sum + resolveEntryScreenSeconds(sport, entry),
         0
       );
       if (repsTotal <= 0 && secondsTotal <= 0 && screenSecondsTotal <= 0) {
@@ -5366,7 +5486,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     if (!sport || !entry?.id || !InstaControl?.upsertScreenTimeEntry) {
       return;
     }
-    const screenSeconds = screenSecondsForEntry(sport, entry);
+    const screenSeconds = resolveEntryScreenSeconds(sport, entry);
     InstaControl.upsertScreenTimeEntry(
       entry.id,
       sport.id,
@@ -5771,6 +5891,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       setNewIcon(sport.icon || "");
       setNewRateMinutes(String(rateMinutes || getDefaultRateMinutes(sport.type)));
       setNewWeightExercise(!!sport.weightExercise);
+      setNewCategory(deriveSportCategory(sport));
       setNewDifficultyLevel(difficultyLevelForSport(sport));
       setSelectedStandardSportId(sport.standardSportId ?? null);
       setIsCustomSportMode(!sport.standardSportId);
@@ -5781,6 +5902,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       setNewIcon("");
       setNewRateMinutes(String(getDefaultRateMinutes("reps")));
       setNewWeightExercise(false);
+      setNewCategory(deriveSportCategory({ type: "reps", weightExercise: false }));
       setNewDifficultyLevel(DEFAULT_DIFFICULTY);
       setSelectedStandardSportId(null);
       setIsCustomSportMode(true);
@@ -5795,6 +5917,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setEditingSportId(null);
     setShowIconInput(false);
     setCustomSuggestionUsed(false);
+    setNewCategory("");
   };
 
   const handleIncreaseDifficulty = () => {
@@ -5818,6 +5941,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       newType === "reps" ? rateMinutes * 60 : rateMinutes;
     const weightMode = newType === "reps" && newWeightExercise;
     const parsedDifficulty = clampDifficultyLevel(newDifficultyLevel);
+    const parsedCategory = newCategory.trim();
     if (editingSportId) {
       const nextSports = sports.map((sport) => {
         if (sport.id !== editingSportId) {
@@ -5836,6 +5960,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           presetKey: keepPresetKey,
           weightExercise: weightMode,
           difficultyLevel: parsedDifficulty,
+          category: parsedCategory || undefined,
           standardSportId: selectedStandardSportId ?? sport.standardSportId,
         };
       });
@@ -5851,6 +5976,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         createdAt: Date.now(),
         weightExercise: weightMode,
         difficultyLevel: parsedDifficulty,
+        category: parsedCategory || undefined,
         standardSportId: selectedStandardSportId ?? undefined,
       };
       await saveSports([newSport, ...sports]);
@@ -6171,27 +6297,29 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
   };
 
-  const toggleControlledApp = async (packageName) => {
+  const toggleControlledApp = (packageName) => {
     setAppToggleLoading((prev) => ({ ...prev, [packageName]: true }));
-    try {
-      const current = settings.controlledApps || [];
-      const exists = current.includes(packageName);
-      const nextApps = exists
-        ? current.filter((pkg) => pkg !== packageName)
-        : [packageName, ...current];
-      await saveSettings({ ...settings, controlledApps: nextApps });
-      if (InstaControl?.setControlledApps) {
-        InstaControl.setControlledApps(nextApps);
+    InteractionManager.runAfterInteractions(async () => {
+      try {
+        const current = settings.controlledApps || [];
+        const exists = current.includes(packageName);
+        const nextApps = exists
+          ? current.filter((pkg) => pkg !== packageName)
+          : [packageName, ...current];
+        await saveSettings({ ...settings, controlledApps: nextApps });
+        if (InstaControl?.setControlledApps) {
+          InstaControl.setControlledApps(nextApps);
+        }
+      } catch (error) {
+        console.warn("toggleControlledApp failed", packageName, error);
+      } finally {
+        setAppToggleLoading((prev) => {
+          const next = { ...prev };
+          delete next[packageName];
+          return next;
+        });
       }
-    } catch (error) {
-      console.warn("toggleControlledApp failed", packageName, error);
-    } finally {
-      setAppToggleLoading((prev) => {
-        const next = { ...prev };
-        delete next[packageName];
-        return next;
-      });
-    }
+    });
   };
 
   const toggleGrayscaleRestrictedApps = async () => {
@@ -6628,13 +6756,15 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       return;
     }
     if (elapsed > 0) {
-      addLogEntry(selectedSport, {
+      const entry = addLogEntry(selectedSport, {
         ts: Date.now(),
         seconds: elapsed,
       });
-      const addedSeconds = screenSecondsForEntry(selectedSport, {
-        seconds: elapsed,
-      });
+      const addedSeconds =
+        entry?.screenSeconds ??
+        screenSecondsForEntry(selectedSport, {
+          seconds: elapsed,
+        });
       updateDayStat(selectedSport.id, (dayStats) => ({
         ...dayStats,
         seconds: dayStats.seconds + elapsed,
@@ -6643,6 +6773,33 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
     setSessionSeconds(0);
     sessionStartRef.current = null;
+  };
+
+  const handleManualTimeLog = () => {
+    const currentSport = selectedSportRef.current;
+    if (!currentSport || currentSport.type !== "time") {
+      return;
+    }
+    const minutes = Math.max(0, Number.parseInt(manualTimeMinutes, 10) || 0);
+    const seconds = Math.max(0, Number.parseInt(manualTimeSeconds, 10) || 0);
+    const totalSeconds = minutes * 60 + seconds;
+    if (totalSeconds <= 0) {
+      return;
+    }
+    const timestamp = Date.now();
+    const entryPayload = { ts: timestamp, seconds: totalSeconds };
+    const loggedEntry = addLogEntry(currentSport, entryPayload);
+    const addedSeconds =
+      loggedEntry?.screenSeconds ??
+      screenSecondsForEntry(currentSport, entryPayload);
+    updateDayStat(currentSport.id, (dayStats) => ({
+      ...dayStats,
+      seconds: (dayStats.seconds || 0) + totalSeconds,
+      screenSeconds: (dayStats.screenSeconds || 0) + addedSeconds,
+    }));
+    setManualTimeMinutes("");
+    setManualTimeSeconds("");
+    maybeAdvanceTutorial("trackAction");
   };
 
   const handleWorkoutStart = () => {
@@ -6755,7 +6912,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           if (entry.ts < startTs || entry.ts > endTs) {
             return;
           }
-          total += screenSecondsForEntry(sport, entry);
+          total += resolveEntryScreenSeconds(sport, entry);
         });
       });
     });
@@ -6781,8 +6938,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     if (sport.type === "time" && Number.isFinite(sport.defaultRateMinutes)) {
       exerciseEntry.seconds = Math.max(1, sport.defaultRateMinutes * 60);
     }
-    addLogEntry(sport, exerciseEntry);
-    const addedSeconds = screenSecondsForEntry(sport, exerciseEntry);
+    const loggedEntry = addLogEntry(sport, exerciseEntry);
+    const addedSeconds =
+      loggedEntry?.screenSeconds ??
+      screenSecondsForEntry(sport, exerciseEntry);
     updateDayStat(sport.id, (dayStats) => ({
       ...dayStats,
       reps: dayStats.reps + (exerciseEntry.reps || 0),
@@ -6877,7 +7036,9 @@ const getSpeechLocale = () => {
       ts: Date.now(),
       reps: 1,
     });
-    const addedSeconds = screenSecondsForEntry(currentSport, { reps: 1 });
+    const addedSeconds =
+      entry?.screenSeconds ??
+      screenSecondsForEntry(currentSport, { reps: 1 });
     updateDayStat(currentSport.id, (dayStats) => ({
       ...dayStats,
       reps: dayStats.reps + 1,
@@ -6896,6 +7057,34 @@ const getSpeechLocale = () => {
         entry,
       };
     }
+    maybeAdvanceTutorial("trackAction");
+  };
+
+  const handleManualRepsLog = () => {
+    const currentSport = selectedSportRef.current;
+    if (!currentSport || currentSport.type !== "reps") {
+      return;
+    }
+    const reps = Math.max(0, Number.parseInt(manualRepsInput, 10) || 0);
+    if (reps <= 0) {
+      return;
+    }
+    if (workoutTrackingMode) {
+      recordWorkoutExercise(currentSport);
+      setWorkoutSessionCount((prev) => prev + 1);
+    }
+    const timestamp = Date.now();
+    const entryPayload = { ts: timestamp, reps };
+    const entry = addLogEntry(currentSport, entryPayload);
+    const addedSeconds =
+      entry?.screenSeconds ??
+      screenSecondsForEntry(currentSport, entryPayload);
+    updateDayStat(currentSport.id, (dayStats) => ({
+      ...dayStats,
+      reps: (dayStats.reps || 0) + reps,
+      screenSeconds: (dayStats.screenSeconds || 0) + addedSeconds,
+    }));
+    setManualRepsInput("");
     maybeAdvanceTutorial("trackAction");
   };
 
@@ -7080,19 +7269,17 @@ const getSpeechLocale = () => {
   const hiddenSports = sports.filter((sport) => sport.hidden);
   const normalizedSportSearchTerm = normalizeTextForSearch(sportSearch);
   const filteredActiveSports = useMemo(() => {
-    if (!normalizedSportSearchTerm) {
-      return activeSports;
-    }
-    return activeSports.filter((sport) =>
-      doesSportMatchSearchTerm(sport, normalizedSportSearchTerm, language)
+    return scoreAndSortSportsBySearch(
+      activeSports,
+      normalizedSportSearchTerm,
+      language
     );
   }, [activeSports, normalizedSportSearchTerm, language]);
   const filteredHiddenSports = useMemo(() => {
-    if (!normalizedSportSearchTerm) {
-      return hiddenSports;
-    }
-    return hiddenSports.filter((sport) =>
-      doesSportMatchSearchTerm(sport, normalizedSportSearchTerm, language)
+    return scoreAndSortSportsBySearch(
+      hiddenSports,
+      normalizedSportSearchTerm,
+      language
     );
   }, [hiddenSports, normalizedSportSearchTerm, language]);
   const selectedSport = sports.find((sport) => sport.id === selectedSportId);
@@ -8353,6 +8540,149 @@ const getSpeechLocale = () => {
     });
   }, [filteredApps, appUsageMap]);
 
+  const controlledApps = settings.controlledApps || [];
+  const grayscaleRestrictedApps = !!settings.grayscaleRestrictedApps;
+
+  const renderAppRowItem = useCallback(
+    ({ item: app }) => {
+      const enabled = controlledApps.includes(app.packageName);
+      const usageMinutes = Math.floor(
+        (appUsageMap[app.packageName] || 0) / 60000
+      );
+      const grayscaleActive = grayscaleRestrictedApps && enabled;
+      const isToggling = !!appToggleLoading[app.packageName];
+      return (
+        <Pressable
+          style={[
+            styles.appRow,
+            isToggling && styles.appRowDisabled,
+            enabled && styles.appRowActive,
+            grayscaleActive && styles.appRowGrayscale,
+          ]}
+          disabled={appsLoading || isToggling}
+          onPress={() => toggleControlledApp(app.packageName)}
+        >
+          <Text
+            style={[
+              styles.appLabel,
+              grayscaleActive && styles.grayscaleText,
+            ]}
+          >
+            {app.label}
+          </Text>
+          <Text
+            style={[
+              styles.appPackage,
+              grayscaleActive && styles.grayscaleText,
+            ]}
+          >
+            {app.packageName}
+          </Text>
+          <Text
+            style={[
+              styles.appUsageText,
+              grayscaleActive && styles.grayscaleText,
+            ]}
+          >
+            {appsUsageLoading ? "..." : `${usageMinutes} min`}
+          </Text>
+          {isToggling ? (
+            <ActivityIndicator
+              size="small"
+              color={COLORS.accent}
+              style={styles.appToggleSpinner}
+            />
+          ) : (
+            <Text
+              style={[
+                styles.appToggle,
+                enabled && styles.appToggleActive,
+                grayscaleActive && styles.grayscaleText,
+              ]}
+            >
+              {enabled ? t("label.active") : t("label.off")}
+            </Text>
+          )}
+        </Pressable>
+      );
+    },
+    [
+      appsLoading,
+      appToggleLoading,
+      appsUsageLoading,
+      appUsageMap,
+      controlledApps,
+      grayscaleRestrictedApps,
+      toggleControlledApp,
+      t,
+    ]
+  );
+
+  const renderAppListHeader = useCallback(
+    () => (
+      <>
+        <View style={styles.headerRow}>
+          <Pressable
+            style={styles.backButton}
+            ref={tutorialAppsBackRef}
+            onPress={() => {
+              setIsAppsSettingsOpen(false);
+              maybeAdvanceTutorial("backFromApps");
+            }}
+          >
+            <Text style={styles.backText}>{t("label.back")}</Text>
+          </Pressable>
+          <Text style={styles.headerTitle}>{t("label.apps")}</Text>
+        </View>
+        {Platform.OS !== "android" ? (
+          <Text style={styles.helperText}>{t("label.androidOnly")}</Text>
+        ) : (
+          <>
+            <TextInput
+              style={styles.searchInput}
+              value={appSearchInput}
+              onChangeText={setAppSearchInput}
+              placeholder={t("label.searchApps")}
+              placeholderTextColor="#7a7a7a"
+            />
+            {appsLoading ? (
+              <View style={styles.appsStatusRow}>
+                <ActivityIndicator size="small" color={COLORS.accent} />
+                <Text style={styles.appsStatusText}>
+                  {t("label.loadApps")}
+                </Text>
+              </View>
+            ) : null}
+            {appSearchBusy ? (
+              <View style={styles.appsStatusRow}>
+                <ActivityIndicator size="small" color={COLORS.accent} />
+                <Text style={styles.appsStatusText}>
+                  {t("label.searchApps")}
+                </Text>
+              </View>
+            ) : null}
+          </>
+        )}
+      </>
+    ),
+    [
+      appSearchInput,
+      appSearchBusy,
+      appsLoading,
+      maybeAdvanceTutorial,
+      setIsAppsSettingsOpen,
+      setAppSearchInput,
+      t,
+    ]
+  );
+
+  const renderAppListEmpty = useCallback(() => {
+    if (Platform.OS !== "android" || appsLoading || sortedApps.length > 0) {
+      return null;
+    }
+    return <Text style={styles.helperText}>{t("label.noApps")}</Text>;
+  }, [appsLoading, sortedApps.length, t]);
+
   useEffect(() => {
     Voice.onSpeechResults = handleVoiceResults;
     Voice.onSpeechError = handleVoiceError;
@@ -8856,7 +9186,7 @@ const getSpeechLocale = () => {
                     statsSport.type === "reps"
                       ? `${entry.reps || 0} ${repsShort}`
                       : formatSeconds(entry.seconds || 0);
-                  const earnedSeconds = screenSecondsForEntry(statsSport, entry);
+                  const earnedSeconds = resolveEntryScreenSeconds(statsSport, entry);
                   return (
                     <View key={entry.id} style={styles.statRow}>
                       <Text style={styles.statLabel}>
@@ -9012,8 +9342,10 @@ const getSpeechLocale = () => {
         reps,
         weight,
       };
-      addLogEntry(selectedSport, entry);
-      const addedSeconds = screenSecondsForEntry(selectedSport, entry);
+      const loggedEntry = addLogEntry(selectedSport, entry);
+      const addedSeconds =
+        loggedEntry?.screenSeconds ??
+        screenSecondsForEntry(selectedSport, entry);
       updateDayStat(selectedSport.id, (dayStats) => ({
         ...dayStats,
         reps: dayStats.reps + reps,
@@ -9112,6 +9444,30 @@ const getSpeechLocale = () => {
                 ) : null}
               </Pressable>
               <Text style={styles.voiceHint}>{t("label.voiceHint")}</Text>
+            </View>
+            <View style={styles.manualEntryContainer}>
+              <Text style={styles.manualEntryLabel}>
+                {t("label.manualRepsEntryTitle")}
+              </Text>
+              <TextInput
+                style={[styles.input, styles.manualRepsInput]}
+                value={manualRepsInput}
+                onChangeText={setManualRepsInput}
+                placeholder={t("label.manualRepsEntryPlaceholder")}
+                placeholderTextColor="#7a7a7a"
+                keyboardType="number-pad"
+              />
+              <Pressable
+                style={[styles.primaryButton, styles.manualEntryButton]}
+                onPress={handleManualRepsLog}
+              >
+                <Text style={styles.primaryButtonText}>
+                  {t("label.manualRepsEntryButton")}
+                </Text>
+              </Pressable>
+              <Text style={styles.manualEntryHelper}>
+                {t("label.manualRepsEntryHint")}
+              </Text>
             </View>
           </Pressable>
         ) : isWeightMode ? (
@@ -9220,6 +9576,52 @@ const getSpeechLocale = () => {
                 {t("label.runningSession")}: {formatSeconds(sessionSeconds)}
               </Text>
             ) : null}
+            <View style={styles.manualEntryContainer}>
+              <Text style={styles.manualEntryLabel}>
+                {t("label.manualTimeEntryTitle")}
+              </Text>
+              <View style={styles.manualTimeInputsRow}>
+                <View style={styles.manualTimeInputWrap}>
+                  <Text style={styles.manualTimeInputLabel}>
+                    {t("label.manualTimeEntryMinutes")}
+                  </Text>
+                  <TextInput
+                    style={[styles.input, styles.manualTimeInput]}
+                    value={manualTimeMinutes}
+                    onChangeText={setManualTimeMinutes}
+                    placeholder={t("label.manualTimeEntryMinutes")}
+                    placeholderTextColor="#7a7a7a"
+                    keyboardType="number-pad"
+                    maxLength={3}
+                  />
+                </View>
+                <View style={styles.manualTimeInputWrap}>
+                  <Text style={styles.manualTimeInputLabel}>
+                    {t("label.manualTimeEntrySeconds")}
+                  </Text>
+                  <TextInput
+                    style={[styles.input, styles.manualTimeInput]}
+                    value={manualTimeSeconds}
+                    onChangeText={setManualTimeSeconds}
+                    placeholder={t("label.manualTimeEntrySeconds")}
+                    placeholderTextColor="#7a7a7a"
+                    keyboardType="number-pad"
+                    maxLength={2}
+                  />
+                </View>
+              </View>
+              <Pressable
+                style={[styles.primaryButton, styles.manualEntryButton]}
+                onPress={handleManualTimeLog}
+              >
+                <Text style={styles.primaryButtonText}>
+                  {t("label.manualTimeEntryButton")}
+                </Text>
+              </Pressable>
+              <Text style={styles.manualEntryHelper}>
+                {t("label.manualTimeEntryHint")}
+              </Text>
+            </View>
           </View>
         )}
       </SafeAreaView>
@@ -9441,117 +9843,29 @@ const getSpeechLocale = () => {
   if (isAppsSettingsOpen) {
     return (
       <SafeAreaView style={styles.container}>
-        <ScrollView
+        <FlatList
           ref={(node) => {
             scrollViewRef.current = node;
             tutorialAppsScreenRef.current = node;
           }}
           contentContainerStyle={styles.scrollContent}
-        >
-          <View style={styles.headerRow}>
-            <Pressable
-                style={styles.backButton}
-                ref={tutorialAppsBackRef}
-                onPress={() => {
-                  setIsAppsSettingsOpen(false);
-                  maybeAdvanceTutorial("backFromApps");
-                }}
-              >
-              <Text style={styles.backText}>{t("label.back")}</Text>
-            </Pressable>
-            <Text style={styles.headerTitle}>{t("label.apps")}</Text>
+          data={sortedApps}
+          keyExtractor={(app) => app.packageName}
+          renderItem={renderAppRowItem}
+          ListHeaderComponent={renderAppListHeader}
+          ListEmptyComponent={renderAppListEmpty}
+          keyboardShouldPersistTaps="handled"
+          initialNumToRender={12}
+          windowSize={6}
+        />
+        {appsLoading ? (
+          <View style={styles.appsLoadingOverlay} pointerEvents="none">
+            <ActivityIndicator size="large" color={COLORS.accent} />
+            <Text style={styles.appsLoadingOverlayText}>
+              {t("label.loadApps")}
+            </Text>
           </View>
-          {Platform.OS !== "android" ? (
-            <Text style={styles.helperText}>{t("label.androidOnly")}</Text>
-          ) : (
-            <>
-              <TextInput
-                style={styles.searchInput}
-                value={appSearchInput}
-                onChangeText={setAppSearchInput}
-                placeholder={t("label.searchApps")}
-                placeholderTextColor="#7a7a7a"
-              />
-              {appsLoading ? (
-                <View style={styles.appsStatusRow}>
-                  <ActivityIndicator size="small" color={COLORS.accent} />
-                  <Text style={styles.appsStatusText}>{t("label.loadApps")}</Text>
-                </View>
-              ) : null}
-              {appSearchBusy ? (
-                <View style={styles.appsStatusRow}>
-                  <ActivityIndicator size="small" color={COLORS.accent} />
-                  <Text style={styles.appsStatusText}>{t("label.searchApps")}</Text>
-                </View>
-              ) : null}
-              {!appsLoading && installedApps.length === 0 ? (
-                <Text style={styles.helperText}>{t("label.noApps")}</Text>
-              ) : null}
-              {sortedApps.map((app) => {
-                const enabled = settings.controlledApps.includes(app.packageName);
-                const usageMs = appUsageMap[app.packageName] || 0;
-                const usageMinutes = Math.floor(usageMs / 60000);
-                const grayscaleActive = settings.grayscaleRestrictedApps && enabled;
-                const isToggling = !!appToggleLoading[app.packageName];
-                return (
-                  <Pressable
-                    key={app.packageName}
-                    style={[
-                      styles.appRow,
-                      isToggling && styles.appRowDisabled,
-                      enabled && styles.appRowActive,
-                      grayscaleActive && styles.appRowGrayscale,
-                    ]}
-                    disabled={appsLoading || isToggling}
-                    onPress={() => toggleControlledApp(app.packageName)}
-                  >
-                    <Text
-                      style={[
-                        styles.appLabel,
-                        grayscaleActive && styles.grayscaleText,
-                      ]}
-                    >
-                      {app.label}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.appPackage,
-                        grayscaleActive && styles.grayscaleText,
-                      ]}
-                    >
-                      {app.packageName}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.appUsageText,
-                        grayscaleActive && styles.grayscaleText,
-                      ]}
-                    >
-                      {appsUsageLoading ? "..." : `${usageMinutes} min`}
-                    </Text>
-                    {isToggling ? (
-                      <ActivityIndicator
-                        size="small"
-                        color={COLORS.accent}
-                        style={styles.appToggleSpinner}
-                      />
-                    ) : (
-                      <Text
-                        style={[
-                          styles.appToggle,
-                          enabled && styles.appToggleActive,
-                          grayscaleActive && styles.grayscaleText,
-                        ]}
-                      >
-                        {enabled ? t("label.active") : t("label.off")}
-                      </Text>
-                    )}
-                  </Pressable>
-                );
-              })}
-            </>
-          )}
-        </ScrollView>
+        ) : null}
       </SafeAreaView>
     );
   }
@@ -10577,6 +10891,19 @@ const getSpeechLocale = () => {
             </View>
             <View
               style={styles.createSportField}
+              collapsable={false}
+            >
+              <Text style={styles.rateLabel}>{t("label.sportCategory")}</Text>
+              <TextInput
+                style={styles.input}
+                value={newCategory}
+                onChangeText={setNewCategory}
+                placeholder={t("label.sportCategoryPlaceholder")}
+                placeholderTextColor="#7a7a7a"
+              />
+            </View>
+            <View
+              style={styles.createSportField}
               ref={tutorialSportIconRef}
               collapsable={false}
             >
@@ -10701,7 +11028,7 @@ const getSpeechLocale = () => {
                     style={[
                       styles.difficultyBarFill,
                       {
-                        width: `${((newDifficultyLevel - 1) / 9) * 100}%`,
+                        width: `${difficultyFillPercent}%`,
                       },
                     ]}
                   />
@@ -11351,6 +11678,48 @@ const styles = StyleSheet.create({
     fontSize: 13,
     maxWidth: "70%",
   },
+  manualEntryContainer: {
+    marginTop: 16,
+    width: "100%",
+    alignItems: "stretch",
+  },
+  manualEntryLabel: {
+    color: COLORS.muted,
+    fontSize: 12,
+    fontWeight: "600",
+    marginBottom: 6,
+  },
+  manualEntryButton: {
+    alignSelf: "stretch",
+    marginTop: 6,
+  },
+  manualEntryHelper: {
+    marginTop: 6,
+    color: COLORS.muted,
+    fontSize: 12,
+    textAlign: "center",
+  },
+  manualRepsInput: {
+    textAlign: "center",
+  },
+  manualTimeInputsRow: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  manualTimeInputWrap: {
+    flex: 1,
+  },
+  manualTimeInputLabel: {
+    color: COLORS.muted,
+    fontSize: 10,
+    fontWeight: "600",
+    marginBottom: 4,
+    textTransform: "uppercase",
+  },
+  manualTimeInput: {
+    marginBottom: 0,
+    textAlign: "center",
+  },
   timerRow: {
     flexDirection: "row",
     marginTop: 24,
@@ -11785,6 +12154,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 4,
     justifyContent: "center",
+  },
+  sportTitleTextColumn: {
+    flex: 1,
+    minWidth: 0,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sportCategory: {
+    color: COLORS.muted,
+    fontSize: 12,
+    marginTop: 2,
+    textTransform: "capitalize",
   },
   titleSideSlot: {
     alignItems: "center",
@@ -12801,6 +13182,19 @@ const styles = StyleSheet.create({
   appsStatusText: {
     color: COLORS.muted,
     fontSize: 12,
+  },
+  appsLoadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(2, 6, 23, 0.55)",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
+  },
+  appsLoadingOverlayText: {
+    color: COLORS.white,
+    marginTop: 12,
+    fontWeight: "600",
+    textAlign: "center",
   },
   statRow: {
     flexDirection: "row",
