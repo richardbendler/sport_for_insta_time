@@ -9912,6 +9912,7 @@ const getSpeechLocale = () => {
     }
     return (
       <SafeAreaView style={styles.container}>
+        {renderAppListHeader()}
         <FlatList
           ref={(node) => {
             scrollViewRef.current = node;
@@ -9921,7 +9922,6 @@ const getSpeechLocale = () => {
           data={sortedApps}
           keyExtractor={(app) => app.packageName}
           renderItem={renderAppRowItem}
-          ListHeaderComponent={renderAppListHeader}
           ListEmptyComponent={renderAppListEmpty}
           extraData={grayscaleRestrictedApps}
           keyboardShouldPersistTaps="handled"
