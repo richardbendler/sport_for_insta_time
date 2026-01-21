@@ -70,17 +70,37 @@ const normalizeSpeechLocale = (locale) =>
   typeof locale === "string" ? locale.replace(/-/g, "_") : "";
 
 const DEFAULT_ICON = "⭐";
-const USER_FACTOR_OPTIONS = [1, 2, 3, 5, 8, 12, 19, 28, 40, 55, 70, 85, 100];
-const DEFAULT_DIFFICULTY = 40;
-const DEFAULT_DIFFICULTY_INDEX = Math.max(
-  0,
-  USER_FACTOR_OPTIONS.indexOf(DEFAULT_DIFFICULTY)
-);
+const USER_FACTOR_OPTIONS = (() => {
+  const options = [];
+  let value = 1;
+  while (value <= 1000) {
+    options.push(Math.round(value));
+    const step = Math.max(1, Math.round(Math.pow(value, 0.25)));
+    value += step;
+  }
+  if (options[options.length - 1] !== 1000) {
+    options.push(1000);
+  }
+  return Array.from(new Set(options));
+})();
+const DEFAULT_DIFFICULTY = 451;
+const DEFAULT_DIFFICULTY_INDEX = (() => {
+  let closestIndex = 0;
+  let smallestDistance = Infinity;
+  USER_FACTOR_OPTIONS.forEach((option, index) => {
+    const distance = Math.abs(option - DEFAULT_DIFFICULTY);
+    if (distance < smallestDistance) {
+      smallestDistance = distance;
+      closestIndex = index;
+    }
+  });
+  return closestIndex;
+})();
 const DEFAULT_TIME_RATE = 0.5;
 const DEFAULT_REPS_RATE = 0.5;
-const ADMIN_FACTOR_TIME = 0.05; // tweak this factor to globally adjust granted Screen Time for non-reps sports
-const ADMIN_FACTOR_REPS = 1.1; // dedicated admin factor for reps-based screen time
-const ADMIN_FACTOR_WEIGHTED = 0.01; // base admin multiplier applied only for weighted reps entries
+const ADMIN_FACTOR_TIME = 0.005; // tweak this factor to globally adjust granted Screen Time for non-reps sports
+const ADMIN_FACTOR_REPS = 0.11; // dedicated admin factor for reps-based screen time
+const ADMIN_FACTOR_WEIGHTED = 0.001; // base admin multiplier applied only for weighted reps entries
 const DEFAULT_WEIGHT_RATE = 0.04;
 const WORKOUT_CONTINUE_WINDOW_MS = 30 * 60 * 1000;
 const TUTORIAL_STRONG_HIGHLIGHT = "rgba(249, 115, 22, 0.2)";
@@ -3972,11 +3992,39 @@ const mergeTranslatedLabels = (entry) => {
   };
 };
 
+const LEGACY_DIFFICULTY_MIN = 1;
+const LEGACY_DIFFICULTY_MAX = 10;
+const LEGACY_DIFFICULTY_MIN_SCALE = 400;
+const LEGACY_DIFFICULTY_MAX_SCALE = 600;
+
+const mapLegacyDifficultyToNewScale = (value) => {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    return DEFAULT_DIFFICULTY;
+  }
+  const clamped = Math.max(
+    LEGACY_DIFFICULTY_MIN,
+    Math.min(LEGACY_DIFFICULTY_MAX, parsed)
+  );
+  if (LEGACY_DIFFICULTY_MAX === LEGACY_DIFFICULTY_MIN) {
+    return LEGACY_DIFFICULTY_MIN_SCALE;
+  }
+  const ratio =
+    (clamped - LEGACY_DIFFICULTY_MIN) /
+    (LEGACY_DIFFICULTY_MAX - LEGACY_DIFFICULTY_MIN);
+  const scaled =
+    LEGACY_DIFFICULTY_MIN_SCALE +
+    ratio * (LEGACY_DIFFICULTY_MAX_SCALE - LEGACY_DIFFICULTY_MIN_SCALE);
+  return Math.round(scaled);
+};
+
 const STANDARD_SPORTS = RAW_STANDARD_SPORTS.map((sport) => ({
   ...sport,
+  difficultyLevel: mapLegacyDifficultyToNewScale(sport.difficultyLevel),
   icon: deriveTemplateIcon(sport),
   labels: mergeTranslatedLabels(sport),
 }));
+const STANDARD_SPORT_IDS = new Set(STANDARD_SPORTS.map((sport) => sport.id));
 const getStandardSportLabel = (entry, language) =>
   entry.labels?.[language] || entry.labels?.en || entry.id;
 
@@ -4183,14 +4231,16 @@ const SportTitleSlots = ({ sport, sportLabel }) => {
         <Text style={styles.sportIcon}>{sport.icon || DEFAULT_ICON}</Text>
       </View>
       <View style={styles.sportTitleTextColumn}>
-        <Text style={styles.sportName} numberOfLines={1}>
-          {sportLabel}
-        </Text>
-        {categoryLabel ? (
-          <Text style={styles.sportCategory} numberOfLines={1}>
-            {categoryLabel}
+        <View style={styles.sportTitleTextRow}>
+          <Text style={styles.sportName} numberOfLines={1}>
+            {sportLabel}
           </Text>
-        ) : null}
+          {categoryLabel ? (
+            <Text style={styles.sportCategory} numberOfLines={1}>
+              {categoryLabel}
+            </Text>
+          ) : null}
+        </View>
       </View>
       <View
         style={[styles.titleSideSlot, slotStyle]}
@@ -4466,12 +4516,27 @@ const difficultyLevelForSport = (sport) => {
     sport.weightFactor !== undefined
       ? Number(sport.weightFactor)
       : undefined;
-  const candidate =
+  const rawDifficulty =
     Number.isFinite(Number(sport.difficultyLevel)) &&
     sport.difficultyLevel !== undefined
       ? Number(sport.difficultyLevel)
       : undefined;
-  const selected = candidate ?? fallbackWeightFactor ?? DEFAULT_DIFFICULTY;
+  const legacyIdentifier =
+    typeof sport.id === "string"
+      ? sport.id
+      : typeof sport.standardSportId === "string"
+      ? sport.standardSportId
+      : null;
+  const isLegacyStandard =
+    rawDifficulty !== undefined &&
+    Number(rawDifficulty) <= LEGACY_DIFFICULTY_MAX &&
+    legacyIdentifier &&
+    STANDARD_SPORT_IDS.has(legacyIdentifier);
+  const candidateDifficulty = isLegacyStandard
+    ? mapLegacyDifficultyToNewScale(rawDifficulty)
+    : rawDifficulty;
+  const selected =
+    candidateDifficulty ?? fallbackWeightFactor ?? DEFAULT_DIFFICULTY;
   return clampDifficultyLevel(selected);
 };
 
@@ -4891,7 +4956,6 @@ export default function App() {
   const [newIcon, setNewIcon] = useState("");
   const [newRateMinutes, setNewRateMinutes] = useState("1");
   const [newWeightExercise, setNewWeightExercise] = useState(false);
-  const [newCategory, setNewCategory] = useState("");
   const [newDifficultyLevel, setNewDifficultyLevel] = useState(
     DEFAULT_DIFFICULTY
   );
@@ -4919,6 +4983,7 @@ export default function App() {
   const [appSearchBusy, setAppSearchBusy] = useState(false);
   const [appsLoading, setAppsLoading] = useState(false);
   const [appsUsageLoading, setAppsUsageLoading] = useState(false);
+  const [appsInitialLoadComplete, setAppsInitialLoadComplete] = useState(false);
   const [appToggleLoading, setAppToggleLoading] = useState({});
   const [appUsageMap, setAppUsageMap] = useState({});
   const [usageState, setUsageState] = useState({
@@ -5121,7 +5186,6 @@ export default function App() {
     setNewDifficultyLevel(
       clampDifficultyLevel(entry.difficultyLevel ?? DEFAULT_DIFFICULTY)
     );
-    setNewCategory(deriveSportCategory(entry));
     setShowIconInput(false);
     setSelectedStandardSportId(entry.id);
     setIsCustomSportMode(false);
@@ -5134,10 +5198,6 @@ export default function App() {
     setNewName(trimmedSportSearch);
     setCustomSuggestionUsed(true);
     setNewDifficultyLevel(DEFAULT_DIFFICULTY);
-    setNewCategory(deriveSportCategory({
-      type: newType,
-      weightExercise: newWeightExercise,
-    }));
   };
 
   useEffect(() => {
@@ -5891,7 +5951,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       setNewIcon(sport.icon || "");
       setNewRateMinutes(String(rateMinutes || getDefaultRateMinutes(sport.type)));
       setNewWeightExercise(!!sport.weightExercise);
-      setNewCategory(deriveSportCategory(sport));
       setNewDifficultyLevel(difficultyLevelForSport(sport));
       setSelectedStandardSportId(sport.standardSportId ?? null);
       setIsCustomSportMode(!sport.standardSportId);
@@ -5902,7 +5961,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       setNewIcon("");
       setNewRateMinutes(String(getDefaultRateMinutes("reps")));
       setNewWeightExercise(false);
-      setNewCategory(deriveSportCategory({ type: "reps", weightExercise: false }));
       setNewDifficultyLevel(DEFAULT_DIFFICULTY);
       setSelectedStandardSportId(null);
       setIsCustomSportMode(true);
@@ -5917,7 +5975,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setEditingSportId(null);
     setShowIconInput(false);
     setCustomSuggestionUsed(false);
-    setNewCategory("");
   };
 
   const handleIncreaseDifficulty = () => {
@@ -5941,7 +5998,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       newType === "reps" ? rateMinutes * 60 : rateMinutes;
     const weightMode = newType === "reps" && newWeightExercise;
     const parsedDifficulty = clampDifficultyLevel(newDifficultyLevel);
-    const parsedCategory = newCategory.trim();
     if (editingSportId) {
       const nextSports = sports.map((sport) => {
         if (sport.id !== editingSportId) {
@@ -5960,7 +6016,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           presetKey: keepPresetKey,
           weightExercise: weightMode,
           difficultyLevel: parsedDifficulty,
-          category: parsedCategory || undefined,
           standardSportId: selectedStandardSportId ?? sport.standardSportId,
         };
       });
@@ -5976,7 +6031,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         createdAt: Date.now(),
         weightExercise: weightMode,
         difficultyLevel: parsedDifficulty,
-        category: parsedCategory || undefined,
         standardSportId: selectedStandardSportId ?? undefined,
       };
       await saveSports([newSport, ...sports]);
@@ -6269,6 +6323,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
 
   const loadInstalledApps = async () => {
     if (!InstaControl?.getInstalledApps) {
+      setAppsInitialLoadComplete(true);
       return;
     }
     setAppsLoading(true);
@@ -6294,6 +6349,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     } finally {
       setAppsLoading(false);
       setAppsUsageLoading(false);
+      setAppsInitialLoadComplete(true);
     }
   };
 
@@ -6398,7 +6454,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setOverallDayKey(null);
     setStatsEditMode(false);
     setIsSettingsOpen(true);
-    loadInstalledApps();
     refreshUsageState();
     maybeAdvanceTutorial("openSettings");
   };
@@ -6415,6 +6470,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   };
 
   const openAppsSettings = () => {
+    setAppsInitialLoadComplete(false);
     setIsAppsSettingsOpen(true);
     setAppSearch("");
     setAppSearchInput("");
@@ -9841,6 +9897,19 @@ const getSpeechLocale = () => {
   }
 
   if (isAppsSettingsOpen) {
+    if (!appsInitialLoadComplete) {
+      return (
+        <SafeAreaView style={styles.container}>
+          {renderAppListHeader()}
+          <View style={styles.appsInitialLoader}>
+            <ActivityIndicator size="large" color={COLORS.accent} />
+            <Text style={styles.appsInitialLoaderText}>
+              {t("label.loadApps")}
+            </Text>
+          </View>
+        </SafeAreaView>
+      );
+    }
     return (
       <SafeAreaView style={styles.container}>
         <FlatList
@@ -9854,6 +9923,7 @@ const getSpeechLocale = () => {
           renderItem={renderAppRowItem}
           ListHeaderComponent={renderAppListHeader}
           ListEmptyComponent={renderAppListEmpty}
+          extraData={grayscaleRestrictedApps}
           keyboardShouldPersistTaps="handled"
           initialNumToRender={12}
           windowSize={6}
@@ -10888,19 +10958,6 @@ const getSpeechLocale = () => {
                   ) : null}
                 </View>
               ) : null}
-            </View>
-            <View
-              style={styles.createSportField}
-              collapsable={false}
-            >
-              <Text style={styles.rateLabel}>{t("label.sportCategory")}</Text>
-              <TextInput
-                style={styles.input}
-                value={newCategory}
-                onChangeText={setNewCategory}
-                placeholder={t("label.sportCategoryPlaceholder")}
-                placeholderTextColor="#7a7a7a"
-              />
             </View>
             <View
               style={styles.createSportField}
@@ -12161,11 +12218,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  sportTitleTextRow: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    justifyContent: "center",
+    minWidth: 0,
+  },
   sportCategory: {
     color: COLORS.muted,
     fontSize: 12,
-    marginTop: 2,
     textTransform: "capitalize",
+    marginLeft: 6,
+    flexShrink: 0,
   },
   titleSideSlot: {
     alignItems: "center",
@@ -13192,6 +13256,18 @@ const styles = StyleSheet.create({
   },
   appsLoadingOverlayText: {
     color: COLORS.white,
+    marginTop: 12,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  appsInitialLoader: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
+  },
+  appsInitialLoaderText: {
+    color: COLORS.text,
     marginTop: 12,
     fontWeight: "600",
     textAlign: "center",
