@@ -43,6 +43,7 @@ const STORAGE_KEYS = {
   accessibilityDisclosure: "@accessibility_disclosure_v1",
   usagePermissions: "@usage_permissions_prompted_v1",
   notificationsPermissions: "@notifications_permissions_prompted_v1",
+  motivationActions: "@motivation_actions_v1",
   carryover: "@carryover_seconds_v1",
   carryoverDay: "@carryover_day_v1",
   usageSnapshot: "@usage_snapshot_v1",
@@ -4040,6 +4041,20 @@ const normalizeTextForSearch = (value) =>
 
 const stripNonAlphanumeric = (value) => value.replace(/[^a-z0-9]+/g, "");
 
+const splitSearchTokens = (value) =>
+  (value || "").split(/\s+/).filter((token) => token.length > 0);
+
+const getLabelRoot = (label) => {
+  if (!label || typeof label !== "string") {
+    return "";
+  }
+  const tokens = label
+    .split(/[\s-]+/)
+    .map((token) => token.trim())
+    .filter((token) => token.length > 0);
+  return tokens[0] || "";
+};
+
 const getLabelCandidates = (entry, language = "en") => {
   const labels = entry.labels || {};
   const seen = new Set();
@@ -5011,6 +5026,8 @@ export default function App() {
   const [permissionsCheckTick, setPermissionsCheckTick] = useState(0);
   const [dismissedMotivationActionId, setDismissedMotivationActionId] =
     useState(null);
+  const [completedMotivationActionIds, setCompletedMotivationActionIds] =
+    useState([]);
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [statsRange, setStatsRange] = useState("month");
   const [infoHint, setInfoHint] = useState(null);
@@ -5102,26 +5119,52 @@ export default function App() {
     return () => pulse.stop();
   }, [tutorialFingerScale]);
   const storageErrorAlertedRef = useRef(false);
-  const handleStorageError = (contextLabel, error) => {
-    console.warn("Storage save failed", contextLabel, error);
-    if (storageErrorAlertedRef.current) {
-      return;
-    }
-    storageErrorAlertedRef.current = true;
-    Alert.alert(
-      t("label.storageErrorTitle"),
-      interpolateTemplate(t("label.storageErrorBody"), {
-        context: contextLabel,
-      })
-    );
-  };
-  const persistStorageValue = async (key, value, contextLabel) => {
-    try {
-      await AsyncStorage.setItem(key, value);
-    } catch (error) {
-      handleStorageError(contextLabel, error);
-    }
-  };
+  const handleStorageError = useCallback(
+    (contextLabel, error) => {
+      console.warn("Storage save failed", contextLabel, error);
+      if (storageErrorAlertedRef.current) {
+        return;
+      }
+      storageErrorAlertedRef.current = true;
+      Alert.alert(
+        t("label.storageErrorTitle"),
+        interpolateTemplate(t("label.storageErrorBody"), {
+          context: contextLabel,
+        })
+      );
+    },
+    [t]
+  );
+  const persistStorageValue = useCallback(
+    async (key, value, contextLabel) => {
+      try {
+        await AsyncStorage.setItem(key, value);
+      } catch (error) {
+        handleStorageError(contextLabel, error);
+      }
+    },
+    [handleStorageError]
+  );
+  const markMotivationActionCompleted = useCallback(
+    (actionId) => {
+      if (!actionId) {
+        return;
+      }
+      setCompletedMotivationActionIds((current) => {
+        if (current.includes(actionId)) {
+          return current;
+        }
+        const next = [...current, actionId];
+        persistStorageValue(
+          STORAGE_KEYS.motivationActions,
+          JSON.stringify(next),
+          "motivation actions"
+        );
+        return next;
+      });
+    },
+    [persistStorageValue]
+  );
   const repsShort = t("label.repsShort");
   const voiceStatusText = voiceError
     ? voiceError
@@ -5137,6 +5180,8 @@ export default function App() {
       return STANDARD_SPORTS;
     }
     const searchCompact = stripNonAlphanumeric(normalizedSportSearch);
+    const searchTokens = splitSearchTokens(normalizedSportSearch);
+    const singleWordSearch = searchTokens.length === 1;
     const scoredMatches = STANDARD_SPORTS.map((entry) => {
       const match = getSportMatchScore(
         entry,
@@ -5161,7 +5206,24 @@ export default function App() {
         const labelB = getStandardSportLabel(b.entry, language);
         return labelA.localeCompare(labelB);
       });
-    return scoredMatches.slice(0, 6).map((item) => item.entry);
+    const prefixMatches = singleWordSearch
+      ? scoredMatches.filter((item) => item.match.index === 0)
+      : scoredMatches;
+    const dedupedMatches = [];
+    const seenRoots = new Set();
+    prefixMatches.forEach((item) => {
+      if (singleWordSearch) {
+        const candidateRoot = getLabelRoot(item.match.candidate);
+        if (candidateRoot && seenRoots.has(candidateRoot)) {
+          return;
+        }
+        if (candidateRoot) {
+          seenRoots.add(candidateRoot);
+        }
+      }
+      dedupedMatches.push(item);
+    });
+    return dedupedMatches.slice(0, 6).map((item) => item.entry);
   }, [language, normalizedSportSearch]);
   const showCustomSuggestionButton =
     trimmedSportSearch.length > 0 && standardSportSuggestions.length === 0;
@@ -5346,6 +5408,24 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       setNotificationsGranted(false);
       setTutorialSeen(tutorialSeenRaw === "true");
       setWorkoutHistory(workoutsRaw ? JSON.parse(workoutsRaw) : []);
+      const motivationActionsRaw = await AsyncStorage.getItem(
+        STORAGE_KEYS.motivationActions
+      );
+      let parsedCompletedMotivationActions = [];
+      if (motivationActionsRaw) {
+        try {
+          const parsed = JSON.parse(motivationActionsRaw);
+          if (Array.isArray(parsed)) {
+            parsedCompletedMotivationActions = parsed;
+          }
+        } catch (error) {
+          console.warn(
+            "Failed to parse completed motivation actions",
+            error
+          );
+        }
+      }
+      setCompletedMotivationActionIds(parsedCompletedMotivationActions);
       setHasLoaded(true);
     };
     load();
@@ -6046,6 +6126,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         standardSportId: selectedStandardSportId ?? undefined,
       };
       await saveSports([newSport, ...sports]);
+      markMotivationActionCompleted("newSport");
       if (tutorialActive && tutorialStep?.id === "createSportSave") {
         setTutorialWaitingForSportCreation(true);
         maybeAdvanceTutorial("saveSport");
@@ -7911,6 +7992,10 @@ const getSpeechLocale = () => {
     () => new Map(motivationActions.map((item) => [item.id, item])),
     [motivationActions]
   );
+  const completedMotivationActionIdsSet = useMemo(
+    () => new Set(completedMotivationActionIds),
+    [completedMotivationActionIds]
+  );
 
   const recommendedQuoteId = useMemo(() => {
     const hasEntries = (usageState.entryCount || 0) > 0;
@@ -7938,32 +8023,54 @@ const getSpeechLocale = () => {
   const recommendedActionId = useMemo(() => {
     const hasSports = activeSports.length > 0;
     const hasEntries = (usageState.entryCount || 0) > 0;
-    if (!hasSports || !hasEntries) {
-      return "startSport";
+    const candidateId = (() => {
+      if (!hasSports || !hasEntries) {
+        return "startSport";
+      }
+      if (highestAppUsageMinutes >= 45) {
+        return "apps";
+      }
+      const usedSeconds = usageState.usedSeconds || 0;
+      const remainingSeconds = usageState.remainingSeconds || 0;
+      if (remainingSeconds < 10 * 60 && usedSeconds > 0) {
+        return "workout";
+      }
+      const totalSeconds = usedSeconds + remainingSeconds;
+      const usageRatio = totalSeconds > 0 ? usedSeconds / totalSeconds : 0;
+      if (usageRatio >= 0.7 && remainingSeconds < 30 * 60) {
+        return "difficulty";
+      }
+      if (highestAppUsageMinutes >= 25) {
+        return "notifications";
+      }
+      return "stats";
+    })();
+    const isActionAvailable = (id) => {
+      const action = motivationActionMap.get(id);
+      return !!action && !action.disabled;
+    };
+    if (
+      candidateId &&
+      !completedMotivationActionIdsSet.has(candidateId) &&
+      isActionAvailable(candidateId)
+    ) {
+      return candidateId;
     }
-    if (highestAppUsageMinutes >= 45) {
-      return "apps";
-    }
-    const usedSeconds = usageState.usedSeconds || 0;
-    const remainingSeconds = usageState.remainingSeconds || 0;
-    if (remainingSeconds < 10 * 60 && usedSeconds > 0) {
-      return "workout";
-    }
-    const totalSeconds = usedSeconds + remainingSeconds;
-    const usageRatio = totalSeconds > 0 ? usedSeconds / totalSeconds : 0;
-    if (usageRatio >= 0.7 && remainingSeconds < 30 * 60) {
-      return "difficulty";
-    }
-    if (highestAppUsageMinutes >= 25) {
-      return "notifications";
-    }
-    return "stats";
+    const fallback = motivationActions.find(
+      (action) =>
+        !completedMotivationActionIdsSet.has(action.id) &&
+        !action.disabled
+    );
+    return fallback ? fallback.id : null;
   }, [
     activeSports.length,
     highestAppUsageMinutes,
     usageState.entryCount,
     usageState.remainingSeconds,
     usageState.usedSeconds,
+    completedMotivationActionIdsSet,
+    motivationActionMap,
+    motivationActions,
   ]);
 
   useEffect(() => {
@@ -7980,8 +8087,9 @@ const getSpeechLocale = () => {
   const activeQuoteTitle = activeQuote ? t(activeQuote.titleKey) : "";
   const activeQuoteBody = activeQuote ? t(activeQuote.bodyKey) : "";
 
-  const activeAction =
-    motivationActionMap.get(recommendedActionId) ?? motivationActions[0];
+  const activeAction = recommendedActionId
+    ? motivationActionMap.get(recommendedActionId)
+    : null;
   const activeActionTitle = activeAction ? t(activeAction.titleKey) : "";
   const activeActionBody = activeAction
     ? interpolateTemplate(
@@ -7993,8 +8101,11 @@ const getSpeechLocale = () => {
     activeAction?.actionLabelKey ?? "label.motivationActionDefault"
   );
   const shouldShowMotivationAction =
-    !dismissedMotivationActionId ||
-    dismissedMotivationActionId !== recommendedActionId;
+    activeAction &&
+    recommendedActionId &&
+    !completedMotivationActionIdsSet.has(recommendedActionId) &&
+    (!dismissedMotivationActionId ||
+      dismissedMotivationActionId !== recommendedActionId);
   const showMotivationBlock = missingPermissions || shouldShowMotivationAction;
 
   const handleMotivationAction = (actionItem) => {
@@ -8004,8 +8115,72 @@ const getSpeechLocale = () => {
     if (actionItem.id === recommendedActionId) {
       setDismissedMotivationActionId(actionItem.id);
     }
+    markMotivationActionCompleted(actionItem.id);
     actionItem.action();
   };
+
+  useEffect(() => {
+    if (usageState.entryCount > 0) {
+      markMotivationActionCompleted("startSport");
+    }
+    if (isWorkoutOpen || workoutRunning) {
+      markMotivationActionCompleted("workout");
+    }
+    if (overallStatsOpen) {
+      markMotivationActionCompleted("stats");
+    }
+    if (isSettingsOpen) {
+      markMotivationActionCompleted("settings");
+    }
+    if (isPrefaceSettingsOpen) {
+      markMotivationActionCompleted("preface");
+    }
+    if (isAppsSettingsOpen) {
+      markMotivationActionCompleted("apps");
+    }
+    if (showLanguageMenu) {
+      markMotivationActionCompleted("language");
+    }
+    if (notificationsPrompted) {
+      markMotivationActionCompleted("notifications");
+    }
+    if (voiceEnabled) {
+      markMotivationActionCompleted("voice");
+    }
+    if (tutorialActive) {
+      markMotivationActionCompleted("tutorial");
+    }
+  }, [
+    usageState.entryCount,
+    isWorkoutOpen,
+    workoutRunning,
+    overallStatsOpen,
+    isSettingsOpen,
+    isPrefaceSettingsOpen,
+    isAppsSettingsOpen,
+    showLanguageMenu,
+    notificationsPrompted,
+    voiceEnabled,
+    tutorialActive,
+    markMotivationActionCompleted,
+  ]);
+
+  useEffect(() => {
+    if (
+      !isSportModalOpen ||
+      !editingSportId ||
+      !motivationSport ||
+      motivationSport.id !== editingSportId
+    ) {
+      return;
+    }
+    markMotivationActionCompleted("difficulty");
+  }, [
+    isSportModalOpen,
+    editingSportId,
+    motivationSport?.id,
+    markMotivationActionCompleted,
+  ]);
 
   useEffect(() => {
     if (!infoHint) {
