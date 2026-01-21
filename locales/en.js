@@ -204,7 +204,7 @@ const en = {
       "Review your entries to see how far you've come.",
     "label.motivationQuoteStartTitle": "Fun fact",
     "label.motivationQuoteStartBody":
-      "Did you know that each unit multiplies your earned time? Start a sport and raise the difficulty to pull ahead.",
+      "Did you know that athletes in ancient Egypt practiced wrestling, archery, and swimming to train pharaohs for ceremonies and battles?",
     "label.motivationQuoteDifficultyTitle": "Quick reminder",
     "label.motivationQuoteDifficultyBody":
       "A slightly higher difficulty boosts the time each rep gives you—nudge the slider up and go for it.",

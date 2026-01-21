@@ -4027,6 +4027,9 @@ const STANDARD_SPORTS = RAW_STANDARD_SPORTS.map((sport) => ({
 const STANDARD_SPORT_IDS = new Set(STANDARD_SPORTS.map((sport) => sport.id));
 const getStandardSportLabel = (entry, language) =>
   entry.labels?.[language] || entry.labels?.en || entry.id;
+const STANDARD_SPORT_BY_ID = new Map(
+  STANDARD_SPORTS.map((sport) => [sport.id, sport])
+);
 
 const normalizeTextForSearch = (value) =>
   String(value || "")
@@ -5224,8 +5227,17 @@ export default function App() {
   }, [notificationsPrompted]);
 
   const getSportLabel = (sport) => {
+    if (!sport) {
+      return "";
+    }
     if (sport.presetKey) {
       return t(`sport.${sport.presetKey}`);
+    }
+    if (sport.standardSportId) {
+      const standardSport = STANDARD_SPORT_BY_ID.get(sport.standardSportId);
+      if (standardSport) {
+        return getStandardSportLabel(standardSport, language);
+      }
     }
     return sport.name;
   };
@@ -6788,6 +6800,39 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       InstaControl.setPrefaceDelaySeconds(parsed);
     }
     setIsPrefaceSettingsOpen(false);
+  };
+
+  const renderPrefaceSettingsModal = () => {
+    if (!isPrefaceSettingsOpen) {
+      return null;
+    }
+    return (
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalCard}>
+          <Text style={styles.modalTitle}>{t("label.prefaceSettings")}</Text>
+          <Text style={styles.rateLabel}>{t("label.prefaceDelay")}</Text>
+          <TextInput
+            style={styles.input}
+            value={prefaceDelayInput}
+            onChangeText={setPrefaceDelayInput}
+            keyboardType="number-pad"
+            placeholder="10"
+            placeholderTextColor="#7a7a7a"
+          />
+          <View style={styles.modalActions}>
+            <Pressable
+              style={styles.secondaryButton}
+              onPress={() => setIsPrefaceSettingsOpen(false)}
+            >
+              <Text style={styles.secondaryButtonText}>{t("label.cancel")}</Text>
+            </Pressable>
+            <Pressable style={styles.primaryButton} onPress={savePrefaceSettings}>
+              <Text style={styles.primaryButtonText}>{t("label.save")}</Text>
+            </Pressable>
+          </View>
+        </View>
+      </View>
+    );
   };
 
   const handleStart = () => {
@@ -9367,6 +9412,7 @@ const getSpeechLocale = () => {
             );
           })}
         </ScrollView>
+        {renderPrefaceSettingsModal()}
       </SafeAreaView>
     );
   }
@@ -10843,33 +10889,7 @@ const getSpeechLocale = () => {
           ) : null}
         </Pressable>
       </View>
-      {isPrefaceSettingsOpen ? (
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>{t("label.prefaceSettings")}</Text>
-            <Text style={styles.rateLabel}>{t("label.prefaceDelay")}</Text>
-            <TextInput
-              style={styles.input}
-              value={prefaceDelayInput}
-              onChangeText={setPrefaceDelayInput}
-              keyboardType="number-pad"
-              placeholder="10"
-              placeholderTextColor="#7a7a7a"
-            />
-            <View style={styles.modalActions}>
-              <Pressable
-                style={styles.secondaryButton}
-                onPress={() => setIsPrefaceSettingsOpen(false)}
-              >
-                <Text style={styles.secondaryButtonText}>{t("label.cancel")}</Text>
-              </Pressable>
-              <Pressable style={styles.primaryButton} onPress={savePrefaceSettings}>
-                <Text style={styles.primaryButtonText}>{t("label.save")}</Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      ) : null}
+      {renderPrefaceSettingsModal()}
       {isSportModalOpen ? (
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>

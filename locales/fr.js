@@ -202,7 +202,7 @@ const fr = {
       "Regarde tes entrées pour voir tes progrès.",
     "label.motivationQuoteStartTitle": "Petit retour",
     "label.motivationQuoteStartBody":
-      "Tu savais que quelques unités suffisent pour accumuler du temps d'écran ? Lance un sport et relève la difficulté.",
+      "Le savais-tu ? Dans l'Egypte ancienne, des sports comme la lutte, le tir a l'arc et la natation servaient a former les pharaons pour les ceremonies et les combats.",
     "label.motivationQuoteDifficultyTitle": "Astuce rapide",
     "label.motivationQuoteDifficultyBody":
       "Un peu plus de difficulté augmente la valeur de chaque répétition. Monte le curseur et fonce.",
