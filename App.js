@@ -6277,12 +6277,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   };
 
   const openAccessibilitySettings = async () => {
-    if (InstaControl?.openAccessibilitySettings) {
-      InstaControl.openAccessibilitySettings();
-    } else {
+    if (!InstaControl?.openAccessibilitySettings) {
       showPermissionInstruction("label.accessibilityTitle", "label.accessibilitySteps");
-      await openAppSettingsFallback();
+      return;
     }
+    InstaControl.openAccessibilitySettings();
     await AsyncStorage.setItem(STORAGE_KEYS.permissions, "true");
     setPermissionsPrompted(true);
   };
@@ -6312,12 +6311,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   };
 
   const openUsageAccessSettings = async () => {
-    if (InstaControl?.openUsageAccessSettings) {
-      InstaControl.openUsageAccessSettings();
-    } else {
+    if (!InstaControl?.openUsageAccessSettings) {
       showPermissionInstruction("label.usageAccessTitle", "label.usageAccessSteps");
-      await openAppSettingsFallback();
+      return;
     }
+    InstaControl.openUsageAccessSettings();
     await AsyncStorage.setItem(STORAGE_KEYS.usagePermissions, "true");
     setUsagePermissionsPrompted(true);
   };
@@ -7343,14 +7341,6 @@ const getSpeechLocale = () => {
       return;
     }
     Linking.openSettings();
-  };
-
-  const openAppSettingsFallback = async () => {
-    try {
-      await Linking.openSettings();
-    } catch (error) {
-      console.warn("Failed to open settings fallback", error);
-    }
   };
 
   const maybePromptNotifications = async () => {
