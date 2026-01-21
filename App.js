@@ -6272,12 +6272,19 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setNotificationsGranted(!!granted);
   };
 
+  const showPermissionInstruction = (titleKey, bodyKey) => {
+    Alert.alert(t(titleKey), t(bodyKey));
+  };
+
   const openAccessibilitySettings = async () => {
     if (InstaControl?.openAccessibilitySettings) {
       InstaControl.openAccessibilitySettings();
-      await AsyncStorage.setItem(STORAGE_KEYS.permissions, "true");
-      setPermissionsPrompted(true);
+    } else {
+      showPermissionInstruction("label.accessibilityTitle", "label.accessibilitySteps");
+      await openAppSettingsFallback();
     }
+    await AsyncStorage.setItem(STORAGE_KEYS.permissions, "true");
+    setPermissionsPrompted(true);
   };
 
   const requestAccessibilityAccess = () => {
@@ -6307,9 +6314,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   const openUsageAccessSettings = async () => {
     if (InstaControl?.openUsageAccessSettings) {
       InstaControl.openUsageAccessSettings();
-      await AsyncStorage.setItem(STORAGE_KEYS.usagePermissions, "true");
-      setUsagePermissionsPrompted(true);
+    } else {
+      showPermissionInstruction("label.usageAccessTitle", "label.usageAccessSteps");
+      await openAppSettingsFallback();
     }
+    await AsyncStorage.setItem(STORAGE_KEYS.usagePermissions, "true");
+    setUsagePermissionsPrompted(true);
   };
 
   useEffect(() => {
@@ -7333,6 +7343,14 @@ const getSpeechLocale = () => {
       return;
     }
     Linking.openSettings();
+  };
+
+  const openAppSettingsFallback = async () => {
+    try {
+      await Linking.openSettings();
+    } catch (error) {
+      console.warn("Failed to open settings fallback", error);
+    }
   };
 
   const maybePromptNotifications = async () => {
