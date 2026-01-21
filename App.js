@@ -23,7 +23,35 @@ import {
   FlatList,
   InteractionManager,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+const makeStorageFallback = () => {
+  const memory = new Map();
+  return {
+    getItem: async (key) => (memory.has(key) ? memory.get(key) : null),
+    setItem: async (key, value) => {
+      memory.set(key, value);
+      return value;
+    },
+    removeItem: async (key) => {
+      memory.delete(key);
+      return null;
+    },
+    multiRemove: async (keys = []) => {
+      keys.forEach((key) => memory.delete(key));
+      return null;
+    },
+  };
+};
+
+let AsyncStorage = makeStorageFallback();
+try {
+  const imported = require("@react-native-async-storage/async-storage");
+  AsyncStorage = imported.default || imported;
+} catch (error) {
+  console.warn(
+    "Native AsyncStorage module unavailable, falling back to in-memory storage.",
+    error
+  );
+}
 import Voice from "@react-native-voice/voice";
 import { I18nextProvider, useTranslation } from "react-i18next";
 import i18n from "./i18n";
@@ -4936,7 +4964,7 @@ const pickElbowAngle = (landmarks, side, minConfidence) => {
   return angleBetween(shoulder, elbow, wrist);
 };
 
-export default function App() {
+function AppContent() {
   const { width, height } = useWindowDimensions();
   const { t } = useTranslation();
   const [sports, setSports] = useState([]);
@@ -13678,3 +13706,59 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
 });
+
+const errorStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+    backgroundColor: COLORS.cardDark,
+  },
+  title: {
+    color: COLORS.accent,
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 12,
+  },
+  message: {
+    color: COLORS.text,
+    textAlign: "center",
+  },
+});
+
+class AppErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { error };
+  }
+
+  componentDidCatch(error, info) {
+    console.error("App initialization failed", error, info?.componentStack);
+  }
+
+  render() {
+    const { error } = this.state;
+    if (error) {
+      return (
+        <SafeAreaView style={errorStyles.container}>
+          <Text style={errorStyles.title}>App konnte nicht geladen werden</Text>
+          <Text style={errorStyles.message}>{error.message}</Text>
+        </SafeAreaView>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+export default function App() {
+  return (
+    <AppErrorBoundary>
+      <AppContent />
+    </AppErrorBoundary>
+  );
+}
