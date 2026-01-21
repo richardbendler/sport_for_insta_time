@@ -114,9 +114,11 @@ object ScreenTimeStore {
     val entries = ensureLegacyMigration(loadEntries(prefs), prefs, now)
     val changed = applyDecay(entries, now)
     val persisted = entries.filter { shouldKeepEntry(it, now) }
+    val cutoff = now - DAY_MS
+    val recentEntries = entries.filter { it.remainingSeconds > 0 && it.createdAt >= cutoff }
     val remainingBySport = mutableMapOf<String, Int>()
     var total = 0
-    entries.filter { it.remainingSeconds > 0 }.forEach { entry ->
+    recentEntries.forEach { entry ->
       total += entry.remainingSeconds
       val sportKey = entry.sportId
       if (!sportKey.isNullOrBlank()) {
@@ -126,7 +128,7 @@ object ScreenTimeStore {
     if (changed || persisted.size != entries.size) {
       saveEntries(prefs, persisted)
     }
-    return Totals(total, remainingBySport, entries.count { it.remainingSeconds > 0 })
+    return Totals(total, remainingBySport, recentEntries.size)
   }
 
   fun getBreakdown(prefs: SharedPreferences, now: Long): Breakdown {
@@ -137,7 +139,7 @@ object ScreenTimeStore {
     var totalToday = 0
     var carryover = 0
     entries.forEach { entry ->
-      if (entry.remainingSeconds > 0) {
+      if (entry.createdAt >= cutoff && entry.remainingSeconds > 0) {
         remainingTotal += entry.remainingSeconds
       }
       if (entry.createdAt >= cutoff) {
