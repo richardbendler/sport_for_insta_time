@@ -207,7 +207,7 @@ const es = {
       "Mira tus registros para ver tu progreso.",
     "label.motivationQuoteStartTitle": "Dato curioso",
     "label.motivationQuoteStartBody":
-      "¿Sabías que cada unidad suma más tiempo de pantalla? Crea un deporte ahora y sube la dificultad para multiplicar tu recompensa.",
+      "Sabias que en el antiguo Egipto ya practicaban deportes como la lucha, el tiro con arco y la natacion para preparar a los faraones para ceremonias y batallas?",
     "label.motivationQuoteDifficultyTitle": "Consejo rápido",
     "label.motivationQuoteDifficultyBody":
       "Aumentar un poco la dificultad hace que cada repetición valga más. Sube el regulador y sigue adelante.",

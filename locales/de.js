@@ -209,7 +209,7 @@ const de = {
       "Sieh nach, wie oft du Sport gemacht hast und bleib im Rhythmus.",
     "label.motivationQuoteStartTitle": "Wusstest du schon?",
     "label.motivationQuoteStartBody":
-      "Wusstest du, dass schon wenige Einheiten dir Screen Time sichern? Starte jetzt deinen Sport und stelle die Schwierigkeit hoch.",
+      "Wusstest du, dass im alten Aegypten Sportarten wie Ringen, Bogenschiessen und Schwimmen genutzt wurden, um Pharaonen auf Rituale und Schlachten vorzubereiten?",
     "label.motivationQuoteDifficultyTitle": "Ein Extra-Tipp",
     "label.motivationQuoteDifficultyBody":
       "Ein höherer Schwierigkeitsgrad multipliziert deine erspielte Zeit; schiebe den Regler nach oben und geh richtig ran.",
