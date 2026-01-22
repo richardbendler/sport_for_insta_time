@@ -122,6 +122,8 @@ const en = {
     "label.todayScreenTime": "Earned time",
     "label.widgets": "Widgets",
     "label.widget": "Widget",
+    "label.widgetInstructions":
+      "Long-press an empty spot on your home screen, tap Widgets, and add the Sport for Screen Time widget.",
     "label.widgetOverall": "General widget",
     "label.recentActivity": "Recent activity",
     "label.recentActivityEmpty": "No recent entries yet.",

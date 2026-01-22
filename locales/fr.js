@@ -120,6 +120,8 @@ const fr = {
     "label.todayScreenTime": "Temps gagné",
     "label.widgets": "Widgets",
     "label.widget": "Widget",
+    "label.widgetInstructions":
+      "Maintenez le doigt appuyé sur un espace libre de l'écran d'accueil, choisissez Widgets et ajoutez le widget Sport for Screen Time.",
     "label.widgetOverall": "Widget general",
     "label.recentActivity": "Activite recente",
     "label.recentActivityEmpty": "Aucune entree recente.",
