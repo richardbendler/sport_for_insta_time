@@ -128,6 +128,8 @@ const de = {
     "label.todayScreenTime": "Erspielte Zeit",
     "label.widgets": "Widgets",
     "label.widget": "Widget",
+    "label.widgetInstructions":
+      "Halte einen freien Bereich des Startbildschirms gedrückt, tippe auf \"Widgets\" und füge das Sport für Screen Time-Widget hinzu.",
     "label.widgetOverall": "Allgemeines Widget",
     "label.recentActivity": "Letzte Aktivit\u00e4t",
     "label.recentActivityEmpty": "Keine Eintr\u00e4ge vorhanden.",

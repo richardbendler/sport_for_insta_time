@@ -6276,12 +6276,28 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     Alert.alert(t(titleKey), t(bodyKey));
   };
 
+  const showWidgetInstructions = useCallback(() => {
+    Alert.alert(t("label.widget"), t("label.widgetInstructions"));
+  }, [t]);
+
+  const requestWidgetPin = useCallback(
+    (widgetId, widgetLabel) => {
+      if (InstaControl?.requestPinWidget) {
+        InstaControl.requestPinWidget(widgetId, widgetLabel);
+        return;
+      }
+      showWidgetInstructions();
+    },
+    [showWidgetInstructions]
+  );
+
   const openAccessibilitySettings = async () => {
-    if (!InstaControl?.openAccessibilitySettings) {
+    if (InstaControl?.openAccessibilitySettings) {
+      InstaControl.openAccessibilitySettings();
+    } else {
       showPermissionInstruction("label.accessibilityTitle", "label.accessibilitySteps");
-      return;
+      await openAppSettingsFallback();
     }
-    InstaControl.openAccessibilitySettings();
     await AsyncStorage.setItem(STORAGE_KEYS.permissions, "true");
     setPermissionsPrompted(true);
   };
@@ -6311,11 +6327,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   };
 
   const openUsageAccessSettings = async () => {
-    if (!InstaControl?.openUsageAccessSettings) {
+    if (InstaControl?.openUsageAccessSettings) {
+      InstaControl.openUsageAccessSettings();
+    } else {
       showPermissionInstruction("label.usageAccessTitle", "label.usageAccessSteps");
-      return;
+      await openAppSettingsFallback();
     }
-    InstaControl.openUsageAccessSettings();
     await AsyncStorage.setItem(STORAGE_KEYS.usagePermissions, "true");
     setUsagePermissionsPrompted(true);
   };
@@ -7343,6 +7360,14 @@ const getSpeechLocale = () => {
     Linking.openSettings();
   };
 
+  const openAppSettingsFallback = async () => {
+    try {
+      await Linking.openSettings();
+    } catch (error) {
+      console.warn("Failed to open settings fallback", error);
+    }
+  };
+
   const maybePromptNotifications = async () => {
     if (Platform.OS !== "android") {
       return;
@@ -7914,13 +7939,8 @@ const getSpeechLocale = () => {
         titleKey: "label.motivationWidgetTitle",
         bodyKey: "label.motivationWidgetBody",
         actionLabelKey: "label.motivationActionWidget",
-        action: () => {
-          if (InstaControl?.requestPinWidget) {
-            InstaControl.requestPinWidget("overall", t("label.todayScreenTime"));
-            return;
-          }
-          showMotivationAlert("label.motivationWidgetTitle", "label.motivationWidgetBody");
-        },
+        action: () =>
+          requestWidgetPin("overall", t("label.todayScreenTime")),
       },
       {
         id: "notifications",
@@ -8017,6 +8037,7 @@ const getSpeechLocale = () => {
     openSportModal,
     openStatsOverview,
     openWorkout,
+    requestWidgetPin,
     setShowLanguageMenu,
     showMotivationAlert,
     startTutorial,
@@ -10264,10 +10285,7 @@ const getSpeechLocale = () => {
             <Pressable
               style={[styles.secondaryButton, styles.widgetButton]}
               onPress={() =>
-                InstaControl?.requestPinWidget?.(
-                  "overall",
-                  t("label.todayScreenTime")
-                )
+                requestWidgetPin("overall", t("label.todayScreenTime"))
               }
             >
               <View style={styles.widgetButtonContent}>
@@ -10736,9 +10754,7 @@ const getSpeechLocale = () => {
                         <View style={styles.sportGridColumnLeft}>
                           <Pressable
                             style={[styles.secondaryButton, styles.widgetButton]}
-                            onPress={() =>
-                              InstaControl?.requestPinWidget?.(sport.id, sportLabel)
-                            }
+                            onPress={() => requestWidgetPin(sport.id, sportLabel)}
                           >
                             <View style={styles.widgetButtonContent}>
                               <WidgetGlyph color={COLORS.text} />
@@ -10889,9 +10905,7 @@ const getSpeechLocale = () => {
                           <View style={styles.sportGridColumnLeft}>
                       <Pressable
                         style={[styles.secondaryButton, styles.widgetButton]}
-                        onPress={() =>
-                          InstaControl?.requestPinWidget?.(sport.id, sportLabel)
-                        }
+                        onPress={() => requestWidgetPin(sport.id, sportLabel)}
                       >
                         <View style={styles.widgetButtonContent}>
                           <WidgetGlyph color={COLORS.text} />
