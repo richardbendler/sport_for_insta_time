@@ -78,6 +78,7 @@ eas login
 cd ~/sport_for_insta_time
 printf "sdk.dir=%s\n" "$HOME/Android/Sdk" > android/local.properties
 npm ci --include=dev || (rm -rf node_modules package-lock.json && npm install)
+cd ~/sport_for_insta_time
 eas build --platform android --profile production --local
 ```
 
