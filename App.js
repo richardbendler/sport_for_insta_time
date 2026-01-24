@@ -127,9 +127,9 @@ const DEFAULT_DIFFICULTY_INDEX = (() => {
 })();
 const DEFAULT_TIME_RATE = 0.5;
 const DEFAULT_REPS_RATE = 0.5;
-const ADMIN_FACTOR_TIME = 0.005; // tweak this factor to globally adjust granted Screen Time for non-reps sports
-const ADMIN_FACTOR_REPS = 0.11; // dedicated admin factor for reps-based screen time
-const ADMIN_FACTOR_WEIGHTED = 0.001; // base admin multiplier applied only for weighted reps entries
+const ADMIN_FACTOR_TIME = 0.0025; // tweak this factor to globally adjust granted Screen Time for non-reps sports
+const ADMIN_FACTOR_REPS = 0.055; // dedicated admin factor for reps-based screen time
+const ADMIN_FACTOR_WEIGHTED = 0.0005; // base admin multiplier applied only for weighted reps entries
 const DEFAULT_WEIGHT_RATE = 0.04;
 const WORKOUT_CONTINUE_WINDOW_MS = 30 * 60 * 1000;
 const TUTORIAL_STRONG_HIGHLIGHT = "rgba(249, 115, 22, 0.2)";
@@ -4986,6 +4986,8 @@ function AppContent() {
   const [isPrefaceSettingsOpen, setIsPrefaceSettingsOpen] = useState(false);
   const [isAppsSettingsOpen, setIsAppsSettingsOpen] = useState(false);
   const [isWorkoutOpen, setIsWorkoutOpen] = useState(false);
+  const [isScreenTimeDetailsOpen, setIsScreenTimeDetailsOpen] =
+    useState(false);
   const [prefaceDelayInput, setPrefaceDelayInput] = useState("");
   const [currentWorkout, setCurrentWorkout] = useState(null);
   const [workoutHistory, setWorkoutHistory] = useState([]);
@@ -5040,6 +5042,7 @@ function AppContent() {
     entryCount: 0,
     carryoverSeconds: 0,
   });
+  const [screenTimeEntries, setScreenTimeEntries] = useState([]);
   const [needsAccessibility, setNeedsAccessibility] = useState(true);
   const [accessibilityDisclosureVisible, setAccessibilityDisclosureVisible] =
     useState(false);
@@ -5050,7 +5053,7 @@ function AppContent() {
   const [usageAccessGranted, setUsageAccessGranted] = useState(false);
   const [notificationsPrompted, setNotificationsPrompted] = useState(false);
   const [notificationsGranted, setNotificationsGranted] = useState(false);
-  const [permissionsPanelOpen, setPermissionsPanelOpen] = useState(true);
+  const [permissionsPanelOpen, setPermissionsPanelOpen] = useState(false);
   const [permissionsCheckTick, setPermissionsCheckTick] = useState(0);
   const [dismissedMotivationActionId, setDismissedMotivationActionId] =
     useState(null);
@@ -5237,17 +5240,19 @@ function AppContent() {
     const prefixMatches = singleWordSearch
       ? scoredMatches.filter((item) => item.match.index === 0)
       : scoredMatches;
+    const shouldDedupRoots = singleWordSearch && normalizedSportSearch.length <= 2;
+    if (!shouldDedupRoots) {
+      return prefixMatches.slice(0, 6).map((item) => item.entry);
+    }
     const dedupedMatches = [];
     const seenRoots = new Set();
     prefixMatches.forEach((item) => {
-      if (singleWordSearch) {
-        const candidateRoot = getLabelRoot(item.match.candidate);
-        if (candidateRoot && seenRoots.has(candidateRoot)) {
-          return;
-        }
-        if (candidateRoot) {
-          seenRoots.add(candidateRoot);
-        }
+      const candidateRoot = getLabelRoot(item.match.candidate);
+      if (candidateRoot && seenRoots.has(candidateRoot)) {
+        return;
+      }
+      if (candidateRoot) {
+        seenRoots.add(candidateRoot);
       }
       dedupedMatches.push(item);
     });
@@ -6259,6 +6264,20 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
   };
 
+  const refreshScreenTimeEntries = useCallback(async () => {
+    if (!InstaControl?.getScreenTimeEntries) {
+      setScreenTimeEntries([]);
+      return;
+    }
+    try {
+      const entries = await InstaControl.getScreenTimeEntries();
+      setScreenTimeEntries(entries || []);
+    } catch (error) {
+      console.warn("getScreenTimeEntries failed", error);
+      setScreenTimeEntries([]);
+    }
+  }, []);
+
   const refreshNotificationPermission = async () => {
     if (Platform.OS !== "android") {
       return;
@@ -6388,6 +6407,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
 
   useEffect(() => {
     const handler = () => {
+      if (isScreenTimeDetailsOpen) {
+        setIsScreenTimeDetailsOpen(false);
+        return true;
+      }
       if (statsSportId) {
         setStatsSportId(null);
         return true;
@@ -6442,6 +6465,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     selectedSportId,
     isAppsSettingsOpen,
     isSettingsOpen,
+    isScreenTimeDetailsOpen,
     isWorkoutOpen,
     workoutRunning,
     isPrefaceSettingsOpen,
@@ -6545,6 +6569,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setOverallStatsOpen(false);
     setIsPrefaceSettingsOpen(false);
     setIsWorkoutOpen(false);
+    setIsScreenTimeDetailsOpen(false);
     setSelectedSportId(null);
     setStatsSportId(null);
     setStatsDayKey(null);
@@ -6556,6 +6581,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setIsSettingsOpen(false);
     setOverallStatsOpen(false);
     setIsPrefaceSettingsOpen(false);
+    setIsScreenTimeDetailsOpen(false);
     setSelectedSportId(null);
     setStatsSportId(null);
     setStatsDayKey(null);
@@ -6570,6 +6596,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setIsSettingsOpen(false);
     setIsPrefaceSettingsOpen(false);
     setIsWorkoutOpen(false);
+    setIsScreenTimeDetailsOpen(false);
     setSelectedSportId(null);
     setStatsSportId(null);
     setStatsDayKey(null);
@@ -6587,6 +6614,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setOverallDayKey(null);
     setStatsEditMode(false);
     setOverallStatsOpen(false);
+    setIsScreenTimeDetailsOpen(false);
     setStatsSportId(sportId);
   };
 
@@ -6594,6 +6622,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setOverallStatsOpen(false);
     setIsPrefaceSettingsOpen(false);
     setIsWorkoutOpen(false);
+    setIsScreenTimeDetailsOpen(false);
     setSelectedSportId(null);
     setStatsSportId(null);
     setStatsDayKey(null);
@@ -6607,6 +6636,22 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   const handleSelectSport = (sportId) => {
     setSelectedSportId(sportId);
     maybeAdvanceTutorial("openSport");
+  };
+
+  const openScreenTimeDetails = () => {
+    setIsSettingsOpen(false);
+    setOverallStatsOpen(false);
+    setIsPrefaceSettingsOpen(false);
+    setIsWorkoutOpen(false);
+    setSelectedSportId(null);
+    setStatsSportId(null);
+    setStatsDayKey(null);
+    setOverallDayKey(null);
+    setStatsEditMode(false);
+    setIsScreenTimeDetailsOpen(true);
+    refreshUsageState();
+    refreshScreenTimeEntries();
+    loadInstalledApps();
   };
 
   const handleBackFromSport = () => {
@@ -7572,6 +7617,90 @@ const getSpeechLocale = () => {
   const rollingEarnedSeconds = useMemo(
     () => rollingScreenSecondsTotal(logs, sports),
     [logs, sports]
+  );
+  const totalRemainingSeconds =
+    (usageState.remainingSeconds || 0) +
+    (usageState.carryoverSeconds || 0);
+  const remainingBySportList = useMemo(() => {
+    const entries = Object.entries(usageState.remainingBySport || {});
+    return entries
+      .map(([sportId, seconds]) => {
+        const sport = sports.find((item) => item.id === sportId);
+        return {
+          sportId,
+          seconds: Number(seconds) || 0,
+          label: sport ? getSportLabel(sport) : sportId,
+          icon: sport?.icon || DEFAULT_ICON,
+        };
+      })
+      .filter((entry) => entry.seconds > 0)
+      .sort((a, b) => b.seconds - a.seconds);
+  }, [sports, usageState.remainingBySport, language]);
+  const earnedBySportList = useMemo(() => {
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+    return sports
+      .map((sport) => {
+        const entries = flattenSportEntries(logs, sport.id);
+        const totalSeconds = entries.reduce(
+          (sum, entry) => {
+            if (!entry?.ts || entry.ts < cutoff) {
+              return sum;
+            }
+            return sum + resolveEntryScreenSeconds(sport, entry);
+          },
+          0
+        );
+        return {
+          sportId: sport.id,
+          label: getSportLabel(sport),
+          icon: sport.icon || DEFAULT_ICON,
+          totalSeconds,
+        };
+      })
+      .filter((entry) => entry.totalSeconds > 0)
+      .sort((a, b) => b.totalSeconds - a.totalSeconds);
+  }, [logs, sports, language]);
+  const usageByAppList = useMemo(() => {
+    return (installedApps || [])
+      .map((app) => ({
+        key: app.packageName || app.label || "",
+        label: app.label || app.packageName || "",
+        seconds: Math.floor((appUsageMap[app.packageName] || 0) / 1000),
+      }))
+      .filter((entry) => entry.seconds > 0 && entry.label)
+      .sort((a, b) => b.seconds - a.seconds);
+  }, [appUsageMap, installedApps]);
+  const screenTimeEntryRows = useMemo(() => {
+    return (screenTimeEntries || [])
+      .map((entry, index) => {
+        const sport = sports.find((item) => item.id === entry.sportId);
+        const createdAt = Number(entry.createdAt || 0);
+        const remainingSeconds = Number(entry.remainingSeconds || 0);
+        const originalSeconds = Number(entry.originalSeconds || 0);
+        const dayKey = createdAt
+          ? dateKeyFromDate(new Date(createdAt))
+          : todayKey();
+        return {
+          key: entry.id || `${entry.sportId || "entry"}-${index}`,
+          sportId: entry.sportId || null,
+          label: sport ? getSportLabel(sport) : t("label.screenTime"),
+          icon: sport?.icon || DEFAULT_ICON,
+          createdAt,
+          dayKey,
+          remainingSeconds,
+          originalSeconds,
+        };
+      })
+      .sort((a, b) => b.createdAt - a.createdAt);
+  }, [screenTimeEntries, sports, language, t]);
+  const screenTimeEntryCutoff = Date.now() - 24 * 60 * 60 * 1000;
+  const currentScreenTimeEntries = screenTimeEntryRows.filter(
+    (entry) =>
+      entry.createdAt >= screenTimeEntryCutoff && entry.remainingSeconds > 0
+  );
+  const carryoverScreenTimeEntries = screenTimeEntryRows.filter(
+    (entry) =>
+      entry.createdAt < screenTimeEntryCutoff && entry.remainingSeconds > 0
   );
   const trackBodyKey =
     selectedSport && selectedSport.type === "time"
@@ -8953,7 +9082,7 @@ const getSpeechLocale = () => {
 
   const renderAppListHeader = useCallback(
     () => (
-      <>
+      <View style={styles.appsHeaderWrap}>
         <View style={styles.headerRow}>
           <Pressable
             style={styles.backButton}
@@ -8996,7 +9125,7 @@ const getSpeechLocale = () => {
             ) : null}
           </>
         )}
-      </>
+      </View>
     ),
     [
       appSearchInput,
@@ -9958,6 +10087,214 @@ const getSpeechLocale = () => {
             </View>
           </View>
         )}
+      </SafeAreaView>
+    );
+  }
+
+  if (isScreenTimeDetailsOpen) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ScrollView
+          ref={scrollViewRef}
+          contentContainerStyle={styles.scrollContent}
+        >
+          <View style={styles.headerRow}>
+            <View style={styles.workoutHeaderLeft}>
+              <Pressable style={styles.backButton} onPress={openHome}>
+                <Text style={styles.backText}>{t("label.back")}</Text>
+              </Pressable>
+              <View style={styles.headerTitleBlock}>
+                <View style={styles.titleWrap}>
+                  <Text style={styles.title}>{t("app.title")}</Text>
+                  <View style={styles.titleDecoration} />
+                </View>
+                <Text style={styles.subtitle}>
+                  {t("label.screenTimeDetailsTitle")}
+                </Text>
+              </View>
+            </View>
+            {renderTutorialHeaderButton()}
+          </View>
+          {renderMainNav("home")}
+          <Text style={styles.sectionTitle}>{t("label.breakdownSummary")}</Text>
+          <View style={styles.infoCard}>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>{t("label.screenTime")}</Text>
+              <Text style={styles.detailValue}>
+                {formatScreenTime(rollingEarnedSeconds)}
+              </Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>{t("label.used")}</Text>
+              <Text style={styles.detailValue}>
+                {formatScreenTime(usageState.usedSeconds || 0)}
+              </Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>{t("label.remainingCurrent")}</Text>
+              <Text style={styles.detailValue}>
+                {formatScreenTime(usageState.remainingSeconds || 0)}
+              </Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>{t("label.carryover")}</Text>
+              <Text style={styles.detailValue}>
+                {formatScreenTime(usageState.carryoverSeconds || 0)}
+              </Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>{t("label.remaining")}</Text>
+              <Text style={[styles.detailValue, styles.detailValueStrong]}>
+                {formatScreenTime(totalRemainingSeconds)}
+              </Text>
+            </View>
+          </View>
+          <Text style={styles.sectionTitle}>
+            {t("label.remainingBySport")}
+          </Text>
+          <View style={styles.infoCard}>
+            {remainingBySportList.length === 0 ? (
+              <Text style={styles.helperText}>
+                {t("label.noRemainingBySport")}
+              </Text>
+            ) : (
+              remainingBySportList.map((entry) => (
+                <View key={entry.sportId} style={styles.detailListItem}>
+                  <View style={styles.detailListLeft}>
+                    <Text style={styles.detailListIcon}>{entry.icon}</Text>
+                    <Text style={styles.detailListLabel}>{entry.label}</Text>
+                  </View>
+                  <Text style={styles.detailListValue}>
+                    {formatScreenTime(entry.seconds)}
+                  </Text>
+                </View>
+              ))
+            )}
+          </View>
+          <Text style={styles.sectionTitle}>
+            {t("label.screenTimeEntriesCurrent")}
+          </Text>
+          <View style={styles.infoCard}>
+            {currentScreenTimeEntries.length === 0 ? (
+              <Text style={styles.helperText}>
+                {t("label.noScreenTimeEntriesCurrent")}
+              </Text>
+            ) : (
+              currentScreenTimeEntries.map((entry) => (
+                <View key={entry.key} style={styles.detailEntryRow}>
+                  <View style={styles.detailEntryLeft}>
+                    <Text style={styles.detailListIcon}>{entry.icon}</Text>
+                    <View>
+                      <Text style={styles.detailListLabel}>{entry.label}</Text>
+                      <Text style={styles.detailEntryMeta}>
+                        {formatDateLabel(entry.dayKey)} ·{" "}
+                        {formatTime(entry.createdAt || Date.now())}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.detailEntryRight}>
+                    <Text style={styles.detailEntryValue}>
+                      {formatScreenTime(entry.remainingSeconds)}
+                    </Text>
+                    <Text style={styles.detailEntrySubValue}>
+                      {t("label.screenTimeEntryOriginal")}:{" "}
+                      {formatScreenTime(entry.originalSeconds)}
+                    </Text>
+                  </View>
+                </View>
+              ))
+            )}
+          </View>
+          <Text style={styles.sectionTitle}>
+            {t("label.screenTimeEntriesCarryover")}
+          </Text>
+          <View style={styles.infoCard}>
+            {carryoverScreenTimeEntries.length === 0 ? (
+              <Text style={styles.helperText}>
+                {t("label.noScreenTimeEntriesCarryover")}
+              </Text>
+            ) : (
+              carryoverScreenTimeEntries.map((entry) => (
+                <View key={entry.key} style={styles.detailEntryRow}>
+                  <View style={styles.detailEntryLeft}>
+                    <Text style={styles.detailListIcon}>{entry.icon}</Text>
+                    <View>
+                      <Text style={styles.detailListLabel}>{entry.label}</Text>
+                      <Text style={styles.detailEntryMeta}>
+                        {formatDateLabel(entry.dayKey)} ·{" "}
+                        {formatTime(entry.createdAt || Date.now())}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.detailEntryRight}>
+                    <Text style={styles.detailEntryValue}>
+                      {formatScreenTime(entry.remainingSeconds)}
+                    </Text>
+                    <Text style={styles.detailEntrySubValue}>
+                      {t("label.screenTimeEntryOriginal")}:{" "}
+                      {formatScreenTime(entry.originalSeconds)}
+                    </Text>
+                  </View>
+                </View>
+              ))
+            )}
+          </View>
+          <Text style={styles.sectionTitle}>{t("label.earnedBySport")}</Text>
+          <View style={styles.infoCard}>
+            {earnedBySportList.length === 0 ? (
+              <Text style={styles.helperText}>
+                {t("label.noEarnedBySport")}
+              </Text>
+            ) : (
+              earnedBySportList.map((entry) => (
+                <View key={entry.sportId} style={styles.detailListItem}>
+                  <View style={styles.detailListLeft}>
+                    <Text style={styles.detailListIcon}>{entry.icon}</Text>
+                    <Text style={styles.detailListLabel}>{entry.label}</Text>
+                  </View>
+                  <Text style={styles.detailListValue}>
+                    {formatScreenTime(entry.totalSeconds)}
+                  </Text>
+                </View>
+              ))
+            )}
+          </View>
+          <Text style={styles.sectionTitle}>{t("label.usageBreakdown")}</Text>
+          <View style={styles.infoCard}>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>{t("label.used")}</Text>
+              <Text style={styles.detailValue}>
+                {formatScreenTime(usageState.usedSeconds || 0)}
+              </Text>
+            </View>
+            {usageAccessMissing ? (
+              <Text style={styles.helperText}>
+                {t("label.usageAccessMissing")}
+              </Text>
+            ) : usageByAppList.length === 0 ? (
+              <Text style={styles.helperText}>{t("label.noUsageData")}</Text>
+            ) : (
+              usageByAppList.map((entry) => (
+                <View key={entry.key} style={styles.detailListItem}>
+                  <Text style={styles.detailListLabel}>{entry.label}</Text>
+                  <Text style={styles.detailListValue}>
+                    {formatScreenTime(entry.seconds)}
+                  </Text>
+                </View>
+              ))
+            )}
+          </View>
+          <Text style={styles.sectionTitle}>{t("label.carryover")}</Text>
+          <View style={styles.infoCard}>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>{t("label.carryover")}</Text>
+              <Text style={styles.detailValue}>
+                {formatScreenTime(usageState.carryoverSeconds || 0)}
+              </Text>
+            </View>
+            <Text style={styles.helperText}>{t("label.carryoverHint")}</Text>
+          </View>
+        </ScrollView>
       </SafeAreaView>
     );
   }
@@ -11065,32 +11402,13 @@ const getSpeechLocale = () => {
             >
               <InfoGlyph type="remaining" color={COLORS.text} />
               <Text style={styles.infoValue}>
-                {formatScreenTime(usageState.remainingSeconds || 0)}
+                {formatScreenTime(totalRemainingSeconds)}
               </Text>
               <Text style={styles.infoLabel}>{t("label.remaining")}</Text>
-            </Pressable>
-            <Pressable
-              style={styles.infoItem}
-              onLayout={(event) => {
-                const layout = event.nativeEvent.layout;
-                setInfoAnchors((prev) => ({
-                  ...prev,
-                  carryover: layout,
-                }));
-              }}
-              onPress={() =>
-                showInfoHint(
-                  "carryover",
-                  "label.carryover",
-                  "label.carryoverHint"
-                )
-              }
-            >
-              <InfoGlyph type="carryover" color={COLORS.text} />
-              <Text style={styles.infoValue}>
+              <Text style={styles.infoSubLabel}>
+                {t("label.carryoverInline")}:{" "}
                 {formatScreenTime(usageState.carryoverSeconds || 0)}
               </Text>
-              <Text style={styles.infoLabel}>{t("label.carryover")}</Text>
             </Pressable>
           </View>
           {infoHint ? (
@@ -11110,6 +11428,17 @@ const getSpeechLocale = () => {
             >
               <Text style={styles.infoTooltipTitle}>{infoHint.title}</Text>
               <Text style={styles.infoTooltipText}>{infoHint.body}</Text>
+              <Pressable
+                onPress={(event) => {
+                  event.stopPropagation?.();
+                  setInfoHint(null);
+                  openScreenTimeDetails();
+                }}
+              >
+                <Text style={styles.infoTooltipLink}>
+                  {t("label.moreInfo")}
+                </Text>
+              </Pressable>
             </Pressable>
           ) : null}
         </Pressable>
@@ -13255,8 +13584,8 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 20,
+    paddingTop: 8,
+    paddingBottom: 14,
     zIndex: 10,
     backgroundColor: COLORS.surface,
     borderTopWidth: 1,
@@ -13272,7 +13601,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: COLORS.cardAlt,
     borderRadius: 10,
-    paddingVertical: 10,
+    paddingVertical: 8,
     paddingHorizontal: 6,
   },
   infoGlyph: {
@@ -13353,6 +13682,11 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "600",
   },
+  infoSubLabel: {
+    marginTop: 2,
+    color: COLORS.muted,
+    fontSize: 10,
+  },
   infoTooltip: {
     position: "absolute",
     backgroundColor: COLORS.cardDark,
@@ -13379,6 +13713,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
     flexWrap: "wrap",
   },
+  infoTooltipLink: {
+    marginTop: 8,
+    color: COLORS.accent,
+    fontSize: 11,
+    fontWeight: "700",
+    textAlign: "center",
+  },
   cardTitle: {
     color: COLORS.muted,
     marginBottom: 8,
@@ -13391,6 +13732,79 @@ const styles = StyleSheet.create({
   cardMeta: {
     marginTop: 6,
     color: COLORS.muted,
+  },
+  detailRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 6,
+  },
+  detailLabel: {
+    color: COLORS.muted,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  detailValue: {
+    color: COLORS.text,
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  detailValueStrong: {
+    color: COLORS.accent,
+  },
+  detailListItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 6,
+  },
+  detailListLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  detailListIcon: {
+    fontSize: 14,
+  },
+  detailListLabel: {
+    color: COLORS.text,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  detailListValue: {
+    color: COLORS.muted,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  detailEntryRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 8,
+  },
+  detailEntryLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    flex: 1,
+  },
+  detailEntryRight: {
+    alignItems: "flex-end",
+  },
+  detailEntryMeta: {
+    color: COLORS.muted,
+    fontSize: 11,
+    marginTop: 2,
+  },
+  detailEntryValue: {
+    color: COLORS.text,
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  detailEntrySubValue: {
+    color: COLORS.muted,
+    fontSize: 10,
+    marginTop: 2,
   },
   sectionTitle: {
     fontSize: 16,
@@ -13491,6 +13905,10 @@ const styles = StyleSheet.create({
   appsStatusText: {
     color: COLORS.muted,
     fontSize: 12,
+  },
+  appsHeaderWrap: {
+    paddingTop: 68,
+    paddingHorizontal: 16,
   },
   appsLoadingOverlay: {
     ...StyleSheet.absoluteFillObject,
