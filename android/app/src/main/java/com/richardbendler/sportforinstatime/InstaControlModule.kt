@@ -280,6 +280,29 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
+  fun getScreenTimeEntries(promise: Promise) {
+    try {
+      val prefs = getPrefs()
+      val now = System.currentTimeMillis()
+      val entries = ScreenTimeStore.getEntries(prefs, now)
+      val list = Arguments.createArray()
+      entries.forEach { entry ->
+        val map = Arguments.createMap()
+        map.putString("id", entry.id)
+        map.putString("sportId", entry.sportId ?: "")
+        map.putDouble("createdAt", entry.createdAt.toDouble())
+        map.putDouble("lastDecayAt", entry.lastDecayAt.toDouble())
+        map.putInt("remainingSeconds", entry.remainingSeconds)
+        map.putInt("originalSeconds", entry.originalSeconds)
+        list.pushMap(map)
+      }
+      promise.resolve(list)
+    } catch (e: Exception) {
+      promise.reject("SCREEN_TIME_ENTRIES_ERROR", e)
+    }
+  }
+
+  @ReactMethod
   fun requestPinWidget(sportId: String, sportName: String, promise: Promise) {
     try {
       val manager = AppWidgetManager.getInstance(reactContext)

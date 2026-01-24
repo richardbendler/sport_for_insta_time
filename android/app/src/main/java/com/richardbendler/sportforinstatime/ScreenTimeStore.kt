@@ -131,6 +131,16 @@ object ScreenTimeStore {
     return Totals(total, remainingBySport, recentEntries.size)
   }
 
+  fun getEntries(prefs: SharedPreferences, now: Long): List<Entry> {
+    val entries = ensureLegacyMigration(loadEntries(prefs), prefs, now)
+    val changed = applyDecay(entries, now)
+    val persisted = entries.filter { shouldKeepEntry(it, now) }
+    if (changed || persisted.size != entries.size) {
+      saveEntries(prefs, persisted)
+    }
+    return entries.sortedByDescending { it.createdAt }
+  }
+
   fun getBreakdown(prefs: SharedPreferences, now: Long): Breakdown {
     val entries = ensureLegacyMigration(loadEntries(prefs), prefs, now)
     val changed = applyDecay(entries, now)
