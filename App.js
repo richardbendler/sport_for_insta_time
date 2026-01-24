@@ -268,6 +268,21 @@ const RAW_STANDARD_SPORTS = [
     difficultyLevel: 3,
   },
   {
+    id: "smith_machine_bench_press",
+    labels: {
+      de: "Bankdr?cken an der Multipresse",
+      en: "Smith Machine Bench Press",
+      es: "Press de banca en m?quina Smith",
+      fr: "D?velopp? couch? ? la Smith machine",
+    },
+    aliases: ["Multipresse Bankdr?cken", "Smith Bench Press"],
+    icon: "???",
+    type: "reps",
+    defaultRateMinutes: 1,
+    difficultyLevel: 3,
+  },
+
+  {
     id: "dumbbell_bench_press",
     labels: {
       de: "Kurzhantel-Bankdrücken",
@@ -315,6 +330,34 @@ const RAW_STANDARD_SPORTS = [
       fr: "Squat",
     },
     icon: "🏋️‍♀️",
+    type: "reps",
+    defaultRateMinutes: 1,
+    difficultyLevel: 6,
+  },
+  {
+    id: "hack_squat_machine",
+    labels: {
+      de: "Hackenschmidt-Kniebeuge (Maschine)",
+      en: "Hack Squat Machine",
+      es: "Sentadilla Hack en máquina",
+      fr: "Hack squat (machine)",
+    },
+    aliases: ["Hack Squat", "Hackenschmidt", "Hack Squat Machine"],
+    icon: "🏋️‍♂️",
+    type: "reps",
+    defaultRateMinutes: 1,
+    difficultyLevel: 6,
+  },
+  {
+    id: "smith_machine_squat",
+    labels: {
+      de: "Kniebeuge an der Multipresse",
+      en: "Smith Machine Squat",
+      es: "Sentadilla en máquina Smith",
+      fr: "Squat à la Smith machine",
+    },
+    aliases: ["Multipresse Kniebeuge", "Smith Squat", "Smith Machine Squat"],
+    icon: "🏋️",
     type: "reps",
     defaultRateMinutes: 1,
     difficultyLevel: 6,
@@ -448,6 +491,46 @@ const RAW_STANDARD_SPORTS = [
     type: "reps",
     defaultRateMinutes: 1,
     difficultyLevel: 5,
+  },
+  {
+    id: "machine_chest_press",
+    labels: {
+      de: "Brustpresse (Maschine)",
+      en: "Machine Chest Press",
+      es: "Press de pecho en máquina",
+      fr: "Presse pectorale (machine)",
+    },
+    aliases: [
+      "Brustpresse",
+      "Chest Press Machine",
+      "Seated Chest Press",
+      "Machine Chest Press",
+      "Geräte-Brustpresse",
+    ],
+    icon: "🏋️",
+    type: "reps",
+    defaultRateMinutes: 1,
+    difficultyLevel: 5,
+  },
+  {
+    id: "pec_deck",
+    labels: {
+      de: "Butterfly (Pec Deck)",
+      en: "Pec Deck",
+      es: "Pec Deck",
+      fr: "Pec deck",
+    },
+    aliases: [
+      "Butterfly",
+      "Butterfly Maschine",
+      "Pec Deck Fly",
+      "Machine Fly",
+      "Chest Fly Machine",
+    ],
+    icon: "🦋",
+    type: "reps",
+    defaultRateMinutes: 1,
+    difficultyLevel: 4,
   },
   {
     id: "pushups",
@@ -827,6 +910,20 @@ const RAW_STANDARD_SPORTS = [
     difficultyLevel: 4,
   },
   {
+    id: "assisted_pull_ups",
+    labels: {
+      de: "Unterstützte Klimmzüge (Maschine)",
+      en: "Assisted Pull-ups",
+      es: "Dominadas asistidas",
+      fr: "Tractions assistées",
+    },
+    aliases: ["Pull-up Machine", "Assisted Pull-up Machine"],
+    icon: "🏋️",
+    type: "reps",
+    defaultRateMinutes: 1,
+    difficultyLevel: 4,
+  },
+  {
     id: "lat_pulldown",
     labels: {
       de: "Latziehen",
@@ -834,6 +931,7 @@ const RAW_STANDARD_SPORTS = [
       es: "Jalón al pecho",
       fr: "Tirage vertical",
     },
+    aliases: ["Latzzug", "Latzug", "Lat-Zug", "Lat Pulldown"],
     icon: "??",
     type: "reps",
     defaultRateMinutes: 1,
@@ -4047,12 +4145,49 @@ const mapLegacyDifficultyToNewScale = (value) => {
   return Math.round(scaled);
 };
 
-const STANDARD_SPORTS = RAW_STANDARD_SPORTS.map((sport) => ({
-  ...sport,
-  difficultyLevel: mapLegacyDifficultyToNewScale(sport.difficultyLevel),
-  icon: deriveTemplateIcon(sport),
-  labels: mergeTranslatedLabels(sport),
-}));
+const normalizeAliasList = (aliases) => {
+  const seen = new Set();
+  const normalized = [];
+  const addAlias = (value) => {
+    if (!value || typeof value !== "string") {
+      return;
+    }
+    const trimmed = value.trim();
+    if (!trimmed || seen.has(trimmed)) {
+      return;
+    }
+    seen.add(trimmed);
+    normalized.push(trimmed);
+  };
+  (Array.isArray(aliases) ? aliases : []).forEach(addAlias);
+  return normalized;
+};
+
+const buildStandardSportAliases = (sport) => {
+  const combined = [];
+  if (Array.isArray(sport.aliases)) {
+    combined.push(...sport.aliases);
+  }
+  Object.values(sport.labels || {}).forEach((label) => combined.push(label));
+  if (typeof sport.name === "string") {
+    combined.push(sport.name);
+  }
+  if (typeof sport.id === "string") {
+    combined.push(sport.id.replace(/_/g, " "));
+  }
+  return normalizeAliasList(combined);
+};
+
+const STANDARD_SPORTS = RAW_STANDARD_SPORTS.map((sport) => {
+  const labels = mergeTranslatedLabels(sport);
+  return {
+    ...sport,
+    difficultyLevel: mapLegacyDifficultyToNewScale(sport.difficultyLevel),
+    icon: deriveTemplateIcon(sport),
+    labels,
+    aliases: buildStandardSportAliases({ ...sport, labels }),
+  };
+});
 const STANDARD_SPORT_IDS = new Set(STANDARD_SPORTS.map((sport) => sport.id));
 const getStandardSportLabel = (entry, language) =>
   entry.labels?.[language] || entry.labels?.en || entry.id;
@@ -4098,9 +4233,16 @@ const getLabelCandidates = (entry, language = "en") => {
     seen.add(trimmed);
     candidates.push(trimmed);
   };
+  const addAliases = (list) => {
+    if (!Array.isArray(list)) {
+      return;
+    }
+    list.forEach(addLabel);
+  };
   addLabel(labels?.[language]);
   addLabel(labels?.en);
   Object.values(labels || {}).forEach(addLabel);
+  addAliases(entry.aliases);
   addLabel(entry.name);
   addLabel(entry.id);
   return candidates;
@@ -4260,7 +4402,6 @@ const SportTitleSlots = ({ sport, sportLabel }) => {
   const [rightWidth, setRightWidth] = useState(0);
   const slotWidth = Math.max(leftWidth, rightWidth);
   const slotStyle = slotWidth ? { width: slotWidth } : undefined;
-  const categoryLabel = deriveSportCategory(sport);
 
   const handleLeftLayout = useCallback(
     (event) => setLeftWidth(event.nativeEvent.layout.width),
@@ -4281,11 +4422,6 @@ const SportTitleSlots = ({ sport, sportLabel }) => {
           <Text style={styles.sportName} numberOfLines={1}>
             {sportLabel}
           </Text>
-          {categoryLabel ? (
-            <Text style={styles.sportCategory} numberOfLines={1}>
-              {categoryLabel}
-            </Text>
-          ) : null}
         </View>
       </View>
       <View
@@ -4859,6 +4995,7 @@ const normalizeSports = (sportList) => {
       name,
       presetKey,
       icon: sport.icon || defaultIconForSport(sport),
+      aliases: Array.isArray(sport.aliases) ? sport.aliases : [],
       screenSecondsPerUnit:
         sport.screenSecondsPerUnit ?? defaultScreenSecondsPerUnit(sport),
       difficultyLevel,
