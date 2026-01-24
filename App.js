@@ -5119,6 +5119,7 @@ function AppContent() {
   const [editEntryValue, setEditEntryValue] = useState("");
   const [editingSportId, setEditingSportId] = useState(null);
   const [isSportModalOpen, setIsSportModalOpen] = useState(false);
+  const [isFormulaModalOpen, setIsFormulaModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isPrefaceSettingsOpen, setIsPrefaceSettingsOpen] = useState(false);
   const [isAppsSettingsOpen, setIsAppsSettingsOpen] = useState(false);
@@ -5133,9 +5134,13 @@ function AppContent() {
   const [workoutRunning, setWorkoutRunning] = useState(false);
   const [workoutSeconds, setWorkoutSeconds] = useState(0);
   const [workoutSessionCount, setWorkoutSessionCount] = useState(0);
+  /*
   const workoutTrackingMode = workoutRunning && isWorkoutOpen;
+  */
+  const workoutTrackingMode = false;
   const [showHidden, setShowHidden] = useState(false);
   const [sportSearch, setSportSearch] = useState("");
+  const [sportSortMode, setSportSortMode] = useState("manual");
   const [newName, setNewName] = useState("");
   const [newType, setNewType] = useState("reps");
   const [newIcon, setNewIcon] = useState("");
@@ -5191,6 +5196,7 @@ function AppContent() {
   const [notificationsPrompted, setNotificationsPrompted] = useState(false);
   const [notificationsGranted, setNotificationsGranted] = useState(false);
   const [permissionsPanelOpen, setPermissionsPanelOpen] = useState(false);
+  const [permissionsPanelTouched, setPermissionsPanelTouched] = useState(false);
   const [permissionsCheckTick, setPermissionsCheckTick] = useState(0);
   const [dismissedMotivationActionId, setDismissedMotivationActionId] =
     useState(null);
@@ -6576,17 +6582,21 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         setIsSettingsOpen(false);
         return true;
       }
+      /*
       if (isWorkoutOpen) {
         setIsWorkoutOpen(false);
         return true;
       }
+      */
       if (isPrefaceSettingsOpen) {
         setIsPrefaceSettingsOpen(false);
         return true;
       }
+      /*
       if (workoutRunning) {
         handleWorkoutStop();
       }
+      */
       return false;
     };
     const subscription = BackHandler.addEventListener(
@@ -6705,7 +6715,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setIsSettingsOpen(false);
     setOverallStatsOpen(false);
     setIsPrefaceSettingsOpen(false);
-    setIsWorkoutOpen(false);
+    // setIsWorkoutOpen(false);
     setIsScreenTimeDetailsOpen(false);
     setSelectedSportId(null);
     setStatsSportId(null);
@@ -6714,6 +6724,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setStatsEditMode(false);
   };
 
+  /*
   const openWorkout = () => {
     setIsSettingsOpen(false);
     setOverallStatsOpen(false);
@@ -6728,11 +6739,13 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setIsWorkoutOpen(true);
     maybeAdvanceTutorial("openWorkout");
   };
+  */
+  const openWorkout = () => {};
 
   const openStatsOverview = () => {
     setIsSettingsOpen(false);
     setIsPrefaceSettingsOpen(false);
-    setIsWorkoutOpen(false);
+    // setIsWorkoutOpen(false);
     setIsScreenTimeDetailsOpen(false);
     setSelectedSportId(null);
     setStatsSportId(null);
@@ -6758,7 +6771,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   const openSettings = () => {
     setOverallStatsOpen(false);
     setIsPrefaceSettingsOpen(false);
-    setIsWorkoutOpen(false);
+    // setIsWorkoutOpen(false);
     setIsScreenTimeDetailsOpen(false);
     setSelectedSportId(null);
     setStatsSportId(null);
@@ -6779,7 +6792,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setIsSettingsOpen(false);
     setOverallStatsOpen(false);
     setIsPrefaceSettingsOpen(false);
-    setIsWorkoutOpen(false);
+    // setIsWorkoutOpen(false);
     setSelectedSportId(null);
     setStatsSportId(null);
     setStatsDayKey(null);
@@ -6793,7 +6806,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
 
   const handleBackFromSport = () => {
     setSelectedSportId(null);
-    setWorkoutSessionCount(0);
+    // setWorkoutSessionCount(0);
     maybeAdvanceTutorial("backHome");
   };
 
@@ -6829,11 +6842,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       sportId: null,
       entry: null,
     };
+    await maybePromptNotifications();
   };
 
   const completeTutorial = async () => {
     await finishTutorial();
-    await maybePromptNotifications();
   };
 
   const renderTutorialHeaderButton = () => {
@@ -7095,6 +7108,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     </View>
   );
 
+  /*
   const renderWorkoutBanner = () => {
     if (!workoutRunning || isAppActive) {
       return null;
@@ -7107,6 +7121,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       </View>
     );
   };
+  */
+  const renderWorkoutBanner = () => null;
 
   const savePrefaceSettings = async () => {
     const parsed = Math.max(0, Number.parseInt(prefaceDelayInput, 10) || 0);
@@ -7445,10 +7461,12 @@ const getSpeechLocale = () => {
     if (!currentSport || currentSport.type !== "reps") {
       return;
     }
+    /*
     if (workoutTrackingMode) {
       recordWorkoutExercise(currentSport);
       setWorkoutSessionCount((prev) => prev + 1);
     }
+    */
     const entry = addLogEntry(currentSport, {
       ts: Date.now(),
       reps: 1,
@@ -7486,10 +7504,12 @@ const getSpeechLocale = () => {
     if (reps <= 0) {
       return;
     }
+    /*
     if (workoutTrackingMode) {
       recordWorkoutExercise(currentSport);
       setWorkoutSessionCount((prev) => prev + 1);
     }
+    */
     const timestamp = Date.now();
     const entryPayload = { ts: timestamp, reps };
     const entry = addLogEntry(currentSport, entryPayload);
@@ -7693,23 +7713,91 @@ const getSpeechLocale = () => {
   const activeSports = sports.filter((sport) => !sport.hidden);
   const hiddenSports = sports.filter((sport) => sport.hidden);
   const normalizedSportSearchTerm = normalizeTextForSearch(sportSearch);
+  const sportLastUsageMap = useMemo(() => {
+    const map = new Map();
+    Object.entries(logs || {}).forEach(([sportId, sportLogs]) => {
+      let latest = 0;
+      Object.values(sportLogs || {}).forEach((dayLogs) => {
+        (dayLogs || []).forEach((entry) => {
+          const ts = entry?.ts || 0;
+          if (ts > latest) {
+            latest = ts;
+          }
+        });
+      });
+      map.set(sportId, latest);
+    });
+    return map;
+  }, [logs]);
+
   const filteredActiveSports = useMemo(() => {
-    return scoreAndSortSportsBySearch(
+    const base = scoreAndSortSportsBySearch(
       activeSports,
       normalizedSportSearchTerm,
       language
     );
-  }, [activeSports, normalizedSportSearchTerm, language]);
+    if (sportSortMode === "manual") {
+      return base;
+    }
+    if (sportSortMode === "alpha") {
+      return [...base].sort((a, b) =>
+        getSportLabel(a).localeCompare(getSportLabel(b), language)
+      );
+    }
+    if (sportSortMode === "recent") {
+      return [...base].sort((a, b) => {
+        const tsA = sportLastUsageMap.get(a.id) || 0;
+        const tsB = sportLastUsageMap.get(b.id) || 0;
+        if (tsA !== tsB) {
+          return tsB - tsA;
+        }
+        return getSportLabel(a).localeCompare(getSportLabel(b), language);
+      });
+    }
+    return base;
+  }, [
+    activeSports,
+    normalizedSportSearchTerm,
+    language,
+    sportSortMode,
+    sportLastUsageMap,
+  ]);
   const filteredHiddenSports = useMemo(() => {
-    return scoreAndSortSportsBySearch(
+    const base = scoreAndSortSportsBySearch(
       hiddenSports,
       normalizedSportSearchTerm,
       language
     );
-  }, [hiddenSports, normalizedSportSearchTerm, language]);
+    if (sportSortMode === "manual") {
+      return base;
+    }
+    if (sportSortMode === "alpha") {
+      return [...base].sort((a, b) =>
+        getSportLabel(a).localeCompare(getSportLabel(b), language)
+      );
+    }
+    if (sportSortMode === "recent") {
+      return [...base].sort((a, b) => {
+        const tsA = sportLastUsageMap.get(a.id) || 0;
+        const tsB = sportLastUsageMap.get(b.id) || 0;
+        if (tsA !== tsB) {
+          return tsB - tsA;
+        }
+        return getSportLabel(a).localeCompare(getSportLabel(b), language);
+      });
+    }
+    return base;
+  }, [
+    hiddenSports,
+    normalizedSportSearchTerm,
+    language,
+    sportSortMode,
+    sportLastUsageMap,
+  ]);
   const selectedSport = sports.find((sport) => sport.id === selectedSportId);
   const tutorialSportId = activeSports[0]?.id;
   const motivationSport = activeSports[0] ?? null;
+  /*
   const workoutWeightSummary = (() => {
     if (
       !selectedSport ||
@@ -7744,6 +7832,9 @@ const getSpeechLocale = () => {
   })();
   const weightWorkoutTotal = workoutWeightSummary.total || 0;
   const lastWorkoutWeightEntry = workoutWeightSummary.last;
+  */
+  const weightWorkoutTotal = 0;
+  const lastWorkoutWeightEntry = null;
   const recentWeightEntries = useMemo(() => {
     if (!selectedSport || !selectedSport.weightExercise) {
       return [];
@@ -7967,6 +8058,7 @@ const getSpeechLocale = () => {
         renderInModal: true,
       });
     }
+    /*
     steps.push({
       id: "workout",
       titleKey: "tutorial.step.workout.title",
@@ -7982,6 +8074,7 @@ const getSpeechLocale = () => {
       targetRef: tutorialWorkoutTimerRef,
       blocksTouches: true,
     });
+    */
     steps.push({
       id: "statsNav",
       titleKey: "tutorial.step.stats.title",
@@ -8175,6 +8268,7 @@ const getSpeechLocale = () => {
         action: handleIncreaseDifficulty,
         disabled: !motivationSport,
       },
+      /*
       {
         id: "workout",
         icon: "Work",
@@ -8183,6 +8277,7 @@ const getSpeechLocale = () => {
         actionLabelKey: "label.motivationActionWorkout",
         action: () => openWorkout(),
       },
+      */
       {
         id: "stats",
         icon: "Stats",
@@ -8355,9 +8450,11 @@ const getSpeechLocale = () => {
       }
       const usedSeconds = usageState.usedSeconds || 0;
       const remainingSeconds = usageState.remainingSeconds || 0;
+      /*
       if (remainingSeconds < 10 * 60 && usedSeconds > 0) {
         return "workout";
       }
+      */
       const totalSeconds = usedSeconds + remainingSeconds;
       const usageRatio = totalSeconds > 0 ? usedSeconds / totalSeconds : 0;
       if (usageRatio >= 0.7 && remainingSeconds < 30 * 60) {
@@ -8446,9 +8543,11 @@ const getSpeechLocale = () => {
     if (usageState.entryCount > 0) {
       markMotivationActionCompleted("startSport");
     }
+    /*
     if (isWorkoutOpen || workoutRunning) {
       markMotivationActionCompleted("workout");
     }
+    */
     if (overallStatsOpen) {
       markMotivationActionCompleted("stats");
     }
@@ -9058,7 +9157,12 @@ const getSpeechLocale = () => {
     return getRollingStats(logs, selectedSport.id, selectedSport);
   }, [logs, selectedSport]);
 
-  const workoutDisplayReps = workoutTrackingMode ? workoutSessionCount : todayStats.reps;
+  /*
+  const workoutDisplayReps = workoutTrackingMode
+    ? workoutSessionCount
+    : todayStats.reps;
+  */
+  const workoutDisplayReps = todayStats.reps;
 
   useEffect(() => {
     selectedSportRef.current = selectedSport || null;
@@ -9086,6 +9190,28 @@ const getSpeechLocale = () => {
     (permissionsPrompted ||
       usagePermissionsPrompted ||
       accessibilityDisclosureAccepted);
+
+  const prevMissingPermissionsRef = useRef(missingPermissions);
+  useEffect(() => {
+    if (prevMissingPermissionsRef.current !== missingPermissions) {
+      setPermissionsPanelTouched(false);
+    }
+    prevMissingPermissionsRef.current = missingPermissions;
+  }, [missingPermissions]);
+
+  useEffect(() => {
+    if (permissionsPanelTouched || !showMotivationBlock) {
+      return;
+    }
+    if (missingPermissions || shouldShowMotivationAction) {
+      setPermissionsPanelOpen(true);
+    }
+  }, [
+    permissionsPanelTouched,
+    showMotivationBlock,
+    missingPermissions,
+    shouldShowMotivationAction,
+  ]);
 
   useEffect(() => {
     if (!hasLoaded) {
@@ -9307,7 +9433,8 @@ const getSpeechLocale = () => {
 
   useEffect(() => {
     if (selectedSportId === null) {
-      setWorkoutSessionCount(0);
+      // setWorkoutSessionCount(0);
+      setIsFormulaModalOpen(false);
     }
   }, [selectedSportId]);
 
@@ -9919,6 +10046,29 @@ const getSpeechLocale = () => {
     const isReps = selectedSport.type === "reps";
     const isWeightMode = isReps && selectedSport.weightExercise;
     const isSimpleReps = isReps && !selectedSport.weightExercise;
+    const userFactor = difficultyLevelForSport(selectedSport);
+    const adminFactor = isWeightMode
+      ? ADMIN_FACTOR_WEIGHTED
+      : isReps
+      ? ADMIN_FACTOR_REPS
+      : ADMIN_FACTOR_TIME;
+    const formatFactorValue = (value) => {
+      if (!Number.isFinite(value)) {
+        return "-";
+      }
+      const fixed = Number(value).toFixed(4);
+      return fixed.replace(/\.?0+$/, "");
+    };
+    const formulaBaseLabel = isWeightMode
+      ? `${t("label.weightUnit")} × ${repsShort}`
+      : isReps
+      ? repsShort
+      : t("label.formulaTimeUnit");
+    const formulaShort = `${formulaBaseLabel} × ${formatFactorValue(
+      adminFactor
+    )} × ${formatFactorValue(userFactor)}`;
+    const userFactorDeltaPercent = Math.round((userFactor - 1) * 100);
+    const userFactorPercentText = `${userFactorDeltaPercent > 0 ? "+" : ""}${userFactorDeltaPercent}%`;
     const previewWeight = parsePositiveNumber(weightEntryWeight);
     const previewReps = parsePositiveInteger(weightEntryReps);
     const weightPreviewSeconds =
@@ -10224,6 +10374,89 @@ const getSpeechLocale = () => {
             </View>
           </View>
         )}
+        <View style={styles.formulaBadgeWrap} pointerEvents="box-none">
+          <Pressable
+            style={styles.formulaBadge}
+            onPress={() => setIsFormulaModalOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel={t("label.formulaTitle")}
+          >
+            <View style={styles.formulaBadgeHeader}>
+              <Text style={styles.formulaBadgeTitle}>
+                {t("label.formulaBadge")}
+              </Text>
+              <Text style={styles.formulaBadgeChevron}>›</Text>
+            </View>
+            <Text style={styles.formulaBadgeValue}>{formulaShort}</Text>
+          </Pressable>
+        </View>
+        <Modal
+          visible={isFormulaModalOpen}
+          animationType="slide"
+          transparent
+          onRequestClose={() => setIsFormulaModalOpen(false)}
+        >
+          <View style={styles.formulaModalOverlay}>
+            <View style={styles.formulaModalCard}>
+              <View style={styles.formulaModalHeader}>
+                <Text style={styles.sectionTitle}>
+                  {t("label.formulaTitle")}
+                </Text>
+                <Pressable
+                  style={styles.secondaryButton}
+                  onPress={() => setIsFormulaModalOpen(false)}
+                >
+                  <Text style={styles.secondaryButtonText}>
+                    {t("label.close")}
+                  </Text>
+                </Pressable>
+              </View>
+              <Text style={styles.formulaDetailText}>
+                {t("label.formulaIntro")}
+              </Text>
+              <Text style={styles.formulaEquation}>
+                {t("label.screenTime")}: {formulaShort}
+              </Text>
+              <View style={styles.formulaFactorsRow}>
+                <View style={styles.formulaFactorCard}>
+                  <Text style={styles.formulaFactorLabel}>
+                    {t("label.formulaAdminFactor")}
+                  </Text>
+                  <Text style={styles.formulaFactorValue}>
+                    {formatFactorValue(adminFactor)}
+                  </Text>
+                </View>
+                <View style={styles.formulaFactorCard}>
+                  <Text style={styles.formulaFactorLabel}>
+                    {t("label.formulaUserFactor")}
+                  </Text>
+                  <Text style={styles.formulaFactorValue}>
+                    {formatFactorValue(userFactor)}
+                  </Text>
+                </View>
+              </View>
+              <Text style={styles.formulaDetailText}>
+                {t("label.formulaAdminInfo")}
+              </Text>
+              <Text style={styles.formulaDetailText}>
+                {t("label.formulaUserEffect", {
+                  percent: userFactorPercentText,
+                })}
+              </Text>
+              <Pressable
+                style={[styles.primaryButton, styles.fullWidthButton]}
+                onPress={() => {
+                  setIsFormulaModalOpen(false);
+                  openSportModal(selectedSport);
+                }}
+              >
+                <Text style={styles.primaryButtonText}>
+                  {t("label.formulaEditButton")}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </Modal>
       </SafeAreaView>
     );
   }
@@ -10436,6 +10669,7 @@ const getSpeechLocale = () => {
     );
   }
 
+  /*
   if (isWorkoutOpen) {
     const recentWorkouts = [...workoutHistory].sort(
       (a, b) => (b.startTs || 0) - (a.startTs || 0)
@@ -10647,6 +10881,7 @@ const getSpeechLocale = () => {
       </SafeAreaView>
     );
   }
+  */
 
   if (isAppsSettingsOpen) {
     if (!appsInitialLoadComplete) {
@@ -10945,7 +11180,7 @@ const getSpeechLocale = () => {
           {renderTutorialHeaderButton()}
         </View>
         {renderMainNav("home")}
-        {renderWorkoutBanner()}
+        {/* {renderWorkoutBanner()} */}
         {showMotivationBlock ? (
           <View
             style={[
@@ -10955,7 +11190,10 @@ const getSpeechLocale = () => {
           >
               <Pressable
                 style={styles.permissionHeaderRow}
-                onPress={() => setPermissionsPanelOpen((prev) => !prev)}
+                onPress={() => {
+                  setPermissionsPanelTouched(true);
+                  setPermissionsPanelOpen((prev) => !prev);
+                }}
               >
               <View>
                 {missingPermissions ? (
@@ -11085,6 +11323,7 @@ const getSpeechLocale = () => {
               )}
           </View>
         ) : null}
+        {/*
         <View style={styles.workoutStartRow}>
           <Pressable
             ref={tutorialWorkoutStartRef}
@@ -11096,6 +11335,7 @@ const getSpeechLocale = () => {
             </Text>
           </Pressable>
         </View>
+        */}
         <TextInput
           style={styles.searchInput}
           autoCorrect={false}
@@ -11159,6 +11399,56 @@ const getSpeechLocale = () => {
         </Modal>
         
         <Text style={styles.sectionTitle}>{t("menu.sports")}</Text>
+        <View style={styles.sortRow}>
+          <Pressable
+            style={[
+              styles.sortButton,
+              sportSortMode === "alpha" && styles.sortButtonActive,
+            ]}
+            onPress={() => setSportSortMode("alpha")}
+          >
+            <Text
+              style={[
+                styles.sortButtonText,
+                sportSortMode === "alpha" && styles.sortButtonTextActive,
+              ]}
+            >
+              {t("label.sortAlpha")}
+            </Text>
+          </Pressable>
+          <Pressable
+            style={[
+              styles.sortButton,
+              sportSortMode === "recent" && styles.sortButtonActive,
+            ]}
+            onPress={() => setSportSortMode("recent")}
+          >
+            <Text
+              style={[
+                styles.sortButtonText,
+                sportSortMode === "recent" && styles.sortButtonTextActive,
+              ]}
+            >
+              {t("label.sortRecent")}
+            </Text>
+          </Pressable>
+          <Pressable
+            style={[
+              styles.sortButton,
+              sportSortMode === "manual" && styles.sortButtonActive,
+            ]}
+            onPress={() => setSportSortMode("manual")}
+          >
+            <Text
+              style={[
+                styles.sortButtonText,
+                sportSortMode === "manual" && styles.sortButtonTextActive,
+              ]}
+            >
+              {t("label.sortManual")}
+            </Text>
+          </Pressable>
+        </View>
         {activeSports.length === 0 ? (
           <Text style={styles.helperText}>{t("label.noSports")}</Text>
         ) : null}
@@ -11269,20 +11559,22 @@ const getSpeechLocale = () => {
                             <Text style={styles.earnedTimeTextRight}>
                               {t("label.screenTime")}: {formatScreenTime(daily.screenSeconds || 0)}
                             </Text>
-                            <View style={styles.moveButtonColumn}>
-                              <Pressable
-                                style={styles.iconAction}
-                                onPress={() => moveSport(sport.id, -1)}
-                              >
-                                <Text style={styles.iconActionText}>↑</Text>
-                              </Pressable>
-                              <Pressable
-                                style={[styles.iconAction, styles.moveButtonArrow]}
-                                onPress={() => moveSport(sport.id, 1)}
-                              >
-                                <Text style={styles.iconActionText}>↓</Text>
-                              </Pressable>
-                            </View>
+                            {sportSortMode === "manual" ? (
+                              <View style={styles.moveButtonColumn}>
+                                <Pressable
+                                  style={styles.iconAction}
+                                  onPress={() => moveSport(sport.id, -1)}
+                                >
+                                  <Text style={styles.iconActionText}>↑</Text>
+                                </Pressable>
+                                <Pressable
+                                  style={[styles.iconAction, styles.moveButtonArrow]}
+                                  onPress={() => moveSport(sport.id, 1)}
+                                >
+                                  <Text style={styles.iconActionText}>↓</Text>
+                                </Pressable>
+                              </View>
+                            ) : null}
                           </View>
                         </View>
                       </View>
@@ -11420,20 +11712,22 @@ const getSpeechLocale = () => {
                               <Text style={styles.earnedTimeTextRight}>
                                 {t("label.screenTime")}: {formatScreenTime(daily.screenSeconds || 0)}
                               </Text>
-                              <View style={styles.moveButtonColumn}>
-                                <Pressable
-                                  style={styles.iconAction}
-                                  onPress={() => moveSport(sport.id, -1)}
-                                >
-                                <Text style={styles.iconActionText}>↑</Text>
-                                </Pressable>
-                                <Pressable
-                                  style={[styles.iconAction, styles.moveButtonArrow]}
-                                  onPress={() => moveSport(sport.id, 1)}
-                                >
-                                <Text style={styles.iconActionText}>↓</Text>
-                                </Pressable>
-                              </View>
+                              {sportSortMode === "manual" ? (
+                                <View style={styles.moveButtonColumn}>
+                                  <Pressable
+                                    style={styles.iconAction}
+                                    onPress={() => moveSport(sport.id, -1)}
+                                  >
+                                    <Text style={styles.iconActionText}>↑</Text>
+                                  </Pressable>
+                                  <Pressable
+                                    style={[styles.iconAction, styles.moveButtonArrow]}
+                                    onPress={() => moveSport(sport.id, 1)}
+                                  >
+                                    <Text style={styles.iconActionText}>↓</Text>
+                                  </Pressable>
+                                </View>
+                              ) : null}
                             </View>
                           </View>
                         </View>
@@ -12260,6 +12554,32 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     gap: 12,
     width: "100%",
+  },
+  sortRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 10,
+  },
+  sortButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 999,
+    backgroundColor: COLORS.cardAlt,
+    borderWidth: 1,
+    borderColor: COLORS.cardAlt,
+  },
+  sortButtonActive: {
+    backgroundColor: COLORS.accent,
+    borderColor: COLORS.accent,
+  },
+  sortButtonText: {
+    color: COLORS.muted,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  sortButtonTextActive: {
+    color: COLORS.white,
   },
   backButton: {
     paddingVertical: 6,
@@ -13714,6 +14034,101 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "flex-start",
     marginBottom: 8,
+  },
+  formulaBadgeWrap: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 12,
+    alignItems: "center",
+    zIndex: 6,
+  },
+  formulaBadge: {
+    backgroundColor: "rgba(15, 23, 42, 0.9)",
+    borderRadius: 12,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: COLORS.cardAlt,
+    minWidth: 220,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  formulaBadgeHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  formulaBadgeTitle: {
+    color: COLORS.muted,
+    fontSize: 11,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+  },
+  formulaBadgeChevron: {
+    color: COLORS.accent,
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  formulaBadgeValue: {
+    color: COLORS.text,
+    fontSize: 12,
+    fontWeight: "600",
+    marginTop: 2,
+  },
+  formulaModalOverlay: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+    justifyContent: "center",
+    padding: 24,
+  },
+  formulaModalCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 18,
+    padding: 18,
+  },
+  formulaModalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 8,
+  },
+  formulaEquation: {
+    color: COLORS.text,
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 12,
+  },
+  formulaDetailText: {
+    color: COLORS.muted,
+    marginBottom: 10,
+  },
+  formulaFactorsRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 12,
+  },
+  formulaFactorCard: {
+    flex: 1,
+    backgroundColor: COLORS.cardAlt,
+    borderRadius: 12,
+    padding: 12,
+  },
+  formulaFactorLabel: {
+    color: COLORS.muted,
+    fontSize: 11,
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  formulaFactorValue: {
+    color: COLORS.accent,
+    fontSize: 16,
+    fontWeight: "700",
   },
   fixedTimers: {
     position: "absolute",

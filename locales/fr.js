@@ -24,6 +24,18 @@ const fr = {
     "label.screenTimeEntryOriginal": "Original",
     "label.remainingCurrent": "Restant (sans report)",
     "label.moreInfo": "Plus d'infos",
+    "label.formulaBadge": "Formule",
+    "label.formulaTitle": "Formule actuelle",
+    "label.formulaIntro":
+      "Voici comment le temps d'ecran est calcule pour ce sport :",
+    "label.formulaAdminFactor": "Facteur admin",
+    "label.formulaUserFactor": "Facteur utilisateur",
+    "label.formulaAdminInfo":
+      "Le facteur admin est un multiplicateur de base global pour cette categorie.",
+    "label.formulaUserEffect":
+      "Le facteur utilisateur ajuste le temps gagne. Actuel : {{percent}} par rapport a 1.0.",
+    "label.formulaEditButton": "Modifier le facteur utilisateur",
+    "label.formulaTimeUnit": "secondes",
     "label.screenTimeDetailsTitle": "Details du temps d'ecran",
     "label.breakdownSummary": "Résumé",
     "label.remainingBySport": "Restant par exercice",
@@ -119,6 +131,9 @@ const fr = {
     "label.closeApps": "Fermer les apps",
     "label.searchApps": "Rechercher des apps",
     "label.searchSports": "Rechercher des sports",
+    "label.sortAlpha": "Alphabetique",
+    "label.sortRecent": "Derniere utilisation",
+    "label.sortManual": "Manuel",
     "label.noApps": "Aucune app trouvee.",
     "label.accessibilityMissing": "Accessibilité inactive",
     "label.accessibilityActive": "Accessibilité active",

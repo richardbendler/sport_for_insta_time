@@ -24,6 +24,18 @@ const de = {
     "label.screenTimeEntryOriginal": "Ursprünglich",
     "label.remainingCurrent": "Übrig (ohne Übertrag)",
     "label.moreInfo": "Mehr Infos",
+    "label.formulaBadge": "Formel",
+    "label.formulaTitle": "Aktuelle Formel",
+    "label.formulaIntro":
+      "So wird deine Screen Time fur diese Sportart berechnet:",
+    "label.formulaAdminFactor": "Admin-Faktor",
+    "label.formulaUserFactor": "User-Faktor",
+    "label.formulaAdminInfo":
+      "Der Admin-Faktor ist ein globaler Basiswert fur diese Kategorie.",
+    "label.formulaUserEffect":
+      "Der User-Faktor skaliert deine erspielte Zeit. Aktuell: {{percent}} gegenuber 1.0.",
+    "label.formulaEditButton": "User-Faktor bearbeiten",
+    "label.formulaTimeUnit": "Sekunden",
     "label.screenTimeDetailsTitle": "Bildschirmzeit-Details",
     "label.breakdownSummary": "Übersicht",
     "label.remainingBySport": "Übrig nach Übung",
@@ -119,6 +131,9 @@ const de = {
     "label.closeApps": "Apps schließen",
     "label.searchApps": "Apps suchen",
     "label.searchSports": "Sportarten durchsuchen",
+    "label.sortAlpha": "Alphabetisch",
+    "label.sortRecent": "Letzte Nutzung",
+    "label.sortManual": "Manuell",
     "label.noApps": "Keine Apps gefunden.",
     "label.accessibilityMissing": "Zugriffshilfe fehlt",
     "label.accessibilityActive": "Zugriffshilfe aktiv",
