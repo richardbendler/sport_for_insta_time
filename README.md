@@ -12,6 +12,29 @@ eas build --platform android --local
 npx eas build -p android --profile production
 ```
 
+## Expo Cloud Build (EAS)
+Falls lokale Builds (WSL) Probleme machen, nutze den Cloud Build.
+
+### Einmalig
+```bash
+npm i -g eas-cli
+eas login
+```
+
+Falls `eas` nicht gefunden wird (Windows):
+```bash
+mkdir %APPDATA%\\npm
+npx eas-cli build --platform android --profile production
+```
+
+### Android (Production, Cloud)
+```bash
+eas build --platform android --profile production
+```
+
+Hinweis: Der Build laeuft in der Expo Cloud. Den Download-Link findest du danach in der Konsole
+oder im Expo Dashboard.
+
 ## Android APK lokal bauen (Windows + WSL / Ubuntu)
 
 ### Voraussetzungen
