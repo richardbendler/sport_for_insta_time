@@ -56,8 +56,20 @@ yes | sdkmanager --licenses
 ```
 
 #### 5) EAS CLI
+Option A (empfohlen): npm-global in dein Home legen (ohne sudo)
+
+```bash
+mkdir -p ~/.npm-global
+npm config set prefix '~/.npm-global'
+echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+Dann installieren:
+
 ```bash
 npm i -g eas-cli
+eas --version
 eas login
 ```
 
