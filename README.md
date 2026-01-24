@@ -38,8 +38,8 @@ node -v
 #### 3) Java 17 installieren
 ```bash
 sudo apt install -y openjdk-17-jdk
-echo 'export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64' >> ~/.bashrc
-source ~/.bashrc
+echo 'export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64' >> ~/.bash_profile
+source ~/.bash_profile
 java -version
 ```
 
@@ -47,11 +47,12 @@ java -version
 ```bash
 mkdir -p ~/Android/Sdk/cmdline-tools && cd ~/Android/Sdk/cmdline-tools
 wget -O tools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
-unzip tools.zip && mv cmdline-tools latest
-echo 'export ANDROID_HOME=$HOME/Android/Sdk' >> ~/.bashrc
-echo 'export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools' >> ~/.bashrc
-source ~/.bashrc
-sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+unzip tools.zip && mkdir -p latest && mv cmdline-tools/* latest/
+echo 'export ANDROID_SDK_ROOT=$HOME/Android/Sdk' >> ~/.bash_profile
+echo 'export ANDROID_HOME=$HOME/Android/Sdk' >> ~/.bash_profile
+echo 'export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH' >> ~/.bash_profile
+source ~/.bash_profile
+sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" "ndk;27.1.12297006"
 yes | sdkmanager --licenses
 ```
 
@@ -61,8 +62,8 @@ Option A (empfohlen): npm-global in dein Home legen (ohne sudo)
 ```bash
 mkdir -p ~/.npm-global
 npm config set prefix '~/.npm-global'
-echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> ~/.bashrc
-source ~/.bashrc
+echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> ~/.bash_profile
+source ~/.bash_profile
 ```
 
 Dann installieren:
@@ -72,6 +73,7 @@ npm i -g eas-cli
 eas --version
 eas login
 ```
+Falls `eas` nicht gefunden wird: `source ~/.bash_profile` oder neues WSL-Terminal.
 
 ### Build APK
 ```bash
