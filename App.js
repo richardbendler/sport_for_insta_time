@@ -3925,31 +3925,38 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       return null;
     }
     return (
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalCard}>
-          <Text style={styles.modalTitle}>{t("label.prefaceSettings")}</Text>
-          <Text style={styles.rateLabel}>{t("label.prefaceDelay")}</Text>
-          <TextInput
-            style={styles.input}
-            value={prefaceDelayInput}
-            onChangeText={setPrefaceDelayInput}
-            keyboardType="number-pad"
-            placeholder="10"
-            placeholderTextColor="#7a7a7a"
-          />
-          <View style={styles.modalActions}>
-            <Pressable
-              style={styles.secondaryButton}
-              onPress={() => setIsPrefaceSettingsOpen(false)}
-            >
-              <Text style={styles.secondaryButtonText}>{t("label.cancel")}</Text>
-            </Pressable>
-            <Pressable style={styles.primaryButton} onPress={savePrefaceSettings}>
-              <Text style={styles.primaryButtonText}>{t("label.save")}</Text>
-            </Pressable>
+      <Modal
+        visible={isPrefaceSettingsOpen}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setIsPrefaceSettingsOpen(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>{t("label.prefaceSettings")}</Text>
+            <Text style={styles.rateLabel}>{t("label.prefaceDelay")}</Text>
+            <TextInput
+              style={styles.input}
+              value={prefaceDelayInput}
+              onChangeText={setPrefaceDelayInput}
+              keyboardType="number-pad"
+              placeholder="10"
+              placeholderTextColor="#7a7a7a"
+            />
+            <View style={styles.modalActions}>
+              <Pressable
+                style={styles.secondaryButton}
+                onPress={() => setIsPrefaceSettingsOpen(false)}
+              >
+                <Text style={styles.secondaryButtonText}>{t("label.cancel")}</Text>
+              </Pressable>
+              <Pressable style={styles.primaryButton} onPress={savePrefaceSettings}>
+                <Text style={styles.primaryButtonText}>{t("label.save")}</Text>
+              </Pressable>
+            </View>
           </View>
         </View>
-      </View>
+      </Modal>
     );
   };
 
@@ -9085,71 +9092,78 @@ const getSpeechLocale = () => {
       {renderPrefaceSettingsModal()}
       {renderSportModal()}
       {infoModalKey ? (
-        <Pressable
-          style={styles.modalOverlay}
-          onPress={() => setInfoModalKey(null)}
+        <Modal
+          visible={!!infoModalKey}
+          animationType="fade"
+          transparent
+          onRequestClose={() => setInfoModalKey(null)}
         >
           <Pressable
-            style={styles.modalCard}
-            onPress={(event) => event.stopPropagation()}
+            style={styles.modalOverlay}
+            onPress={() => setInfoModalKey(null)}
           >
-            <Text style={styles.modalTitle}>
-              {infoModalKey === "type"
-                ? t("label.typeInfoTitle")
-                : infoModalKey === "difficulty"
-                ? t("label.difficultyLabel")
-                : t("label.weightExerciseInfoTitle")}
-            </Text>
-            <Text style={styles.modalSubtitle}>
-              {infoModalKey === "type"
-                ? t("label.typeHelp")
-                : infoModalKey === "difficulty"
-                ? t("label.difficultyDescription")
-                : t("label.weightExerciseInfoBody")}
-            </Text>
-            {infoModalKey === "difficulty" ? (
-              <View style={styles.difficultyFormulaList}>
-                <View style={styles.difficultyFormulaRow}>
-                  <Text style={styles.difficultyFormulaLabel}>
-                    {t("label.formulaTimeBased")}
-                  </Text>
-                  <Text style={styles.difficultyFormulaValue}>
-                    {t("label.formulaTimeUnit")} ×{" "}
-                    {formatFactorValue(ADMIN_FACTOR_TIME)} ×{" "}
-                    {t("label.formulaUserFactor")}
-                  </Text>
+            <Pressable
+              style={styles.modalCard}
+              onPress={(event) => event.stopPropagation()}
+            >
+              <Text style={styles.modalTitle}>
+                {infoModalKey === "type"
+                  ? t("label.typeInfoTitle")
+                  : infoModalKey === "difficulty"
+                  ? t("label.difficultyLabel")
+                  : t("label.weightExerciseInfoTitle")}
+              </Text>
+              <Text style={styles.modalSubtitle}>
+                {infoModalKey === "type"
+                  ? t("label.typeHelp")
+                  : infoModalKey === "difficulty"
+                  ? t("label.difficultyDescription")
+                  : t("label.weightExerciseInfoBody")}
+              </Text>
+              {infoModalKey === "difficulty" ? (
+                <View style={styles.difficultyFormulaList}>
+                  <View style={styles.difficultyFormulaRow}>
+                    <Text style={styles.difficultyFormulaLabel}>
+                      {t("label.formulaTimeBased")}
+                    </Text>
+                    <Text style={styles.difficultyFormulaValue}>
+                      {t("label.formulaTimeUnit")} ×{" "}
+                      {formatFactorValue(ADMIN_FACTOR_TIME)} ×{" "}
+                      {t("label.formulaUserFactor")}
+                    </Text>
+                  </View>
+                  <View style={styles.difficultyFormulaRow}>
+                    <Text style={styles.difficultyFormulaLabel}>
+                      {t("label.formulaRepsBased")}
+                    </Text>
+                    <Text style={styles.difficultyFormulaValue}>
+                      {repsShort} × {formatFactorValue(ADMIN_FACTOR_REPS)} ×{" "}
+                      {t("label.formulaUserFactor")}
+                    </Text>
+                  </View>
+                  <View style={styles.difficultyFormulaRow}>
+                    <Text style={styles.difficultyFormulaLabel}>
+                      {t("label.formulaWeighted")}
+                    </Text>
+                    <Text style={styles.difficultyFormulaValue}>
+                      {t("label.weightUnit")} × {repsShort} ×{" "}
+                      {t("label.formulaUserFactor")} ×{" "}
+                      {formatFactorValue(ADMIN_FACTOR_WEIGHTED)}
+                    </Text>
+                  </View>
                 </View>
-                <View style={styles.difficultyFormulaRow}>
-                  <Text style={styles.difficultyFormulaLabel}>
-                    {t("label.formulaRepsBased")}
-                  </Text>
-                  <Text style={styles.difficultyFormulaValue}>
-                    {repsShort} × {formatFactorValue(ADMIN_FACTOR_REPS)} ×{" "}
-                    {t("label.formulaUserFactor")}
-                  </Text>
-                </View>
-                <View style={styles.difficultyFormulaRow}>
-                  <Text style={styles.difficultyFormulaLabel}>
-                    {t("label.formulaWeighted")}
-                  </Text>
-                  <Text style={styles.difficultyFormulaValue}>
-                    {t("label.weightUnit")} × {repsShort} ×{" "}
-                    {t("label.formulaUserFactor")} ×{" "}
-                    {formatFactorValue(ADMIN_FACTOR_WEIGHTED)}
-                  </Text>
-                </View>
+              ) : null}
+              <View style={styles.modalActions}>
+                <Pressable
+                  style={styles.secondaryButton}
+                  onPress={() => setInfoModalKey(null)}
+                >
+                  <Text style={styles.secondaryButtonText}>{t("label.close")}</Text>
+                </Pressable>
               </View>
-            ) : null}
-            <View style={styles.modalActions}>
-              <Pressable
-                style={styles.secondaryButton}
-                onPress={() => setInfoModalKey(null)}
-              >
-                <Text style={styles.secondaryButtonText}>{t("label.close")}</Text>
-              </Pressable>
-            </View>
+            </Pressable>
           </Pressable>
-        </Pressable>
+        </Modal>
       ) : null}
     </SafeAreaView>
   );
