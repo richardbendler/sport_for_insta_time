@@ -247,17 +247,6 @@ const fr = {
     "label.motivationStatsBody":
       "Regarde tes entrées pour voir tes progrès.",
     "label.motivationQuoteStartTitle": "Petit retour",
-    "label.motivationQuoteStartBody":
-      "Le savais-tu ? Dans l'Egypte ancienne, des sports comme la lutte, le tir a l'arc et la natation servaient a former les pharaons pour les ceremonies et les combats.",
-    "label.motivationQuoteDifficultyTitle": "Astuce rapide",
-    "label.motivationQuoteDifficultyBody":
-      "Un peu plus de difficulté augmente la valeur de chaque répétition. Monte le curseur et fonce.",
-    "label.motivationQuoteScreenTimeTitle": "Du temps d'écran en bonus",
-    "label.motivationQuoteScreenTimeBody":
-      "Chaque mouvement te rapporte des minutes supplémentaires sur ton téléphone — continue comme ça.",
-    "label.motivationQuoteFocusTitle": "Concentre-toi sur le mouvement",
-    "label.motivationQuoteFocusBody":
-      "Quelques minutes de sport te sortent de l'écran et te lancent dans ton élan.",
     "label.motivationNewSportTitle": "Ajoute un autre sport",
     "label.motivationNewSportBody":
       "Diversifie ton entraînement avec une nouvelle activité.",

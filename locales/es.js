@@ -252,17 +252,6 @@ const es = {
     "label.motivationStatsBody":
       "Mira tus registros para ver tu progreso.",
     "label.motivationQuoteStartTitle": "Dato curioso",
-    "label.motivationQuoteStartBody":
-      "Sabias que en el antiguo Egipto ya practicaban deportes como la lucha, el tiro con arco y la natacion para preparar a los faraones para ceremonias y batallas?",
-    "label.motivationQuoteDifficultyTitle": "Consejo rápido",
-    "label.motivationQuoteDifficultyBody":
-      "Aumentar un poco la dificultad hace que cada repetición valga más. Sube el regulador y sigue adelante.",
-    "label.motivationQuoteScreenTimeTitle": "Tiempo de pantalla como premio",
-    "label.motivationQuoteScreenTimeBody":
-      "Cada movimiento te da minutos extra en el móvil — sigue así para cobrarlos.",
-    "label.motivationQuoteFocusTitle": "Concéntrate en moverte",
-    "label.motivationQuoteFocusBody":
-      "Unos minutos de deporte te alejan de la pantalla y te ponen en ritmo.",
     "label.motivationNewSportTitle": "Añade otra disciplina",
     "label.motivationNewSportBody":
       "Varía tu rutina creando un nuevo deporte.",

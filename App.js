@@ -56,6 +56,7 @@ try {
 import Voice from "@react-native-voice/voice";
 import { I18nextProvider, useTranslation } from "react-i18next";
 import i18n from "./i18n";
+import { getFunFactsForLanguage } from "./funFacts";
 import {
   DEFAULT_WEEKDAY_LABELS,
   MONTH_LABELS,
@@ -74,6 +75,7 @@ const STORAGE_KEYS = {
   notificationsPermissions: "@notifications_permissions_prompted_v1",
   grayscalePermissions: "@grayscale_permissions_prompted_v1",
   motivationActions: "@motivation_actions_v1",
+  motivationFunFactsUsed: "@motivation_fun_facts_used_v1",
   carryover: "@carryover_seconds_v1",
   carryoverDay: "@carryover_day_v1",
   usageSnapshot: "@usage_snapshot_v1",
@@ -2276,6 +2278,8 @@ function AppContent() {
     useState(null);
   const [completedMotivationActionIds, setCompletedMotivationActionIds] =
     useState([]);
+  const [usedFunFactIds, setUsedFunFactIds] = useState([]);
+  const [activeFunFactId, setActiveFunFactId] = useState(null);
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [statsRange, setStatsRange] = useState("month");
   const [infoHint, setInfoHint] = useState(null);
@@ -2418,6 +2422,17 @@ function AppContent() {
         );
         return next;
       });
+    },
+    [persistStorageValue]
+  );
+  const markFunFactUsed = useCallback(
+    (nextUsedIds) => {
+      setUsedFunFactIds(nextUsedIds);
+      persistStorageValue(
+        STORAGE_KEYS.motivationFunFactsUsed,
+        JSON.stringify(nextUsedIds),
+        "motivation fun facts"
+      );
     },
     [persistStorageValue]
   );
@@ -2747,6 +2762,21 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         }
       }
       setCompletedMotivationActionIds(parsedCompletedMotivationActions);
+      const motivationFunFactsRaw = await AsyncStorage.getItem(
+        STORAGE_KEYS.motivationFunFactsUsed
+      );
+      let parsedUsedFunFacts = [];
+      if (motivationFunFactsRaw) {
+        try {
+          const parsed = JSON.parse(motivationFunFactsRaw);
+          if (Array.isArray(parsed)) {
+            parsedUsedFunFacts = parsed;
+          }
+        } catch (error) {
+          console.warn("Failed to parse used fun facts", error);
+        }
+      }
+      setUsedFunFactIds(parsedUsedFunFacts);
       setHasLoaded(true);
     };
     load();
@@ -5869,36 +5899,35 @@ const getSpeechLocale = () => {
   const showMotivationAlert = (titleKey, bodyKey) => {
     Alert.alert(t(titleKey), t(bodyKey));
   };
-
-  const motivationQuotes = useMemo(
-    () => [
-      {
-        id: "quoteStart",
-        titleKey: "label.motivationQuoteStartTitle",
-        bodyKey: "label.motivationQuoteStartBody",
-      },
-      {
-        id: "quoteDifficulty",
-        titleKey: "label.motivationQuoteDifficultyTitle",
-        bodyKey: "label.motivationQuoteDifficultyBody",
-      },
-      {
-        id: "quoteScreenTime",
-        titleKey: "label.motivationQuoteScreenTimeTitle",
-        bodyKey: "label.motivationQuoteScreenTimeBody",
-      },
-      {
-        id: "quoteFocus",
-        titleKey: "label.motivationQuoteFocusTitle",
-        bodyKey: "label.motivationQuoteFocusBody",
-      },
-    ],
+  const funFacts = useMemo(
+    () => getFunFactsForLanguage(language),
     [language]
   );
-  const motivationQuoteMap = useMemo(
-    () => new Map(motivationQuotes.map((item) => [item.id, item])),
-    [motivationQuotes]
-  );
+  const selectRandomFunFact = useCallback(() => {
+    if (!funFacts.length) {
+      setActiveFunFactId(null);
+      return;
+    }
+    const validIds = new Set(funFacts.map((fact) => fact.id));
+    const cleanedUsedIds = usedFunFactIds.filter((id) => validIds.has(id));
+    const usedSet = new Set(cleanedUsedIds);
+    const availableFacts = funFacts.filter((fact) => !usedSet.has(fact.id));
+    const pool = availableFacts.length ? availableFacts : funFacts;
+    const selected = pool[Math.floor(Math.random() * pool.length)];
+    if (!selected) {
+      setActiveFunFactId(null);
+      return;
+    }
+    const nextUsedIds = availableFacts.length
+      ? Array.from(new Set([...cleanedUsedIds, selected.id]))
+      : [selected.id];
+    setActiveFunFactId(selected.id);
+    if (nextUsedIds.length !== usedFunFactIds.length) {
+      markFunFactUsed(nextUsedIds);
+    } else if (!usedSet.has(selected.id)) {
+      markFunFactUsed(nextUsedIds);
+    }
+  }, [funFacts, markFunFactUsed, usedFunFactIds]);
 
   const motivationActions = useMemo(() => {
     const defaultSport = motivationSport ?? activeSports[0];
@@ -6067,29 +6096,6 @@ const getSpeechLocale = () => {
     [completedMotivationActionIds]
   );
 
-  const recommendedQuoteId = useMemo(() => {
-    const hasEntries = (usageState.entryCount || 0) > 0;
-    if (!hasEntries) {
-      return "quoteStart";
-    }
-    if (highestAppUsageMinutes >= 45) {
-      return "quoteScreenTime";
-    }
-    const usedSeconds = usageState.usedSeconds || 0;
-    const remainingSeconds = usageState.remainingSeconds || 0;
-    const totalSeconds = usedSeconds + remainingSeconds;
-    const usageRatio = totalSeconds > 0 ? usedSeconds / totalSeconds : 0;
-    if (usageRatio >= 0.7) {
-      return "quoteFocus";
-    }
-    return "quoteDifficulty";
-  }, [
-    highestAppUsageMinutes,
-    usageState.entryCount,
-    usageState.remainingSeconds,
-    usageState.usedSeconds,
-  ]);
-
   const recommendedActionId = useMemo(() => {
     const hasSports = activeSports.length > 0;
     const hasEntries = (usageState.entryCount || 0) > 0;
@@ -6154,10 +6160,29 @@ const getSpeechLocale = () => {
     }
   }, [recommendedActionId, dismissedMotivationActionId]);
 
-  const activeQuote =
-    motivationQuoteMap.get(recommendedQuoteId) ?? motivationQuotes[0];
-  const activeQuoteTitle = activeQuote ? t(activeQuote.titleKey) : "";
-  const activeQuoteBody = activeQuote ? t(activeQuote.bodyKey) : "";
+  useEffect(() => {
+    if (!hasLoaded) {
+      return;
+    }
+    if (!activeFunFactId) {
+      selectRandomFunFact();
+      return;
+    }
+    if (!funFacts.some((fact) => fact.id === activeFunFactId)) {
+      selectRandomFunFact();
+    }
+  }, [activeFunFactId, funFacts, hasLoaded, selectRandomFunFact]);
+
+  useEffect(() => {
+    if (!hasLoaded || !permissionsPanelOpen || missingPermissions) {
+      return;
+    }
+    selectRandomFunFact();
+  }, [hasLoaded, missingPermissions, permissionsPanelOpen, selectRandomFunFact]);
+
+  const activeFunFact = funFacts.find((fact) => fact.id === activeFunFactId);
+  const activeQuoteTitle = t("label.motivationQuoteStartTitle");
+  const activeQuoteBody = activeFunFact ? activeFunFact.text : "";
 
   const activeAction = recommendedActionId
     ? motivationActionMap.get(recommendedActionId)
