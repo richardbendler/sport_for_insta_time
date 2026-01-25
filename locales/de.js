@@ -201,9 +201,14 @@ const de = {
     "label.manualTimeEntryTitle": "Zeit manuell erfassen",
     "label.manualTimeEntryMinutes": "Minuten",
     "label.manualTimeEntrySeconds": "Sekunden",
+    "label.distanceKm": "Kilometer (optional)",
+    "label.distanceKmHint":
+      "Optional - wird nur in der Statistik verwendet.",
     "label.manualTimeEntryButton": "Zeit hinzufügen",
     "label.manualTimeEntryHint":
       "Gib die Dauer deines Trainings ein und tippe auf den Button.",
+    "label.kmUnit": "km",
+    "label.kmhUnit": "km/h",
     "label.timeBased": "Zeitbasiert",
     "label.typePickerTitle": "Tracking-Modus",
     "label.typeInfoTitle": "Modus verstehen",

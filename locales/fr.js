@@ -194,7 +194,11 @@ const fr = {
     "label.manualTimeEntryTitle": "Saisir le temps manuellement",
     "label.manualTimeEntryMinutes": "Minutes",
     "label.manualTimeEntrySeconds": "Secondes",
+    "label.distanceKm": "KilomÃ¨tres (optionnel)",
+    "label.distanceKmHint": "Optionnel - utilisÃ© uniquement dans les stats.",
     "label.manualTimeEntryButton": "Ajouter du temps",
+    "label.kmUnit": "km",
+    "label.kmhUnit": "km/h",
     "label.manualTimeEntryHint":
       "Indique la durée de ton entraînement et appuie sur le bouton.",
     "label.timeBased": "Basé sur le temps",

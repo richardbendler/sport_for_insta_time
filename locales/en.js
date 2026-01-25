@@ -197,9 +197,13 @@ const en = {
     "label.manualTimeEntryTitle": "Log time manually",
     "label.manualTimeEntryMinutes": "Minutes",
     "label.manualTimeEntrySeconds": "Seconds",
+    "label.distanceKm": "Kilometers (optional)",
+    "label.distanceKmHint": "Optional - used only in stats.",
     "label.manualTimeEntryButton": "Add time",
     "label.manualTimeEntryHint":
       "Enter how long you trained and tap the button to log it.",
+    "label.kmUnit": "km",
+    "label.kmhUnit": "km/h",
     "label.timeBased": "Time-based",
     "label.typePickerTitle": "Tracking mode",
     "label.typeInfoTitle": "How modes work",
