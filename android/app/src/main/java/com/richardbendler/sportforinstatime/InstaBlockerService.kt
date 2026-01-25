@@ -41,6 +41,8 @@ class InstaBlockerService : AccessibilityService() {
   private val homeClearDelayMillis = 600L
   private val grayscalePrefKey = "grayscale_restricted_apps"
   private val daltonizerMonochromacy = 0
+  private val daltonizerEnabledKey = "accessibility_display_daltonizer_enabled"
+  private val daltonizerModeKey = "accessibility_display_daltonizer"
 
   private var grayscaleApplied = false
   private var previousDaltonizerEnabled: Int? = null
@@ -499,22 +501,22 @@ class InstaBlockerService : AccessibilityService() {
       val resolver = contentResolver
       previousDaltonizerEnabled = Settings.Secure.getInt(
         resolver,
-        Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
+        daltonizerEnabledKey,
         0
       )
       previousDaltonizerMode = Settings.Secure.getInt(
         resolver,
-        Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER,
+        daltonizerModeKey,
         -1
       )
       Settings.Secure.putInt(
         resolver,
-        Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
+        daltonizerEnabledKey,
         1
       )
       Settings.Secure.putInt(
         resolver,
-        Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER,
+        daltonizerModeKey,
         daltonizerMonochromacy
       )
       grayscaleApplied = true
@@ -539,12 +541,12 @@ class InstaBlockerService : AccessibilityService() {
       val modeValue = previousDaltonizerMode ?: -1
       Settings.Secure.putInt(
         resolver,
-        Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
+        daltonizerEnabledKey,
         enabledValue
       )
       Settings.Secure.putInt(
         resolver,
-        Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER,
+        daltonizerModeKey,
         modeValue
       )
     } catch (e: SecurityException) {
