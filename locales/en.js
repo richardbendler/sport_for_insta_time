@@ -30,10 +30,10 @@ const en = {
     "label.formulaTitle": "Current formula",
     "label.formulaIntro":
       "This is how your screen time is calculated for this sport:",
-    "label.formulaAdminFactor": "Admin factor",
+    "label.formulaAdminFactor": "Fix Factor",
     "label.formulaUserFactor": "Screen Time Factor",
     "label.formulaAdminInfo":
-      "The admin factor is a global base multiplier for this category.",
+      "The Fix Factor is a global base multiplier for this category.",
     "label.formulaUserEffect":
       "The screen time factor scales your earned time. Currently: {{percent}} vs 1.0.",
     "label.formulaEditButton": "Edit Screen Time Factor",
@@ -184,7 +184,7 @@ const en = {
         "Formulas shown below.",
     "label.weightExerciseInfoTitle": "Weight exercises",
     "label.weightExerciseInfoBody":
-      "Enable this when logging sets with additional weight; screen time = kg × reps × difficulty × adminFactor_weighted.",
+      "Enable this when logging sets with additional weight; screen time = kg × reps × difficulty × fixFactor_weighted.",
     "label.weightEntryButton": "Log set",
     "label.weightEntryPreview": "Screen time preview",
     "label.weightEntryWeight": "Weight (kg)",

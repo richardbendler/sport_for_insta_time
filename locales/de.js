@@ -30,10 +30,10 @@ const de = {
     "label.formulaTitle": "Aktuelle Formel",
     "label.formulaIntro":
       "So wird deine Screen Time fur diese Sportart berechnet:",
-    "label.formulaAdminFactor": "Admin-Faktor",
+    "label.formulaAdminFactor": "Fix Factor",
     "label.formulaUserFactor": "Screen Time Faktor",
     "label.formulaAdminInfo":
-      "Der Admin-Faktor ist ein globaler Basiswert fur diese Kategorie.",
+      "Der Fix Factor ist ein globaler Basiswert fur diese Kategorie.",
     "label.formulaUserEffect":
       "Der Screen Time Faktor skaliert deine erspielte Zeit. Aktuell: {{percent}} gegen?ber 1.0.",
     "label.formulaEditButton": "Screen Time Faktor bearbeiten",
@@ -189,7 +189,7 @@ const de = {
       "label.difficultyFormula":
         "Formeln siehe unten.",
     "label.weightExerciseInfoTitle": "Gewichtsuebungen",
-    "label.weightExerciseInfoBody": "Aktiviere das bei Ubungen mit zusatzlichem Gewicht; die Screen Time berechnet sich als kg × Wiederholungen × Intensitat × adminFactor_weighted.",
+    "label.weightExerciseInfoBody": "Aktiviere das bei Ubungen mit zusatzlichem Gewicht; die Screen Time berechnet sich als kg × Wiederholungen × Intensitat × fixFactor_weighted.",
 "label.weightEntryPreview": "Screen Time (Vorschau)",
     "label.weightEntryWeight": "Gewicht (kg)",
     "label.weightEntryReps": "Wiederholungen",
