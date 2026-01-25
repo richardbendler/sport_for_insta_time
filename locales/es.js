@@ -199,7 +199,11 @@ const es = {
     "label.manualTimeEntryTitle": "Registrar tiempo manualmente",
     "label.manualTimeEntryMinutes": "Minutos",
     "label.manualTimeEntrySeconds": "Segundos",
+    "label.distanceKm": "KilÃ³metros (opcional)",
+    "label.distanceKmHint": "Opcional - solo se usa en estadÃ­sticas.",
     "label.manualTimeEntryButton": "Agregar tiempo",
+    "label.kmUnit": "km",
+    "label.kmhUnit": "km/h",
     "label.manualTimeEntryHint":
       "Indica cuánto tiempo entrenaste y toca el botón.",
     "label.timeBased": "Por tiempo",

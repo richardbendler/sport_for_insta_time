@@ -1207,6 +1207,7 @@ const getRollingStats = (logs, sportId, sport) => {
   const sportLogs = logs[sportId] || {};
   let reps = 0;
   let seconds = 0;
+  let km = 0;
   let screenSeconds = 0;
   Object.values(sportLogs).forEach((dayLogs) => {
     (dayLogs || []).forEach((entry) => {
@@ -1215,10 +1216,11 @@ const getRollingStats = (logs, sportId, sport) => {
       }
       reps += entry.reps || 0;
       seconds += entry.seconds || 0;
+      km += entry.km || 0;
       screenSeconds += resolveEntryScreenSeconds(sport, entry);
     });
   });
-  return { reps, seconds, screenSeconds };
+  return { reps, seconds, km, screenSeconds };
 };
 
 const getWeeklyStats = (stats, sportId) => {
@@ -1226,7 +1228,7 @@ const getWeeklyStats = (stats, sportId) => {
   return weekKeys.map(({ key, label }) => ({
     key,
     label,
-    dayStats: (stats[sportId] || {})[key] || { reps: 0, seconds: 0 },
+    dayStats: (stats[sportId] || {})[key] || { reps: 0, seconds: 0, km: 0 },
   }));
 };
 
@@ -1254,6 +1256,29 @@ const formatWeightValue = (value) => {
   }
   return `${Math.round(value)}`;
 };
+
+const formatDistanceValue = (value, maxDecimals = 2) => {
+  if (!Number.isFinite(value)) {
+    return "0";
+  }
+  const factor = Math.pow(10, maxDecimals);
+  const rounded = Math.round(value * factor) / factor;
+  const text = rounded.toFixed(maxDecimals);
+  return text.replace(/\.0+$/, "").replace(/(\.\d*[1-9])0+$/, "$1");
+};
+
+const computeKmPerHour = (km, seconds) => {
+  if (!Number.isFinite(km) || km <= 0) {
+    return 0;
+  }
+  if (!Number.isFinite(seconds) || seconds <= 0) {
+    return 0;
+  }
+  return (km * 3600) / seconds;
+};
+
+const formatKmPerHour = (km, seconds) =>
+  formatDistanceValue(computeKmPerHour(km, seconds), 1);
 
 const flattenSportEntries = (logs, sportId) => {
   const sportLog = (logs || {})[sportId] || {};
@@ -1292,6 +1317,17 @@ const parsePositiveNumber = (value) => {
     return 0;
   }
   return Math.max(0, parsed);
+};
+
+const scaleKmForSeconds = (km, fromSeconds, toSeconds) => {
+  if (!Number.isFinite(km) || km <= 0) {
+    return 0;
+  }
+  if (!Number.isFinite(fromSeconds) || fromSeconds <= 0) {
+    return km;
+  }
+  const ratio = Math.max(0, toSeconds) / fromSeconds;
+  return Math.max(0, km * ratio);
 };
 
 const parsePositiveInteger = (value) => {
@@ -1491,6 +1527,16 @@ const normalizeLogs = (logs, sports) => {
             nextEntry.id = generateLogId();
             changed = true;
           }
+          if (sport.type === "time") {
+            const normalizedKm = parsePositiveNumber(nextEntry.km);
+            if (normalizedKm !== (nextEntry.km || 0)) {
+              nextEntry.km = normalizedKm;
+              changed = true;
+            }
+          } else if (nextEntry.km) {
+            nextEntry.km = 0;
+            changed = true;
+          }
           if (!Number.isFinite(nextEntry.screenSeconds)) {
             nextEntry.screenSeconds = screenSecondsForEntry(sport, nextEntry);
             changed = true;
@@ -1524,16 +1570,18 @@ const buildStatsFromLogs = (logs, sports = []) => {
         (sum, entry) => sum + (entry.seconds || 0),
         0
       );
+      const km = dayEntries.reduce((sum, entry) => sum + (entry.km || 0), 0);
       const screenSeconds = dayEntries.reduce(
         (sum, entry) => sum + resolveEntryScreenSeconds(sport, entry),
         0
       );
-      if (reps <= 0 && seconds <= 0 && screenSeconds <= 0) {
+      if (reps <= 0 && seconds <= 0 && km <= 0 && screenSeconds <= 0) {
         return;
       }
       nextSportStats[dayKey] = {
         reps,
         seconds,
+        km,
         screenSeconds,
       };
     });
@@ -1572,11 +1620,17 @@ const groupEntriesByWindow = (entries, sportOrType, weightMode = false) => {
         endTs: entry.ts,
         reps: entry.reps || 0,
         seconds: entry.seconds || 0,
+        km: entry.km || 0,
+        kmSeconds: entry.km ? entry.seconds || 0 : 0,
       });
     } else {
       last.endTs = entry.ts;
       last.reps += entry.reps || 0;
       last.seconds += entry.seconds || 0;
+      if (entry.km) {
+        last.km += entry.km || 0;
+        last.kmSeconds += entry.seconds || 0;
+      }
     }
   });
   return groups;
@@ -1878,6 +1932,7 @@ function AppContent() {
   const [voiceError, setVoiceError] = useState(null);
   const [manualTimeMinutes, setManualTimeMinutes] = useState("");
   const [manualTimeSeconds, setManualTimeSeconds] = useState("");
+  const [manualTimeKm, setManualTimeKm] = useState("");
   const [manualRepsInput, setManualRepsInput] = useState("");
   const [isAppActive, setIsAppActive] = useState(
     AppState.currentState === "active"
@@ -1893,6 +1948,7 @@ function AppContent() {
   const manualRepsInputRef = useRef(null);
   const manualTimeMinutesRef = useRef(null);
   const manualTimeSecondsRef = useRef(null);
+  const manualTimeKmRef = useRef(null);
   const weightEntryWeightRef = useRef(null);
   const weightEntryRepsRef = useRef(null);
   const workoutRunningRef = useRef(false);
@@ -2504,7 +2560,13 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setStats((prev) => {
       const nextStats = { ...prev };
       const sportStats = { ...(nextStats[sportId] || {}) };
-      const dayStats = { reps: 0, seconds: 0, screenSeconds: 0, ...(sportStats[day] || {}) };
+      const dayStats = {
+        reps: 0,
+        seconds: 0,
+        km: 0,
+        screenSeconds: 0,
+        ...(sportStats[day] || {}),
+      };
       const updated = updater(dayStats);
       sportStats[day] = updated;
       nextStats[sportId] = sportStats;
@@ -2524,16 +2586,23 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         (sum, entry) => sum + (entry.seconds || 0),
         0
       );
+      const kmTotal = dayEntries.reduce((sum, entry) => sum + (entry.km || 0), 0);
       const screenSecondsTotal = dayEntries.reduce(
         (sum, entry) => sum + resolveEntryScreenSeconds(sport, entry),
         0
       );
-      if (repsTotal <= 0 && secondsTotal <= 0 && screenSecondsTotal <= 0) {
+      if (
+        repsTotal <= 0 &&
+        secondsTotal <= 0 &&
+        kmTotal <= 0 &&
+        screenSecondsTotal <= 0
+      ) {
         delete sportStats[dayKey];
       } else {
         sportStats[dayKey] = {
           reps: repsTotal,
           seconds: secondsTotal,
+          km: kmTotal,
           screenSeconds: screenSecondsTotal,
         };
       }
@@ -2578,6 +2647,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       ts: entry.ts || Date.now(),
       reps: entry.reps || 0,
       seconds: entry.seconds || 0,
+      km: sport.type === "time" ? parsePositiveNumber(entry.km) : 0,
       weight: entry.weight || 0,
     };
     nextEntry.screenSeconds =
@@ -2677,7 +2747,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           if (sport.type === "reps") {
             entry.reps = reduced;
           } else {
+            const previousSeconds = entry.seconds || 0;
             entry.seconds = reduced;
+            entry.km = scaleKmForSeconds(entry.km || 0, previousSeconds, reduced);
           }
           entry.screenSeconds = screenSecondsForEntry(sport, entry);
           updatedEntries.push(entry);
@@ -2787,7 +2859,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           removedEntryId = entry.id;
           dayLogs.splice(index, 1);
         } else {
+          const previousSeconds = entry.seconds || 0;
           entry.seconds = nextSeconds;
+          entry.km = scaleKmForSeconds(entry.km || 0, previousSeconds, nextSeconds);
           entry.screenSeconds = screenSecondsForEntry(sport, entry);
           dayLogs[index] = entry;
           updatedEntry = entry;
@@ -2825,11 +2899,16 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       const current = {
         reps: 0,
         seconds: 0,
+        km: 0,
         screenSeconds: 0,
         ...(sportStats[dayKey] || {}),
       };
       const updated = updater(current);
-      if ((updated.reps || 0) <= 0 && (updated.seconds || 0) <= 0) {
+      if (
+        (updated.reps || 0) <= 0 &&
+        (updated.seconds || 0) <= 0 &&
+        (updated.km || 0) <= 0
+      ) {
         delete sportStats[dayKey];
       } else {
         sportStats[dayKey] = updated;
@@ -4369,9 +4448,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       return;
     }
     if (elapsed > 0) {
+      const km = parsePositiveNumber(manualTimeKm);
       const entry = addLogEntry(selectedSport, {
         ts: Date.now(),
         seconds: elapsed,
+        km,
       });
       const addedSeconds =
         entry?.screenSeconds ??
@@ -4381,11 +4462,13 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       updateDayStat(selectedSport.id, (dayStats) => ({
         ...dayStats,
         seconds: dayStats.seconds + elapsed,
+        km: (dayStats.km || 0) + km,
         screenSeconds: (dayStats.screenSeconds || 0) + addedSeconds,
       }));
     }
     setSessionSeconds(0);
     sessionStartRef.current = null;
+    setManualTimeKm("");
   };
 
   const handleManualTimeLog = () => {
@@ -4399,8 +4482,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     if (totalSeconds <= 0) {
       return;
     }
+    const km = parsePositiveNumber(manualTimeKm);
     const timestamp = Date.now();
-    const entryPayload = { ts: timestamp, seconds: totalSeconds };
+    const entryPayload = { ts: timestamp, seconds: totalSeconds, km };
     const loggedEntry = addLogEntry(currentSport, entryPayload);
     const addedSeconds =
       loggedEntry?.screenSeconds ??
@@ -4408,10 +4492,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     updateDayStat(currentSport.id, (dayStats) => ({
       ...dayStats,
       seconds: (dayStats.seconds || 0) + totalSeconds,
+      km: (dayStats.km || 0) + km,
       screenSeconds: (dayStats.screenSeconds || 0) + addedSeconds,
     }));
     setManualTimeMinutes("");
     setManualTimeSeconds("");
+    setManualTimeKm("");
     maybeAdvanceTutorial("trackAction");
   };
 
@@ -6759,9 +6845,18 @@ const getSpeechLocale = () => {
               <Text style={styles.helperText}>{t("label.noEntries")}</Text>
             ) : (
               workoutGroups.map(({ key, sport, group }) => {
+                const hasKm = sport.type === "time" && (group.km || 0) > 0;
+                const kmSeconds = group.kmSeconds || group.seconds || 0;
                 const valueText =
                   sport.type === "reps"
                     ? `${group.reps} ${repsShort}`
+                    : hasKm
+                    ? `${formatSeconds(group.seconds)} · ${formatDistanceValue(
+                        group.km
+                      )} ${t("label.kmUnit")} · ${formatKmPerHour(
+                        group.km,
+                        kmSeconds
+                      )} ${t("label.kmhUnit")}`
                     : formatSeconds(group.seconds);
                 const range =
                   group.startTs === group.endTs
@@ -7065,9 +7160,19 @@ const getSpeechLocale = () => {
               <Text style={styles.helperText}>{t("label.noEntries")}</Text>
             ) : (
               groups.map((group, index) => {
+                const hasKm =
+                  statsSport.type === "time" && (group.km || 0) > 0;
+                const kmSeconds = group.kmSeconds || group.seconds || 0;
                 const valueText =
                   statsSport.type === "reps"
                     ? `${group.reps} ${repsShort}`
+                    : hasKm
+                    ? `${formatSeconds(group.seconds)} · ${formatDistanceValue(
+                        group.km
+                      )} ${t("label.kmUnit")} · ${formatKmPerHour(
+                        group.km,
+                        kmSeconds
+                      )} ${t("label.kmhUnit")}`
                     : formatSeconds(group.seconds);
                 const range =
                   group.startTs === group.endTs
@@ -7110,9 +7215,17 @@ const getSpeechLocale = () => {
               <View style={styles.breakdownSection}>
                 <Text style={styles.sectionTitle}>{t("label.breakdown")}</Text>
                 {sortedEntries.map((entry) => {
+                  const hasKm = statsSport.type === "time" && (entry.km || 0) > 0;
                   const baseValue =
                     statsSport.type === "reps"
                       ? `${entry.reps || 0} ${repsShort}`
+                      : hasKm
+                      ? `${formatSeconds(entry.seconds || 0)} · ${formatDistanceValue(
+                          entry.km || 0
+                        )} ${t("label.kmUnit")} · ${formatKmPerHour(
+                          entry.km || 0,
+                          entry.seconds || 0
+                        )} ${t("label.kmhUnit")}`
                       : formatSeconds(entry.seconds || 0);
                   const earnedSeconds = resolveEntryScreenSeconds(statsSport, entry);
                   return (
@@ -7587,6 +7700,27 @@ const getSpeechLocale = () => {
                     />
                   </View>
                 </View>
+                <View style={styles.manualTimeInputsRow}>
+                  <View style={styles.manualTimeInputWrap}>
+                    <Text style={styles.manualTimeInputLabel}>
+                      {t("label.distanceKm")}
+                    </Text>
+                    <TextInput
+                      style={[styles.input, styles.manualTimeInput]}
+                      ref={manualTimeKmRef}
+                      value={manualTimeKm}
+                      onChangeText={setManualTimeKm}
+                      onFocus={() => scrollToInput(manualTimeKmRef)}
+                      placeholder="5.0"
+                      placeholderTextColor="#7a7a7a"
+                      keyboardType="decimal-pad"
+                      maxLength={6}
+                    />
+                  </View>
+                </View>
+              <Text style={styles.manualEntryHelper}>
+                {t("label.distanceKmHint")}
+              </Text>
               <Pressable
                 style={[styles.primaryButton, styles.manualEntryButton]}
                 onPress={handleManualTimeLog}
