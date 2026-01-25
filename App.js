@@ -4267,6 +4267,86 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     );
   };
 
+  const renderInfoModal = () => {
+    if (!infoModalKey) {
+      return null;
+    }
+    return (
+      <Modal
+        visible={!!infoModalKey}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setInfoModalKey(null)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setInfoModalKey(null)}
+        >
+          <Pressable
+            style={styles.modalCard}
+            onPress={(event) => event.stopPropagation()}
+          >
+            <Text style={styles.modalTitle}>
+              {infoModalKey === "type"
+                ? t("label.typeInfoTitle")
+                : infoModalKey === "difficulty"
+                ? t("label.difficultyLabel")
+                : t("label.weightExerciseInfoTitle")}
+            </Text>
+            <Text style={styles.modalSubtitle}>
+              {infoModalKey === "type"
+                ? t("label.typeHelp")
+                : infoModalKey === "difficulty"
+                ? t("label.difficultyDescription")
+                : t("label.weightExerciseInfoBody")}
+            </Text>
+            {infoModalKey === "difficulty" ? (
+              <View style={styles.difficultyFormulaList}>
+                <View style={styles.difficultyFormulaRow}>
+                  <Text style={styles.difficultyFormulaLabel}>
+                    {t("label.formulaTimeBased")}
+                  </Text>
+                  <Text style={styles.difficultyFormulaValue}>
+                    {t("label.formulaTimeUnit")} ×{" "}
+                    {formatFactorValue(ADMIN_FACTOR_TIME)} ×{" "}
+                    {t("label.formulaUserFactor")}
+                  </Text>
+                </View>
+                <View style={styles.difficultyFormulaRow}>
+                  <Text style={styles.difficultyFormulaLabel}>
+                    {t("label.formulaRepsBased")}
+                  </Text>
+                  <Text style={styles.difficultyFormulaValue}>
+                    {repsShort} × {formatFactorValue(ADMIN_FACTOR_REPS)} ×{" "}
+                    {t("label.formulaUserFactor")}
+                  </Text>
+                </View>
+                <View style={styles.difficultyFormulaRow}>
+                  <Text style={styles.difficultyFormulaLabel}>
+                    {t("label.formulaWeighted")}
+                  </Text>
+                  <Text style={styles.difficultyFormulaValue}>
+                    {t("label.weightUnit")} × {repsShort} ×{" "}
+                    {t("label.formulaUserFactor")} ×{" "}
+                    {formatFactorValue(ADMIN_FACTOR_WEIGHTED)}
+                  </Text>
+                </View>
+              </View>
+            ) : null}
+            <View style={styles.modalActions}>
+              <Pressable
+                style={styles.secondaryButton}
+                onPress={() => setInfoModalKey(null)}
+              >
+                <Text style={styles.secondaryButtonText}>{t("label.close")}</Text>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+    );
+  };
+
   const handleStart = () => {
     sessionStartRef.current = Date.now();
     setSessionSeconds(0);
@@ -7170,7 +7250,6 @@ const getSpeechLocale = () => {
             );
           })}
         </ScrollView>
-        {renderPrefaceSettingsModal()}
       </SafeAreaView>
     );
   }
@@ -7621,7 +7700,6 @@ const getSpeechLocale = () => {
             </View>
           </View>
         </Modal>
-        {renderSportModal()}
       </SafeAreaView>
     );
   }
@@ -7867,7 +7945,6 @@ const getSpeechLocale = () => {
             <Text style={styles.helperText}>{t("label.carryoverHint")}</Text>
           </View>
         </ScrollView>
-        {renderPrefaceSettingsModal()}
       </SafeAreaView>
     );
   }
@@ -8357,7 +8434,6 @@ const getSpeechLocale = () => {
             </Text>
           </View>
         </ScrollView>
-        {renderPrefaceSettingsModal()}
       </SafeAreaView>
     );
   }
@@ -9089,82 +9165,6 @@ const getSpeechLocale = () => {
           ) : null}
         </Pressable>
       </View>
-      {renderPrefaceSettingsModal()}
-      {renderSportModal()}
-      {infoModalKey ? (
-        <Modal
-          visible={!!infoModalKey}
-          animationType="fade"
-          transparent
-          onRequestClose={() => setInfoModalKey(null)}
-        >
-          <Pressable
-            style={styles.modalOverlay}
-            onPress={() => setInfoModalKey(null)}
-          >
-            <Pressable
-              style={styles.modalCard}
-              onPress={(event) => event.stopPropagation()}
-            >
-              <Text style={styles.modalTitle}>
-                {infoModalKey === "type"
-                  ? t("label.typeInfoTitle")
-                  : infoModalKey === "difficulty"
-                  ? t("label.difficultyLabel")
-                  : t("label.weightExerciseInfoTitle")}
-              </Text>
-              <Text style={styles.modalSubtitle}>
-                {infoModalKey === "type"
-                  ? t("label.typeHelp")
-                  : infoModalKey === "difficulty"
-                  ? t("label.difficultyDescription")
-                  : t("label.weightExerciseInfoBody")}
-              </Text>
-              {infoModalKey === "difficulty" ? (
-                <View style={styles.difficultyFormulaList}>
-                  <View style={styles.difficultyFormulaRow}>
-                    <Text style={styles.difficultyFormulaLabel}>
-                      {t("label.formulaTimeBased")}
-                    </Text>
-                    <Text style={styles.difficultyFormulaValue}>
-                      {t("label.formulaTimeUnit")} ×{" "}
-                      {formatFactorValue(ADMIN_FACTOR_TIME)} ×{" "}
-                      {t("label.formulaUserFactor")}
-                    </Text>
-                  </View>
-                  <View style={styles.difficultyFormulaRow}>
-                    <Text style={styles.difficultyFormulaLabel}>
-                      {t("label.formulaRepsBased")}
-                    </Text>
-                    <Text style={styles.difficultyFormulaValue}>
-                      {repsShort} × {formatFactorValue(ADMIN_FACTOR_REPS)} ×{" "}
-                      {t("label.formulaUserFactor")}
-                    </Text>
-                  </View>
-                  <View style={styles.difficultyFormulaRow}>
-                    <Text style={styles.difficultyFormulaLabel}>
-                      {t("label.formulaWeighted")}
-                    </Text>
-                    <Text style={styles.difficultyFormulaValue}>
-                      {t("label.weightUnit")} × {repsShort} ×{" "}
-                      {t("label.formulaUserFactor")} ×{" "}
-                      {formatFactorValue(ADMIN_FACTOR_WEIGHTED)}
-                    </Text>
-                  </View>
-                </View>
-              ) : null}
-              <View style={styles.modalActions}>
-                <Pressable
-                  style={styles.secondaryButton}
-                  onPress={() => setInfoModalKey(null)}
-                >
-                  <Text style={styles.secondaryButtonText}>{t("label.close")}</Text>
-                </Pressable>
-              </View>
-            </Pressable>
-          </Pressable>
-        </Modal>
-      ) : null}
     </SafeAreaView>
   );
 };
@@ -9178,6 +9178,9 @@ const getSpeechLocale = () => {
             {renderTutorialOverlay()}
           </View>
         ) : null}
+        {renderPrefaceSettingsModal()}
+        {renderSportModal()}
+        {renderInfoModal()}
       </View>
     </I18nextProvider>
   );
