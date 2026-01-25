@@ -31,12 +31,15 @@ const es = {
     "label.formulaIntro":
       "Asi se calcula el tiempo de pantalla para este deporte:",
     "label.formulaAdminFactor": "Factor admin",
-    "label.formulaUserFactor": "Factor de usuario",
+    "label.formulaUserFactor": "Factor de tiempo de pantalla",
     "label.formulaAdminInfo":
       "El factor admin es un multiplicador base global para esta categoria.",
     "label.formulaUserEffect":
-      "El factor de usuario escala tu tiempo ganado. Actual: {{percent}} frente a 1.0.",
-    "label.formulaEditButton": "Editar factor de usuario",
+      "El factor de tiempo de pantalla escala tu tiempo ganado. Actual: {{percent}} frente a 1.0.",
+    "label.formulaEditButton": "Editar factor de tiempo de pantalla",
+    "label.formulaWeighted": "Con peso",
+    "label.formulaRepsBased": "Repeticiones",
+    "label.formulaTimeBased": "Basado en tiempo",
     "label.formulaTimeUnit": "segundos",
     "label.screenTimeDetailsTitle": "Detalles del tiempo de pantalla",
     "label.breakdownSummary": "Resumen",
@@ -177,11 +180,11 @@ const es = {
     "label.repsShort": "rep.",
     "label.timeUnit": "Tiempo",
     "label.weightExercise": "Ejercicio con peso",
-    "label.difficultyLabel": "Factor de intensidad (1-10)",
+    "label.difficultyLabel": "Factor de tiempo de pantalla (1-10)",
       "label.difficultyDescription":
-        "El deslizador multiplica duración, repeticiones o peso para definir cuánto tiempo de pantalla otorga cada serie.",
+        "El factor de tiempo de pantalla multiplica duraci?n, repeticiones o peso y define cu?nta pantalla aporta cada unidad.",
       "label.difficultyFormula":
-        "Fórmulas:\nTiempo cronometrado = segundos × adminFactor_time × dificultad\nRepeticiones = repeticiones × adminFactor_reps × dificultad\nDeportes con peso = kg × repeticiones × dificultad × adminFactor_weighted",
+        "F?rmulas abajo.",
     "label.weightExerciseInfoTitle": "Ejercicios con peso",
     "label.weightExerciseInfoBody": "Activa esto para series con peso adicional; el tiempo de pantalla se calcula como kg × repeticiones × dificultad × adminFactor_weighted.",
     "label.weightEntryButton": "Registrar serie",

@@ -8,6 +8,7 @@ import {
   Switch,
   TextInput,
   ScrollView,
+  KeyboardAvoidingView,
   StyleSheet,
   ActivityIndicator,
   Animated,
@@ -79,6 +80,7 @@ const STORAGE_KEYS = {
   logs: "@logs_v1",
   tutorialSeen: "@tutorial_seen_v1",
   workouts: "@workouts_v1",
+  sportColors: "@sport_color_links_v1",
 };
 
 
@@ -4398,11 +4400,87 @@ const COLORS = {
   white: "#f8fafc",
 };
 
+const SPORT_COLOR_POOL = [
+  "#f97316",
+  "#fb923c",
+  "#f59e0b",
+  "#eab308",
+  "#84cc16",
+  "#22c55e",
+  "#10b981",
+  "#14b8a6",
+  "#06b6d4",
+  "#0ea5e9",
+  "#38bdf8",
+  "#60a5fa",
+  "#6366f1",
+  "#8b5cf6",
+  "#a855f7",
+  "#d946ef",
+  "#ec4899",
+  "#f472b6",
+  "#f43f5e",
+  "#ef4444",
+];
+
+const ensureSportColorLinks = (sportsList = [], existing = {}) => {
+  const safeExisting =
+    existing && typeof existing === "object" ? existing : {};
+  const next = {};
+  let changed = false;
+  const validIds = new Set(sportsList.map((sport) => sport.id));
+
+  sportsList.forEach((sport) => {
+    const current = safeExisting[sport.id];
+    const isValid =
+      Number.isInteger(current) &&
+      current >= 0 &&
+      current < SPORT_COLOR_POOL.length;
+    const colorId = isValid
+      ? current
+      : Math.floor(Math.random() * SPORT_COLOR_POOL.length);
+    if (!isValid) {
+      changed = true;
+    }
+    next[sport.id] = colorId;
+  });
+
+  if (!changed) {
+    Object.keys(safeExisting).forEach((sportId) => {
+      if (!validIds.has(sportId)) {
+        changed = true;
+      }
+    });
+  }
+
+  return { map: next, changed };
+};
+
+const addWordBreaks = (label = "") =>
+  String(label)
+    .split(" ")
+    .map((word) =>
+      word.length > 12 ? word.split("").join("\u200b") : word
+    )
+    .join(" ");
+
+const formatFactorValue = (value) => {
+  if (!Number.isFinite(value)) {
+    return "-";
+  }
+  const fixed = Number(value).toFixed(4);
+  return fixed.replace(/\.?0+$/, "");
+};
+
 const SportTitleSlots = ({ sport, sportLabel }) => {
   const [leftWidth, setLeftWidth] = useState(0);
   const [rightWidth, setRightWidth] = useState(0);
   const slotWidth = Math.max(leftWidth, rightWidth);
   const slotStyle = slotWidth ? { width: slotWidth } : undefined;
+  const displayLabel = useMemo(
+    () => addWordBreaks(sportLabel),
+    [sportLabel]
+  );
 
   const handleLeftLayout = useCallback(
     (event) => setLeftWidth(event.nativeEvent.layout.width),
@@ -4420,8 +4498,8 @@ const SportTitleSlots = ({ sport, sportLabel }) => {
       </View>
       <View style={styles.sportTitleTextColumn}>
         <View style={styles.sportTitleTextRow}>
-          <Text style={styles.sportName} numberOfLines={1}>
-            {sportLabel}
+          <Text style={styles.sportName} numberOfLines={2} ellipsizeMode="tail">
+            {displayLabel}
           </Text>
         </View>
       </View>
@@ -5106,6 +5184,7 @@ function AppContent() {
   const { width, height } = useWindowDimensions();
   const { t } = useTranslation();
   const [sports, setSports] = useState([]);
+  const [sportColorLinks, setSportColorLinks] = useState({});
   const [stats, setStats] = useState({});
   const [logs, setLogs] = useState({});
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
@@ -5237,6 +5316,12 @@ function AppContent() {
   const runningRef = useRef(false);
   const workoutStartRef = useRef(null);
   const workoutIntervalRef = useRef(null);
+  const sportDetailScrollRef = useRef(null);
+  const manualRepsInputRef = useRef(null);
+  const manualTimeMinutesRef = useRef(null);
+  const manualTimeSecondsRef = useRef(null);
+  const weightEntryWeightRef = useRef(null);
+  const weightEntryRepsRef = useRef(null);
   const workoutRunningRef = useRef(false);
   const lastPermissionPromptAt = useRef(0);
   const notificationsPromptedRef = useRef(false);
@@ -5484,6 +5569,40 @@ function AppContent() {
     return sport.name;
   };
 
+  const getSportAccentColor = (sportId) => {
+    const colorId = sportColorLinks?.[sportId];
+    if (!Number.isInteger(colorId)) {
+      return COLORS.accent;
+    }
+    return SPORT_COLOR_POOL[colorId % SPORT_COLOR_POOL.length] || COLORS.accent;
+  };
+
+  const scrollToInput = useCallback((inputRef) => {
+    const input = inputRef?.current;
+    const scrollView = sportDetailScrollRef.current;
+    if (!input || !scrollView?.scrollTo) {
+      return;
+    }
+    const measureTarget =
+      scrollView.getInnerViewNode?.() || scrollView;
+    setTimeout(() => {
+      try {
+        input.measureLayout(
+          measureTarget,
+          (_x, y) => {
+            scrollView.scrollTo({
+              y: Math.max(0, y - 24),
+              animated: true,
+            });
+          },
+          () => {}
+        );
+      } catch (error) {
+        // no-op for platforms that can't measure
+      }
+    }, 80);
+  }, []);
+
   const getWorkoutExerciseCount = (sportId) => {
     const entry = currentWorkout?.exercises?.find(
       (item) => item.sportId === sportId
@@ -5532,6 +5651,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       const grayscalePermissionsRaw = await AsyncStorage.getItem(
         STORAGE_KEYS.grayscalePermissions
       );
+      const sportColorsRaw = await AsyncStorage.getItem(
+        STORAGE_KEYS.sportColors
+      );
       const usagePermissionsRaw = await AsyncStorage.getItem(
         STORAGE_KEYS.usagePermissions
       );
@@ -5552,6 +5674,23 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         await AsyncStorage.setItem(
           STORAGE_KEYS.sports,
           JSON.stringify(normalized)
+        );
+      }
+      let parsedSportColors = {};
+      if (sportColorsRaw) {
+        try {
+          parsedSportColors = JSON.parse(sportColorsRaw) || {};
+        } catch (error) {
+          console.warn("Failed to parse sport colors", error);
+        }
+      }
+      const { map: normalizedSportColors, changed: colorsChanged } =
+        ensureSportColorLinks(normalized, parsedSportColors);
+      setSportColorLinks(normalizedSportColors);
+      if (colorsChanged || !sportColorsRaw) {
+        await AsyncStorage.setItem(
+          STORAGE_KEYS.sportColors,
+          JSON.stringify(normalizedSportColors)
         );
       }
       const parsedLogs = logsRaw ? JSON.parse(logsRaw) : {};
@@ -5741,6 +5880,18 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
 
   const saveSports = async (nextSports) => {
     setSports(nextSports);
+    const { map: normalizedSportColors, changed } = ensureSportColorLinks(
+      nextSports,
+      sportColorLinks
+    );
+    if (changed) {
+      setSportColorLinks(normalizedSportColors);
+      await persistStorageValue(
+        STORAGE_KEYS.sportColors,
+        JSON.stringify(normalizedSportColors),
+        t("menu.sports")
+      );
+    }
     await persistStorageValue(
       STORAGE_KEYS.sports,
       JSON.stringify(nextSports),
@@ -8284,6 +8435,7 @@ const getSpeechLocale = () => {
     0,
     Math.floor((gridWidth - gridGap * (columnCount - 1)) / columnCount)
   );
+  const titleWidth = Math.max(140, cardWidth - 64 * 2 - 24);
   const highestAppUsageMs = useMemo(() => {
     const values = Object.values(appUsageMap || {});
     if (values.length === 0) {
@@ -9286,8 +9438,12 @@ const getSpeechLocale = () => {
     if (permissionsPanelTouched || !showMotivationBlock) {
       return;
     }
-    if (missingPermissions || shouldShowMotivationAction) {
+    if (missingPermissions) {
       setPermissionsPanelOpen(true);
+      return;
+    }
+    if (shouldShowMotivationAction) {
+      setPermissionsPanelOpen(false);
     }
   }, [
     permissionsPanelTouched,
@@ -9603,7 +9759,7 @@ const getSpeechLocale = () => {
             group,
           }));
         })
-        .sort((a, b) => a.group.startTs - b.group.startTs);
+        .sort((a, b) => (b.group.startTs || 0) - (a.group.startTs || 0));
       return (
     <SafeAreaView style={styles.container}>
         <ScrollView
@@ -9913,8 +10069,12 @@ const getSpeechLocale = () => {
     };
     if (statsDayKey) {
       const dayLogs = (logs[statsSport.id] || {})[statsDayKey] || [];
-      const groups = groupEntriesByWindow(dayLogs, statsSport.type);
-      const sortedEntries = [...dayLogs].sort((a, b) => a.ts - b.ts);
+      const groups = groupEntriesByWindow(dayLogs, statsSport.type).sort(
+        (a, b) => (b.startTs || 0) - (a.startTs || 0)
+      );
+      const sortedEntries = [...dayLogs].sort(
+        (a, b) => (b.ts || 0) - (a.ts || 0)
+      );
       return (
         <SafeAreaView style={styles.container}>
           <ScrollView
@@ -10129,19 +10289,12 @@ const getSpeechLocale = () => {
     const isReps = selectedSport.type === "reps";
     const isWeightMode = isReps && selectedSport.weightExercise;
     const isSimpleReps = isReps && !selectedSport.weightExercise;
-    const userFactor = difficultyLevelForSport(selectedSport);
+    const userFactor = difficultyLevelForSport(selectedSport); // Screen Time Faktor (userFactor)
     const adminFactor = isWeightMode
       ? ADMIN_FACTOR_WEIGHTED
       : isReps
       ? ADMIN_FACTOR_REPS
       : ADMIN_FACTOR_TIME;
-    const formatFactorValue = (value) => {
-      if (!Number.isFinite(value)) {
-        return "-";
-      }
-      const fixed = Number(value).toFixed(4);
-      return fixed.replace(/\.?0+$/, "");
-    };
     const formulaBaseLabel = isWeightMode
       ? `${t("label.weightUnit")} × ${repsShort}`
       : isReps
@@ -10214,33 +10367,59 @@ const getSpeechLocale = () => {
             style={styles.iconButton}
             onPress={() => setStatsSportId(selectedSport.id)}
           >
-            <Text style={styles.iconButtonText}>{t("menu.stats")}</Text>
+            <View style={styles.iconButtonContent}>
+              <ActionGlyph type="stats" color={COLORS.text} />
+              <Text style={styles.iconButtonText}>{t("menu.stats")}</Text>
+            </View>
           </Pressable>
         </View>
-        <Pressable
-          style={styles.statsCard}
-          onPress={() => setStatsSportId(selectedSport.id)}
+        <KeyboardAvoidingView
+          style={styles.flexGrow}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
         >
-          <View style={styles.counterRow}>
-            <View style={styles.counterBlock}>
-              <Text style={styles.counterLabel}>{t("label.today")}</Text>
-              <Text style={styles.counterValueSmall}>
-                {selectedSport.type === "reps"
-                  ? `${todayStats.reps}`
-                  : formatSeconds(todayStats.seconds || 0)}
-              </Text>
-              <Text style={styles.counterUnit}>
-                {selectedSport.type === "reps" ? repsShort : t("label.timeUnit")}
-              </Text>
-            </View>
-          </View>
-        </Pressable>
-        {isSimpleReps ? (
-          <Pressable
-            style={styles.trackingArea}
-            ref={tutorialTrackingAreaRef}
-            onPress={incrementReps}
+          <ScrollView
+            ref={sportDetailScrollRef}
+            contentContainerStyle={styles.sportDetailScrollContent}
+            keyboardShouldPersistTaps="handled"
           >
+            <Pressable
+              style={styles.statsCard}
+              onPress={() => setStatsSportId(selectedSport.id)}
+            >
+              <View style={styles.counterRow}>
+                <View style={styles.counterBlock}>
+                  <Text style={styles.counterLabel}>{t("label.today")}</Text>
+                  <Text style={styles.counterValueSmall}>
+                    {selectedSport.type === "reps"
+                      ? `${todayStats.reps}`
+                      : formatSeconds(todayStats.seconds || 0)}
+                  </Text>
+                  <Text style={styles.counterUnit}>
+                    {selectedSport.type === "reps"
+                      ? repsShort
+                      : t("label.timeUnit")}
+                  </Text>
+                </View>
+              </View>
+            </Pressable>
+            <Pressable
+              style={styles.editSportButton}
+              onPress={() => openSportModal(selectedSport)}
+            >
+              <View style={styles.editSportButtonContent}>
+                <ActionGlyph type="edit" color={COLORS.text} />
+                <Text style={styles.editSportButtonText}>
+                  {t("label.editSport")}
+                </Text>
+              </View>
+            </Pressable>
+            {isSimpleReps ? (
+              <Pressable
+                style={styles.trackingArea}
+                ref={tutorialTrackingAreaRef}
+                onPress={incrementReps}
+              >
             <Text style={styles.counterValue}>{workoutDisplayReps}</Text>
             <Text style={styles.plusSign}>+</Text>
             <Text style={styles.helperText}>{t("label.tapAnywhere")}</Text>
@@ -10278,18 +10457,20 @@ const getSpeechLocale = () => {
               </Pressable>
               <Text style={styles.voiceHint}>{t("label.voiceHint")}</Text>
             </View>
-            <View style={styles.manualEntryContainer}>
-              <Text style={styles.manualEntryLabel}>
-                {t("label.manualRepsEntryTitle")}
-              </Text>
-              <TextInput
-                style={[styles.input, styles.manualRepsInput]}
-                value={manualRepsInput}
-                onChangeText={setManualRepsInput}
-                placeholder={t("label.manualRepsEntryPlaceholder")}
-                placeholderTextColor="#7a7a7a"
-                keyboardType="number-pad"
-              />
+              <View style={styles.manualEntryContainer}>
+                <Text style={styles.manualEntryLabel}>
+                  {t("label.manualRepsEntryTitle")}
+                </Text>
+                <TextInput
+                  style={[styles.input, styles.manualRepsInput]}
+                  ref={manualRepsInputRef}
+                  value={manualRepsInput}
+                  onChangeText={setManualRepsInput}
+                  onFocus={() => scrollToInput(manualRepsInputRef)}
+                  placeholder={t("label.manualRepsEntryPlaceholder")}
+                  placeholderTextColor="#7a7a7a"
+                  keyboardType="number-pad"
+                />
               <Pressable
                 style={[styles.primaryButton, styles.manualEntryButton]}
                 onPress={handleManualRepsLog}
@@ -10302,9 +10483,9 @@ const getSpeechLocale = () => {
                 {t("label.manualRepsEntryHint")}
               </Text>
             </View>
-          </Pressable>
-        ) : isWeightMode ? (
-          <View style={styles.weightEntryArea} ref={tutorialTrackingAreaRef}>
+              </Pressable>
+            ) : isWeightMode ? (
+              <View style={styles.weightEntryArea} ref={tutorialTrackingAreaRef}>
             <View style={styles.weightSummaryRow}>
               <View style={styles.weightSummaryColumn}>
                 <Text style={styles.weightSummaryLabel}>{t("label.weightLastSet")}</Text>
@@ -10330,8 +10511,10 @@ const getSpeechLocale = () => {
                 </Text>
                 <TextInput
                   style={[styles.input, styles.weightFieldInput]}
+                  ref={weightEntryWeightRef}
                   value={weightEntryWeight}
                   onChangeText={setWeightEntryWeight}
+                  onFocus={() => scrollToInput(weightEntryWeightRef)}
                   placeholder="60"
                   keyboardType="decimal-pad"
                   placeholderTextColor="#7a7a7a"
@@ -10343,8 +10526,10 @@ const getSpeechLocale = () => {
                 </Text>
                 <TextInput
                   style={[styles.input, styles.weightFieldInput]}
+                  ref={weightEntryRepsRef}
                   value={weightEntryReps}
                   onChangeText={setWeightEntryReps}
+                  onFocus={() => scrollToInput(weightEntryRepsRef)}
                   placeholder="10"
                   keyboardType="number-pad"
                   placeholderTextColor="#7a7a7a"
@@ -10384,9 +10569,9 @@ const getSpeechLocale = () => {
                 ))}
               </View>
             ) : null}
-          </View>
-        ) : (
-          <View style={styles.trackingArea} ref={tutorialTrackingAreaRef}>
+              </View>
+            ) : (
+              <View style={styles.trackingArea} ref={tutorialTrackingAreaRef}>
             <Text style={styles.counterValue}>
               {formatSeconds(todayStats.seconds + sessionSeconds)}
             </Text>
@@ -10413,36 +10598,40 @@ const getSpeechLocale = () => {
               <Text style={styles.manualEntryLabel}>
                 {t("label.manualTimeEntryTitle")}
               </Text>
-              <View style={styles.manualTimeInputsRow}>
-                <View style={styles.manualTimeInputWrap}>
-                  <Text style={styles.manualTimeInputLabel}>
-                    {t("label.manualTimeEntryMinutes")}
-                  </Text>
-                  <TextInput
-                    style={[styles.input, styles.manualTimeInput]}
-                    value={manualTimeMinutes}
-                    onChangeText={setManualTimeMinutes}
-                    placeholder={t("label.manualTimeEntryMinutes")}
-                    placeholderTextColor="#7a7a7a"
-                    keyboardType="number-pad"
-                    maxLength={3}
-                  />
+                <View style={styles.manualTimeInputsRow}>
+                  <View style={styles.manualTimeInputWrap}>
+                    <Text style={styles.manualTimeInputLabel}>
+                      {t("label.manualTimeEntryMinutes")}
+                    </Text>
+                    <TextInput
+                      style={[styles.input, styles.manualTimeInput]}
+                      ref={manualTimeMinutesRef}
+                      value={manualTimeMinutes}
+                      onChangeText={setManualTimeMinutes}
+                      onFocus={() => scrollToInput(manualTimeMinutesRef)}
+                      placeholder={t("label.manualTimeEntryMinutes")}
+                      placeholderTextColor="#7a7a7a"
+                      keyboardType="number-pad"
+                      maxLength={3}
+                    />
+                  </View>
+                  <View style={styles.manualTimeInputWrap}>
+                    <Text style={styles.manualTimeInputLabel}>
+                      {t("label.manualTimeEntrySeconds")}
+                    </Text>
+                    <TextInput
+                      style={[styles.input, styles.manualTimeInput]}
+                      ref={manualTimeSecondsRef}
+                      value={manualTimeSeconds}
+                      onChangeText={setManualTimeSeconds}
+                      onFocus={() => scrollToInput(manualTimeSecondsRef)}
+                      placeholder={t("label.manualTimeEntrySeconds")}
+                      placeholderTextColor="#7a7a7a"
+                      keyboardType="number-pad"
+                      maxLength={2}
+                    />
+                  </View>
                 </View>
-                <View style={styles.manualTimeInputWrap}>
-                  <Text style={styles.manualTimeInputLabel}>
-                    {t("label.manualTimeEntrySeconds")}
-                  </Text>
-                  <TextInput
-                    style={[styles.input, styles.manualTimeInput]}
-                    value={manualTimeSeconds}
-                    onChangeText={setManualTimeSeconds}
-                    placeholder={t("label.manualTimeEntrySeconds")}
-                    placeholderTextColor="#7a7a7a"
-                    keyboardType="number-pad"
-                    maxLength={2}
-                  />
-                </View>
-              </View>
               <Pressable
                 style={[styles.primaryButton, styles.manualEntryButton]}
                 onPress={handleManualTimeLog}
@@ -10455,24 +10644,26 @@ const getSpeechLocale = () => {
                 {t("label.manualTimeEntryHint")}
               </Text>
             </View>
-          </View>
-        )}
-        <View style={styles.formulaBadgeWrap} pointerEvents="box-none">
-          <Pressable
-            style={styles.formulaBadge}
-            onPress={() => setIsFormulaModalOpen(true)}
-            accessibilityRole="button"
-            accessibilityLabel={t("label.formulaTitle")}
-          >
-            <View style={styles.formulaBadgeHeader}>
-              <Text style={styles.formulaBadgeTitle}>
-                {t("label.formulaBadge")}
-              </Text>
-              <Text style={styles.formulaBadgeChevron}>›</Text>
+              </View>
+            )}
+            <View style={styles.formulaBadgeWrap} pointerEvents="box-none">
+              <Pressable
+                style={styles.formulaBadge}
+                onPress={() => setIsFormulaModalOpen(true)}
+                accessibilityRole="button"
+                accessibilityLabel={t("label.formulaTitle")}
+              >
+                <View style={styles.formulaBadgeHeader}>
+                  <Text style={styles.formulaBadgeTitle}>
+                    {t("label.formulaBadge")}
+                  </Text>
+                  <Text style={styles.formulaBadgeChevron}>›</Text>
+                </View>
+                <Text style={styles.formulaBadgeValue}>{formulaShort}</Text>
+              </Pressable>
             </View>
-            <Text style={styles.formulaBadgeValue}>{formulaShort}</Text>
-          </Pressable>
-        </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
         <Modal
           visible={isFormulaModalOpen}
           animationType="slide"
@@ -11580,10 +11771,14 @@ const getSpeechLocale = () => {
           {filteredActiveSports.map((sport) => {
             const daily = getRollingStats(logs, sport.id, sport);
             const sportLabel = getSportLabel(sport);
+            const sportAccentColor = getSportAccentColor(sport.id);
             return (
               <View
                 key={sport.id}
-                style={[styles.sportCard, { width: cardWidth }]}
+                style={[
+                  styles.sportCard,
+                  { width: cardWidth, borderTopColor: sportAccentColor },
+                ]}
                 ref={sport.id === tutorialSportId ? tutorialFirstSportRef : undefined}
               >
                 <View style={styles.sportTopRow}>
@@ -11601,7 +11796,7 @@ const getSpeechLocale = () => {
                       <ActionGlyph type="edit" color={COLORS.text} />
                     </Pressable>
                   </View>
-                  <View style={styles.sportTopTitleCenter}>
+                  <View style={[styles.sportTopTitleCenter, { width: titleWidth }]}>
                     <SportTitleSlots sport={sport} sportLabel={sportLabel} />
                   </View>
                   <View style={styles.sportTopIconsRight}>
@@ -11731,10 +11926,15 @@ const getSpeechLocale = () => {
             ? filteredHiddenSports.map((sport) => {
                 const daily = getRollingStats(logs, sport.id, sport);
                 const sportLabel = getSportLabel(sport);
+                const sportAccentColor = getSportAccentColor(sport.id);
                 return (
                   <View
                     key={sport.id}
-                    style={[styles.sportCard, styles.hiddenCard, { width: cardWidth }]}
+                    style={[
+                      styles.sportCard,
+                      styles.hiddenCard,
+                      { width: cardWidth, borderTopColor: sportAccentColor },
+                    ]}
                   >
                     <View style={styles.sportTopRow}>
                       <View style={styles.sportTopIconsLeft}>
@@ -11751,7 +11951,9 @@ const getSpeechLocale = () => {
                           <Text style={styles.iconActionText}>🛠</Text>
                         </Pressable>
                       </View>
-                      <View style={styles.sportTopTitleCenter}>
+                      <View
+                        style={[styles.sportTopTitleCenter, { width: titleWidth }]}
+                      >
                         <SportTitleSlots sport={sport} sportLabel={sportLabel} />
                       </View>
                       <View style={styles.sportTopIconsRight}>
@@ -12315,9 +12517,37 @@ const getSpeechLocale = () => {
                 : t("label.weightExerciseInfoBody")}
             </Text>
             {infoModalKey === "difficulty" ? (
-              <Text style={styles.modalSubtitle}>
-                {t("label.difficultyFormula")}
-              </Text>
+              <View style={styles.difficultyFormulaList}>
+                <View style={styles.difficultyFormulaRow}>
+                  <Text style={styles.difficultyFormulaLabel}>
+                    {t("label.formulaTimeBased")}
+                  </Text>
+                  <Text style={styles.difficultyFormulaValue}>
+                    {t("label.formulaTimeUnit")} ×{" "}
+                    {formatFactorValue(ADMIN_FACTOR_TIME)} ×{" "}
+                    {t("label.formulaUserFactor")}
+                  </Text>
+                </View>
+                <View style={styles.difficultyFormulaRow}>
+                  <Text style={styles.difficultyFormulaLabel}>
+                    {t("label.formulaRepsBased")}
+                  </Text>
+                  <Text style={styles.difficultyFormulaValue}>
+                    {repsShort} × {formatFactorValue(ADMIN_FACTOR_REPS)} ×{" "}
+                    {t("label.formulaUserFactor")}
+                  </Text>
+                </View>
+                <View style={styles.difficultyFormulaRow}>
+                  <Text style={styles.difficultyFormulaLabel}>
+                    {t("label.formulaWeighted")}
+                  </Text>
+                  <Text style={styles.difficultyFormulaValue}>
+                    {t("label.weightUnit")} × {repsShort} ×{" "}
+                    {t("label.formulaUserFactor")} ×{" "}
+                    {formatFactorValue(ADMIN_FACTOR_WEIGHTED)}
+                  </Text>
+                </View>
+              </View>
             ) : null}
             <View style={styles.modalActions}>
               <Pressable
@@ -12353,10 +12583,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
+  flexGrow: {
+    flex: 1,
+  },
   scrollContent: {
     padding: 16,
     paddingTop: 68,
     paddingBottom: 220,
+  },
+  sportDetailScrollContent: {
+    paddingBottom: 24,
   },
   title: {
     fontSize: 28,
@@ -12732,6 +12968,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 8,
   },
+  iconButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
   iconButtonText: {
     color: COLORS.text,
     fontWeight: "600",
@@ -12968,6 +13209,9 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     textAlign: "center",
     paddingHorizontal: 6,
+    flexWrap: "wrap",
+    flexShrink: 1,
+    width: "100%",
   },
   sportBadges: {
     flexDirection: "row",
@@ -13246,6 +13490,33 @@ const styles = StyleSheet.create({
     color: COLORS.muted,
     marginBottom: 10,
   },
+  difficultyFormulaList: {
+    marginTop: 4,
+    gap: 8,
+  },
+  difficultyFormulaRow: {
+    backgroundColor: COLORS.cardAlt,
+    borderRadius: 10,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    borderWidth: 1,
+    borderColor: "rgba(148, 163, 184, 0.3)",
+  },
+  difficultyFormulaLabel: {
+    color: COLORS.muted,
+    fontSize: 10,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+    marginBottom: 4,
+    textAlign: "center",
+  },
+  difficultyFormulaValue: {
+    color: COLORS.text,
+    fontSize: 12,
+    fontWeight: "700",
+    textAlign: "center",
+  },
   modalUnit: {
     color: COLORS.muted,
     marginTop: -6,
@@ -13369,12 +13640,15 @@ const styles = StyleSheet.create({
     minWidth: 0,
     alignItems: "center",
     justifyContent: "center",
+    width: "100%",
   },
   sportTitleTextRow: {
     flexDirection: "row",
     alignItems: "baseline",
     justifyContent: "center",
     minWidth: 0,
+    flexWrap: "wrap",
+    width: "100%",
   },
   sportCategory: {
     color: COLORS.muted,
@@ -13515,6 +13789,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   secondaryButtonText: {
+    color: COLORS.text,
+    fontWeight: "600",
+    fontSize: 11,
+  },
+  editSportButton: {
+    alignSelf: "center",
+    marginTop: 6,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 999,
+    backgroundColor: COLORS.cardAlt,
+  },
+  editSportButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  editSportButtonText: {
     color: COLORS.text,
     fontWeight: "600",
     fontSize: 11,

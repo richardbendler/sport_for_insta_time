@@ -31,12 +31,15 @@ const fr = {
     "label.formulaIntro":
       "Voici comment le temps d'ecran est calcule pour ce sport :",
     "label.formulaAdminFactor": "Facteur admin",
-    "label.formulaUserFactor": "Facteur utilisateur",
+    "label.formulaUserFactor": "Facteur de temps d??cran",
     "label.formulaAdminInfo":
       "Le facteur admin est un multiplicateur de base global pour cette categorie.",
     "label.formulaUserEffect":
-      "Le facteur utilisateur ajuste le temps gagne. Actuel : {{percent}} par rapport a 1.0.",
-    "label.formulaEditButton": "Modifier le facteur utilisateur",
+      "Le facteur de temps d??cran ajuste ton temps gagn?. Actuellement : {{percent}} par rapport ? 1.0.",
+    "label.formulaEditButton": "Modifier le facteur de temps d??cran",
+    "label.formulaWeighted": "Avec poids",
+    "label.formulaRepsBased": "R?p?titions",
+    "label.formulaTimeBased": "Bas? sur le temps",
     "label.formulaTimeUnit": "secondes",
     "label.screenTimeDetailsTitle": "Details du temps d'ecran",
     "label.breakdownSummary": "Résumé",
@@ -172,11 +175,11 @@ const fr = {
     "label.repsShort": "rép.",
     "label.timeUnit": "Temps",
     "label.weightExercise": "Exercice de force",
-    "label.difficultyLabel": "Facteur d'intensité (1-10)",
+    "label.difficultyLabel": "Facteur de temps d??cran (1-10)",
       "label.difficultyDescription":
-        "Le curseur multiplie durée, répétitions ou poids pour décider du temps d'écran attribué à chaque série.",
+        "Le facteur de temps d??cran multiplie la dur?e, les r?p?titions ou le poids et d?termine le temps d??cran gagn? par unit?.",
       "label.difficultyFormula":
-        "Formules :\nBasé sur le temps = secondes × adminFactor_time × difficulté\nBasé sur les répétitions = répétitions × adminFactor_reps × difficulté\nSports avec charges = kg × répétitions × difficulté × adminFactor_weighted",
+        "Formules ci-dessous.",
     "label.weightExerciseInfoTitle": "Exercices avec poids",
     "label.weightExerciseInfoBody": "Activez ceci pour les series avec charges supplementaires ; le temps d'ecran se calcule comme kg × repetitions × difficulte × adminFactor_weighted.",
     "label.weightEntryButton": "Enregistrer la série",
