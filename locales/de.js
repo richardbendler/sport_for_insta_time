@@ -255,17 +255,6 @@ const de = {
     "label.motivationStatsBody":
       "Sieh nach, wie oft du Sport gemacht hast und bleib im Rhythmus.",
     "label.motivationQuoteStartTitle": "Wusstest du schon?",
-    "label.motivationQuoteStartBody":
-      "Wusstest du, dass im alten Aegypten Sportarten wie Ringen, Bogenschiessen und Schwimmen genutzt wurden, um Pharaonen auf Rituale und Schlachten vorzubereiten?",
-    "label.motivationQuoteDifficultyTitle": "Ein Extra-Tipp",
-    "label.motivationQuoteDifficultyBody":
-      "Ein höherer Schwierigkeitsgrad multipliziert deine erspielte Zeit; schiebe den Regler nach oben und geh richtig ran.",
-    "label.motivationQuoteScreenTimeTitle": "Screen Time als Bonus",
-    "label.motivationQuoteScreenTimeBody":
-      "Jede Bewegung verdient extra Zeit fürs Handy — bleib dran und kassier noch mehr.",
-    "label.motivationQuoteFocusTitle": "Fokus auf Bewegung",
-    "label.motivationQuoteFocusBody":
-      "Ein paar Minuten Sport ziehen dich raus vom Bildschirm und rein in deinen Flow.",
     "label.motivationNewSportTitle": "Weitere Sportart ausprobieren",
     "label.motivationNewSportBody":
       "Füge etwas Neues hinzu, damit der Tag abwechslungsreich bleibt.",
