@@ -21,6 +21,8 @@ const de = {
     "label.noScreenTimeEntriesCurrent": "Keine aktiven Einträge in den letzten 24h.",
     "label.screenTimeEntriesCarryover": "Übertrag-Einträge",
     "label.noScreenTimeEntriesCarryover": "Kein Übertrag vorhanden.",
+    "label.carryoverEntriesHint":
+      "Das sind Einträge, die älter als 24h sind. Nach jeweils 24h wird der verbleibende Betrag halbiert.",
     "label.screenTimeEntryOriginal": "Ursprünglich",
     "label.remainingCurrent": "Übrig (ohne Übertrag)",
     "label.moreInfo": "Mehr Infos",
@@ -40,7 +42,7 @@ const de = {
     "label.breakdownSummary": "Übersicht",
     "label.remainingBySport": "Übrig nach Übung",
     "label.noRemainingBySport": "Keine restliche Zeit pro Übung vorhanden.",
-    "label.earnedBySport": "Erspeilt nach Übung (24h)",
+    "label.earnedBySport": "Erspielt nach Übung (24h)",
     "label.noEarnedBySport": "Keine erspielte Zeit vorhanden.",
     "label.usageBreakdown": "Bildschirmnutzung",
     "label.noUsageData": "Keine Nutzungsdaten verfügbar.",
@@ -128,6 +130,10 @@ const de = {
     "label.grayscaleRestrictedApps": "Eingeschränkte Apps in Schwarz-Weiß",
     "label.grayscaleRestrictedAppsHint":
       "Zeigt blockierte Apps in der Liste mit einem Schwarz-Weiß-Stil an.",
+    "label.grayscalePermissionTitle": "Schwarz-Weiss aktivieren",
+    "label.grayscalePermissionBody":
+      "Um eingeschraenkte Apps automatisch in Schwarz-Weiss zu schalten, braucht die App die Systemberechtigung \"Secure settings\". Wenn du sie nicht erteilst, aktiviere Android > Bedienungshilfen > Farbkorrektur > Graustufen manuell.",
+    "label.openAccessibilitySettings": "Bedienungshilfen oeffnen",
     "label.closeApps": "Apps schließen",
     "label.searchApps": "Apps suchen",
     "label.searchSports": "Sportarten durchsuchen",

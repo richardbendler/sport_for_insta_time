@@ -2,6 +2,7 @@ package com.richardbendler.sportforinstatime
 
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.app.AppOpsManager
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.usage.UsageStatsManager
@@ -204,6 +205,21 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
+  fun setGrayscaleRestrictedApps(enabled: Boolean) {
+    val prefs = getPrefs()
+    prefs.edit().putBoolean("grayscale_restricted_apps", enabled).apply()
+  }
+
+  @ReactMethod
+  fun canWriteSecureSettings(promise: Promise) {
+    val status = ContextCompat.checkSelfPermission(
+      reactContext,
+      Manifest.permission.WRITE_SECURE_SETTINGS
+    )
+    promise.resolve(status == PackageManager.PERMISSION_GRANTED)
+  }
+
+  @ReactMethod
   fun upsertScreenTimeEntry(
     entryId: String,
     sportId: String?,
@@ -261,6 +277,7 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
       val used = ScreenTimeStore.getUsedSecondsToday(prefs, now)
       val totals = ScreenTimeStore.getTotals(prefs, now)
       val breakdown = ScreenTimeStore.getBreakdown(prefs, now)
+      val byApp = ScreenTimeStore.getUsedByAppToday(prefs, now)
       val map = Arguments.createMap()
       map.putInt("remainingSeconds", totals.remainingSeconds)
       map.putInt("usedSeconds", used)
@@ -272,6 +289,11 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
         bySport.putInt(sportKey, value)
       }
       map.putMap("remainingBySport", bySport)
+      val byAppMap = Arguments.createMap()
+      byApp.forEach { (pkg, seconds) ->
+        byAppMap.putInt(pkg, seconds)
+      }
+      map.putMap("usedByApp", byAppMap)
       OverallWidgetProvider.refreshAll(reactContext)
       promise.resolve(map)
     } catch (e: Exception) {
