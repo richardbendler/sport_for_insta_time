@@ -30,10 +30,10 @@ const fr = {
     "label.formulaTitle": "Formule actuelle",
     "label.formulaIntro":
       "Voici comment le temps d'ecran est calcule pour ce sport :",
-    "label.formulaAdminFactor": "Facteur admin",
+    "label.formulaAdminFactor": "Fix Factor",
     "label.formulaUserFactor": "Facteur de temps d??cran",
     "label.formulaAdminInfo":
-      "Le facteur admin est un multiplicateur de base global pour cette categorie.",
+      "Le Fix Factor est un multiplicateur de base global pour cette categorie.",
     "label.formulaUserEffect":
       "Le facteur de temps d??cran ajuste ton temps gagn?. Actuellement : {{percent}} par rapport ? 1.0.",
     "label.formulaEditButton": "Modifier le facteur de temps d??cran",
@@ -181,7 +181,7 @@ const fr = {
       "label.difficultyFormula":
         "Formules ci-dessous.",
     "label.weightExerciseInfoTitle": "Exercices avec poids",
-    "label.weightExerciseInfoBody": "Activez ceci pour les series avec charges supplementaires ; le temps d'ecran se calcule comme kg × repetitions × difficulte × adminFactor_weighted.",
+    "label.weightExerciseInfoBody": "Activez ceci pour les series avec charges supplementaires ; le temps d'ecran se calcule comme kg × repetitions × difficulte × fixFactor_weighted.",
     "label.weightEntryButton": "Enregistrer la série",
     "label.weightEntryPreview": "Aperçu du temps écran",
     "label.weightEntryWeight": "Poids (kg)",

@@ -130,9 +130,9 @@ const DEFAULT_DIFFICULTY_INDEX = (() => {
 })();
 const DEFAULT_TIME_RATE = 0.5;
 const DEFAULT_REPS_RATE = 0.5;
-const ADMIN_FACTOR_TIME = 0.0025; // tweak this factor to globally adjust granted Screen Time for non-reps sports
-const ADMIN_FACTOR_REPS = 0.055; // dedicated admin factor for reps-based screen time
-const ADMIN_FACTOR_WEIGHTED = 0.0005; // base admin multiplier applied only for weighted reps entries
+const ADMIN_FACTOR_TIME = 0.0025; // "Fix Factor" in UI; global base multiplier for time-based sports
+const ADMIN_FACTOR_REPS = 0.055; // "Fix Factor" in UI; base multiplier for reps-based sports
+const ADMIN_FACTOR_WEIGHTED = 0.0005; // "Fix Factor" in UI; base multiplier for weighted reps entries
 const DEFAULT_WEIGHT_RATE = 0.04;
 const WORKOUT_CONTINUE_WINDOW_MS = 30 * 60 * 1000;
 const TUTORIAL_STRONG_HIGHLIGHT = "rgba(249, 115, 22, 0.2)";
@@ -6978,14 +6978,6 @@ const getSpeechLocale = () => {
   }
 
   if (statsSport) {
-    const weekEntries = getWeeklyStats(stats, statsSport.id);
-    const weeklyTotal =
-      statsSport.type === "reps"
-        ? weekEntries.reduce((sum, entry) => sum + entry.dayStats.reps, 0)
-        : weekEntries.reduce(
-            (sum, entry) => sum + (entry.dayStats.seconds || 0),
-            0
-          );
     const sportStats = stats[statsSport.id] || {};
     const sportKeys = new Set(Object.keys(sportStats || {}));
     const months = getMonthsForCalendar(sportKeys);
@@ -7157,12 +7149,6 @@ const getSpeechLocale = () => {
           </View>
           <View style={styles.statsActionsRow}>
             <Pressable
-              style={styles.statsActionButton}
-              onPress={() => setStatsEditMode((prev) => !prev)}
-            >
-              <Text style={styles.editEntriesText}>{t("label.editEntries")}</Text>
-            </Pressable>
-            <Pressable
               style={styles.statsActionButtonDanger}
               onPress={() =>
                 confirmAction(t("label.confirmDeleteAll"), () =>
@@ -7175,15 +7161,6 @@ const getSpeechLocale = () => {
           </View>
           <View style={styles.infoCard}>
             <Text style={styles.sectionTitle}>{getSportLabel(statsSport)}</Text>
-            <Text style={styles.cardMeta}>{t("label.weekTotal")}</Text>
-            <Text style={styles.cardValue}>
-              {statsSport.type === "reps"
-                ? `${weeklyTotal} ${repsShort}`
-                : formatSeconds(weeklyTotal)}
-            </Text>
-            <Text style={styles.cardMeta}>
-              {t("label.screenTime")}: {formatScreenTime(weeklyScreenSeconds(stats, statsSport))}
-            </Text>
           </View>
           {months.map((monthDate) => {
             const monthKey = `${monthDate.getFullYear()}-${String(
@@ -7259,6 +7236,7 @@ const getSpeechLocale = () => {
     const isWeightMode = isReps && selectedSport.weightExercise;
     const isSimpleReps = isReps && !selectedSport.weightExercise;
     const userFactor = difficultyLevelForSport(selectedSport); // Screen Time Faktor (userFactor)
+    // Admin factor is displayed as "Fix Factor" in the UI.
     const adminFactor = isWeightMode
       ? ADMIN_FACTOR_WEIGHTED
       : isReps
@@ -7269,9 +7247,13 @@ const getSpeechLocale = () => {
       : isReps
       ? repsShort
       : t("label.formulaTimeUnit");
+    const combinedFactor = adminFactor * userFactor;
     const formulaShort = `${formulaBaseLabel} × ${formatFactorValue(
       adminFactor
     )} × ${formatFactorValue(userFactor)}`;
+    const formulaBadgeValue = `${formulaBaseLabel} × ${formatFactorValue(
+      combinedFactor
+    )}`;
     const userFactorDeltaPercent = Math.round((userFactor - 1) * 100);
     const userFactorPercentText = `${userFactorDeltaPercent > 0 ? "+" : ""}${userFactorDeltaPercent}%`;
     const previewWeight = parsePositiveNumber(weightEntryWeight);
@@ -7455,6 +7437,7 @@ const getSpeechLocale = () => {
               </Pressable>
             ) : isWeightMode ? (
               <View style={styles.weightEntryArea} ref={tutorialTrackingAreaRef}>
+            {/*
             <View style={styles.weightSummaryRow}>
               <View style={styles.weightSummaryColumn}>
                 <Text style={styles.weightSummaryLabel}>{t("label.weightLastSet")}</Text>
@@ -7473,6 +7456,7 @@ const getSpeechLocale = () => {
                 </Text>
               </View>
             </View>
+            */}
             <View style={styles.weightFieldsRow}>
               <View style={styles.weightField}>
                 <Text style={styles.weightFieldLabel}>
@@ -7516,6 +7500,7 @@ const getSpeechLocale = () => {
                 {t("label.weightEntryButton")}
               </Text>
             </Pressable>
+            {/*
             {recentWeightEntries.length > 0 ? (
               <View style={styles.weightHistoryCard}>
                 <Text style={styles.sectionTitle}>{t("label.weightHistory")}</Text>
@@ -7538,6 +7523,7 @@ const getSpeechLocale = () => {
                 ))}
               </View>
             ) : null}
+            */}
               </View>
             ) : (
               <View style={styles.trackingArea} ref={tutorialTrackingAreaRef}>
@@ -7628,7 +7614,7 @@ const getSpeechLocale = () => {
                   </Text>
                   <Text style={styles.formulaBadgeChevron}>›</Text>
                 </View>
-                <Text style={styles.formulaBadgeValue}>{formulaShort}</Text>
+                <Text style={styles.formulaBadgeValue}>{formulaBadgeValue}</Text>
               </Pressable>
             </View>
           </ScrollView>
@@ -11056,7 +11042,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     right: 0,
-    bottom: 12,
+    bottom: 4,
     alignItems: "center",
     zIndex: 6,
   },
