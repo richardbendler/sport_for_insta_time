@@ -1544,13 +1544,29 @@ const buildStatsFromLogs = (logs, sports = []) => {
   return nextStats;
 };
 
-const groupEntriesByWindow = (entries, type) => {
+const groupEntriesByWindow = (entries, sportOrType, weightMode = false) => {
   const sorted = [...entries].sort((a, b) => a.ts - b.ts);
   const groups = [];
-  const windowMs = type === "reps" ? 5 * 60 * 1000 : 30 * 60 * 1000;
+  const resolvedType =
+    typeof sportOrType === "string" ? sportOrType : sportOrType?.type;
+  const resolvedWeightMode =
+    typeof sportOrType === "string"
+      ? weightMode
+      : !!sportOrType?.weightExercise;
+  const windowMs =
+    resolvedType === "reps"
+      ? resolvedWeightMode
+        ? 5 * 60 * 1000
+        : 15 * 1000
+      : 30 * 60 * 1000;
   sorted.forEach((entry) => {
     const last = groups[groups.length - 1];
-    if (!last || entry.ts - last.endTs > windowMs) {
+    const gapMs = last ? entry.ts - last.endTs : null;
+    const splitOnGap =
+      resolvedType === "reps" && !resolvedWeightMode
+        ? gapMs >= windowMs
+        : gapMs > windowMs;
+    if (!last || splitOnGap) {
       groups.push({
         startTs: entry.ts,
         endTs: entry.ts,
@@ -3937,6 +3953,306 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     );
   };
 
+  const renderSportModal = () => {
+    if (!isSportModalOpen) {
+      return null;
+    }
+    return (
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalCard}>
+          <Text style={styles.modalTitle}>
+            {editingSportId ? t("label.editSport") : t("label.addSport")}
+          </Text>
+          <View
+            style={styles.createSportField}
+            ref={tutorialSportNameRef}
+            collapsable={false}
+          >
+            <TextInput
+              style={styles.searchInput}
+              value={newName}
+              onChangeText={handleSportNameChange}
+              placeholder={t("label.searchSports")}
+              placeholderTextColor="#7a7a7a"
+            />
+            {!editingSportId ? (
+              <View style={styles.standardSuggestionWindow}>
+                <Text style={styles.suggestionsHeader}>
+                  {t("label.sportSuggestions")}
+                </Text>
+                <View style={styles.suggestionListContainer}>
+                  <ScrollView
+                    contentContainerStyle={styles.suggestionList}
+                    showsVerticalScrollIndicator={false}
+                  >
+                    {standardSportSuggestions.length > 0 ? (
+                      standardSportSuggestions.map((entry) => {
+                        const label = getStandardSportLabel(entry, language);
+                        const isActive = entry.id === selectedStandardSportId;
+                        return (
+                          <Pressable
+                            key={entry.id}
+                            style={[
+                              styles.suggestionItem,
+                              isActive && styles.suggestionItemActive,
+                            ]}
+                            onPress={() => applyStandardSport(entry)}
+                          >
+                            <View style={styles.suggestionMain}>
+                              <Text style={styles.suggestionIcon}>
+                                {entry.icon || DEFAULT_ICON}
+                              </Text>
+                              <View>
+                                <Text style={styles.suggestionLabel}>{label}</Text>
+                                <Text style={styles.suggestionMeta}>
+                                  {entry.type === "reps"
+                                    ? t("label.reps")
+                                    : t("label.timeBased")}
+                                </Text>
+                              </View>
+                            </View>
+                          </Pressable>
+                        );
+                      })
+                    ) : (
+                      <Text style={styles.helperText}>
+                        {t("label.noSportSuggestions")}
+                      </Text>
+                    )}
+                  </ScrollView>
+                </View>
+                {showCustomSuggestionButton ? (
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.customSuggestionButton,
+                      (pressed || customSuggestionUsed) &&
+                        styles.customSuggestionButtonActive,
+                    ]}
+                    onPress={handleUseSearchAsCustom}
+                  >
+                    {({ pressed }) => (
+                      <Text
+                        style={[
+                          styles.customSuggestionButtonText,
+                          (pressed || customSuggestionUsed) &&
+                            styles.customSuggestionButtonTextActive,
+                        ]}
+                      >
+                        {customSuggestionLabel}
+                      </Text>
+                    )}
+                  </Pressable>
+                ) : null}
+              </View>
+            ) : null}
+          </View>
+          <View
+            style={styles.createSportField}
+            ref={tutorialSportIconRef}
+            collapsable={false}
+          >
+            {isCustomSportMode ? (
+              <>
+                <View style={styles.iconRow}>
+                  <Pressable
+                    style={styles.secondaryButton}
+                    onPress={() => setShowIconInput((prev) => !prev)}
+                  >
+                    <Text style={styles.secondaryButtonText}>
+                      {t("label.iconChoose")}
+                    </Text>
+                  </Pressable>
+                  <Text style={styles.iconPreview}>{newIcon || DEFAULT_ICON}</Text>
+                </View>
+                {showIconInput ? (
+                  <TextInput
+                    style={styles.input}
+                    value={newIcon}
+                    onChangeText={(text) => setNewIcon(normalizeIcon(text))}
+                    placeholder={t("label.iconPlaceholder")}
+                    placeholderTextColor="#7a7a7a"
+                    maxLength={2}
+                  />
+                ) : null}
+              </>
+            ) : (
+              <View style={styles.iconRow}>
+                <Text style={styles.helperText}>
+                  {t("label.iconPlaceholder")}: {newIcon || DEFAULT_ICON}
+                </Text>
+              </View>
+            )}
+          </View>
+          <View style={styles.typeHeaderRow}>
+            <Text style={styles.typeHeaderTitle}>
+              {t("label.typePickerTitle")}
+            </Text>
+            <Pressable
+              style={styles.infoButton}
+              onPress={() =>
+                setInfoModalKey((prev) => (prev === "type" ? null : "type"))
+              }
+            >
+              <Text style={styles.infoButtonText}>?</Text>
+            </Pressable>
+          </View>
+          <View
+            style={styles.createSportField}
+            ref={tutorialSportTypeRef}
+            collapsable={false}
+          >
+            <View style={styles.typeRow}>
+              <Pressable
+                style={[
+                  styles.typeButton,
+                  newType === "reps" && styles.typeButtonActive,
+                ]}
+                onPress={() => {
+                  setNewType("reps");
+                  setNewRateMinutes(String(getDefaultRateMinutes("reps")));
+                }}
+              >
+                <Text
+                  style={[
+                    styles.typeButtonText,
+                    newType === "reps" && styles.typeButtonTextActive,
+                  ]}
+                >
+                  {t("label.reps")}
+                </Text>
+              </Pressable>
+              <Pressable
+                style={[
+                  styles.typeButton,
+                  newType === "time" && styles.typeButtonActive,
+                ]}
+                onPress={() => {
+                  setNewType("time");
+                  setNewRateMinutes(String(getDefaultRateMinutes("time")));
+                  setNewWeightExercise(false);
+                }}
+              >
+                <Text
+                  style={[
+                    styles.typeButtonText,
+                    newType === "time" && styles.typeButtonTextActive,
+                  ]}
+                >
+                  {t("label.timeBased")}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+          <View
+            style={[styles.sliderSection, styles.createSportField]}
+            ref={tutorialSportDifficultyRef}
+            collapsable={false}
+          >
+            <View style={styles.difficultyHeaderRow}>
+              <Text style={styles.rateLabel}>{t("label.difficultyLabel")}</Text>
+              <View style={styles.difficultyHeaderActions}>
+                <Text style={styles.difficultyHeaderValue}>
+                  {newDifficultyLevel}
+                </Text>
+                <Pressable
+                  style={styles.infoButton}
+                  onPress={() =>
+                    setInfoModalKey((prev) =>
+                      prev === "difficulty" ? null : "difficulty"
+                    )
+                  }
+                >
+                  <Text style={styles.infoButtonText}>?</Text>
+                </Pressable>
+              </View>
+            </View>
+            <View style={styles.difficultyBarWrapper}>
+              <View style={styles.difficultyBarTrack}>
+                <View
+                  style={[
+                    styles.difficultyBarFill,
+                    {
+                      width: `${difficultyFillPercent}%`,
+                    },
+                  ]}
+                />
+              </View>
+            </View>
+            <View style={styles.difficultyButtonsRow}>
+              <Pressable
+                style={styles.difficultyButton}
+                onPress={() => adjustDifficultyLevel(-1)}
+              >
+                <Text style={styles.difficultyButtonText}>-</Text>
+              </Pressable>
+              <Pressable
+                style={styles.difficultyButton}
+                onPress={() => adjustDifficultyLevel(1)}
+              >
+                <Text style={styles.difficultyButtonText}>+</Text>
+              </Pressable>
+            </View>
+          </View>
+          {newType === "reps" ? (
+            <View
+              style={styles.weightToggleRow}
+              ref={tutorialSportWeightRef}
+              collapsable={false}
+            >
+              <Pressable
+                style={[
+                  styles.weightToggleButton,
+                  newWeightExercise && styles.weightToggleButtonActive,
+                ]}
+                onPress={() => setNewWeightExercise((prev) => !prev)}
+              >
+                <View
+                  style={[
+                    styles.weightToggleIcon,
+                    newWeightExercise && styles.weightToggleIconActive,
+                  ]}
+                >
+                  {newWeightExercise ? (
+                    <Text style={styles.weightToggleIconText}>✓</Text>
+                  ) : null}
+                </View>
+                <Text style={styles.weightToggleLabel}>
+                  {t("label.weightExercise")}
+                </Text>
+              </Pressable>
+              <Pressable
+                style={styles.infoButton}
+                onPress={() =>
+                  setInfoModalKey((prev) => (prev === "weight" ? null : "weight"))
+                }
+              >
+                <Text style={styles.infoButtonText}>?</Text>
+              </Pressable>
+            </View>
+          ) : null}
+          <View style={styles.modalActions}>
+            <Pressable style={styles.secondaryButton} onPress={closeSportModal}>
+              <Text style={styles.secondaryButtonText}>{t("label.cancel")}</Text>
+            </Pressable>
+            <Pressable
+              style={styles.primaryButton}
+              onPress={saveSportModal}
+              ref={tutorialSportSaveRef}
+              collapsable={false}
+            >
+              <Text style={styles.primaryButtonText}>{t("label.save")}</Text>
+            </Pressable>
+          </View>
+        </View>
+        {tutorialOverlayInModal ? (
+          <View style={styles.tutorialPortal} pointerEvents="box-none">
+            {renderTutorialOverlay()}
+          </View>
+        ) : null}
+      </View>
+    );
+  };
+
   const handleStart = () => {
     sessionStartRef.current = Date.now();
     setSessionSeconds(0);
@@ -4973,7 +5289,7 @@ const getSpeechLocale = () => {
       groups.push({
         sport,
         dayKey: latestKey,
-        groups: groupEntriesByWindow(sorted, sport.type),
+        groups: groupEntriesByWindow(sorted, sport),
         latestTs,
       });
     });
@@ -6309,7 +6625,7 @@ const getSpeechLocale = () => {
       const workoutGroups = sports
         .flatMap((sport) => {
           const dayLogs = (logs[sport.id] || {})[overallDayKey] || [];
-          const groups = groupEntriesByWindow(dayLogs, sport.type);
+          const groups = groupEntriesByWindow(dayLogs, sport);
           return groups.map((group, index) => ({
             key: `${sport.id}-${group.startTs}-${index}`,
             sport,
@@ -6626,7 +6942,7 @@ const getSpeechLocale = () => {
     };
     if (statsDayKey) {
       const dayLogs = (logs[statsSport.id] || {})[statsDayKey] || [];
-      const groups = groupEntriesByWindow(dayLogs, statsSport.type).sort(
+      const groups = groupEntriesByWindow(dayLogs, statsSport).sort(
         (a, b) => (b.startTs || 0) - (a.startTs || 0)
       );
       const sortedEntries = [...dayLogs].sort(
@@ -6810,6 +7126,12 @@ const getSpeechLocale = () => {
                             isToday && styles.overallDayCellToday,
                           ]}
                           onPress={() => {
+                            if (statsEditMode) {
+                              if (hasValue) {
+                                openEditEntry(key);
+                              }
+                              return;
+                            }
                             if (!statsEditMode) {
                               setStatsDayKey(key);
                             }
@@ -6821,12 +7143,9 @@ const getSpeechLocale = () => {
                           <Text style={styles.overallDayNumber}>{day.getDate()}</Text>
                           <Text style={styles.overallDayValue}>{displayValue}</Text>
                           {statsEditMode && hasValue ? (
-                            <Pressable
-                              style={styles.calendarEditButton}
-                              onPress={() => openEditEntry(key)}
-                            >
-                              <Text style={styles.calendarEditText}>-</Text>
-                            </Pressable>
+                            <View style={styles.calendarEditOverlay} pointerEvents="none">
+                              <Text style={styles.calendarEditMinus}>-</Text>
+                            </View>
                           ) : null}
                         </Pressable>
                       );
@@ -7288,6 +7607,7 @@ const getSpeechLocale = () => {
             </View>
           </View>
         </Modal>
+        {renderSportModal()}
       </SafeAreaView>
     );
   }
@@ -8023,6 +8343,7 @@ const getSpeechLocale = () => {
             </Text>
           </View>
         </ScrollView>
+        {renderPrefaceSettingsModal()}
       </SafeAreaView>
     );
   }
@@ -8755,301 +9076,7 @@ const getSpeechLocale = () => {
         </Pressable>
       </View>
       {renderPrefaceSettingsModal()}
-      {isSportModalOpen ? (
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>
-              {editingSportId ? t("label.editSport") : t("label.addSport")}
-            </Text>
-            <View
-              style={styles.createSportField}
-              ref={tutorialSportNameRef}
-              collapsable={false}
-            >
-              <TextInput
-                style={styles.searchInput}
-                value={newName}
-                onChangeText={handleSportNameChange}
-                placeholder={t("label.searchSports")}
-                placeholderTextColor="#7a7a7a"
-              />
-              {!editingSportId ? (
-                <View style={styles.standardSuggestionWindow}>
-                  <Text style={styles.suggestionsHeader}>
-                    {t("label.sportSuggestions")}
-                  </Text>
-                  <View style={styles.suggestionListContainer}>
-                    <ScrollView
-                      contentContainerStyle={styles.suggestionList}
-                      showsVerticalScrollIndicator={false}
-                    >
-                      {standardSportSuggestions.length > 0 ? (
-                        standardSportSuggestions.map((entry) => {
-                          const label = getStandardSportLabel(entry, language);
-                          const isActive = entry.id === selectedStandardSportId;
-                          return (
-                            <Pressable
-                              key={entry.id}
-                              style={[
-                                styles.suggestionItem,
-                                isActive && styles.suggestionItemActive,
-                              ]}
-                              onPress={() => applyStandardSport(entry)}
-                            >
-                              <View style={styles.suggestionMain}>
-                                <Text style={styles.suggestionIcon}>
-                                  {entry.icon || DEFAULT_ICON}
-                                </Text>
-                                <View>
-                                  <Text style={styles.suggestionLabel}>{label}</Text>
-                                  <Text style={styles.suggestionMeta}>
-                                    {entry.type === "reps"
-                                      ? t("label.reps")
-                                      : t("label.timeBased")}
-                                  </Text>
-                                </View>
-                              </View>
-                            </Pressable>
-                          );
-                        })
-                      ) : (
-                        <Text style={styles.helperText}>
-                          {t("label.noSportSuggestions")}
-                        </Text>
-                      )}
-                    </ScrollView>
-                  </View>
-                  {showCustomSuggestionButton ? (
-                    <Pressable
-                      style={({ pressed }) => [
-                        styles.customSuggestionButton,
-                        (pressed || customSuggestionUsed) &&
-                          styles.customSuggestionButtonActive,
-                      ]}
-                      onPress={handleUseSearchAsCustom}
-                    >
-                      {({ pressed }) => (
-                        <Text
-                          style={[
-                            styles.customSuggestionButtonText,
-                            (pressed || customSuggestionUsed) &&
-                              styles.customSuggestionButtonTextActive,
-                          ]}
-                        >
-                          {customSuggestionLabel}
-                        </Text>
-                      )}
-                    </Pressable>
-                  ) : null}
-                </View>
-              ) : null}
-            </View>
-            <View
-              style={styles.createSportField}
-              ref={tutorialSportIconRef}
-              collapsable={false}
-            >
-              {isCustomSportMode ? (
-                <>
-                  <View style={styles.iconRow}>
-                    <Pressable
-                      style={styles.secondaryButton}
-                      onPress={() => setShowIconInput((prev) => !prev)}
-                    >
-                      <Text style={styles.secondaryButtonText}>
-                        {t("label.iconChoose")}
-                      </Text>
-                    </Pressable>
-                    <Text style={styles.iconPreview}>{newIcon || DEFAULT_ICON}</Text>
-                  </View>
-                  {showIconInput ? (
-                    <TextInput
-                      style={styles.input}
-                      value={newIcon}
-                      onChangeText={(text) => setNewIcon(normalizeIcon(text))}
-                      placeholder={t("label.iconPlaceholder")}
-                      placeholderTextColor="#7a7a7a"
-                      maxLength={2}
-                    />
-                  ) : null}
-                </>
-              ) : (
-                <View style={styles.iconRow}>
-                  <Text style={styles.helperText}>
-                    {t("label.iconPlaceholder")}: {newIcon || DEFAULT_ICON}
-                  </Text>
-                </View>
-              )}
-            </View>
-            <View style={styles.typeHeaderRow}>
-              <Text style={styles.typeHeaderTitle}>
-                {t("label.typePickerTitle")}
-              </Text>
-              <Pressable
-                style={styles.infoButton}
-                onPress={() =>
-                  setInfoModalKey((prev) => (prev === "type" ? null : "type"))
-                }
-              >
-                <Text style={styles.infoButtonText}>?</Text>
-              </Pressable>
-            </View>
-            <View
-              style={styles.createSportField}
-              ref={tutorialSportTypeRef}
-              collapsable={false}
-            >
-              <View style={styles.typeRow}>
-                <Pressable
-                  style={[
-                    styles.typeButton,
-                    newType === "reps" && styles.typeButtonActive,
-                  ]}
-                  onPress={() => {
-                    setNewType("reps");
-                    setNewRateMinutes(String(getDefaultRateMinutes("reps")));
-                  }}
-                >
-                  <Text
-                    style={[
-                      styles.typeButtonText,
-                      newType === "reps" && styles.typeButtonTextActive,
-                    ]}
-                  >
-                    {t("label.reps")}
-                  </Text>
-                </Pressable>
-                <Pressable
-                  style={[
-                    styles.typeButton,
-                    newType === "time" && styles.typeButtonActive,
-                  ]}
-                  onPress={() => {
-                    setNewType("time");
-                    setNewRateMinutes(String(getDefaultRateMinutes("time")));
-                    setNewWeightExercise(false);
-                  }}
-                >
-                  <Text
-                    style={[
-                      styles.typeButtonText,
-                      newType === "time" && styles.typeButtonTextActive,
-                    ]}
-                  >
-                    {t("label.timeBased")}
-                  </Text>
-                </Pressable>
-              </View>
-            </View>
-            <View
-              style={[styles.sliderSection, styles.createSportField]}
-              ref={tutorialSportDifficultyRef}
-              collapsable={false}
-            >
-              <View style={styles.difficultyHeaderRow}>
-                <Text style={styles.rateLabel}>{t("label.difficultyLabel")}</Text>
-                <View style={styles.difficultyHeaderActions}>
-                  <Text style={styles.difficultyHeaderValue}>
-                    {newDifficultyLevel}
-                  </Text>
-                  <Pressable
-                    style={styles.infoButton}
-                    onPress={() =>
-                      setInfoModalKey((prev) =>
-                        prev === "difficulty" ? null : "difficulty"
-                      )
-                    }
-                  >
-                    <Text style={styles.infoButtonText}>?</Text>
-                  </Pressable>
-                </View>
-              </View>
-              <View style={styles.difficultyBarWrapper}>
-                <View style={styles.difficultyBarTrack}>
-                  <View
-                    style={[
-                      styles.difficultyBarFill,
-                      {
-                        width: `${difficultyFillPercent}%`,
-                      },
-                    ]}
-                  />
-                </View>
-              </View>
-              <View style={styles.difficultyButtonsRow}>
-                <Pressable
-                  style={styles.difficultyButton}
-                  onPress={() => adjustDifficultyLevel(-1)}
-                >
-                  <Text style={styles.difficultyButtonText}>-</Text>
-                </Pressable>
-                <Pressable
-                  style={styles.difficultyButton}
-                  onPress={() => adjustDifficultyLevel(1)}
-                >
-                  <Text style={styles.difficultyButtonText}>+</Text>
-                </Pressable>
-              </View>
-            </View>
-            {newType === "reps" ? (
-              <View
-                style={styles.weightToggleRow}
-                ref={tutorialSportWeightRef}
-                collapsable={false}
-              >
-                <Pressable
-                  style={[
-                    styles.weightToggleButton,
-                    newWeightExercise && styles.weightToggleButtonActive,
-                  ]}
-                  onPress={() => setNewWeightExercise((prev) => !prev)}
-                >
-                  <View
-                    style={[
-                      styles.weightToggleIcon,
-                      newWeightExercise && styles.weightToggleIconActive,
-                    ]}
-                  >
-                    {newWeightExercise ? (
-                      <Text style={styles.weightToggleIconText}>✓</Text>
-                    ) : null}
-                  </View>
-                  <Text style={styles.weightToggleLabel}>
-                    {t("label.weightExercise")}
-                  </Text>
-                </Pressable>
-                <Pressable
-                  style={styles.infoButton}
-                  onPress={() => setInfoModalKey((prev) => prev === "weight" ? null : "weight")}
-                >
-                  <Text style={styles.infoButtonText}>?</Text>
-                </Pressable>
-              </View>
-            ) : null}
-            <View style={styles.modalActions}>
-              <Pressable
-                style={styles.secondaryButton}
-                onPress={closeSportModal}
-              >
-                <Text style={styles.secondaryButtonText}>{t("label.cancel")}</Text>
-              </Pressable>
-              <Pressable
-                style={styles.primaryButton}
-                onPress={saveSportModal}
-                ref={tutorialSportSaveRef}
-                collapsable={false}
-              >
-                <Text style={styles.primaryButtonText}>{t("label.save")}</Text>
-              </Pressable>
-            </View>
-          </View>
-          {tutorialOverlayInModal ? (
-            <View style={styles.tutorialPortal} pointerEvents="box-none">
-              {renderTutorialOverlay()}
-            </View>
-          ) : null}
-        </View>
-      ) : null}
+      {renderSportModal()}
       {infoModalKey ? (
         <Pressable
           style={styles.modalOverlay}
@@ -9998,21 +10025,17 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 10,
   },
-  calendarEditButton: {
-    position: "absolute",
-    top: -6,
-    right: -6,
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: COLORS.danger,
+  calendarEditOverlay: {
+    ...StyleSheet.absoluteFillObject,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "rgba(239, 68, 68, 0.18)",
+    borderRadius: 6,
   },
-  calendarEditText: {
-    color: COLORS.white,
-    fontSize: 12,
-    fontWeight: "700",
+  calendarEditMinus: {
+    color: "rgba(239, 68, 68, 0.85)",
+    fontSize: 18,
+    fontWeight: "800",
   },
   modalOverlay: {
     position: "absolute",
