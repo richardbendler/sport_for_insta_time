@@ -10,6 +10,7 @@ import java.util.Locale
 object ScreenTimeStore {
   private const val PREF_KEY_ENTRIES = "screen_time_entries"
   private const val PREF_KEY_USED = "used_seconds"
+  private const val PREF_KEY_USED_BY_APP = "used_seconds_by_app"
   private const val PREF_KEY_LAST_DAY = "last_day"
   private const val PREF_KEY_LEGACY_ALLOWANCE = "allowance_seconds"
   private const val DAY_MS = 24L * 60L * 60L * 1000L
@@ -197,14 +198,8 @@ object ScreenTimeStore {
   }
 
   fun getUsedSecondsToday(prefs: SharedPreferences, now: Long): Int {
-    val today = todayKey(now)
-    val lastDay = prefs.getString(PREF_KEY_LAST_DAY, "") ?: ""
-    var used = prefs.getInt(PREF_KEY_USED, 0)
-    if (lastDay != today) {
-      used = 0
-      prefs.edit().putInt(PREF_KEY_USED, 0).putString(PREF_KEY_LAST_DAY, today).apply()
-    }
-    return used
+    ensureToday(prefs, now)
+    return prefs.getInt(PREF_KEY_USED, 0)
   }
 
   fun addUsedSeconds(prefs: SharedPreferences, now: Long, delta: Int): Int {
@@ -212,6 +207,27 @@ object ScreenTimeStore {
     val next = (current + delta).coerceAtLeast(0)
     prefs.edit().putInt(PREF_KEY_USED, next).apply()
     return next
+  }
+
+  fun addUsedSecondsForApp(
+    prefs: SharedPreferences,
+    now: Long,
+    packageName: String?,
+    delta: Int
+  ) {
+    if (delta <= 0 || packageName.isNullOrBlank()) {
+      return
+    }
+    ensureToday(prefs, now)
+    val current = loadUsedByApp(prefs)
+    val nextValue = (current[packageName] ?: 0) + delta
+    current[packageName] = nextValue
+    saveUsedByApp(prefs, current)
+  }
+
+  fun getUsedByAppToday(prefs: SharedPreferences, now: Long): Map<String, Int> {
+    ensureToday(prefs, now)
+    return loadUsedByApp(prefs)
   }
 
   private fun loadEntries(prefs: SharedPreferences): MutableList<Entry> {
@@ -276,6 +292,48 @@ object ScreenTimeStore {
       array.put(obj)
     }
     prefs.edit().putString(PREF_KEY_ENTRIES, array.toString()).apply()
+  }
+
+  private fun ensureToday(prefs: SharedPreferences, now: Long): String {
+    val today = todayKey(now)
+    val lastDay = prefs.getString(PREF_KEY_LAST_DAY, "") ?: ""
+    if (lastDay != today) {
+      prefs.edit()
+        .putInt(PREF_KEY_USED, 0)
+        .putString(PREF_KEY_LAST_DAY, today)
+        .remove(PREF_KEY_USED_BY_APP)
+        .apply()
+    }
+    return today
+  }
+
+  private fun loadUsedByApp(prefs: SharedPreferences): MutableMap<String, Int> {
+    val raw = prefs.getString(PREF_KEY_USED_BY_APP, null) ?: return mutableMapOf()
+    val obj = try {
+      JSONObject(raw)
+    } catch (e: Exception) {
+      return mutableMapOf()
+    }
+    val result = mutableMapOf<String, Int>()
+    val iterator = obj.keys()
+    while (iterator.hasNext()) {
+      val key = iterator.next()
+      val value = obj.optInt(key, 0)
+      if (value > 0) {
+        result[key] = value
+      }
+    }
+    return result
+  }
+
+  private fun saveUsedByApp(prefs: SharedPreferences, data: Map<String, Int>) {
+    val obj = JSONObject()
+    data.forEach { (key, value) ->
+      if (value > 0) {
+        obj.put(key, value)
+      }
+    }
+    prefs.edit().putString(PREF_KEY_USED_BY_APP, obj.toString()).apply()
   }
 
   private fun parseEntry(obj: JSONObject): Entry? {

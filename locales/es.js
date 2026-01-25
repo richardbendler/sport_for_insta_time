@@ -21,6 +21,8 @@ const es = {
     "label.noScreenTimeEntriesCurrent": "No hay entradas activas en las ultimas 24h.",
     "label.screenTimeEntriesCarryover": "Entradas de arrastre",
     "label.noScreenTimeEntriesCarryover": "No hay arrastre disponible.",
+    "label.carryoverEntriesHint":
+      "Estas entradas tienen más de 24h. Cada 24h, lo que queda se reduce a la mitad.",
     "label.screenTimeEntryOriginal": "Original",
     "label.remainingCurrent": "Restante (sin arrastre)",
     "label.moreInfo": "Más info",
@@ -125,6 +127,10 @@ const es = {
     "label.grayscaleRestrictedApps": "Mostrar apps restringidas en escala de grises",
     "label.grayscaleRestrictedAppsHint":
       "Aplica un estilo en blanco y negro a las apps restringidas en la lista.",
+    "label.grayscalePermissionTitle": "Activar escala de grises",
+    "label.grayscalePermissionBody":
+      "Para cambiar las apps restringidas a escala de grises, la app necesita el permiso del sistema \"Secure settings\". Si no lo concedes, activa Android > Accesibilidad > Correccion de color > Escala de grises manualmente.",
+    "label.openAccessibilitySettings": "Abrir accesibilidad",
     "label.closeApps": "Cerrar apps",
     "label.searchApps": "Buscar apps",
     "label.searchSports": "Buscar deportes",

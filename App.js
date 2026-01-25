@@ -71,6 +71,7 @@ const STORAGE_KEYS = {
   accessibilityDisclosure: "@accessibility_disclosure_v1",
   usagePermissions: "@usage_permissions_prompted_v1",
   notificationsPermissions: "@notifications_permissions_prompted_v1",
+  grayscalePermissions: "@grayscale_permissions_prompted_v1",
   motivationActions: "@motivation_actions_v1",
   carryover: "@carryover_seconds_v1",
   carryoverDay: "@carryover_day_v1",
@@ -5183,6 +5184,7 @@ function AppContent() {
     remainingBySport: {},
     entryCount: 0,
     carryoverSeconds: 0,
+    usedByApp: {},
   });
   const [screenTimeEntries, setScreenTimeEntries] = useState([]);
   const [needsAccessibility, setNeedsAccessibility] = useState(true);
@@ -5195,6 +5197,8 @@ function AppContent() {
   const [usageAccessGranted, setUsageAccessGranted] = useState(false);
   const [notificationsPrompted, setNotificationsPrompted] = useState(false);
   const [notificationsGranted, setNotificationsGranted] = useState(false);
+  const [grayscalePermissionsPrompted, setGrayscalePermissionsPrompted] =
+    useState(false);
   const [permissionsPanelOpen, setPermissionsPanelOpen] = useState(false);
   const [permissionsPanelTouched, setPermissionsPanelTouched] = useState(false);
   const [permissionsCheckTick, setPermissionsCheckTick] = useState(0);
@@ -5525,6 +5529,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       const notificationsPermissionsRaw = await AsyncStorage.getItem(
         STORAGE_KEYS.notificationsPermissions
       );
+      const grayscalePermissionsRaw = await AsyncStorage.getItem(
+        STORAGE_KEYS.grayscalePermissions
+      );
       const usagePermissionsRaw = await AsyncStorage.getItem(
         STORAGE_KEYS.usagePermissions
       );
@@ -5575,12 +5582,18 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           parsedSettings.language || DEFAULT_SETTINGS.language
         );
       }
+      if (InstaControl?.setGrayscaleRestrictedApps) {
+        InstaControl.setGrayscaleRestrictedApps(
+          !!parsedSettings.grayscaleRestrictedApps
+        );
+      }
       setPermissionsPrompted(permissionsRaw === "true");
       setAccessibilityDisclosureAccepted(
         accessibilityDisclosureRaw === "true"
       );
       setUsagePermissionsPrompted(usagePermissionsRaw === "true");
       setNotificationsPrompted(!!notificationsPermissionsRaw);
+      setGrayscalePermissionsPrompted(grayscalePermissionsRaw === "true");
       setNotificationsGranted(false);
       setTutorialSeen(tutorialSeenRaw === "true");
       setWorkoutHistory(workoutsRaw ? JSON.parse(workoutsRaw) : []);
@@ -6403,6 +6416,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         remainingBySport: state.remainingBySport || {},
         entryCount: state.entryCount || 0,
         carryoverSeconds: state.carryoverSeconds || 0,
+        usedByApp: state.usedByApp || {},
       });
     }
   };
@@ -6453,13 +6467,17 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     [showWidgetInstructions]
   );
 
-  const openAccessibilitySettings = async () => {
+  const openAccessibilitySettingsDirect = async () => {
     if (InstaControl?.openAccessibilitySettings) {
       InstaControl.openAccessibilitySettings();
     } else {
       showPermissionInstruction("label.accessibilityTitle", "label.accessibilitySteps");
       await openAppSettingsFallback();
     }
+  };
+
+  const openAccessibilitySettings = async () => {
+    await openAccessibilitySettingsDirect();
     await AsyncStorage.setItem(STORAGE_KEYS.permissions, "true");
     setPermissionsPrompted(true);
   };
@@ -6510,6 +6528,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         ? settings.prefaceDelaySeconds
         : DEFAULT_SETTINGS.prefaceDelaySeconds;
       InstaControl.setPrefaceDelaySeconds(delay);
+    }
+    if (InstaControl?.setGrayscaleRestrictedApps) {
+      InstaControl.setGrayscaleRestrictedApps(
+        !!settings.grayscaleRestrictedApps
+      );
     }
   }, [settings, syncScreenTimeEntries]);
 
@@ -6574,14 +6597,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         setSelectedSportId(null);
         return true;
       }
-      if (isAppsSettingsOpen) {
-        setIsAppsSettingsOpen(false);
-        return true;
-      }
-      if (isSettingsOpen) {
-        setIsSettingsOpen(false);
-        return true;
-      }
       /*
       if (isWorkoutOpen) {
         setIsWorkoutOpen(false);
@@ -6590,6 +6605,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       */
       if (isPrefaceSettingsOpen) {
         setIsPrefaceSettingsOpen(false);
+        return true;
+      }
+      if (isAppsSettingsOpen) {
+        setIsAppsSettingsOpen(false);
+        return true;
+      }
+      if (isSettingsOpen) {
+        setIsSettingsOpen(false);
         return true;
       }
       /*
@@ -6696,10 +6719,49 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   };
 
   const toggleGrayscaleRestrictedApps = async () => {
+    const nextEnabled = !settings.grayscaleRestrictedApps;
     const nextSettings = {
       ...settings,
-      grayscaleRestrictedApps: !settings.grayscaleRestrictedApps,
+      grayscaleRestrictedApps: nextEnabled,
     };
+    if (!nextEnabled) {
+      if (InstaControl?.setGrayscaleRestrictedApps) {
+        InstaControl.setGrayscaleRestrictedApps(false);
+      }
+      await saveSettings(nextSettings);
+      return;
+    }
+    if (Platform.OS === "android" && InstaControl?.canWriteSecureSettings) {
+      let canWrite = false;
+      try {
+        canWrite = await InstaControl.canWriteSecureSettings();
+      } catch (error) {
+        console.warn("canWriteSecureSettings failed", error);
+      }
+      if (!canWrite) {
+        if (!grayscalePermissionsPrompted) {
+          Alert.alert(
+            t("label.grayscalePermissionTitle"),
+            t("label.grayscalePermissionBody"),
+            [
+              { text: t("label.later"), style: "cancel" },
+              {
+                text: t("label.openAccessibilitySettings"),
+                onPress: openAccessibilitySettingsDirect,
+              },
+            ]
+          );
+          await AsyncStorage.setItem(
+            STORAGE_KEYS.grayscalePermissions,
+            "true"
+          );
+          setGrayscalePermissionsPrompted(true);
+        }
+      }
+    }
+    if (InstaControl?.setGrayscaleRestrictedApps) {
+      InstaControl.setGrayscaleRestrictedApps(true);
+    }
     await saveSettings(nextSettings);
   };
 
@@ -7888,20 +7950,38 @@ const getSpeechLocale = () => {
       .filter((entry) => entry.totalSeconds > 0)
       .sort((a, b) => b.totalSeconds - a.totalSeconds);
   }, [logs, sports, language]);
+  const logEntryById = useMemo(() => {
+    const map = {};
+    Object.values(logs || {}).forEach((sportLog) => {
+      Object.values(sportLog || {}).forEach((dayEntries) => {
+        (dayEntries || []).forEach((entry) => {
+          if (entry?.id) {
+            map[entry.id] = entry;
+          }
+        });
+      });
+    });
+    return map;
+  }, [logs]);
   const usageByAppList = useMemo(() => {
-    return (installedApps || [])
-      .map((app) => ({
-        key: app.packageName || app.label || "",
-        label: app.label || app.packageName || "",
-        seconds: Math.floor((appUsageMap[app.packageName] || 0) / 1000),
-      }))
+    const usedByApp = usageState.usedByApp || {};
+    return (settings.controlledApps || [])
+      .map((pkg) => {
+        const app = installedApps.find((entry) => entry.packageName === pkg);
+        return {
+          key: pkg,
+          label: app?.label || pkg,
+          seconds: Number(usedByApp[pkg] || 0),
+        };
+      })
       .filter((entry) => entry.seconds > 0 && entry.label)
       .sort((a, b) => b.seconds - a.seconds);
-  }, [appUsageMap, installedApps]);
+  }, [installedApps, settings.controlledApps, usageState.usedByApp]);
   const screenTimeEntryRows = useMemo(() => {
     return (screenTimeEntries || [])
       .map((entry, index) => {
         const sport = sports.find((item) => item.id === entry.sportId);
+        const logEntry = entry?.id ? logEntryById[entry.id] : null;
         const createdAt = Number(entry.createdAt || 0);
         const remainingSeconds = Number(entry.remainingSeconds || 0);
         const originalSeconds = Number(entry.originalSeconds || 0);
@@ -7917,10 +7997,13 @@ const getSpeechLocale = () => {
           dayKey,
           remainingSeconds,
           originalSeconds,
+          reps: Number.isFinite(logEntry?.reps) ? logEntry.reps : 0,
+          seconds: Number.isFinite(logEntry?.seconds) ? logEntry.seconds : 0,
+          weight: Number.isFinite(logEntry?.weight) ? logEntry.weight : 0,
         };
       })
       .sort((a, b) => b.createdAt - a.createdAt);
-  }, [screenTimeEntries, sports, language, t]);
+  }, [screenTimeEntries, sports, language, t, logEntryById]);
   const screenTimeEntryCutoff = Date.now() - 24 * 60 * 60 * 1000;
   const currentScreenTimeEntries = screenTimeEntryRows.filter(
     (entry) =>
@@ -10560,15 +10643,34 @@ const getSpeechLocale = () => {
                         {formatDateLabel(entry.dayKey)} ·{" "}
                         {formatTime(entry.createdAt || Date.now())}
                       </Text>
+                      {entry.reps > 0 ? (
+                        <Text style={styles.detailEntryMeta}>
+                          {t("label.reps")}: {entry.reps}
+                        </Text>
+                      ) : null}
+                      {entry.weight > 0 ? (
+                        <Text style={styles.detailEntryMeta}>
+                          {t("label.weightEntryWeight")}:{" "}
+                          {formatWeightValue(entry.weight)}
+                        </Text>
+                      ) : null}
+                      {entry.seconds > 0 ? (
+                        <Text style={styles.detailEntryMeta}>
+                          {t("label.timeUnit")}: {formatSeconds(entry.seconds)}
+                        </Text>
+                      ) : null}
                     </View>
                   </View>
                   <View style={styles.detailEntryRight}>
                     <Text style={styles.detailEntryValue}>
-                      {formatScreenTime(entry.remainingSeconds)}
+                      {formatScreenTime(entry.originalSeconds)}
                     </Text>
                     <Text style={styles.detailEntrySubValue}>
-                      {t("label.screenTimeEntryOriginal")}:{" "}
-                      {formatScreenTime(entry.originalSeconds)}
+                      {t("label.screenTime")}
+                    </Text>
+                    <Text style={styles.detailEntrySubValue}>
+                      {t("label.remaining")}:{" "}
+                      {formatScreenTime(entry.remainingSeconds)}
                     </Text>
                   </View>
                 </View>
@@ -10579,6 +10681,9 @@ const getSpeechLocale = () => {
             {t("label.screenTimeEntriesCarryover")}
           </Text>
           <View style={styles.infoCard}>
+            <Text style={styles.helperText}>
+              {t("label.carryoverEntriesHint")}
+            </Text>
             {carryoverScreenTimeEntries.length === 0 ? (
               <Text style={styles.helperText}>
                 {t("label.noScreenTimeEntriesCarryover")}
@@ -10594,15 +10699,34 @@ const getSpeechLocale = () => {
                         {formatDateLabel(entry.dayKey)} ·{" "}
                         {formatTime(entry.createdAt || Date.now())}
                       </Text>
+                      {entry.reps > 0 ? (
+                        <Text style={styles.detailEntryMeta}>
+                          {t("label.reps")}: {entry.reps}
+                        </Text>
+                      ) : null}
+                      {entry.weight > 0 ? (
+                        <Text style={styles.detailEntryMeta}>
+                          {t("label.weightEntryWeight")}:{" "}
+                          {formatWeightValue(entry.weight)}
+                        </Text>
+                      ) : null}
+                      {entry.seconds > 0 ? (
+                        <Text style={styles.detailEntryMeta}>
+                          {t("label.timeUnit")}: {formatSeconds(entry.seconds)}
+                        </Text>
+                      ) : null}
                     </View>
                   </View>
                   <View style={styles.detailEntryRight}>
                     <Text style={styles.detailEntryValue}>
-                      {formatScreenTime(entry.remainingSeconds)}
+                      {formatScreenTime(entry.originalSeconds)}
                     </Text>
                     <Text style={styles.detailEntrySubValue}>
-                      {t("label.screenTimeEntryOriginal")}:{" "}
-                      {formatScreenTime(entry.originalSeconds)}
+                      {t("label.screenTime")}
+                    </Text>
+                    <Text style={styles.detailEntrySubValue}>
+                      {t("label.remaining")}:{" "}
+                      {formatScreenTime(entry.remainingSeconds)}
                     </Text>
                   </View>
                 </View>
@@ -10637,11 +10761,7 @@ const getSpeechLocale = () => {
                 {formatScreenTime(usageState.usedSeconds || 0)}
               </Text>
             </View>
-            {usageAccessMissing ? (
-              <Text style={styles.helperText}>
-                {t("label.usageAccessMissing")}
-              </Text>
-            ) : usageByAppList.length === 0 ? (
+            {usageByAppList.length === 0 ? (
               <Text style={styles.helperText}>{t("label.noUsageData")}</Text>
             ) : (
               usageByAppList.map((entry) => (
@@ -10665,6 +10785,7 @@ const getSpeechLocale = () => {
             <Text style={styles.helperText}>{t("label.carryoverHint")}</Text>
           </View>
         </ScrollView>
+        {renderPrefaceSettingsModal()}
       </SafeAreaView>
     );
   }

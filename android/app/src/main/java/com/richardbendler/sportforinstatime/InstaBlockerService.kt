@@ -10,6 +10,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -38,6 +39,12 @@ class InstaBlockerService : AccessibilityService() {
   private val notificationId = 1001
   private var pendingHomeClear: Runnable? = null
   private val homeClearDelayMillis = 600L
+  private val grayscalePrefKey = "grayscale_restricted_apps"
+  private val daltonizerMonochromacy = 0
+
+  private var grayscaleApplied = false
+  private var previousDaltonizerEnabled: Int? = null
+  private var previousDaltonizerMode: Int? = null
 
   private val ignoredPackagePrefixes = setOf(
     "com.android.systemui",
@@ -78,32 +85,37 @@ class InstaBlockerService : AccessibilityService() {
     if (ignoredPackagePrefixes.any { pkg.startsWith(it) }) {
       return
     }
-      if (!isLaunchablePackage(pkg)) {
-        if (isHomePackage(pkg)) {
-          scheduleForegroundClear()
-        }
-        return
+    if (!isLaunchablePackage(pkg)) {
+      if (isHomePackage(pkg)) {
+        scheduleForegroundClear()
       }
-      if (pkg == applicationContext.packageName && !appActivities.contains(className)) {
-        return
-      }
+      syncGrayscaleState(false)
+      return
+    }
+    if (pkg == applicationContext.packageName && !appActivities.contains(className)) {
+      syncGrayscaleState(false)
+      return
+    }
     val now = System.currentTimeMillis()
     if (pkg == applicationContext.packageName) {
       currentPackage = pkg
       updateCountdownOverlay(0, false)
       updateCountdownNotification(0, false, null)
+      syncGrayscaleState(false)
       return
     }
     val controlled = getControlledApps()
     if (!controlled.contains(pkg)) {
       if (isHomePackage(pkg)) {
         scheduleForegroundClear()
+        syncGrayscaleState(false)
         return
       }
       currentPackage = pkg
       lastForegroundWasHome = false
       updateCountdownOverlay(0, false)
       updateCountdownNotification(0, false, null)
+      syncGrayscaleState(false)
       return
     }
     cancelForegroundClear()
@@ -118,6 +130,7 @@ class InstaBlockerService : AccessibilityService() {
     val remaining = getRemainingSeconds()
     updateCountdownOverlay(remaining, true)
     updateCountdownNotification(remaining, true, pkg)
+    syncGrayscaleState(true)
     if (shouldBlock(pkg)) {
       updateCountdownOverlay(0, true)
       updateCountdownNotification(0, false, null)
@@ -135,22 +148,27 @@ class InstaBlockerService : AccessibilityService() {
     super.onDestroy()
     teardownOverlay()
     updateCountdownNotification(0, false, null)
+    restoreGrayscale()
   }
 
   private fun tickUsage() {
     val pkg = currentPackage
     if (pkg == null) {
+      syncGrayscaleState(false)
       maybeUpdateWidgets()
       return
     }
     if (pkg == applicationContext.packageName) {
       updateCountdownOverlay(0, false)
       updateCountdownNotification(0, false, null)
+      syncGrayscaleState(false)
       maybeUpdateWidgets()
       return
     }
     val controlled = getControlledApps()
-    if (!controlled.contains(pkg)) {
+    val isControlled = controlled.contains(pkg)
+    syncGrayscaleState(isControlled)
+    if (!isControlled) {
       updateCountdownOverlay(0, false)
       updateCountdownNotification(0, false, null)
       maybeUpdateWidgets()
@@ -162,6 +180,7 @@ class InstaBlockerService : AccessibilityService() {
     val remaining = result.remainingSeconds
     if (result.consumedSeconds > 0) {
       ScreenTimeStore.addUsedSeconds(prefs, now, result.consumedSeconds)
+      ScreenTimeStore.addUsedSecondsForApp(prefs, now, pkg, result.consumedSeconds)
     }
     updateCountdownOverlay(remaining, true)
     updateCountdownNotification(remaining, true, pkg)
@@ -179,6 +198,7 @@ class InstaBlockerService : AccessibilityService() {
     }
     updateCountdownOverlay(0, false)
     updateCountdownNotification(0, false, null)
+    syncGrayscaleState(false)
   }
 
   private fun shouldBlock(pkg: String): Boolean {
@@ -447,6 +467,94 @@ class InstaBlockerService : AccessibilityService() {
 
   private fun getPrefs() =
     applicationContext.getSharedPreferences("insta_control", Context.MODE_PRIVATE)
+
+  private fun syncGrayscaleState(isControlled: Boolean) {
+    if (!shouldUseGrayscale() || !isControlled) {
+      restoreGrayscale()
+      return
+    }
+    applyGrayscale()
+  }
+
+  private fun shouldUseGrayscale(): Boolean {
+    val prefs = getPrefs()
+    return prefs.getBoolean(grayscalePrefKey, false)
+  }
+
+  private fun canWriteSecureSettings(): Boolean {
+    return ContextCompat.checkSelfPermission(
+      this,
+      android.Manifest.permission.WRITE_SECURE_SETTINGS
+    ) == PackageManager.PERMISSION_GRANTED
+  }
+
+  private fun applyGrayscale() {
+    if (grayscaleApplied) {
+      return
+    }
+    if (!canWriteSecureSettings()) {
+      return
+    }
+    try {
+      val resolver = contentResolver
+      previousDaltonizerEnabled = Settings.Secure.getInt(
+        resolver,
+        Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
+        0
+      )
+      previousDaltonizerMode = Settings.Secure.getInt(
+        resolver,
+        Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER,
+        -1
+      )
+      Settings.Secure.putInt(
+        resolver,
+        Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
+        1
+      )
+      Settings.Secure.putInt(
+        resolver,
+        Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER,
+        daltonizerMonochromacy
+      )
+      grayscaleApplied = true
+    } catch (e: SecurityException) {
+      // Permission missing; leave grayscale unchanged.
+    }
+  }
+
+  private fun restoreGrayscale() {
+    if (!grayscaleApplied) {
+      return
+    }
+    if (!canWriteSecureSettings()) {
+      grayscaleApplied = false
+      previousDaltonizerEnabled = null
+      previousDaltonizerMode = null
+      return
+    }
+    try {
+      val resolver = contentResolver
+      val enabledValue = previousDaltonizerEnabled ?: 0
+      val modeValue = previousDaltonizerMode ?: -1
+      Settings.Secure.putInt(
+        resolver,
+        Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
+        enabledValue
+      )
+      Settings.Secure.putInt(
+        resolver,
+        Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER,
+        modeValue
+      )
+    } catch (e: SecurityException) {
+      // Ignore restore failures.
+    } finally {
+      grayscaleApplied = false
+      previousDaltonizerEnabled = null
+      previousDaltonizerMode = null
+    }
+  }
 
   private fun isHomePackage(pkg: String): Boolean {
     val intent = Intent(Intent.ACTION_MAIN)

@@ -21,6 +21,8 @@ const en = {
     "label.noScreenTimeEntriesCurrent": "No active entries in the last 24h.",
     "label.screenTimeEntriesCarryover": "Carryover entries",
     "label.noScreenTimeEntriesCarryover": "No carryover entries available.",
+    "label.carryoverEntriesHint":
+      "These entries are older than 24h. Every 24h, whatever remains is cut in half.",
     "label.screenTimeEntryOriginal": "Original",
     "label.remainingCurrent": "Remaining (without carryover)",
     "label.moreInfo": "More info",
@@ -122,6 +124,10 @@ const en = {
     "label.grayscaleRestrictedApps": "Show restricted apps in monochrome",
     "label.grayscaleRestrictedAppsHint":
       "Render restricted apps in the list with a black-and-white style.",
+    "label.grayscalePermissionTitle": "Allow monochrome control",
+    "label.grayscalePermissionBody":
+      "To switch restricted apps to grayscale, the app needs the system permission \"Secure settings\". If you do not grant it, enable Android Accessibility > Color correction > Grayscale manually.",
+    "label.openAccessibilitySettings": "Open accessibility settings",
     "label.closeApps": "Close apps",
     "label.searchApps": "Search apps",
     "label.searchSports": "Search sports",
