@@ -31,12 +31,15 @@ const en = {
     "label.formulaIntro":
       "This is how your screen time is calculated for this sport:",
     "label.formulaAdminFactor": "Admin factor",
-    "label.formulaUserFactor": "User factor",
+    "label.formulaUserFactor": "Screen Time Factor",
     "label.formulaAdminInfo":
       "The admin factor is a global base multiplier for this category.",
     "label.formulaUserEffect":
-      "The user factor scales your earned time. Current: {{percent}} compared to 1.0.",
-    "label.formulaEditButton": "Edit user factor",
+      "The screen time factor scales your earned time. Currently: {{percent}} vs 1.0.",
+    "label.formulaEditButton": "Edit Screen Time Factor",
+    "label.formulaWeighted": "Weighted",
+    "label.formulaRepsBased": "Reps-based",
+    "label.formulaTimeBased": "Time-based",
     "label.formulaTimeUnit": "seconds",
     "label.screenTimeDetailsTitle": "Screen time details",
     "label.breakdownSummary": "Summary",
@@ -174,11 +177,11 @@ const en = {
     "label.repsShort": "reps",
     "label.timeUnit": "Time",
     "label.weightExercise": "Weight exercise",
-    "label.difficultyLabel": "Intensity factor (1-10)",
+    "label.difficultyLabel": "Screen Time Factor (1-10)",
       "label.difficultyDescription":
-        "The slider multiplies duration, reps or weight so you control how much Screen Time each set earns.",
+        "The screen time factor multiplies time, reps, or weight and sets how much screen time each unit grants.",
       "label.difficultyFormula":
-        "Formulas:\nTime-based = seconds × adminFactor_time × difficulty\nRepetitions = reps × adminFactor_reps × difficulty\nWeighted sports = kg × reps × difficulty × adminFactor_weighted",
+        "Formulas shown below.",
     "label.weightExerciseInfoTitle": "Weight exercises",
     "label.weightExerciseInfoBody":
       "Enable this when logging sets with additional weight; screen time = kg × reps × difficulty × adminFactor_weighted.",

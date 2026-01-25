@@ -31,12 +31,15 @@ const de = {
     "label.formulaIntro":
       "So wird deine Screen Time fur diese Sportart berechnet:",
     "label.formulaAdminFactor": "Admin-Faktor",
-    "label.formulaUserFactor": "User-Faktor",
+    "label.formulaUserFactor": "Screen Time Faktor",
     "label.formulaAdminInfo":
       "Der Admin-Faktor ist ein globaler Basiswert fur diese Kategorie.",
     "label.formulaUserEffect":
-      "Der User-Faktor skaliert deine erspielte Zeit. Aktuell: {{percent}} gegenuber 1.0.",
-    "label.formulaEditButton": "User-Faktor bearbeiten",
+      "Der Screen Time Faktor skaliert deine erspielte Zeit. Aktuell: {{percent}} gegen?ber 1.0.",
+    "label.formulaEditButton": "Screen Time Faktor bearbeiten",
+    "label.formulaWeighted": "Gewichte",
+    "label.formulaRepsBased": "Wiederholungen",
+    "label.formulaTimeBased": "Zeitbasiert",
     "label.formulaTimeUnit": "Sekunden",
     "label.screenTimeDetailsTitle": "Bildschirmzeit-Details",
     "label.breakdownSummary": "Übersicht",
@@ -180,11 +183,11 @@ const de = {
     "label.repsShort": "Wdh.",
     "label.timeUnit": "Zeit",
     "label.weightExercise": "Gewichtsübung",
-    "label.difficultyLabel": "Intensitätsfaktor (1-10)",
+    "label.difficultyLabel": "Screen Time Faktor (1-10)",
       "label.difficultyDescription":
-        "Der Faktor multipliziert Dauer, Wiederholungen oder Gewicht und legt fest, wie viel Screen Time jede Einheit bringt.",
+        "Der Screen Time Faktor multipliziert Dauer, Wiederholungen oder Gewicht und legt fest, wie viel Screen Time jede Einheit bringt.",
       "label.difficultyFormula":
-        "Formeln:\nZeitbasiert = Sekunden × adminFactor_time × Intensität\nWiederholungen = Wiederholungen × adminFactor_reps × Intensität\nSportarten mit Gewichten = kg × Wiederholungen × Intensität × adminFactor_weighted",
+        "Formeln siehe unten.",
     "label.weightExerciseInfoTitle": "Gewichtsuebungen",
     "label.weightExerciseInfoBody": "Aktiviere das bei Ubungen mit zusatzlichem Gewicht; die Screen Time berechnet sich als kg × Wiederholungen × Intensitat × adminFactor_weighted.",
 "label.weightEntryPreview": "Screen Time (Vorschau)",
