@@ -408,6 +408,125 @@ const weekdayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const monthLabels = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const numberWords = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty"];
 
-export { weekdayLabels, monthLabels, numberWords };
+const funFacts = [
+  {
+    id: "funfact-001",
+    text: "Did you know? Just 10 minutes of movement can measurably boost your mood.",
+  },
+  {
+    id: "funfact-002",
+    text: "Did you know? Regular exercise increases your life expectancy, regardless of pace.",
+  },
+  {
+    id: "funfact-003",
+    text: "Did you know? Your body gets stronger before you can see it.",
+  },
+  {
+    id: "funfact-004",
+    text: "Did you know? Movement reduces stress more effectively than many relaxation techniques.",
+  },
+  {
+    id: "funfact-005",
+    text: "Did you know? Consistency beats intensity \u2014 every small step counts.",
+  },
+  {
+    id: "funfact-006",
+    text: "Did you know? Exercise improves your sleep after just a few days.",
+  },
+  {
+    id: "funfact-007",
+    text: "Did you know? Your brain loves movement \u2014 it boosts concentration and focus.",
+  },
+  {
+    id: "funfact-008",
+    text: "Did you know? After training you almost always feel better than before.",
+  },
+  {
+    id: "funfact-009",
+    text: "Did you know? Muscles grow during rest \u2014 recovery is part of success.",
+  },
+  {
+    id: "funfact-010",
+    text: "Did you know? Movement strengthens your immune system long term.",
+  },
+  {
+    id: "funfact-011",
+    text: "Did you know? You don't need motivation to start \u2014 movement creates motivation.",
+  },
+  {
+    id: "funfact-012",
+    text: "Did you know? Every training stimulus is a signal to your body: get stronger.",
+  },
+  {
+    id: "funfact-013",
+    text: "Did you know? Exercise is proven to help against anxiety and inner restlessness.",
+  },
+  {
+    id: "funfact-014",
+    text: "Did you know? Being active today makes tomorrow easier.",
+  },
+  {
+    id: "funfact-015",
+    text: "Did you know? Even light movement reduces the risk of many diseases.",
+  },
+  {
+    id: "funfact-016",
+    text: "Did you know? Your body adapts \u2014 no matter what level you start at.",
+  },
+  {
+    id: "funfact-017",
+    text: "Did you know? Training improves your self-confidence, not just your fitness.",
+  },
+  {
+    id: "funfact-018",
+    text: "Did you know? You keep burning calories even after your workout.",
+  },
+  {
+    id: "funfact-019",
+    text: "Did you know? Movement makes you more resilient \u2014 physically and mentally.",
+  },
+  {
+    id: "funfact-020",
+    text: "Did you know? Every workout start is a victory over excuses.",
+  },
+  {
+    id: "funfact-021",
+    text: "Did you know? Your heart gets stronger with every active day.",
+  },
+  {
+    id: "funfact-022",
+    text: "Did you know? Progress isn't linear \u2014 sticking with it is the key.",
+  },
+  {
+    id: "funfact-023",
+    text: "Did you know? Exercise releases happy hormones \u2014 with no side effects.",
+  },
+  {
+    id: "funfact-024",
+    text: "Did you know? More movement = more energy in everyday life.",
+  },
+  {
+    id: "funfact-025",
+    text: "Did you know? Your body is made for movement \u2014 not for stillness.",
+  },
+  {
+    id: "funfact-026",
+    text: "Did you know? Training shapes habits, habits shape your life.",
+  },
+  {
+    id: "funfact-027",
+    text: "Did you know? You're training not just for today but for your future self.",
+  },
+  {
+    id: "funfact-028",
+    text: "Did you know? Every step counts \u2014 even the slow one.",
+  },
+  {
+    id: "funfact-029",
+    text: "Did you know? Movement is an investment with a 100% return.",
+  },
+];
+
+export { weekdayLabels, monthLabels, numberWords, funFacts };
 
 export default en;

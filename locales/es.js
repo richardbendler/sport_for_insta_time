@@ -411,6 +411,125 @@ const weekdayLabels = ["Lun", "Mar", "Mi\u00e9", "Jue", "Vie", "S\u00e1b", "Dom"
 const monthLabels = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 const numberWords = ["cero", "uno", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve", "diez", "once", "doce", "trece", "catorce", "quince", "dieciseis", "diecisiete", "dieciocho", "diecinueve", "veinte"];
 
-export { weekdayLabels, monthLabels, numberWords };
+const funFacts = [
+  {
+    id: "funfact-001",
+    text: "?Sab?as que? Tan solo 10 minutos de movimiento pueden mejorar tu \u00e1nimo de forma medible.",
+  },
+  {
+    id: "funfact-002",
+    text: "?Sab?as que? El ejercicio regular aumenta tu esperanza de vida, sin importar el ritmo.",
+  },
+  {
+    id: "funfact-003",
+    text: "?Sab?as que? Tu cuerpo se fortalece antes de que lo veas.",
+  },
+  {
+    id: "funfact-004",
+    text: "?Sab?as que? El movimiento reduce el estr\u00e9s m\u00e1s eficazmente que muchas t\u00e9cnicas de relajaci\u00f3n.",
+  },
+  {
+    id: "funfact-005",
+    text: "?Sab?as que? La constancia vence a la intensidad: cada peque\u00f1o paso cuenta.",
+  },
+  {
+    id: "funfact-006",
+    text: "?Sab?as que? El ejercicio mejora tu sue\u00f1o despu\u00e9s de solo unos d\u00edas.",
+  },
+  {
+    id: "funfact-007",
+    text: "?Sab?as que? A tu cerebro le encanta moverse: aumenta la concentraci\u00f3n y el enfoque.",
+  },
+  {
+    id: "funfact-008",
+    text: "?Sab?as que? Despu\u00e9s de entrenar casi siempre te sientes mejor que antes.",
+  },
+  {
+    id: "funfact-009",
+    text: "?Sab?as que? Los m\u00fasculos crecen en el descanso: la recuperaci\u00f3n es parte del \u00e9xito.",
+  },
+  {
+    id: "funfact-010",
+    text: "?Sab?as que? El movimiento fortalece tu sistema inmunol\u00f3gico a largo plazo.",
+  },
+  {
+    id: "funfact-011",
+    text: "?Sab?as que? No necesitas motivaci\u00f3n para empezar: el movimiento crea motivaci\u00f3n.",
+  },
+  {
+    id: "funfact-012",
+    text: "?Sab?as que? Cada est\u00edmulo de entrenamiento es una se\u00f1al a tu cuerpo: hazte m\u00e1s fuerte.",
+  },
+  {
+    id: "funfact-013",
+    text: "?Sab?as que? El ejercicio ayuda de forma comprobada contra la ansiedad y la inquietud interior.",
+  },
+  {
+    id: "funfact-014",
+    text: "?Sab?as que? Estar activo hoy hace que ma\u00f1ana sea m\u00e1s f\u00e1cil.",
+  },
+  {
+    id: "funfact-015",
+    text: "?Sab?as que? Incluso el movimiento ligero reduce el riesgo de muchas enfermedades.",
+  },
+  {
+    id: "funfact-016",
+    text: "?Sab?as que? Tu cuerpo se adapta, sin importar el nivel con el que empieces.",
+  },
+  {
+    id: "funfact-017",
+    text: "?Sab?as que? Entrenar mejora tu confianza en ti mismo, no solo tu condici\u00f3n f\u00edsica.",
+  },
+  {
+    id: "funfact-018",
+    text: "?Sab?as que? Sigues quemando calor\u00edas incluso despu\u00e9s del entrenamiento.",
+  },
+  {
+    id: "funfact-019",
+    text: "?Sab?as que? El movimiento te hace m\u00e1s resistente, f\u00edsica y mentalmente.",
+  },
+  {
+    id: "funfact-020",
+    text: "?Sab?as que? Cada inicio de entrenamiento es una victoria sobre las excusas.",
+  },
+  {
+    id: "funfact-021",
+    text: "?Sab?as que? Tu coraz\u00f3n se fortalece con cada d\u00eda activo.",
+  },
+  {
+    id: "funfact-022",
+    text: "?Sab?as que? El progreso no es lineal: mantenerse es la clave.",
+  },
+  {
+    id: "funfact-023",
+    text: "?Sab?as que? El ejercicio libera hormonas de la felicidad, sin efectos secundarios.",
+  },
+  {
+    id: "funfact-024",
+    text: "?Sab?as que? M\u00e1s movimiento = m\u00e1s energ\u00eda en el d\u00eda a d\u00eda.",
+  },
+  {
+    id: "funfact-025",
+    text: "?Sab?as que? Tu cuerpo est\u00e1 hecho para moverse, no para la quietud.",
+  },
+  {
+    id: "funfact-026",
+    text: "?Sab?as que? El entrenamiento forma h\u00e1bitos, los h\u00e1bitos forman tu vida.",
+  },
+  {
+    id: "funfact-027",
+    text: "?Sab?as que? No entrenas solo para hoy, sino para tu yo futuro.",
+  },
+  {
+    id: "funfact-028",
+    text: "?Sab?as que? Cada paso cuenta, incluso el lento.",
+  },
+  {
+    id: "funfact-029",
+    text: "?Sab?as que? El movimiento es una inversi\u00f3n con un retorno del 100 %.",
+  },
+];
+
+export { weekdayLabels, monthLabels, numberWords, funFacts };
 
 export default es;
