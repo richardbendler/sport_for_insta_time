@@ -91,6 +91,7 @@ const DEFAULT_SETTINGS = {
   language: "en",
   prefaceDelaySeconds: 10,
   grayscaleRestrictedApps: false,
+  sportSortMode: "manual",
 };
 
 const SPEECH_LOCALES = {
@@ -190,11 +191,11 @@ const RAW_STANDARD_SPORTS = [
     id: "jogging",
     labels: {
       de: "Joggen",
-      en: "Jogging / Running",
-      es: "Trotar / Correr",
-      fr: "Jogging / Course ? pied",
+      en: "Jogging",
+      es: "Trotar",
+      fr: "Jogging",
     },
-    aliases: ["Laufen", "Dauerlauf"],
+    aliases: ["Laufen", "Dauerlauf", "Running"],
     icon: "??",
     type: "time",
     defaultRateMinutes: 1,
@@ -206,22 +207,6 @@ const RAW_STANDARD_SPORTS = [
       "Core",
       "Herz-Kreislauf",
     ],
-  },
-  {
-    id: "running_outdoor",
-    labels: {
-      de: "Laufen (Outdoor)",
-      en: "Running",
-      es: "Correr",
-      fr: "Course ? pied",
-    },
-    aliases: ["Stra?enlauf", "Running"],
-    icon: "??",
-    type: "time",
-    defaultRateMinutes: 1,
-    difficultyLevel: 4,
-    category: "Kardio",
-    muscleGroups: ["Beine", "Ges??", "Core", "Herz-Kreislauf"],
   },
   {
     id: "treadmill_running",
@@ -1089,6 +1074,77 @@ const normalizeAliasList = (aliases) => {
   return normalized;
 };
 
+const SPORT_ID_MIGRATIONS = {
+  running_outdoor: "jogging",
+};
+
+const LEGACY_JOGGING_NAMES = new Set([
+  "Jogging / Running",
+  "Jogging",
+  "Running",
+  "Joggen",
+  "Trotar / Correr",
+  "Correr",
+  "Jogging / Course ? pied",
+  "Course ? pied",
+]);
+
+const migrateSportsList = (sportsList = []) => {
+  let changed = false;
+  const byId = new Map();
+  const migrated = [];
+
+  sportsList.forEach((sport) => {
+    if (!sport || !sport.id) {
+      return;
+    }
+    const mappedId = SPORT_ID_MIGRATIONS[sport.id] || sport.id;
+    let next = mappedId === sport.id ? { ...sport } : { ...sport, id: mappedId };
+    if (mappedId !== sport.id) {
+      changed = true;
+    }
+
+    if (mappedId === "jogging") {
+      const name = typeof next.name === "string" ? next.name.trim() : "";
+      if (name && LEGACY_JOGGING_NAMES.has(name) && name !== "Jogging") {
+        next = { ...next, name: "Jogging" };
+        changed = true;
+      }
+      const aliases = normalizeAliasList(next.aliases || []);
+      if (!aliases.includes("Running")) {
+        aliases.push("Running");
+        next = { ...next, aliases };
+        changed = true;
+      } else if (aliases.length !== (next.aliases || []).length) {
+        next = { ...next, aliases };
+        changed = true;
+      }
+    }
+
+    if (byId.has(mappedId)) {
+      const existing = byId.get(mappedId);
+      const mergedAliases = normalizeAliasList([
+        ...(existing.aliases || []),
+        ...(next.aliases || []),
+      ]);
+      if (mergedAliases.length !== (existing.aliases || []).length) {
+        existing.aliases = mergedAliases;
+        changed = true;
+      }
+      if (!existing.name && next.name) {
+        existing.name = next.name;
+        changed = true;
+      }
+      return;
+    }
+
+    byId.set(mappedId, next);
+    migrated.push(next);
+  });
+
+  return { list: migrated, changed };
+};
+
 const buildStandardSportAliases = (sport) => {
   const combined = [];
   if (Array.isArray(sport.aliases)) {
@@ -1283,7 +1339,7 @@ const scoreAndSortSportsBySearch = (sportsList, searchLower, language = "en") =>
 
 const createDefaultPresetSports = () => [];
 
-const PRESET_IDS_TO_REMOVE = new Set(["pullups", "pushups_alt", "jogging"]);
+const PRESET_IDS_TO_REMOVE = new Set(["pullups", "pushups_alt"]);
 
 const pruneNonPushupPresets = (sportsList) =>
   sportsList.filter((sport) => !PRESET_IDS_TO_REMOVE.has(sport.id));
@@ -1873,6 +1929,35 @@ const rollingScreenSecondsTotal = (logs, sports) => {
   return Math.max(0, Math.floor(totalSeconds));
 };
 
+const migrateLogsForSportIds = (logs, mapping = {}) => {
+  if (!logs) {
+    return { logs: {}, changed: false };
+  }
+  let changed = false;
+  const nextLogs = {};
+  Object.entries(logs).forEach(([sportId, sportLogs]) => {
+    const mappedId = mapping[sportId] || sportId;
+    if (mappedId !== sportId) {
+      changed = true;
+    }
+    if (!nextLogs[mappedId]) {
+      nextLogs[mappedId] = sportLogs || {};
+      return;
+    }
+    const merged = { ...(nextLogs[mappedId] || {}) };
+    Object.entries(sportLogs || {}).forEach(([dayKey, entries]) => {
+      if (!merged[dayKey]) {
+        merged[dayKey] = entries || [];
+      } else {
+        merged[dayKey] = [...(merged[dayKey] || []), ...(entries || [])];
+      }
+    });
+    nextLogs[mappedId] = merged;
+    changed = true;
+  });
+  return { logs: nextLogs, changed };
+};
+
 const normalizeLogs = (logs, sports) => {
   if (!logs) {
     return { normalized: {}, changed: false };
@@ -2240,6 +2325,10 @@ function AppContent() {
   const [customSuggestionUsed, setCustomSuggestionUsed] = useState(false);
   const [infoModalKey, setInfoModalKey] = useState(null);
   const scrollViewRef = useRef(null);
+  const homeScrollRef = useRef(null);
+  const screenTimeDetailsScrollRef = useRef(null);
+  const homeScrollYRef = useRef(0);
+  const screenTimeDetailsScrollYRef = useRef(0);
   const [installedApps, setInstalledApps] = useState([]);
   const [appSearch, setAppSearch] = useState("");
   const [appSearchInput, setAppSearchInput] = useState("");
@@ -2676,9 +2765,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       const baseSports = cleanedSports.length
         ? ensurePushupPreset(cleanedSports)
         : createDefaultPresetSports();
-      const { normalized, changed } = normalizeSports(baseSports);
+      const { list: migratedSports, changed: sportsMigrated } =
+        migrateSportsList(baseSports);
+      const { normalized, changed } = normalizeSports(migratedSports);
       setSports(normalized);
-      if (changed || !parsedSports.length) {
+      if (changed || sportsMigrated || !parsedSports.length) {
         await AsyncStorage.setItem(
           STORAGE_KEYS.sports,
           JSON.stringify(normalized)
@@ -2702,8 +2793,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         );
       }
       const parsedLogs = logsRaw ? JSON.parse(logsRaw) : {};
+      const { logs: migratedLogs, changed: logsMigrated } =
+        migrateLogsForSportIds(parsedLogs, SPORT_ID_MIGRATIONS);
       const { normalized: normalizedLogs, changed: logsChanged } = normalizeLogs(
-        parsedLogs,
+        migratedLogs,
         normalized
       );
       const rebuiltStats = buildStatsFromLogs(normalizedLogs, normalized);
@@ -2713,7 +2806,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         await AsyncStorage.setItem(STORAGE_KEYS.stats, statsJson);
       }
       setLogs(normalizedLogs);
-      if (logsChanged) {
+      if (logsChanged || logsMigrated) {
         await AsyncStorage.setItem(
           STORAGE_KEYS.logs,
           JSON.stringify(normalizedLogs)
@@ -2724,6 +2817,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         : DEFAULT_SETTINGS;
       setSettings(parsedSettings);
       setLanguage(parsedSettings.language || DEFAULT_SETTINGS.language);
+      setSportSortMode(
+        parsedSettings.sportSortMode || DEFAULT_SETTINGS.sportSortMode
+      );
       if (InstaControl?.setAppLanguage) {
         InstaControl.setAppLanguage(
           parsedSettings.language || DEFAULT_SETTINGS.language
@@ -2947,6 +3043,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       JSON.stringify(nextSettings),
       t("menu.settings")
     );
+  };
+
+  const updateSportSortMode = async (nextMode) => {
+    setSportSortMode(nextMode);
+    if (settings?.sportSortMode === nextMode) {
+      return;
+    }
+    await saveSettings({ ...settings, sportSortMode: nextMode });
   };
 
   const updateDayStat = (sportId, updater) => {
@@ -3375,6 +3479,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setWorkoutHistory([]);
     setWorkoutDetailId(null);
     setLanguage(DEFAULT_SETTINGS.language);
+    setSportSortMode(DEFAULT_SETTINGS.sportSortMode);
     setSelectedSportId(null);
     setStatsSportId(null);
     setStatsDayKey(null);
@@ -3969,6 +4074,70 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setPrefaceDelayInput(String(delay));
     setIsPrefaceSettingsOpen(true);
   };
+
+  const handleHomeScroll = useCallback((event) => {
+    const offset = event?.nativeEvent?.contentOffset?.y;
+    if (Number.isFinite(offset)) {
+      homeScrollYRef.current = offset;
+    }
+  }, []);
+
+  const handleScreenTimeDetailsScroll = useCallback((event) => {
+    const offset = event?.nativeEvent?.contentOffset?.y;
+    if (Number.isFinite(offset)) {
+      screenTimeDetailsScrollYRef.current = offset;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isScreenTimeDetailsOpen) {
+      return;
+    }
+    const node = screenTimeDetailsScrollRef.current;
+    if (!node || typeof node.scrollTo !== "function") {
+      return;
+    }
+    const y = screenTimeDetailsScrollYRef.current || 0;
+    const raf = requestAnimationFrame(() => {
+      node.scrollTo({ y, animated: false });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [isScreenTimeDetailsOpen]);
+
+  useEffect(() => {
+    if (
+      isScreenTimeDetailsOpen ||
+      isSettingsOpen ||
+      overallStatsOpen ||
+      isPrefaceSettingsOpen ||
+      isAppsSettingsOpen ||
+      selectedSportId ||
+      statsSportId ||
+      statsDayKey ||
+      overallDayKey
+    ) {
+      return;
+    }
+    const node = homeScrollRef.current;
+    if (!node || typeof node.scrollTo !== "function") {
+      return;
+    }
+    const y = homeScrollYRef.current || 0;
+    const raf = requestAnimationFrame(() => {
+      node.scrollTo({ y, animated: false });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [
+    isScreenTimeDetailsOpen,
+    isSettingsOpen,
+    overallStatsOpen,
+    isPrefaceSettingsOpen,
+    isAppsSettingsOpen,
+    selectedSportId,
+    statsSportId,
+    statsDayKey,
+    overallDayKey,
+  ]);
 
   const openHome = () => {
     setIsSettingsOpen(false);
@@ -7637,8 +7806,13 @@ const getSpeechLocale = () => {
     return (
       <SafeAreaView style={styles.container}>
         <ScrollView
-          ref={scrollViewRef}
+          ref={(node) => {
+            scrollViewRef.current = node;
+            screenTimeDetailsScrollRef.current = node;
+          }}
           contentContainerStyle={styles.scrollContent}
+          onScroll={handleScreenTimeDetailsScroll}
+          scrollEventThrottle={16}
         >
           <View style={styles.headerRow}>
             <Pressable
@@ -8950,8 +9124,13 @@ const getSpeechLocale = () => {
   return (
     <SafeAreaView style={styles.container}>
         <ScrollView
-          ref={scrollViewRef}
+          ref={(node) => {
+            scrollViewRef.current = node;
+            homeScrollRef.current = node;
+          }}
           contentContainerStyle={styles.scrollContent}
+          onScroll={handleHomeScroll}
+          scrollEventThrottle={16}
           onTouchStart={() => {
           if (infoHint) {
             setInfoHint(null);
@@ -9194,7 +9373,7 @@ const getSpeechLocale = () => {
               styles.sortButton,
               sportSortMode === "alpha" && styles.sortButtonActive,
             ]}
-            onPress={() => setSportSortMode("alpha")}
+            onPress={() => updateSportSortMode("alpha")}
           >
             <Text
               style={[
@@ -9210,7 +9389,7 @@ const getSpeechLocale = () => {
               styles.sortButton,
               sportSortMode === "recent" && styles.sortButtonActive,
             ]}
-            onPress={() => setSportSortMode("recent")}
+            onPress={() => updateSportSortMode("recent")}
           >
             <Text
               style={[
@@ -9226,7 +9405,7 @@ const getSpeechLocale = () => {
               styles.sortButton,
               sportSortMode === "manual" && styles.sortButtonActive,
             ]}
-            onPress={() => setSportSortMode("manual")}
+            onPress={() => updateSportSortMode("manual")}
           >
             <Text
               style={[

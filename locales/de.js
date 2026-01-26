@@ -415,6 +415,125 @@ const weekdayLabels = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 const monthLabels = ["Januar", "Februar", "M\u00e4rz", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 const numberWords = ["null", "eins", "ein", "zwei", "drei", "vier", "funf", "sechs", "sieben", "acht", "neun", "zehn", "elf", "zwolf", "dreizehn", "vierzehn", "funfzehn", "sechzehn", "siebzehn", "achtzehn", "neunzehn", "zwanzig"];
 
-export { weekdayLabels, monthLabels, numberWords };
+const funFacts = [
+  {
+    id: "funfact-001",
+    text: "Wusstest du schon? Schon 10 Minuten Bewegung k\u00f6nnen deine Stimmung messbar verbessern.",
+  },
+  {
+    id: "funfact-002",
+    text: "Wusstest du schon? Regelm\u00e4\u00dfiger Sport erh\u00f6ht deine Lebenserwartung \u2013 unabh\u00e4ngig vom Tempo.",
+  },
+  {
+    id: "funfact-003",
+    text: "Wusstest du schon? Dein K\u00f6rper wird st\u00e4rker, noch bevor du es siehst.",
+  },
+  {
+    id: "funfact-004",
+    text: "Wusstest du schon? Bewegung senkt Stress effektiver als viele Entspannungstechniken.",
+  },
+  {
+    id: "funfact-005",
+    text: "Wusstest du schon? Konsistenz schl\u00e4gt Intensit\u00e4t \u2013 jeder kleine Schritt z\u00e4hlt.",
+  },
+  {
+    id: "funfact-006",
+    text: "Wusstest du schon? Sport verbessert deinen Schlaf bereits nach wenigen Tagen.",
+  },
+  {
+    id: "funfact-007",
+    text: "Wusstest du schon? Dein Gehirn liebt Bewegung \u2013 sie steigert Konzentration und Fokus.",
+  },
+  {
+    id: "funfact-008",
+    text: "Wusstest du schon? Nach dem Training f\u00fchlst du dich fast immer besser als davor.",
+  },
+  {
+    id: "funfact-009",
+    text: "Wusstest du schon? Muskeln wachsen in der Pause \u2013 Regeneration ist Teil des Erfolgs.",
+  },
+  {
+    id: "funfact-010",
+    text: "Wusstest du schon? Bewegung st\u00e4rkt dein Immunsystem langfristig.",
+  },
+  {
+    id: "funfact-011",
+    text: "Wusstest du schon? Du musst nicht motiviert sein, um anzufangen \u2013 Bewegung erzeugt Motivation.",
+  },
+  {
+    id: "funfact-012",
+    text: "Wusstest du schon? Jeder Trainingsreiz ist ein Signal an deinen K\u00f6rper: Werde st\u00e4rker.",
+  },
+  {
+    id: "funfact-013",
+    text: "Wusstest du schon? Sport hilft nachweislich gegen Angst und innere Unruhe.",
+  },
+  {
+    id: "funfact-014",
+    text: "Wusstest du schon? Heute aktiv sein macht morgen leichter.",
+  },
+  {
+    id: "funfact-015",
+    text: "Wusstest du schon? Schon leichte Bewegung reduziert das Risiko vieler Krankheiten.",
+  },
+  {
+    id: "funfact-016",
+    text: "Wusstest du schon? Dein K\u00f6rper passt sich an \u2013 egal, auf welchem Level du startest.",
+  },
+  {
+    id: "funfact-017",
+    text: "Wusstest du schon? Training verbessert dein Selbstvertrauen, nicht nur deine Fitness.",
+  },
+  {
+    id: "funfact-018",
+    text: "Wusstest du schon? Du verbrennst Kalorien auch nach dem Training weiter.",
+  },
+  {
+    id: "funfact-019",
+    text: "Wusstest du schon? Bewegung macht dich belastbarer \u2013 k\u00f6rperlich und mental.",
+  },
+  {
+    id: "funfact-020",
+    text: "Wusstest du schon? Jeder Trainingsstart ist ein Sieg \u00fcber Ausreden.",
+  },
+  {
+    id: "funfact-021",
+    text: "Wusstest du schon? Dein Herz wird st\u00e4rker mit jedem aktiven Tag.",
+  },
+  {
+    id: "funfact-022",
+    text: "Wusstest du schon? Fortschritt ist nicht linear \u2013 Dranbleiben ist der Schl\u00fcssel.",
+  },
+  {
+    id: "funfact-023",
+    text: "Wusstest du schon? Sport setzt Gl\u00fcckshormone frei \u2013 ganz ohne Nebenwirkungen.",
+  },
+  {
+    id: "funfact-024",
+    text: "Wusstest du schon? Mehr Bewegung = mehr Energie im Alltag.",
+  },
+  {
+    id: "funfact-025",
+    text: "Wusstest du schon? Dein K\u00f6rper ist f\u00fcr Bewegung gemacht \u2013 nicht f\u00fcr Stillstand.",
+  },
+  {
+    id: "funfact-026",
+    text: "Wusstest du schon? Training formt Gewohnheiten, Gewohnheiten formen dein Leben.",
+  },
+  {
+    id: "funfact-027",
+    text: "Wusstest du schon? Du trainierst nicht nur f\u00fcr heute, sondern f\u00fcr dein zuk\u00fcnftiges Ich.",
+  },
+  {
+    id: "funfact-028",
+    text: "Wusstest du schon? Jeder Schritt z\u00e4hlt \u2013 auch der langsame.",
+  },
+  {
+    id: "funfact-029",
+    text: "Wusstest du schon? Bewegung ist eine Investition mit 100 % Rendite.",
+  },
+];
+
+export { weekdayLabels, monthLabels, numberWords, funFacts };
 
 export default de;

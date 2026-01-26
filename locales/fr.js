@@ -406,6 +406,125 @@ const weekdayLabels = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 const monthLabels = ["Janvier", "F\u00e9vrier", "Mars", "Avril", "Mai", "Juin", "Juillet", "Ao\u00fbt", "Septembre", "Octobre", "Novembre", "D\u00e9cembre"];
 const numberWords = ["zero", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix", "onze", "douze", "treize", "quatorze", "quinze", "seize", "dixsept", "dixhuit", "dixneuf", "vingt"];
 
-export { weekdayLabels, monthLabels, numberWords };
+const funFacts = [
+  {
+    id: "funfact-001",
+    text: "Le savais-tu ? Seulement 10 minutes de mouvement peuvent am\u00e9liorer ton humeur de fa\u00e7on mesurable.",
+  },
+  {
+    id: "funfact-002",
+    text: "Le savais-tu ? L'exercice r\u00e9gulier augmente ton esp\u00e9rance de vie, quel que soit le rythme.",
+  },
+  {
+    id: "funfact-003",
+    text: "Le savais-tu ? Ton corps devient plus fort avant m\u00eame que tu ne le voies.",
+  },
+  {
+    id: "funfact-004",
+    text: "Le savais-tu ? Le mouvement r\u00e9duit le stress plus efficacement que beaucoup de techniques de relaxation.",
+  },
+  {
+    id: "funfact-005",
+    text: "Le savais-tu ? La constance bat l'intensit\u00e9 \u2014 chaque petit pas compte.",
+  },
+  {
+    id: "funfact-006",
+    text: "Le savais-tu ? Le sport am\u00e9liore ton sommeil apr\u00e8s seulement quelques jours.",
+  },
+  {
+    id: "funfact-007",
+    text: "Le savais-tu ? Ton cerveau adore bouger \u2014 cela booste la concentration et le focus.",
+  },
+  {
+    id: "funfact-008",
+    text: "Le savais-tu ? Apr\u00e8s l'entra\u00eenement, tu te sens presque toujours mieux qu'avant.",
+  },
+  {
+    id: "funfact-009",
+    text: "Le savais-tu ? Les muscles grandissent pendant la pause \u2014 la r\u00e9cup\u00e9ration fait partie du succ\u00e8s.",
+  },
+  {
+    id: "funfact-010",
+    text: "Le savais-tu ? Le mouvement renforce ton syst\u00e8me immunitaire sur le long terme.",
+  },
+  {
+    id: "funfact-011",
+    text: "Le savais-tu ? Tu n'as pas besoin d'\u00eatre motiv\u00e9 pour commencer \u2014 le mouvement cr\u00e9e la motivation.",
+  },
+  {
+    id: "funfact-012",
+    text: "Le savais-tu ? Chaque stimulus d'entra\u00eenement est un signal pour ton corps : deviens plus fort.",
+  },
+  {
+    id: "funfact-013",
+    text: "Le savais-tu ? Le sport aide de fa\u00e7on prouv\u00e9e contre l'anxi\u00e9t\u00e9 et l'agitation int\u00e9rieure.",
+  },
+  {
+    id: "funfact-014",
+    text: "Le savais-tu ? \u00catre actif aujourd'hui rend demain plus facile.",
+  },
+  {
+    id: "funfact-015",
+    text: "Le savais-tu ? M\u00eame un mouvement l\u00e9ger r\u00e9duit le risque de nombreuses maladies.",
+  },
+  {
+    id: "funfact-016",
+    text: "Le savais-tu ? Ton corps s'adapte, peu importe le niveau de d\u00e9part.",
+  },
+  {
+    id: "funfact-017",
+    text: "Le savais-tu ? L'entra\u00eenement am\u00e9liore ta confiance en toi, pas seulement ta forme.",
+  },
+  {
+    id: "funfact-018",
+    text: "Le savais-tu ? Tu continues \u00e0 br\u00fbler des calories m\u00eame apr\u00e8s l'entra\u00eenement.",
+  },
+  {
+    id: "funfact-019",
+    text: "Le savais-tu ? Le mouvement te rend plus r\u00e9sistant \u2014 physiquement et mentalement.",
+  },
+  {
+    id: "funfact-020",
+    text: "Le savais-tu ? Chaque d\u00e9but d'entra\u00eenement est une victoire sur les excuses.",
+  },
+  {
+    id: "funfact-021",
+    text: "Le savais-tu ? Ton c\u0153ur devient plus fort \u00e0 chaque journ\u00e9e active.",
+  },
+  {
+    id: "funfact-022",
+    text: "Le savais-tu ? Le progr\u00e8s n'est pas lin\u00e9aire \u2014 pers\u00e9v\u00e9rer est la cl\u00e9.",
+  },
+  {
+    id: "funfact-023",
+    text: "Le savais-tu ? Le sport lib\u00e8re des hormones du bonheur \u2014 sans effets secondaires.",
+  },
+  {
+    id: "funfact-024",
+    text: "Le savais-tu ? Plus de mouvement = plus d'\u00e9nergie au quotidien.",
+  },
+  {
+    id: "funfact-025",
+    text: "Le savais-tu ? Ton corps est fait pour bouger \u2014 pas pour l'immobilit\u00e9.",
+  },
+  {
+    id: "funfact-026",
+    text: "Le savais-tu ? L'entra\u00eenement fa\u00e7onne des habitudes, les habitudes fa\u00e7onnent ta vie.",
+  },
+  {
+    id: "funfact-027",
+    text: "Le savais-tu ? Tu ne t'entra\u00eenes pas seulement pour aujourd'hui, mais pour ton futur toi.",
+  },
+  {
+    id: "funfact-028",
+    text: "Le savais-tu ? Chaque pas compte \u2014 m\u00eame le plus lent.",
+  },
+  {
+    id: "funfact-029",
+    text: "Le savais-tu ? Le mouvement est un investissement avec un retour de 100 %.",
+  },
+];
+
+export { weekdayLabels, monthLabels, numberWords, funFacts };
 
 export default fr;
