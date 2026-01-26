@@ -8015,14 +8015,21 @@ const getSpeechLocale = () => {
               onPress={() => setStatsSportId(selectedSport.id)}
             >
               <View style={styles.counterRow}>
-                <View style={styles.counterBlock}>
-                  <Text style={styles.counterLabel}>{t("label.today")}</Text>
-                  <Text style={styles.counterValueSmall}>
+                <View style={[styles.counterBlock, styles.statsCounterBlock]}>
+                  <Text style={[styles.counterLabel, styles.statsCounterLabel]}>
+                    {t("label.today")}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.counterValueSmall,
+                      styles.statsCounterValueSmall,
+                    ]}
+                  >
                     {selectedSport.type === "reps"
                       ? `${todayStats.reps}`
                       : formatSeconds(todayStats.seconds || 0)}
                   </Text>
-                  <Text style={styles.counterUnit}>
+                  <Text style={[styles.counterUnit, styles.statsCounterUnit]}>
                     {selectedSport.type === "reps"
                       ? repsShort
                       : t("label.timeUnit")}
@@ -8099,10 +8106,19 @@ const getSpeechLocale = () => {
                   keyboardType="number-pad"
                 />
               <Pressable
-                style={[styles.primaryButton, styles.manualEntryButton]}
+                style={[
+                  styles.primaryButton,
+                  styles.detailPrimaryButton,
+                  styles.manualEntryButton,
+                ]}
                 onPress={handleManualRepsLog}
               >
-                <Text style={styles.primaryButtonText}>
+                <Text
+                  style={[
+                    styles.primaryButtonText,
+                    styles.detailPrimaryButtonText,
+                  ]}
+                >
                   {t("label.manualRepsEntryButton")}
                 </Text>
               </Pressable>
@@ -8169,10 +8185,19 @@ const getSpeechLocale = () => {
               {t("label.weightEntryPreview")}: {formatScreenTime(weightPreviewSeconds)}
             </Text>
             <Pressable
-              style={[styles.primaryButton, styles.fullWidthButton]}
+              style={[
+                styles.primaryButton,
+                styles.detailPrimaryButton,
+                styles.fullWidthButton,
+              ]}
               onPress={logWeightSet}
             >
-              <Text style={styles.primaryButtonText}>
+              <Text
+                style={[
+                  styles.primaryButtonText,
+                  styles.detailPrimaryButtonText,
+                ]}
+              >
                 {t("label.weightEntryButton")}
               </Text>
             </Pressable>
@@ -8211,12 +8236,32 @@ const getSpeechLocale = () => {
             </Text>
             <View style={styles.timerRow}>
               {!running ? (
-                <Pressable style={styles.primaryButton} onPress={handleStart}>
-                  <Text style={styles.primaryButtonText}>{t("label.start")}</Text>
+                <Pressable
+                  style={[styles.primaryButton, styles.detailPrimaryButton]}
+                  onPress={handleStart}
+                >
+                  <Text
+                    style={[
+                      styles.primaryButtonText,
+                      styles.detailPrimaryButtonText,
+                    ]}
+                  >
+                    {t("label.start")}
+                  </Text>
                 </Pressable>
               ) : (
-                <Pressable style={styles.dangerButton} onPress={handleStop}>
-                  <Text style={styles.primaryButtonText}>{t("label.stop")}</Text>
+                <Pressable
+                  style={[styles.dangerButton, styles.detailDangerButton]}
+                  onPress={handleStop}
+                >
+                  <Text
+                    style={[
+                      styles.primaryButtonText,
+                      styles.detailPrimaryButtonText,
+                    ]}
+                  >
+                    {t("label.stop")}
+                  </Text>
                 </Pressable>
               )}
             </View>
@@ -8285,10 +8330,19 @@ const getSpeechLocale = () => {
                 {t("label.distanceKmHint")}
               </Text>
               <Pressable
-                style={[styles.primaryButton, styles.manualEntryButton]}
+                style={[
+                  styles.primaryButton,
+                  styles.detailPrimaryButton,
+                  styles.manualEntryButton,
+                ]}
                 onPress={handleManualTimeLog}
               >
-                <Text style={styles.primaryButtonText}>
+                <Text
+                  style={[
+                    styles.primaryButtonText,
+                    styles.detailPrimaryButtonText,
+                  ]}
+                >
                   {t("label.manualTimeEntryButton")}
                 </Text>
               </Pressable>
@@ -9888,7 +9942,9 @@ const styles = StyleSheet.create({
     paddingBottom: 220,
   },
   sportDetailScrollContent: {
-    paddingBottom: 24,
+    paddingTop: 6,
+    paddingHorizontal: 16,
+    paddingBottom: 120,
   },
   title: {
     fontSize: 28,
@@ -10275,18 +10331,24 @@ const styles = StyleSheet.create({
   },
   trackingArea: {
     flex: 1,
-    margin: 16,
-    borderRadius: 16,
+    marginTop: 12,
+    marginBottom: 16,
+    borderRadius: 18,
     backgroundColor: COLORS.card,
+    borderWidth: 1,
+    borderColor: "rgba(148, 163, 184, 0.2)",
     alignItems: "center",
     justifyContent: "center",
-    padding: 20,
+    padding: 24,
   },
   weightEntryArea: {
-    margin: 16,
-    borderRadius: 16,
+    marginTop: 12,
+    marginBottom: 16,
+    borderRadius: 18,
     backgroundColor: COLORS.card,
-    padding: 16,
+    borderWidth: 1,
+    borderColor: "rgba(148, 163, 184, 0.2)",
+    padding: 18,
     alignItems: "stretch",
   },
   weightFieldsRow: {
@@ -10354,10 +10416,11 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   counterValue: {
-    fontSize: 56,
+    fontSize: 54,
     color: COLORS.text,
     fontWeight: "700",
     textAlign: "center",
+    letterSpacing: 0.4,
   },
   plusSign: {
     fontSize: 72,
@@ -10367,6 +10430,8 @@ const styles = StyleSheet.create({
   helperText: {
     marginTop: 12,
     color: COLORS.muted,
+    textAlign: "center",
+    lineHeight: 18,
   },
   trackingHelperText: {
     textAlign: "center",
@@ -10379,12 +10444,12 @@ const styles = StyleSheet.create({
   },
   voiceButton: {
     width: "100%",
-    borderRadius: 16,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.25)",
-    backgroundColor: "rgba(15, 23, 42, 0.7)",
-    paddingVertical: 14,
-    paddingHorizontal: 18,
+    borderColor: "rgba(148, 163, 184, 0.3)",
+    backgroundColor: "rgba(15, 23, 42, 0.65)",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
@@ -10425,15 +10490,22 @@ const styles = StyleSheet.create({
     maxWidth: "70%",
   },
   manualEntryContainer: {
-    marginTop: 16,
+    marginTop: 18,
     width: "100%",
     alignItems: "stretch",
+    backgroundColor: "rgba(15, 23, 42, 0.55)",
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "rgba(148, 163, 184, 0.2)",
   },
   manualEntryLabel: {
     color: COLORS.muted,
-    fontSize: 12,
-    fontWeight: "600",
-    marginBottom: 6,
+    fontSize: 11,
+    fontWeight: "700",
+    marginBottom: 8,
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
   },
   manualEntryButton: {
     alignSelf: "stretch",
@@ -10444,6 +10516,7 @@ const styles = StyleSheet.create({
     color: COLORS.muted,
     fontSize: 12,
     textAlign: "center",
+    lineHeight: 16,
   },
   manualRepsInput: {
     textAlign: "center",
@@ -10457,10 +10530,11 @@ const styles = StyleSheet.create({
   },
   manualTimeInputLabel: {
     color: COLORS.muted,
-    fontSize: 10,
-    fontWeight: "600",
+    fontSize: 11,
+    fontWeight: "700",
     marginBottom: 4,
     textTransform: "uppercase",
+    letterSpacing: 0.4,
   },
   manualTimeInput: {
     marginBottom: 0,
@@ -10564,7 +10638,8 @@ const styles = StyleSheet.create({
   counterRow: {
     flexDirection: "row",
     gap: 8,
-    marginBottom: 8,
+    marginBottom: 0,
+    justifyContent: "center",
   },
   counterBlock: {
     flex: 1,
@@ -10573,11 +10648,22 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     alignItems: "center",
   },
+  statsCounterBlock: {
+    maxWidth: 220,
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    backgroundColor: "rgba(255, 255, 255, 0.96)",
+  },
   counterLabel: {
     color: "#1f1b16",
     fontSize: 10,
     textTransform: "uppercase",
     letterSpacing: 0.6,
+  },
+  statsCounterLabel: {
+    fontSize: 11,
+    letterSpacing: 0.8,
   },
   counterValueSmall: {
     color: "#14110c",
@@ -10585,21 +10671,28 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginTop: 2,
   },
+  statsCounterValueSmall: {
+    fontSize: 22,
+  },
   counterUnit: {
     color: "#3a332a",
     fontSize: 10,
     marginTop: 2,
+  },
+  statsCounterUnit: {
+    fontSize: 11,
   },
   rateLabel: {
     color: COLORS.muted,
     marginBottom: 6,
   },
   statsCard: {
-    marginHorizontal: 16,
-    marginTop: 6,
-    backgroundColor: COLORS.surface,
-    borderRadius: 8,
-    padding: 10,
+    marginTop: 8,
+    backgroundColor: COLORS.card,
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "rgba(148, 163, 184, 0.25)",
   },
   statsActionsRow: {
     flexDirection: "row",
@@ -11040,6 +11133,11 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: "center",
   },
+  detailPrimaryButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+  },
   trackButtonTop: {
     alignSelf: "stretch",
     width: "100%",
@@ -11053,6 +11151,10 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontWeight: "600",
     fontSize: 11,
+  },
+  detailPrimaryButtonText: {
+    fontSize: 13,
+    letterSpacing: 0.2,
   },
   addSportButton: {
     backgroundColor: "rgba(245, 158, 11, 0.18)",
@@ -11087,11 +11189,13 @@ const styles = StyleSheet.create({
   },
   editSportButton: {
     alignSelf: "center",
-    marginTop: 6,
-    paddingVertical: 4,
-    paddingHorizontal: 10,
+    marginTop: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
     borderRadius: 999,
-    backgroundColor: COLORS.cardAlt,
+    backgroundColor: "rgba(30, 41, 59, 0.85)",
+    borderWidth: 1,
+    borderColor: "rgba(148, 163, 184, 0.25)",
   },
   editSportButtonContent: {
     flexDirection: "row",
@@ -11101,7 +11205,8 @@ const styles = StyleSheet.create({
   editSportButtonText: {
     color: COLORS.text,
     fontWeight: "600",
-    fontSize: 11,
+    fontSize: 12,
+    letterSpacing: 0.2,
   },
   widgetButtonText: {
     textAlign: "center",
@@ -11113,6 +11218,11 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 8,
     borderRadius: 5,
+  },
+  detailDangerButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 10,
   },
   addCard: {
     backgroundColor: COLORS.cardAlt,
@@ -11744,7 +11854,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     right: 0,
-    bottom: 4,
+    bottom: 14,
     alignItems: "center",
     zIndex: 6,
   },
