@@ -354,6 +354,7 @@ const RAW_STANDARD_SPORTS = [
     aliases: ["Chest Press", "Maschinen-Bankdr?cken"],
     icon: "???",
     type: "reps",
+    weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 4,
     category: "Ger?te & Maschinen",
@@ -370,6 +371,7 @@ const RAW_STANDARD_SPORTS = [
     aliases: ["Pec Deck", "Brust-Fly Maschine"],
     icon: "???",
     type: "reps",
+    weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 3,
     category: "Ger?te & Maschinen",
@@ -386,6 +388,7 @@ const RAW_STANDARD_SPORTS = [
     aliases: ["Rear Delt Machine"],
     icon: "???",
     type: "reps",
+    weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 3,
     category: "Ger?te & Maschinen",
@@ -402,6 +405,7 @@ const RAW_STANDARD_SPORTS = [
     aliases: ["Leg Extension"],
     icon: "??",
     type: "reps",
+    weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 3,
     category: "Ger?te & Maschinen",
@@ -418,6 +422,7 @@ const RAW_STANDARD_SPORTS = [
     aliases: ["Leg Curl"],
     icon: "??",
     type: "reps",
+    weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 3,
     category: "Ger?te & Maschinen",
@@ -434,6 +439,7 @@ const RAW_STANDARD_SPORTS = [
     aliases: ["Ab Crunch Machine"],
     icon: "???",
     type: "reps",
+    weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 3,
     category: "Ger?te & Maschinen",
@@ -450,6 +456,7 @@ const RAW_STANDARD_SPORTS = [
     aliases: ["Back Extension Machine"],
     icon: "???",
     type: "reps",
+    weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 3,
     category: "Ger?te & Maschinen",
@@ -466,6 +473,7 @@ const RAW_STANDARD_SPORTS = [
     aliases: ["Biceps Curl Machine", "Preacher Curl Machine"],
     icon: "???",
     type: "reps",
+    weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 3,
     category: "Ger?te & Maschinen",
@@ -482,6 +490,7 @@ const RAW_STANDARD_SPORTS = [
     aliases: ["Triceps Extension Machine"],
     icon: "???",
     type: "reps",
+    weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 3,
     category: "Ger?te & Maschinen",
@@ -498,6 +507,7 @@ const RAW_STANDARD_SPORTS = [
     aliases: ["Seilzug", "Cable Machine"],
     icon: "???",
     type: "reps",
+    weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 3,
     category: "Ger?te & Maschinen",
@@ -514,6 +524,7 @@ const RAW_STANDARD_SPORTS = [
     aliases: ["Lat Pulldown"],
     icon: "???",
     type: "reps",
+    weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 4,
     category: "Ger?te & Maschinen",
@@ -530,6 +541,7 @@ const RAW_STANDARD_SPORTS = [
     aliases: ["Seated Row Machine"],
     icon: "???",
     type: "reps",
+    weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 4,
     category: "Ger?te & Maschinen",
@@ -546,6 +558,7 @@ const RAW_STANDARD_SPORTS = [
     aliases: ["Machine Shoulder Press"],
     icon: "???",
     type: "reps",
+    weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 4,
     category: "Ger?te & Maschinen",
@@ -562,6 +575,7 @@ const RAW_STANDARD_SPORTS = [
     aliases: ["Leg Press"],
     icon: "???",
     type: "reps",
+    weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 5,
     category: "Ger?te & Maschinen",
@@ -578,6 +592,7 @@ const RAW_STANDARD_SPORTS = [
     aliases: ["Calf Raise Machine"],
     icon: "???",
     type: "reps",
+    weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 3,
     category: "Ger?te & Maschinen",
@@ -594,6 +609,7 @@ const RAW_STANDARD_SPORTS = [
     aliases: ["Hip Abductor/Adductor Machine"],
     icon: "???",
     type: "reps",
+    weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 3,
     category: "Ger?te & Maschinen",
@@ -613,6 +629,7 @@ const RAW_STANDARD_SPORTS = [
     aliases: ["Curl", "Kurzhantelcurls", "Langhantelcurls"],
     icon: "??",
     type: "reps",
+    weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 3,
     category: "Freihanteln",
@@ -629,6 +646,7 @@ const RAW_STANDARD_SPORTS = [
     aliases: ["Triceps Extension", "French Press"],
     icon: "??",
     type: "reps",
+    weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 3,
     category: "Freihanteln",
@@ -645,6 +663,7 @@ const RAW_STANDARD_SPORTS = [
     aliases: ["Lateral Raises"],
     icon: "??",
     type: "reps",
+    weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 3,
     category: "Freihanteln",
@@ -661,6 +680,7 @@ const RAW_STANDARD_SPORTS = [
     aliases: ["Row", "Bent-Over Row"],
     icon: "???",
     type: "reps",
+    weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 5,
     category: "Freihanteln",
@@ -677,6 +697,7 @@ const RAW_STANDARD_SPORTS = [
     aliases: ["Squat"],
     icon: "???",
     type: "reps",
+    weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 6,
     category: "Freihanteln",
@@ -693,6 +714,7 @@ const RAW_STANDARD_SPORTS = [
     aliases: ["Deadlift"],
     icon: "???",
     type: "reps",
+    weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 6,
     category: "Freihanteln",
@@ -709,6 +731,7 @@ const RAW_STANDARD_SPORTS = [
     aliases: ["Bench Press"],
     icon: "???",
     type: "reps",
+    weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 5,
     category: "Freihanteln",
@@ -725,6 +748,7 @@ const RAW_STANDARD_SPORTS = [
     aliases: ["Overhead Press", "Military Press"],
     icon: "???",
     type: "reps",
+    weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 5,
     category: "Freihanteln",
@@ -2360,6 +2384,8 @@ function AppContent() {
   const [notificationsGranted, setNotificationsGranted] = useState(false);
   const [grayscalePermissionsPrompted, setGrayscalePermissionsPrompted] =
     useState(false);
+  const [grayscalePermissionGranted, setGrayscalePermissionGranted] =
+    useState(true);
   const [permissionsPanelOpen, setPermissionsPanelOpen] = useState(false);
   const [permissionsPanelTouched, setPermissionsPanelTouched] = useState(false);
   const [permissionsCheckTick, setPermissionsCheckTick] = useState(0);
@@ -3699,6 +3725,22 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     return !!hasAccess;
   };
 
+  const checkGrayscalePermission = useCallback(async () => {
+    if (Platform.OS !== "android" || !InstaControl?.canWriteSecureSettings) {
+      setGrayscalePermissionGranted(true);
+      return true;
+    }
+    try {
+      const canWrite = await InstaControl.canWriteSecureSettings();
+      setGrayscalePermissionGranted(!!canWrite);
+      return !!canWrite;
+    } catch (error) {
+      console.warn("canWriteSecureSettings failed", error);
+      setGrayscalePermissionGranted(false);
+      return false;
+    }
+  }, []);
+
   const refreshUsageState = async () => {
     if (!InstaControl?.getUsageState) {
       return;
@@ -3842,7 +3884,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     checkAccessibility();
     checkUsageAccess();
     refreshNotificationPermission();
-  }, [isSettingsOpen, statsSportId]);
+    if (settings.grayscaleRestrictedApps) {
+      checkGrayscalePermission();
+    }
+  }, [isSettingsOpen, statsSportId, settings.grayscaleRestrictedApps, checkGrayscalePermission]);
 
   useEffect(() => {
     if (!isAppsSettingsOpen) {
@@ -3858,6 +3903,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       refreshNotificationPermission();
     }
   }, [permissionsPanelOpen]);
+
+  useEffect(() => {
+    if (!settings.grayscaleRestrictedApps) {
+      setGrayscalePermissionGranted(true);
+      return;
+    }
+    checkGrayscalePermission();
+  }, [settings.grayscaleRestrictedApps, checkGrayscalePermission]);
 
   useEffect(() => {
     if (needsAccessibility === false && accessibilityDisclosureVisible) {
@@ -4030,6 +4083,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       if (InstaControl?.setGrayscaleRestrictedApps) {
         InstaControl.setGrayscaleRestrictedApps(false);
       }
+      setGrayscalePermissionGranted(true);
       await saveSettings(nextSettings);
       return;
     }
@@ -4040,6 +4094,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       } catch (error) {
         console.warn("canWriteSecureSettings failed", error);
       }
+      setGrayscalePermissionGranted(!!canWrite);
       if (!canWrite) {
         if (!grayscalePermissionsPrompted) {
           Alert.alert(
@@ -4298,16 +4353,36 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     if (type === "home") {
       return (
         <View style={styles.mainNavIconWrapper}>
+          <View style={styles.navIconTrophyRow}>
+            <View
+              style={[
+                styles.navIconTrophyHandle,
+                { borderColor: strokeColor },
+              ]}
+            />
+            <View
+              style={[
+                styles.navIconTrophyCup,
+                { borderColor: strokeColor },
+              ]}
+            />
+            <View
+              style={[
+                styles.navIconTrophyHandle,
+                { borderColor: strokeColor },
+              ]}
+            />
+          </View>
           <View
             style={[
-              styles.navIconRoof,
-              { borderColor: strokeColor, borderBottomColor: "transparent" },
+              styles.navIconTrophyStem,
+              { backgroundColor: strokeColor },
             ]}
           />
           <View
             style={[
-              styles.navIconHouse,
-              { borderColor: strokeColor, backgroundColor: "transparent" },
+              styles.navIconTrophyBase,
+              { backgroundColor: strokeColor },
             ]}
           />
         </View>
@@ -6382,7 +6457,11 @@ const getSpeechLocale = () => {
       setDismissedMotivationActionId(actionItem.id);
     }
     markMotivationActionCompleted(actionItem.id);
-    actionItem.action();
+    try {
+      actionItem.action();
+    } catch (error) {
+      console.warn("Motivation action failed", actionItem?.id, error);
+    }
   };
 
   useEffect(() => {
@@ -7037,13 +7116,14 @@ const getSpeechLocale = () => {
       usagePermissionsPrompted ||
       accessibilityDisclosureAccepted);
 
-  const prevMissingPermissionsRef = useRef(missingPermissions);
+  const prevShowMotivationBlockRef = useRef(showMotivationBlock);
   useEffect(() => {
-    if (prevMissingPermissionsRef.current !== missingPermissions) {
+    if (prevShowMotivationBlockRef.current && !showMotivationBlock) {
       setPermissionsPanelTouched(false);
+      setPermissionsPanelOpen(false);
     }
-    prevMissingPermissionsRef.current = missingPermissions;
-  }, [missingPermissions]);
+    prevShowMotivationBlockRef.current = showMotivationBlock;
+  }, [showMotivationBlock]);
 
   useEffect(() => {
     if (permissionsPanelTouched || !showMotivationBlock) {
@@ -9059,6 +9139,23 @@ const getSpeechLocale = () => {
             <Text style={styles.helperText}>
               {t("label.grayscaleRestrictedAppsHint")}
             </Text>
+            {settings.grayscaleRestrictedApps &&
+            !grayscalePermissionGranted &&
+            Platform.OS === "android" ? (
+              <View style={styles.grayscalePermissionNotice}>
+                <Text style={styles.helperText}>
+                  {t("label.grayscalePermissionBody")}
+                </Text>
+                <Pressable
+                  style={styles.secondaryButton}
+                  onPress={openAccessibilitySettingsDirect}
+                >
+                  <Text style={styles.secondaryButtonText}>
+                    {t("label.openAccessibilitySettings")}
+                  </Text>
+                </Pressable>
+              </View>
+            ) : null}
           </View>
           <View style={styles.settingsDivider} />
           <Text style={styles.settingsSectionTitle}>
@@ -9652,13 +9749,13 @@ const getSpeechLocale = () => {
                           style={styles.iconAction}
                           onPress={() => setStatsSportId(sport.id)}
                         >
-                          <Text style={styles.iconActionText}>📊</Text>
+                          <ActionGlyph type="stats" color={COLORS.text} />
                         </Pressable>
                         <Pressable
                           style={styles.iconAction}
                           onPress={() => openSportModal(sport)}
                         >
-                          <Text style={styles.iconActionText}>🛠</Text>
+                          <ActionGlyph type="edit" color={COLORS.text} />
                         </Pressable>
                       </View>
                       <View
@@ -9668,17 +9765,14 @@ const getSpeechLocale = () => {
                       </View>
                       <View style={styles.sportTopIconsRight}>
                         <Pressable
-                          style={[styles.iconAction, styles.iconActionWithLabel]}
+                          style={styles.iconAction}
                           onPress={() =>
                             confirmAction(t("label.confirmShow"), () =>
                               handleHideSport(sport.id, false)
                             )
                           }
                         >
-                          <Text style={styles.iconActionText}>👁</Text>
-                          <Text style={styles.iconActionLabel}>
-                            {t("label.show")}
-                          </Text>
+                          <ActionGlyph type="hide" color={COLORS.text} />
                         </Pressable>
                         {canDeleteSport(sport) ? (
                           <Pressable
@@ -9689,7 +9783,7 @@ const getSpeechLocale = () => {
                               )
                             }
                           >
-                            <Text style={styles.iconActionText}>✕</Text>
+                            <ActionGlyph type="delete" color={COLORS.text} />
                           </Pressable>
                         ) : null}
                       </View>
@@ -10116,6 +10210,36 @@ const styles = StyleSheet.create({
     borderTopWidth: 0,
     borderBottomLeftRadius: 3,
     borderBottomRightRadius: 3,
+  },
+  navIconTrophyRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 2,
+  },
+  navIconTrophyHandle: {
+    width: 4,
+    height: 6,
+    borderWidth: 2,
+    borderRadius: 3,
+  },
+  navIconTrophyCup: {
+    width: 12,
+    height: 8,
+    borderWidth: 2,
+    borderRadius: 3,
+  },
+  navIconTrophyStem: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    marginTop: 1,
+  },
+  navIconTrophyBase: {
+    width: 14,
+    height: 3,
+    borderRadius: 2,
+    marginTop: 2,
   },
   navIconDumbbellBar: {
     width: 16,
@@ -12237,6 +12361,10 @@ const styles = StyleSheet.create({
   },
   grayscaleText: {
     color: COLORS.muted,
+  },
+  grayscalePermissionNotice: {
+    marginTop: 10,
+    gap: 8,
   },
   appLabel: {
     color: COLORS.text,
