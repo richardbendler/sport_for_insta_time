@@ -17,6 +17,9 @@ const de = {
     "label.screenTimeHint": "Summe der erspielten Bildschirmzeit aus den letzten 24h.",
     "label.remaining": "Übrig",
     "label.remainingHint": "Zeit, die aktuell noch genutzt werden darf.",
+    "label.remainingToday": "Übrig heute",
+    "label.remainingTotal": "Übrig gesamt",
+    "label.remainingTotalHint": "Gesamte Restzeit inklusive Übertrag.",
     "label.screenTimeEntriesCurrent": "Screen Time Einträge (24h)",
     "label.noScreenTimeEntriesCurrent": "Keine aktiven Einträge in den letzten 24h.",
     "label.screenTimeEntriesCarryover": "Übertrag-Einträge",
@@ -24,7 +27,7 @@ const de = {
     "label.carryoverEntriesHint":
       "Das sind Einträge, die älter als 24h sind. Nach jeweils 24h wird der verbleibende Betrag halbiert.",
     "label.screenTimeEntryOriginal": "Ursprünglich",
-    "label.remainingCurrent": "Übrig (ohne Übertrag)",
+    "label.remainingCurrent": "Übrig heute",
     "label.moreInfo": "Mehr Infos",
     "label.formulaBadge": "Formel",
     "label.formulaTitle": "Aktuelle Formel",

@@ -5750,9 +5750,11 @@ const getSpeechLocale = () => {
     () => rollingScreenSecondsTotal(logs, sports),
     [logs, sports]
   );
-  const totalRemainingSeconds =
-    (usageState.remainingSeconds || 0) +
-    (usageState.carryoverSeconds || 0);
+  const totalRemainingSeconds = usageState.remainingSeconds || 0;
+  const remainingTodaySeconds = Math.max(
+    0,
+    totalRemainingSeconds - (usageState.carryoverSeconds || 0)
+  );
   const remainingBySportList = useMemo(() => {
     const entries = Object.entries(usageState.remainingBySport || {});
     return entries
@@ -6351,7 +6353,7 @@ const getSpeechLocale = () => {
         return "apps";
       }
       const usedSeconds = usageState.usedSeconds || 0;
-      const remainingSeconds = usageState.remainingSeconds || 0;
+      const remainingSeconds = remainingTodaySeconds;
       /*
       if (remainingSeconds < 10 * 60 && usedSeconds > 0) {
         return "workout";
@@ -6388,7 +6390,7 @@ const getSpeechLocale = () => {
     activeSports.length,
     highestAppUsageMinutes,
     usageState.entryCount,
-    usageState.remainingSeconds,
+    remainingTodaySeconds,
     usageState.usedSeconds,
     completedMotivationActionIdsSet,
     motivationActionMap,
@@ -8561,9 +8563,9 @@ const getSpeechLocale = () => {
               </Text>
             </View>
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>{t("label.remainingCurrent")}</Text>
+              <Text style={styles.detailLabel}>{t("label.remainingToday")}</Text>
               <Text style={styles.detailValue}>
-                {formatScreenTime(usageState.remainingSeconds || 0)}
+                {formatScreenTime(remainingTodaySeconds)}
               </Text>
             </View>
             <View style={styles.detailRow}>
@@ -8573,7 +8575,7 @@ const getSpeechLocale = () => {
               </Text>
             </View>
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>{t("label.remaining")}</Text>
+              <Text style={styles.detailLabel}>{t("label.remainingTotal")}</Text>
               <Text style={[styles.detailValue, styles.detailValueStrong]}>
                 {formatScreenTime(totalRemainingSeconds)}
               </Text>
@@ -9261,7 +9263,7 @@ const getSpeechLocale = () => {
           <View style={styles.infoCard}>
             <Text style={styles.cardTitle}>{t("label.availableToday")}</Text>
             <Text style={styles.cardValue}>
-              {Math.floor((usageState.remainingSeconds || 0) / 60)} min
+              {Math.floor(remainingTodaySeconds / 60)} min
             </Text>
             <Text style={styles.cardMeta}>
               {t("label.used")}: {Math.floor(usageState.usedSeconds / 60)} min
@@ -9953,8 +9955,8 @@ const getSpeechLocale = () => {
               onPress={() =>
                 showInfoHint(
                   "remaining",
-                  "label.remaining",
-                  "label.remainingHint"
+                  "label.remainingTotal",
+                  "label.remainingTotalHint"
                 )
               }
             >
@@ -9962,10 +9964,9 @@ const getSpeechLocale = () => {
               <Text style={styles.infoValue}>
                 {formatScreenTime(totalRemainingSeconds)}
               </Text>
-              <Text style={styles.infoLabel}>{t("label.remaining")}</Text>
+              <Text style={styles.infoLabel}>{t("label.remainingTotal")}</Text>
               <Text style={styles.infoSubLabel}>
-                {t("label.carryoverInline")}:{" "}
-                {formatScreenTime(usageState.carryoverSeconds || 0)}
+                {t("label.remainingToday")}: {formatScreenTime(remainingTodaySeconds)}
               </Text>
             </Pressable>
           </View>

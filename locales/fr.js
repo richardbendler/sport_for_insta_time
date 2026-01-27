@@ -17,6 +17,9 @@ const fr = {
     "label.screenTimeHint": "Temps total gagne pendant les dernieres 24h.",
     "label.remaining": "Restant",
     "label.remainingHint": "Temps encore disponible a utiliser.",
+    "label.remainingToday": "Restant aujourd'hui",
+    "label.remainingTotal": "Restant total",
+    "label.remainingTotalHint": "Temps restant total, y compris le report.",
     "label.screenTimeEntriesCurrent": "Entrees de temps d'ecran (24h)",
     "label.noScreenTimeEntriesCurrent": "Aucune entree active sur les dernieres 24h.",
     "label.screenTimeEntriesCarryover": "Entrees de report",
@@ -24,7 +27,7 @@ const fr = {
     "label.carryoverEntriesHint":
       "Ces entrées ont plus de 24h. Toutes les 24h, ce qui reste est divisé par deux.",
     "label.screenTimeEntryOriginal": "Original",
-    "label.remainingCurrent": "Restant (sans report)",
+    "label.remainingCurrent": "Restant aujourd'hui",
     "label.moreInfo": "Plus d'infos",
     "label.formulaBadge": "Formule",
     "label.formulaTitle": "Formule actuelle",
