@@ -17,6 +17,9 @@ const es = {
     "label.screenTimeHint": "Tiempo total ganado en las ultimas 24h.",
     "label.remaining": "Restante",
     "label.remainingHint": "Tiempo que aun puedes usar.",
+    "label.remainingToday": "Restante hoy",
+    "label.remainingTotal": "Restante total",
+    "label.remainingTotalHint": "Tiempo restante total, incluyendo arrastre.",
     "label.screenTimeEntriesCurrent": "Entradas de tiempo de pantalla (24h)",
     "label.noScreenTimeEntriesCurrent": "No hay entradas activas en las ultimas 24h.",
     "label.screenTimeEntriesCarryover": "Entradas de arrastre",
@@ -24,7 +27,7 @@ const es = {
     "label.carryoverEntriesHint":
       "Estas entradas tienen más de 24h. Cada 24h, lo que queda se reduce a la mitad.",
     "label.screenTimeEntryOriginal": "Original",
-    "label.remainingCurrent": "Restante (sin arrastre)",
+    "label.remainingCurrent": "Restante hoy",
     "label.moreInfo": "Más info",
     "label.formulaBadge": "Formula",
     "label.formulaTitle": "Formula actual",

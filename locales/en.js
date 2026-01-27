@@ -17,6 +17,9 @@ const en = {
     "label.screenTimeHint": "Total earned screen time from the last 24h.",
     "label.remaining": "Remaining",
     "label.remainingHint": "Time that is still available to use.",
+    "label.remainingToday": "Remaining today",
+    "label.remainingTotal": "Remaining total",
+    "label.remainingTotalHint": "Total remaining time including carryover.",
     "label.screenTimeEntriesCurrent": "Screen time entries (24h)",
     "label.noScreenTimeEntriesCurrent": "No active entries in the last 24h.",
     "label.screenTimeEntriesCarryover": "Carryover entries",
@@ -24,7 +27,7 @@ const en = {
     "label.carryoverEntriesHint":
       "These entries are older than 24h. Every 24h, whatever remains is cut in half.",
     "label.screenTimeEntryOriginal": "Original",
-    "label.remainingCurrent": "Remaining (without carryover)",
+    "label.remainingCurrent": "Remaining today",
     "label.moreInfo": "More info",
     "label.formulaBadge": "Formula",
     "label.formulaTitle": "Current formula",

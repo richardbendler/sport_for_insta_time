@@ -21,7 +21,8 @@ object ScreenTimeStore {
     val createdAt: Long,
     var remainingSeconds: Int,
     var lastDecayAt: Long,
-    var originalSeconds: Int
+    var originalSeconds: Int,
+    var decayCount: Int
   )
 
   data class Totals(
@@ -78,7 +79,8 @@ object ScreenTimeStore {
           createdAt = createdAt,
           remainingSeconds = safeSeconds,
           lastDecayAt = createdAt,
-          originalSeconds = safeSeconds
+          originalSeconds = safeSeconds,
+          decayCount = 0
         )
       )
       changed = true
@@ -116,7 +118,7 @@ object ScreenTimeStore {
     val changed = applyDecay(entries, now)
     val persisted = entries.filter { shouldKeepEntry(it, now) }
     val cutoff = now - DAY_MS
-    val recentEntries = entries.filter { it.remainingSeconds > 0 && it.createdAt >= cutoff }
+    val recentEntries = entries.filter { it.remainingSeconds > 0 }
     val remainingBySport = mutableMapOf<String, Int>()
     var total = 0
     recentEntries.forEach { entry ->
@@ -173,7 +175,7 @@ object ScreenTimeStore {
     }
     val entries = ensureLegacyMigration(loadEntries(prefs), prefs, now)
     var changed = applyDecay(entries, now)
-    val sorted = entries.sortedByDescending { it.createdAt }.toMutableList()
+    val sorted = entries.sortedBy { it.createdAt }.toMutableList()
     var remainingToConsume = seconds
     for (entry in sorted) {
       if (remainingToConsume <= 0) {
@@ -271,7 +273,8 @@ object ScreenTimeStore {
         createdAt = now,
         remainingSeconds = remaining,
         lastDecayAt = now,
-        originalSeconds = remaining
+        originalSeconds = remaining,
+        decayCount = 0
       )
     )
     saveEntries(prefs, entries)
@@ -289,6 +292,7 @@ object ScreenTimeStore {
       obj.put("remainingSeconds", entry.remainingSeconds)
       obj.put("lastDecayAt", entry.lastDecayAt)
       obj.put("originalSeconds", entry.originalSeconds)
+      obj.put("decayCount", entry.decayCount)
       array.put(obj)
     }
     prefs.edit().putString(PREF_KEY_ENTRIES, array.toString()).apply()
@@ -346,13 +350,21 @@ object ScreenTimeStore {
     val remaining = obj.optInt("remainingSeconds", 0)
     val lastDecay = obj.optLong("lastDecayAt", createdAt)
     val original = obj.optInt("originalSeconds", remaining)
+    val explicitDecayCount = obj.optInt("decayCount", -1)
+    val derivedDecayCount = if (lastDecay <= createdAt) {
+      0
+    } else {
+      ((lastDecay - createdAt) / DAY_MS).toInt().coerceAtLeast(0)
+    }
+    val decayCount = if (explicitDecayCount >= 0) explicitDecayCount else derivedDecayCount
     return Entry(
       id = id,
       sportId = if (sportId.isBlank()) null else sportId,
       createdAt = createdAt,
       remainingSeconds = remaining,
       lastDecayAt = lastDecay,
-      originalSeconds = original
+      originalSeconds = original,
+      decayCount = decayCount
     )
   }
 
@@ -361,16 +373,23 @@ object ScreenTimeStore {
     val iterator = entries.iterator()
     while (iterator.hasNext()) {
       val entry = iterator.next()
-      val elapsed = now - entry.lastDecayAt
-      if (elapsed >= DAY_MS) {
-        val steps = (elapsed / DAY_MS).toInt()
-        val maxShift = 30
-        val shift = if (steps > maxShift) maxShift else steps
-        val divisor = 1 shl shift
+      val elapsedDays = ((now - entry.createdAt) / DAY_MS).toInt().coerceAtLeast(0)
+      val maxShift = 30
+      val targetHalves = if (elapsedDays > maxShift) maxShift else elapsedDays
+      val missingHalves = targetHalves - entry.decayCount
+      if (missingHalves > 0) {
         var remaining = entry.remainingSeconds
-        remaining = if (steps > maxShift) 0 else remaining / divisor
-        entry.remainingSeconds = remaining
-        entry.lastDecayAt += steps * DAY_MS
+        repeat(missingHalves) {
+          remaining /= 2
+        }
+        entry.remainingSeconds = if (elapsedDays > maxShift) 0 else remaining
+        entry.decayCount = targetHalves
+        entry.lastDecayAt = entry.createdAt + entry.decayCount * DAY_MS
+        changed = true
+      } else if (elapsedDays > maxShift && entry.remainingSeconds > 0) {
+        entry.remainingSeconds = 0
+        entry.decayCount = targetHalves
+        entry.lastDecayAt = entry.createdAt + entry.decayCount * DAY_MS
         changed = true
       }
       if (entry.remainingSeconds <= 0 && now - entry.createdAt >= DAY_MS) {
