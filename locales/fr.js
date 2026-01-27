@@ -119,6 +119,9 @@ const fr = {
     "label.sectionData": "Donnees",
     "label.resetData": "Reinitialiser l'app",
     "label.resetDataHint": "Supprime sports, stats, logs et reglages.",
+    "label.experimentalFeaturesTitle": "Fonctionnalit?s exp?rimentales",
+    "label.experimentalFeaturesWarning": "Ces fonctionnalit?s sont encore en d?veloppement et peuvent provoquer des plantages.",
+    "label.experimentalFeaturesToggle": "Activer les fonctionnalit?s exp?rimentales",
     "label.confirmResetData": "Confirmer la suppression de toutes les donnees?",
     "label.carryover": "Report",
     "label.carryoverHint":

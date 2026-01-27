@@ -116,6 +116,9 @@ const es = {
     "label.sectionData": "Datos",
     "label.resetData": "Restablecer app",
     "label.resetDataHint": "Borra deportes, estadisticas, logs y ajustes.",
+    "label.experimentalFeaturesTitle": "Funciones experimentales",
+    "label.experimentalFeaturesWarning": "Estas funciones a?n est?n en desarrollo y pueden causar fallos.",
+    "label.experimentalFeaturesToggle": "Activar funciones experimentales",
     "label.confirmResetData": "Seguro que quieres borrar todos los datos?",
     "label.carryover": "Arrastre",
     "label.carryoverHint":

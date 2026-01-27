@@ -92,6 +92,7 @@ const DEFAULT_SETTINGS = {
   prefaceDelaySeconds: 10,
   grayscaleRestrictedApps: false,
   sportSortMode: "manual",
+  experimentalFeaturesEnabled: false,
 };
 
 const SPEECH_LOCALES = {
@@ -4122,6 +4123,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     await saveSettings(nextSettings);
   };
 
+  const toggleExperimentalFeatures = async () => {
+    const nextEnabled = !settings.experimentalFeaturesEnabled;
+    await saveSettings({
+      ...settings,
+      experimentalFeaturesEnabled: nextEnabled,
+    });
+  };
+
   const openPrefaceSettings = () => {
     const delay = Number.isFinite(settings.prefaceDelaySeconds)
       ? settings.prefaceDelaySeconds
@@ -6397,6 +6406,8 @@ const getSpeechLocale = () => {
     motivationActions,
   ]);
 
+  const experimentalFeaturesEnabled = !!settings.experimentalFeaturesEnabled;
+
   useEffect(() => {
     if (
       dismissedMotivationActionId &&
@@ -6407,7 +6418,7 @@ const getSpeechLocale = () => {
   }, [recommendedActionId, dismissedMotivationActionId]);
 
   useEffect(() => {
-    if (!hasLoaded) {
+    if (!hasLoaded || !experimentalFeaturesEnabled) {
       return;
     }
     if (!activeFunFactId) {
@@ -6417,14 +6428,31 @@ const getSpeechLocale = () => {
     if (!funFacts.some((fact) => fact.id === activeFunFactId)) {
       selectRandomFunFact();
     }
-  }, [activeFunFactId, funFacts, hasLoaded, selectRandomFunFact]);
+  }, [
+    activeFunFactId,
+    funFacts,
+    hasLoaded,
+    selectRandomFunFact,
+    experimentalFeaturesEnabled,
+  ]);
 
   useEffect(() => {
-    if (!hasLoaded || !permissionsPanelOpen || missingPermissions) {
+    if (
+      !hasLoaded ||
+      !experimentalFeaturesEnabled ||
+      !permissionsPanelOpen ||
+      missingPermissions
+    ) {
       return;
     }
     selectRandomFunFact();
-  }, [hasLoaded, missingPermissions, permissionsPanelOpen, selectRandomFunFact]);
+  }, [
+    hasLoaded,
+    missingPermissions,
+    permissionsPanelOpen,
+    selectRandomFunFact,
+    experimentalFeaturesEnabled,
+  ]);
 
   const activeFunFact = funFacts.find((fact) => fact.id === activeFunFactId);
   const activeQuoteTitle = t("label.motivationQuoteStartTitle");
@@ -6449,7 +6477,9 @@ const getSpeechLocale = () => {
     !completedMotivationActionIdsSet.has(recommendedActionId) &&
     (!dismissedMotivationActionId ||
       dismissedMotivationActionId !== recommendedActionId);
-  const showMotivationBlock = missingPermissions || shouldShowMotivationAction;
+  const showMotivationBlock =
+    missingPermissions ||
+    (experimentalFeaturesEnabled && shouldShowMotivationAction);
 
   const handleMotivationAction = (actionItem) => {
     if (!actionItem?.action) {
@@ -9268,6 +9298,33 @@ const getSpeechLocale = () => {
             <Text style={styles.cardMeta}>
               {t("label.used")}: {Math.floor(usageState.usedSeconds / 60)} min
             </Text>
+          </View>
+          <View style={styles.settingsDivider} />
+          <Text style={styles.settingsSectionTitle}>
+            {t("label.experimentalFeaturesTitle")}
+          </Text>
+          <View style={styles.infoCard}>
+            <Text style={styles.warningText}>
+              {t("label.experimentalFeaturesWarning")}
+            </Text>
+            <View style={styles.settingsSwitchRow}>
+              <Text style={styles.settingsSwitchLabel}>
+                {t("label.experimentalFeaturesToggle")}
+              </Text>
+              <Switch
+                value={!!settings.experimentalFeaturesEnabled}
+                onValueChange={toggleExperimentalFeatures}
+                trackColor={{
+                  true: "rgba(245, 158, 11, 0.4)",
+                  false: "rgba(148, 163, 184, 0.2)",
+                }}
+                thumbColor={
+                  settings.experimentalFeaturesEnabled
+                    ? COLORS.ember
+                    : "#f4f3f4"
+                }
+              />
+            </View>
           </View>
         </ScrollView>
       </SafeAreaView>

@@ -119,6 +119,9 @@ const de = {
     "label.sectionData": "Daten",
     "label.resetData": "App zurücksetzen",
     "label.resetDataHint": "Löscht Sportarten, Statistik, Logs und Einstellungen.",
+    "label.experimentalFeaturesTitle": "Testbereich",
+    "label.experimentalFeaturesWarning": "Diese Features sind noch in der Entwicklung und k?nnen zu Abst?rzen f?hren.",
+    "label.experimentalFeaturesToggle": "Testfeatures aktivieren",
     "label.confirmResetData": "Willst du wirklich alle App-Daten löschen?",
     "label.carryover": "Übertrag",
     "label.carryoverHint":

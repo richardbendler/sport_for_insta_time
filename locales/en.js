@@ -113,6 +113,10 @@ const en = {
     "label.status": "Status",
     "label.resetData": "Reset app data",
     "label.resetDataHint": "Deletes sports, stats, logs, and settings.",
+    "label.experimentalFeaturesTitle": "Experimental features",
+    "label.experimentalFeaturesWarning":
+      "These features are still in development and may cause crashes.",
+    "label.experimentalFeaturesToggle": "Enable experimental features",
     "label.confirmResetData": "Are you sure you want to delete all app data?",
     "label.carryover": "Carryover",
     "label.carryoverHint":
