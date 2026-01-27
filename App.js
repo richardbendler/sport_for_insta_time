@@ -10023,7 +10023,8 @@ const getSpeechLocale = () => {
               </Text>
               <Text style={styles.infoLabel}>{t("label.remainingTotal")}</Text>
               <Text style={styles.infoSubLabel}>
-                {t("label.remainingToday")}: {formatScreenTime(remainingTodaySeconds)}
+                {t("label.carryover")}:{" "}
+                {formatScreenTime(usageState.carryoverSeconds || 0)}
               </Text>
             </Pressable>
           </View>
