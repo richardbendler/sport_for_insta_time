@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/overlay_workout_root"
+  android:layout_width="wrap_content"
+  android:layout_height="wrap_content"
+  android:background="@drawable/overlay_workout_bg"
+  android:gravity="center"
+  android:orientation="horizontal"
+  android:padding="6dp">
+
+  <TextView
+    android:id="@+id/overlay_workout_label"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="6dp"
+    android:text="Sport"
+    android:textColor="#f8fafc"
+    android:textSize="12sp"
+    android:textStyle="bold" />
+
+  <TextView
+    android:id="@+id/overlay_workout_timer"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="00:00"
+    android:textColor="#f8fafc"
+    android:textSize="12sp"
+    android:textStyle="bold" />
+</LinearLayout>

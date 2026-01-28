@@ -32,6 +32,10 @@ class InstaBlockerService : AccessibilityService() {
   private var overlayView: View? = null
   private var overlayText: TextView? = null
   private var overlayParams: WindowManager.LayoutParams? = null
+  private var workoutOverlayView: View? = null
+  private var workoutOverlayLabel: TextView? = null
+  private var workoutOverlayTimer: TextView? = null
+  private var workoutOverlayParams: WindowManager.LayoutParams? = null
   private var lastWidgetUpdateAt: Long = 0
   private var notificationManager: NotificationManager? = null
 
@@ -71,6 +75,7 @@ class InstaBlockerService : AccessibilityService() {
   override fun onServiceConnected() {
     super.onServiceConnected()
     setupOverlay()
+    setupWorkoutOverlay()
     setupNotificationChannel()
     handler.post(ticker)
   }
@@ -149,6 +154,7 @@ class InstaBlockerService : AccessibilityService() {
   override fun onDestroy() {
     super.onDestroy()
     teardownOverlay()
+    teardownWorkoutOverlay()
     updateCountdownNotification(0, false, null)
     restoreGrayscale()
   }
@@ -157,6 +163,7 @@ class InstaBlockerService : AccessibilityService() {
     val pkg = currentPackage
     if (pkg == null) {
       syncGrayscaleState(false)
+      updateWorkoutOverlay()
       maybeUpdateWidgets()
       return
     }
@@ -164,6 +171,7 @@ class InstaBlockerService : AccessibilityService() {
       updateCountdownOverlay(0, false)
       updateCountdownNotification(0, false, null)
       syncGrayscaleState(false)
+      updateWorkoutOverlay()
       maybeUpdateWidgets()
       return
     }
@@ -173,6 +181,7 @@ class InstaBlockerService : AccessibilityService() {
     if (!isControlled) {
       updateCountdownOverlay(0, false)
       updateCountdownNotification(0, false, null)
+      updateWorkoutOverlay()
       maybeUpdateWidgets()
       return
     }
@@ -186,6 +195,7 @@ class InstaBlockerService : AccessibilityService() {
     }
     updateCountdownOverlay(remaining, true)
     updateCountdownNotification(remaining, true, pkg)
+    updateWorkoutOverlay()
     maybeUpdateWidgets()
     if (remaining <= 0) {
       launchBlocker()
@@ -253,12 +263,55 @@ class InstaBlockerService : AccessibilityService() {
     windowManager?.addView(overlayView, params)
   }
 
+  private fun setupWorkoutOverlay() {
+    if (windowManager == null) {
+      windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    }
+    if (workoutOverlayView != null) {
+      return
+    }
+    val inflater = LayoutInflater.from(this)
+    workoutOverlayView = inflater.inflate(R.layout.overlay_workout_timer, null)
+    workoutOverlayLabel = workoutOverlayView?.findViewById(R.id.overlay_workout_label)
+    workoutOverlayTimer = workoutOverlayView?.findViewById(R.id.overlay_workout_timer)
+    workoutOverlayView?.setOnClickListener { openWorkoutSport() }
+    workoutOverlayView?.visibility = View.GONE
+    val params = WindowManager.LayoutParams(
+      WindowManager.LayoutParams.WRAP_CONTENT,
+      WindowManager.LayoutParams.WRAP_CONTENT,
+      WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
+      WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+      PixelFormat.TRANSLUCENT
+    )
+    params.gravity = Gravity.TOP or Gravity.START
+    val density = resources.displayMetrics.density
+    val prefs = getPrefs()
+    val defaultX = (8 * density).toInt()
+    val defaultY = (8 * density).toInt()
+    params.x = prefs.getInt("workout_overlay_x", defaultX)
+    params.y = prefs.getInt("workout_overlay_y", defaultY)
+    workoutOverlayParams = params
+    workoutOverlayView?.setOnTouchListener(createWorkoutOverlayDragListener())
+    windowManager?.addView(workoutOverlayView, params)
+  }
+
   private fun teardownOverlay() {
     if (overlayView != null) {
       windowManager?.removeView(overlayView)
     }
     overlayView = null
     overlayText = null
+  }
+
+  private fun teardownWorkoutOverlay() {
+    if (workoutOverlayView != null) {
+      windowManager?.removeView(workoutOverlayView)
+    }
+    workoutOverlayView = null
+    workoutOverlayLabel = null
+    workoutOverlayTimer = null
+    workoutOverlayParams = null
     windowManager = null
   }
 
@@ -271,6 +324,25 @@ class InstaBlockerService : AccessibilityService() {
     val minutes = (remainingSeconds / 60).toString().padStart(2, '0')
     val seconds = (remainingSeconds % 60).toString().padStart(2, '0')
     overlayText?.text = "$minutes:$seconds"
+    view.visibility = View.VISIBLE
+  }
+
+  private fun updateWorkoutOverlay() {
+    val view = workoutOverlayView ?: return
+    val prefs = getPrefs()
+    val running = prefs.getBoolean("workout_overlay_running", false)
+    val visible = prefs.getBoolean("workout_overlay_visible", false)
+    val startTs = prefs.getLong("workout_overlay_start_ts", 0L)
+    if (!running || !visible || startTs <= 0L) {
+      view.visibility = View.GONE
+      return
+    }
+    val elapsedSeconds = ((System.currentTimeMillis() - startTs) / 1000).toInt().coerceAtLeast(0)
+    val minutes = (elapsedSeconds / 60).toString().padStart(2, '0')
+    val seconds = (elapsedSeconds % 60).toString().padStart(2, '0')
+    val label = prefs.getString("workout_overlay_sport_label", null) ?: "Sport"
+    workoutOverlayLabel?.text = label
+    workoutOverlayTimer?.text = "$minutes:$seconds"
     view.visibility = View.VISIBLE
   }
 
@@ -456,6 +528,15 @@ class InstaBlockerService : AccessibilityService() {
     startActivity(intent)
   }
 
+  private fun openWorkoutSport() {
+    val prefs = getPrefs()
+    val sportId = prefs.getString("workout_overlay_sport_id", null)
+    if (!sportId.isNullOrBlank()) {
+      prefs.edit().putString("workout_overlay_open_sport_id", sportId).apply()
+    }
+    openApp()
+  }
+
   private fun getControlledApps(): Set<String> {
     val prefs = getPrefs()
     val json = prefs.getString("controlled_apps", "[]") ?: "[]"
@@ -522,6 +603,49 @@ class InstaBlockerService : AccessibilityService() {
       grayscaleApplied = true
     } catch (e: SecurityException) {
       // Permission missing; leave grayscale unchanged.
+    }
+  }
+
+  private fun createWorkoutOverlayDragListener(): View.OnTouchListener {
+    val prefs = getPrefs()
+    val threshold = (8 * resources.displayMetrics.density).toInt()
+    var startX = 0
+    var startY = 0
+    var touchStartX = 0f
+    var touchStartY = 0f
+    var moved = false
+    return View.OnTouchListener { view, event ->
+      val params = workoutOverlayParams ?: return@OnTouchListener false
+      when (event.action) {
+        MotionEvent.ACTION_DOWN -> {
+          startX = params.x
+          startY = params.y
+          touchStartX = event.rawX
+          touchStartY = event.rawY
+          moved = false
+          true
+        }
+        MotionEvent.ACTION_MOVE -> {
+          val dx = (event.rawX - touchStartX).toInt()
+          val dy = (event.rawY - touchStartY).toInt()
+          if (!moved && (abs(dx) > threshold || abs(dy) > threshold)) {
+            moved = true
+          }
+          params.x = startX + dx
+          params.y = startY + dy
+          windowManager?.updateViewLayout(view, params)
+          true
+        }
+        MotionEvent.ACTION_UP -> {
+          if (moved) {
+            prefs.edit().putInt("workout_overlay_x", params.x).putInt("workout_overlay_y", params.y).apply()
+          } else {
+            view.performClick()
+          }
+          true
+        }
+        else -> false
+      }
     }
   }
 
