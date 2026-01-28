@@ -309,15 +309,16 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
       val entries = ScreenTimeStore.getEntries(prefs, now)
       val list = Arguments.createArray()
       entries.forEach { entry ->
-        val map = Arguments.createMap()
-        map.putString("id", entry.id)
-        map.putString("sportId", entry.sportId ?: "")
-        map.putDouble("createdAt", entry.createdAt.toDouble())
-        map.putDouble("lastDecayAt", entry.lastDecayAt.toDouble())
-        map.putInt("remainingSeconds", entry.remainingSeconds)
-        map.putInt("originalSeconds", entry.originalSeconds)
-        list.pushMap(map)
-      }
+      val map = Arguments.createMap()
+      map.putString("id", entry.id)
+      map.putString("sportId", entry.sportId ?: "")
+      map.putDouble("createdAt", entry.createdAt.toDouble())
+      map.putDouble("lastDecayAt", entry.lastDecayAt.toDouble())
+      map.putInt("remainingSeconds", entry.remainingSeconds)
+      map.putInt("originalSeconds", entry.originalSeconds)
+      map.putInt("decayCount", entry.decayCount)
+      list.pushMap(map)
+    }
       promise.resolve(list)
     } catch (e: Exception) {
       promise.reject("SCREEN_TIME_ENTRIES_ERROR", e)
@@ -426,6 +427,51 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
   @ReactMethod
   fun clearWorkoutNotification() {
     getWorkoutNotificationManager().cancel(workoutNotificationId)
+  }
+
+  @ReactMethod
+  fun setWorkoutOverlayState(
+    running: Boolean,
+    visible: Boolean,
+    sportId: String?,
+    sportLabel: String?,
+    startTs: Double
+  ) {
+    val prefs = getPrefs()
+    val editor = prefs.edit()
+    editor.putBoolean("workout_overlay_running", running)
+    editor.putBoolean("workout_overlay_visible", visible)
+    if (running) {
+      if (!sportId.isNullOrBlank()) {
+        editor.putString("workout_overlay_sport_id", sportId)
+      }
+      if (!sportLabel.isNullOrBlank()) {
+        editor.putString("workout_overlay_sport_label", sportLabel)
+      }
+      if (startTs > 0) {
+        editor.putLong("workout_overlay_start_ts", startTs.toLong())
+      }
+    } else {
+      editor.remove("workout_overlay_sport_id")
+      editor.remove("workout_overlay_sport_label")
+      editor.remove("workout_overlay_start_ts")
+      editor.remove("workout_overlay_visible")
+    }
+    editor.apply()
+  }
+
+  @ReactMethod
+  fun getAndClearWorkoutOverlayOpenSportId(promise: Promise) {
+    try {
+      val prefs = getPrefs()
+      val sportId = prefs.getString("workout_overlay_open_sport_id", null)
+      if (sportId != null) {
+        prefs.edit().remove("workout_overlay_open_sport_id").apply()
+      }
+      promise.resolve(sportId)
+    } catch (e: Exception) {
+      promise.reject("WORKOUT_OVERLAY_OPEN_ERROR", e)
+    }
   }
 
   private fun getWorkoutNotificationManager(): NotificationManager {

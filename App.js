@@ -9,6 +9,7 @@ import {
   TextInput,
   ScrollView,
   KeyboardAvoidingView,
+  Keyboard,
   StyleSheet,
   ActivityIndicator,
   Animated,
@@ -237,7 +238,25 @@ const RAW_STANDARD_SPORTS = [
     icon: "??",
     type: "time",
     defaultRateMinutes: 1,
-    difficultyLevel: 2,
+    difficultyLevel: 90,
+    useRawDifficulty: true,
+    category: "Kardio",
+    muscleGroups: ["Beine", "Ges??", "Core", "Herz-Kreislauf"],
+  },
+  {
+    id: "walking",
+    labels: {
+      de: "Gehen",
+      en: "Walking",
+      es: "Caminar",
+      fr: "Marche",
+    },
+    aliases: ["Walk", "Walking", "Gehen", "Spazieren"],
+    icon: "??",
+    type: "time",
+    defaultRateMinutes: 1,
+    difficultyLevel: 90,
+    useRawDifficulty: true,
     category: "Kardio",
     muscleGroups: ["Beine", "Ges??", "Core", "Herz-Kreislauf"],
   },
@@ -1187,9 +1206,14 @@ const buildStandardSportAliases = (sport) => {
 
 const STANDARD_SPORTS = RAW_STANDARD_SPORTS.map((sport) => {
   const labels = mergeTranslatedLabels(sport);
+  const rawDifficulty = Number(sport.difficultyLevel);
   return {
     ...sport,
-    difficultyLevel: mapLegacyDifficultyToNewScale(sport.difficultyLevel),
+    difficultyLevel: sport.useRawDifficulty
+      ? Number.isFinite(rawDifficulty)
+        ? rawDifficulty
+        : DEFAULT_DIFFICULTY
+      : mapLegacyDifficultyToNewScale(sport.difficultyLevel),
     icon: deriveTemplateIcon(sport),
     labels,
     aliases: buildStandardSportAliases({ ...sport, labels }),
@@ -1670,6 +1694,25 @@ const getRollingStats = (logs, sportId, sport) => {
   return { reps, seconds, km, screenSeconds };
 };
 
+const getRollingWeightTotal = (logs, sportId) => {
+  const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+  const sportLogs = logs[sportId] || {};
+  let total = 0;
+  Object.values(sportLogs).forEach((dayLogs) => {
+    (dayLogs || []).forEach((entry) => {
+      if (!entry || !entry.ts || entry.ts < cutoff) {
+        return;
+      }
+      const weight = entry.weight || 0;
+      const reps = entry.reps || 0;
+      if (weight > 0 && reps > 0) {
+        total += weight * reps;
+      }
+    });
+  });
+  return total;
+};
+
 const getWeeklyStats = (stats, sportId) => {
   const weekKeys = getWeekKeys();
   return weekKeys.map(({ key, label }) => ({
@@ -1727,6 +1770,64 @@ const computeKmPerHour = (km, seconds) => {
 const formatKmPerHour = (km, seconds) =>
   formatDistanceValue(computeKmPerHour(km, seconds), 1);
 
+const CHART_RANGE_DAYS = {
+  today: 7,
+  week: 7,
+  month: 30,
+};
+
+const CHART_BALANCE = {
+  reps: 1,
+  timeSeconds: 1 / 60,
+  weightRep: 1 / 100,
+};
+
+const CHART_SCALE_MODE = {
+  overallSummary: "sqrt",
+  overallLines: "sqrt",
+  sport: "sqrt",
+};
+
+const RESUME_WINDOW_MS = 5 * 60 * 1000;
+
+const scaleChartValue = (value, mode) => {
+  if (value <= 0) {
+    return 0;
+  }
+  if (mode === "log") {
+    return Math.log10(value + 1);
+  }
+  if (mode === "linear") {
+    return value;
+  }
+  return Math.sqrt(value);
+};
+
+const getRecentDayKeys = (days) => {
+  const result = [];
+  for (let index = days - 1; index >= 0; index -= 1) {
+    const date = new Date();
+    date.setDate(date.getDate() - index);
+    result.push(dateKeyFromDate(date));
+  }
+  return result;
+};
+
+const formatChartDayLabel = (dayKey) => {
+  if (!dayKey) {
+    return "";
+  }
+  return dayKey.slice(5);
+};
+
+const sparseLabels = (labels, maxCount = 8) => {
+  if (labels.length <= maxCount) {
+    return labels;
+  }
+  const step = Math.ceil(labels.length / maxCount);
+  return labels.map((label, index) => (index % step === 0 ? label : ""));
+};
+
 const flattenSportEntries = (logs, sportId) => {
   const sportLog = (logs || {})[sportId] || {};
   return Object.values(sportLog || {}).flatMap((dayEntries) => dayEntries || []);
@@ -1748,6 +1849,165 @@ const getRecentWeightEntriesForSport = (logs, sportId, limit = 5) => {
   return weightEntries
     .sort((a, b) => (b.ts || 0) - (a.ts || 0))
     .slice(0, limit);
+};
+
+const getRecentTimeEntriesForSport = (logs, sportId, limit = 5) => {
+  if (!sportId) {
+    return [];
+  }
+  const allEntries = flattenSportEntries(logs, sportId);
+  return allEntries
+    .filter((entry) => entry && entry.seconds > 0)
+    .sort((a, b) => (b.ts || 0) - (a.ts || 0))
+    .slice(0, limit);
+};
+
+const sumSportEntryMetric = (sport, entries) => {
+  if (!sport || !entries || entries.length === 0) {
+    return 0;
+  }
+  if (sport.type === "time") {
+    return entries.reduce((sum, entry) => sum + (entry.seconds || 0), 0);
+  }
+  if (sport.weightExercise) {
+    return entries.reduce(
+      (sum, entry) => sum + (entry.weight || 0) * (entry.reps || 0),
+      0
+    );
+  }
+  return entries.reduce((sum, entry) => sum + (entry.reps || 0), 0);
+};
+
+const sumBalancedMetric = (sport, entries) => {
+  if (!sport || !entries || entries.length === 0) {
+    return 0;
+  }
+  if (sport.type === "time") {
+    return entries.reduce(
+      (sum, entry) => sum + (entry.seconds || 0) * CHART_BALANCE.timeSeconds,
+      0
+    );
+  }
+  if (sport.weightExercise) {
+    return entries.reduce(
+      (sum, entry) =>
+        sum + (entry.weight || 0) * (entry.reps || 0) * CHART_BALANCE.weightRep,
+      0
+    );
+  }
+  return entries.reduce(
+    (sum, entry) => sum + (entry.reps || 0) * CHART_BALANCE.reps,
+    0
+  );
+};
+
+const normalizeChartSeries = (seriesValues, mode) => {
+  const scaled = seriesValues.map((value) => scaleChartValue(value, mode));
+  const max = Math.max(1, ...scaled);
+  return scaled.map((value) => value / max);
+};
+
+const ChartBars = ({ labels, normalizedValues, valueLabels, color, style }) => {
+  return (
+    <View style={[styles.chartCard, style]}>
+      <View style={styles.chartBarsRow}>
+        {normalizedValues.map((value, index) => (
+          <View key={`bar-${index}`} style={styles.chartBarColumn}>
+            <View
+              style={[
+                styles.chartBar,
+                {
+                  height: Math.max(4, value * 120),
+                  backgroundColor: color,
+                },
+              ]}
+            />
+            <Text style={styles.chartAxisLabel}>{labels[index]}</Text>
+            {valueLabels ? (
+              <Text style={styles.chartValueLabel}>{valueLabels[index]}</Text>
+            ) : null}
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+};
+
+const ChartLines = ({ labels, series, style }) => {
+  const [layoutWidth, setLayoutWidth] = useState(0);
+  const plotHeight = 140;
+  const usableWidth = Math.max(layoutWidth - 8, 0);
+  const pointCount = labels.length;
+  const stepX = pointCount > 1 ? usableWidth / (pointCount - 1) : 0;
+  return (
+    <View style={[styles.chartCard, style]}>
+      <View
+        style={styles.chartPlot}
+        onLayout={(event) => setLayoutWidth(event.nativeEvent.layout.width)}
+      >
+        {series.map((line) =>
+          line.normalized.map((value, index) => {
+            const x = stepX * index;
+            const y = (1 - value) * plotHeight;
+            const nextValue = line.normalized[index + 1];
+            const nextX = stepX * (index + 1);
+            const nextY = nextValue != null ? (1 - nextValue) * plotHeight : y;
+            const dx = nextX - x;
+            const dy = nextY - y;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx);
+            return (
+              <View key={`${line.sportId}-${index}`}>
+                {nextValue != null ? (
+                  <View
+                    style={[
+                      styles.chartLineSegment,
+                      {
+                        backgroundColor: line.color,
+                        width: length,
+                        left: x,
+                        top: y,
+                        transform: [{ rotate: `${angle}rad` }],
+                      },
+                    ]}
+                  />
+                ) : null}
+                <View
+                  style={[
+                    styles.chartLineDot,
+                    {
+                      backgroundColor: line.color,
+                      left: x - 3,
+                      top: y - 3,
+                    },
+                  ]}
+                />
+              </View>
+            );
+          })
+        )}
+      </View>
+      <View style={styles.chartAxisRow}>
+        {labels.map((label, index) => (
+          <Text key={`${label}-${index}`} style={styles.chartAxisLabel}>
+            {label}
+          </Text>
+        ))}
+      </View>
+      <View style={styles.chartLegendRow}>
+        {series.map((line) => (
+          <View key={line.sportId} style={styles.chartLegendItem}>
+            <View
+              style={[styles.chartLegendSwatch, { backgroundColor: line.color }]}
+            />
+            <Text style={styles.chartLegendText} numberOfLines={1}>
+              {line.label}
+            </Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
 };
 
 const parseRateMinutes = (value, fallback) => {
@@ -2398,6 +2658,9 @@ function AppContent() {
   const [activeFunFactId, setActiveFunFactId] = useState(null);
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [statsRange, setStatsRange] = useState("month");
+  const [overallStatsView, setOverallStatsView] = useState("calendar");
+  const [overallChartMode, setOverallChartMode] = useState("summary");
+  const [sportStatsView, setSportStatsView] = useState("calendar");
   const [infoHint, setInfoHint] = useState(null);
   const [infoAnchors, setInfoAnchors] = useState({});
   const [infoCardWidth, setInfoCardWidth] = useState(0);
@@ -2408,16 +2671,21 @@ function AppContent() {
   const [tutorialWaitingForSportCreation, setTutorialWaitingForSportCreation] =
     useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [pendingOverlaySportId, setPendingOverlaySportId] = useState(null);
 
   const [sessionSeconds, setSessionSeconds] = useState(0);
   const [running, setRunning] = useState(false);
+  const [runningSportId, setRunningSportId] = useState(null);
+  const [runningSportLabel, setRunningSportLabel] = useState("");
   const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [voiceListening, setVoiceListening] = useState(false);
   const [voiceError, setVoiceError] = useState(null);
+  const isTestMode = __DEV__ === true;
   const [manualTimeMinutes, setManualTimeMinutes] = useState("");
   const [manualTimeSeconds, setManualTimeSeconds] = useState("");
   const [manualTimeKm, setManualTimeKm] = useState("");
   const [manualRepsInput, setManualRepsInput] = useState("");
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const [isAppActive, setIsAppActive] = useState(
     AppState.currentState === "active"
   );
@@ -2426,6 +2694,7 @@ function AppContent() {
   const intervalRef = useRef(null);
   const sessionStartRef = useRef(null);
   const runningRef = useRef(false);
+  const resumeEntryRef = useRef(null);
   const workoutStartRef = useRef(null);
   const workoutIntervalRef = useRef(null);
   const sportDetailScrollRef = useRef(null);
@@ -2754,6 +3023,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     if (InstaControl?.setAppLanguage) {
       InstaControl.setAppLanguage(nextLanguage);
     }
+    if (InstaControl?.updateWidgets) {
+      InstaControl.updateWidgets();
+    }
+    if (InstaControl?.updateOverallWidgets) {
+      InstaControl.updateOverallWidgets();
+    }
     setLanguage(nextLanguage);
     setShowLanguageMenu(false);
   };
@@ -2905,11 +3180,31 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     load();
   }, []);
 
+  const consumeWorkoutOverlayOpen = async () => {
+    if (!InstaControl?.getAndClearWorkoutOverlayOpenSportId) {
+      return;
+    }
+    try {
+      const sportId = await InstaControl.getAndClearWorkoutOverlayOpenSportId();
+      if (!sportId) {
+        return;
+      }
+      if (!hasLoaded) {
+        setPendingOverlaySportId(sportId);
+        return;
+      }
+      openSportFromOverlay(sportId);
+    } catch (error) {
+      console.warn("Failed to read workout overlay target", error);
+    }
+  };
+
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (nextState) => {
       const active = nextState === "active";
       setIsAppActive(active);
       if (active) {
+        consumeWorkoutOverlayOpen();
         if (runningRef.current && sessionStartRef.current) {
           const elapsed = Math.max(
             0,
@@ -2934,6 +3229,43 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       subscription.remove();
     };
   }, []);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", () => {
+      setIsKeyboardVisible(true);
+    });
+    const hideSub = Keyboard.addListener("keyboardDidHide", () => {
+      setIsKeyboardVisible(false);
+    });
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isAppActive) {
+      consumeWorkoutOverlayOpen();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!pendingOverlaySportId || !hasLoaded) {
+      return;
+    }
+    openSportFromOverlay(pendingOverlaySportId);
+    setPendingOverlaySportId(null);
+  }, [pendingOverlaySportId, hasLoaded, sports]);
+
+  useEffect(() => {
+    if (!isAppActive || !runningSportId || selectedSportId) {
+      return;
+    }
+    const interval = setInterval(() => {
+      consumeWorkoutOverlayOpen();
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isAppActive, runningSportId, selectedSportId]);
 
   useEffect(() => {
     checkAccessibility();
@@ -2970,6 +3302,43 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       }
     };
   }, [running]);
+
+  useEffect(() => {
+    if (!InstaControl?.setWorkoutOverlayState) {
+      return;
+    }
+    const startTs = sessionStartRef.current || 0;
+    const isRunning = !!running && !!runningSportId;
+    const shouldShow =
+      isRunning && (!isAppActive || !selectedSportId);
+    InstaControl.setWorkoutOverlayState(
+      isRunning,
+      shouldShow,
+      runningSportId || "",
+      runningSportLabel || "",
+      startTs
+    );
+  }, [
+    running,
+    runningSportId,
+    runningSportLabel,
+    isAppActive,
+    selectedSportId,
+  ]);
+
+  useEffect(() => {
+    if (!runningSportId) {
+      return;
+    }
+    const sport = sports.find((item) => item.id === runningSportId);
+    if (!sport) {
+      return;
+    }
+    const label = getSportLabel(sport);
+    if (label !== runningSportLabel) {
+      setRunningSportLabel(label);
+    }
+  }, [runningSportId, runningSportLabel, sports, language]);
 
   useEffect(() => {
     if (!workoutRunning) {
@@ -3161,6 +3530,39 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
     InstaControl.removeScreenTimeEntry(entryId);
     InstaControl?.updateOverallWidgets?.();
+  };
+
+  const updateLogEntry = (sport, entryId, updater) => {
+    if (!sport || !entryId) {
+      return null;
+    }
+    let updatedEntry = null;
+    setLogs((prev) => {
+      const nextLogs = { ...prev };
+      const sportLogs = { ...(nextLogs[sport.id] || {}) };
+      Object.keys(sportLogs).forEach((dayKey) => {
+        const dayEntries = [...(sportLogs[dayKey] || [])];
+        const index = dayEntries.findIndex((entry) => entry.id === entryId);
+        if (index < 0) {
+          return;
+        }
+        const nextEntry = updater(dayEntries[index]);
+        if (!nextEntry) {
+          return;
+        }
+        dayEntries[index] = nextEntry;
+        sportLogs[dayKey] = dayEntries;
+        updatedEntry = nextEntry;
+      });
+      nextLogs[sport.id] = sportLogs;
+      AsyncStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(nextLogs));
+      return nextLogs;
+    });
+    if (updatedEntry) {
+      syncScreenTimeEntry(sport, updatedEntry);
+      refreshUsageState();
+    }
+    return updatedEntry;
   };
 
   const addLogEntry = (sport, entry) => {
@@ -3498,6 +3900,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     sessionStartRef.current = null;
     workoutStartRef.current = null;
     setRunning(false);
+    setRunningSportId(null);
+    setRunningSportLabel("");
     setSessionSeconds(0);
     setWorkoutRunning(false);
     setWorkoutSeconds(0);
@@ -3921,9 +4325,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
 
   useEffect(() => {
     if (!selectedSportId) {
-      setRunning(false);
-      setSessionSeconds(0);
-      sessionStartRef.current = null;
+      if (!running) {
+        setSessionSeconds(0);
+        sessionStartRef.current = null;
+        resumeEntryRef.current = null;
+      }
     }
   }, [selectedSportId]);
 
@@ -4260,6 +4666,25 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setStatsSportId(sportId);
   };
 
+  const openSportFromOverlay = (sportId) => {
+    if (!sportId) {
+      return;
+    }
+    const exists = sports.some((sport) => sport.id === sportId);
+    if (!exists) {
+      return;
+    }
+    setIsSettingsOpen(false);
+    setOverallStatsOpen(false);
+    setIsPrefaceSettingsOpen(false);
+    setIsScreenTimeDetailsOpen(false);
+    setStatsSportId(null);
+    setStatsDayKey(null);
+    setOverallDayKey(null);
+    setStatsEditMode(false);
+    setSelectedSportId(sportId);
+  };
+
   const openSettings = () => {
     setOverallStatsOpen(false);
     setIsPrefaceSettingsOpen(false);
@@ -4422,6 +4847,20 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     // settings or default
     return (
       <View style={styles.mainNavIconWrapper}>
+        <View style={styles.navIconGearTeeth}>
+          {[0, 60, 120, 180, 240, 300].map((angle) => (
+            <View
+              key={angle}
+              style={[
+                styles.navIconGearTooth,
+                {
+                  backgroundColor: strokeColor,
+                  transform: [{ rotate: `${angle}deg` }, { translateY: -11 }],
+                },
+              ]}
+            />
+          ))}
+        </View>
         <View
           style={[
             styles.navIconGear,
@@ -5074,13 +5513,49 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   };
 
   const handleStart = () => {
+    resumeEntryRef.current = null;
     sessionStartRef.current = Date.now();
     setSessionSeconds(0);
     setRunning(true);
+    if (selectedSport) {
+      setRunningSportId(selectedSport.id);
+      setRunningSportLabel(getSportLabel(selectedSport));
+    } else {
+      setRunningSportId(null);
+      setRunningSportLabel("");
+    }
+    maybeAdvanceTutorial("trackAction");
+  };
+
+  const handleResumeStart = (entry) => {
+    if (!selectedSport || !entry) {
+      return;
+    }
+    const priorSeconds = Number(entry.seconds || 0);
+    const priorKm = Number(entry.km || 0);
+    const priorScreenSeconds = Number.isFinite(entry.screenSeconds)
+      ? entry.screenSeconds
+      : screenSecondsForEntry(selectedSport, entry);
+    resumeEntryRef.current = {
+      id: entry.id,
+      ts: entry.ts || Date.now(),
+      seconds: priorSeconds,
+      km: priorKm,
+      screenSeconds: priorScreenSeconds,
+    };
+    sessionStartRef.current = Date.now() - priorSeconds * 1000;
+    setSessionSeconds(priorSeconds);
+    setRunning(true);
+    setRunningSportId(selectedSport.id);
+    setRunningSportLabel(getSportLabel(selectedSport));
     maybeAdvanceTutorial("trackAction");
   };
 
   const handleStop = () => {
+    if (runningSportId && selectedSport?.id && selectedSport.id !== runningSportId) {
+      openSportFromOverlay(runningSportId);
+      return;
+    }
     const elapsed =
       sessionStartRef.current != null
         ? Math.max(
@@ -5089,9 +5564,49 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           )
         : sessionSeconds;
     setRunning(false);
+    setRunningSportId(null);
+    setRunningSportLabel("");
     if (!selectedSport) {
       setSessionSeconds(0);
       sessionStartRef.current = null;
+      resumeEntryRef.current = null;
+      return;
+    }
+    const resumeInfo = resumeEntryRef.current;
+    if (resumeInfo?.id) {
+      const baseSeconds = resumeInfo.seconds || 0;
+      const baseKm = resumeInfo.km || 0;
+      const baseScreenSeconds = resumeInfo.screenSeconds || 0;
+      const km = parsePositiveNumber(manualTimeKm);
+      const deltaSeconds = Math.max(0, elapsed - baseSeconds);
+      const nextSeconds = Math.max(baseSeconds, elapsed);
+      const nextKm = baseKm + km;
+      const nextEntry = updateLogEntry(selectedSport, resumeInfo.id, (current) => {
+        if (!current) {
+          return current;
+        }
+        const next = {
+          ...current,
+          seconds: nextSeconds,
+          km: selectedSport.type === "time" ? nextKm : current.km || 0,
+        };
+        next.screenSeconds = screenSecondsForEntry(selectedSport, next);
+        return next;
+      });
+      if (nextEntry) {
+        const nextScreenSeconds = nextEntry.screenSeconds || 0;
+        const deltaScreenSeconds = Math.max(0, nextScreenSeconds - baseScreenSeconds);
+        updateDayStat(selectedSport.id, (dayStats) => ({
+          ...dayStats,
+          seconds: dayStats.seconds + deltaSeconds,
+          km: (dayStats.km || 0) + km,
+          screenSeconds: (dayStats.screenSeconds || 0) + deltaScreenSeconds,
+        }));
+      }
+      setSessionSeconds(0);
+      sessionStartRef.current = null;
+      resumeEntryRef.current = null;
+      setManualTimeKm("");
       return;
     }
     if (elapsed > 0) {
@@ -5754,6 +6269,12 @@ const getSpeechLocale = () => {
     }
     return getRecentWeightEntriesForSport(logs, selectedSport.id);
   }, [logs, selectedSport?.id]);
+  const recentTimeEntries = useMemo(() => {
+    if (!selectedSport || selectedSport.type !== "time") {
+      return [];
+    }
+    return getRecentTimeEntriesForSport(logs, selectedSport.id);
+  }, [logs, selectedSport?.id, selectedSport?.type]);
   const statsSport = sports.find((sport) => sport.id === statsSportId);
   const rollingEarnedSeconds = useMemo(
     () => rollingScreenSecondsTotal(logs, sports),
@@ -5779,6 +6300,52 @@ const getSpeechLocale = () => {
       .filter((entry) => entry.seconds > 0)
       .sort((a, b) => b.seconds - a.seconds);
   }, [sports, usageState.remainingBySport, language]);
+  const overallChartDayKeys = useMemo(() => {
+    const days = CHART_RANGE_DAYS[statsRange] || CHART_RANGE_DAYS.month;
+    return getRecentDayKeys(days);
+  }, [statsRange]);
+  const overallSummaryChart = useMemo(() => {
+    const values = overallChartDayKeys.map((dayKey) => {
+      return sports.reduce((sum, sport) => {
+        const entries = (logs[sport.id] || {})[dayKey] || [];
+        return sum + sumBalancedMetric(sport, entries);
+      }, 0);
+    });
+    const normalized = normalizeChartSeries(values, CHART_SCALE_MODE.overallSummary);
+    return {
+      values,
+      normalized,
+      labels: sparseLabels(overallChartDayKeys.map(formatChartDayLabel)),
+    };
+  }, [overallChartDayKeys, logs, sports]);
+  const overallLinesChart = useMemo(() => {
+    const series = sports.map((sport) => {
+      const values = overallChartDayKeys.map((dayKey) => {
+        const entries = (logs[sport.id] || {})[dayKey] || [];
+        return sumBalancedMetric(sport, entries);
+      });
+      return {
+        sportId: sport.id,
+        label: getSportLabel(sport),
+        color: getSportAccentColor(sport.id),
+        values,
+      };
+    }).filter((item) => item.values.some((value) => value > 0));
+    const scaledValues = series.flatMap((item) =>
+      item.values.map((value) => scaleChartValue(value, CHART_SCALE_MODE.overallLines))
+    );
+    const max = Math.max(1, ...scaledValues);
+    const normalizedSeries = series.map((item) => ({
+      ...item,
+      normalized: item.values.map(
+        (value) => scaleChartValue(value, CHART_SCALE_MODE.overallLines) / max
+      ),
+    }));
+    return {
+      labels: sparseLabels(overallChartDayKeys.map(formatChartDayLabel)),
+      series: normalizedSeries,
+    };
+  }, [overallChartDayKeys, logs, sports, language, getSportAccentColor]);
   const earnedBySportList = useMemo(() => {
     const cutoff = Date.now() - 24 * 60 * 60 * 1000;
     return sports
@@ -5850,6 +6417,7 @@ const getSpeechLocale = () => {
           dayKey,
           remainingSeconds,
           originalSeconds,
+          decayCount: Number(entry.decayCount || 0),
           reps: Number.isFinite(logEntry?.reps) ? logEntry.reps : 0,
           seconds: Number.isFinite(logEntry?.seconds) ? logEntry.seconds : 0,
           weight: Number.isFinite(logEntry?.weight) ? logEntry.weight : 0,
@@ -5865,6 +6433,10 @@ const getSpeechLocale = () => {
   const carryoverScreenTimeEntries = screenTimeEntryRows.filter(
     (entry) =>
       entry.createdAt < screenTimeEntryCutoff && entry.remainingSeconds > 0
+  );
+  const carryoverEntriesTotalSeconds = carryoverScreenTimeEntries.reduce(
+    (sum, entry) => sum + (entry.remainingSeconds || 0),
+    0
   );
   const trackBodyKey =
     selectedSport && selectedSport.type === "time"
@@ -7113,6 +7685,12 @@ const getSpeechLocale = () => {
     }
     return getRollingStats(logs, selectedSport.id, selectedSport);
   }, [logs, selectedSport]);
+  const todayWeightTotal = useMemo(() => {
+    if (!selectedSport || selectedSport.type !== "reps" || !selectedSport.weightExercise) {
+      return 0;
+    }
+    return getRollingWeightTotal(logs, selectedSport.id);
+  }, [logs, selectedSport]);
 
   /*
   const workoutDisplayReps = workoutTrackingMode
@@ -7595,6 +8173,105 @@ const getSpeechLocale = () => {
             {renderTutorialHeaderButton()}
           </View>
           {renderMainNav("stats")}
+          <View style={styles.chartToggleRow}>
+            <Pressable
+              style={[
+                styles.chartToggleButton,
+                overallStatsView === "calendar" && styles.chartToggleButtonActive,
+              ]}
+              onPress={() => setOverallStatsView("calendar")}
+            >
+              <Text
+                style={[
+                  styles.chartToggleText,
+                  overallStatsView === "calendar" && styles.chartToggleTextActive,
+                ]}
+              >
+                {t("label.calendar")}
+              </Text>
+            </Pressable>
+            <Pressable
+              style={[
+                styles.chartToggleButton,
+                overallStatsView === "chart" && styles.chartToggleButtonActive,
+              ]}
+              onPress={() => setOverallStatsView("chart")}
+            >
+              <Text
+                style={[
+                  styles.chartToggleText,
+                  overallStatsView === "chart" && styles.chartToggleTextActive,
+                ]}
+              >
+                {t("label.chart")}
+              </Text>
+            </Pressable>
+          </View>
+          {overallStatsView === "chart" ? (
+            <>
+              <View style={styles.chartToggleRow}>
+                <Pressable
+                  style={[
+                    styles.chartToggleButton,
+                    overallChartMode === "summary" &&
+                      styles.chartToggleButtonActive,
+                  ]}
+                  onPress={() => setOverallChartMode("summary")}
+                >
+                  <Text
+                    style={[
+                      styles.chartToggleText,
+                      overallChartMode === "summary" &&
+                        styles.chartToggleTextActive,
+                    ]}
+                  >
+                    {t("label.chartSummary")}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  style={[
+                    styles.chartToggleButton,
+                    overallChartMode === "lines" &&
+                      styles.chartToggleButtonActive,
+                  ]}
+                  onPress={() => setOverallChartMode("lines")}
+                >
+                  <Text
+                    style={[
+                      styles.chartToggleText,
+                      overallChartMode === "lines" &&
+                        styles.chartToggleTextActive,
+                    ]}
+                  >
+                    {t("label.chartLines")}
+                  </Text>
+                </Pressable>
+              </View>
+              {overallChartMode === "summary" ? (
+                overallSummaryChart.values.every((value) => value <= 0) ? (
+                  <Text style={styles.helperText}>{t("label.noChartData")}</Text>
+                ) : (
+                  <ChartBars
+                    labels={overallSummaryChart.labels}
+                    normalizedValues={overallSummaryChart.normalized}
+                    valueLabels={overallSummaryChart.values.map((value) =>
+                      value ? Math.round(value).toString() : "-"
+                    )}
+                    color={COLORS.accent}
+                  />
+                )
+              ) : (
+                overallLinesChart.series.length === 0 ? (
+                  <Text style={styles.helperText}>{t("label.noChartData")}</Text>
+                ) : (
+                  <ChartLines
+                    labels={overallLinesChart.labels}
+                    series={overallLinesChart.series}
+                  />
+                )
+              )}
+            </>
+          ) : null}
           <View style={styles.infoCard} ref={tutorialStatsSummaryRef}>
             <Text style={styles.sectionTitle}>{t("label.statsBySport")}</Text>
             <View style={styles.quickActionsRow}>
@@ -7640,71 +8317,75 @@ const getSpeechLocale = () => {
               </Pressable>
             ))}
           </View>
-          {statsRange !== "month" ? (
-            <View style={styles.infoCard}>
-              {rangeKeys.map((key) => (
-                <View key={key} style={styles.statRow}>
-                  <Text style={styles.statLabel}>{formatDateLabel(key)}</Text>
-                  <Text style={styles.statValue}>
-                    {formatScreenTime(dayTotals[key] || 0)}
-                  </Text>
+          {overallStatsView === "calendar" ? (
+            <>
+              {statsRange !== "month" ? (
+                <View style={styles.infoCard}>
+                  {rangeKeys.map((key) => (
+                    <View key={key} style={styles.statRow}>
+                      <Text style={styles.statLabel}>{formatDateLabel(key)}</Text>
+                      <Text style={styles.statValue}>
+                        {formatScreenTime(dayTotals[key] || 0)}
+                      </Text>
+                    </View>
+                  ))}
                 </View>
-              ))}
-            </View>
-          ) : null}
-          <View style={styles.infoCard}>
-            <Text style={styles.sectionTitle}>{t("label.overallStats")}</Text>
-          </View>
-          {statsRange === "month"
-            ? months.map((monthDate) => {
-                const monthKey = `${monthDate.getFullYear()}-${String(
-                  monthDate.getMonth() + 1
-                ).padStart(2, "0")}`;
-                const weeks = buildWeeksForMonth(monthDate);
-                return (
-                  <View key={monthKey} style={styles.overallMonth}>
-                    <Text style={styles.calendarMonthTitle}>
-                      {formatMonthLabel(monthDate, language)}
-                    </Text>
-                    {weeks.map((weekDays, weekIndex) => (
-                      <View
-                        key={`${monthKey}-w${weekIndex}`}
-                        style={styles.overallWeekRow}
-                      >
-                        {weekDays.map((day, index) => {
-                          const key = dateKeyFromDate(day);
-                          const totalSeconds = dayTotals[key] || 0;
-                          const hasValue = totalSeconds > 0;
-                          const inMonth = day.getMonth() === monthDate.getMonth();
-                          const isToday = key === todayKey();
-                          return (
-                            <Pressable
-                              key={key}
-                              style={[
-                                styles.overallDayCell,
-                                !inMonth && styles.overallDayCellOut,
-                                isToday && styles.overallDayCellToday,
-                              ]}
-                              onPress={() => setOverallDayKey(key)}
-                            >
-                              <Text style={styles.overallWeekday}>
-                                {weekdayLabels[index]}
-                              </Text>
-                              <Text style={styles.overallDayNumber}>
-                                {day.getDate()}
-                              </Text>
-                              <Text style={styles.overallDayValue}>
-                                {hasValue ? formatScreenTime(totalSeconds) : "-"}
-                              </Text>
-                            </Pressable>
-                          );
-                        })}
+              ) : null}
+              <View style={styles.infoCard}>
+                <Text style={styles.sectionTitle}>{t("label.overallStats")}</Text>
+              </View>
+              {statsRange === "month"
+                ? months.map((monthDate) => {
+                    const monthKey = `${monthDate.getFullYear()}-${String(
+                      monthDate.getMonth() + 1
+                    ).padStart(2, "0")}`;
+                    const weeks = buildWeeksForMonth(monthDate);
+                    return (
+                      <View key={monthKey} style={styles.overallMonth}>
+                        <Text style={styles.calendarMonthTitle}>
+                          {formatMonthLabel(monthDate, language)}
+                        </Text>
+                        {weeks.map((weekDays, weekIndex) => (
+                          <View
+                            key={`${monthKey}-w${weekIndex}`}
+                            style={styles.overallWeekRow}
+                          >
+                            {weekDays.map((day, index) => {
+                              const key = dateKeyFromDate(day);
+                              const totalSeconds = dayTotals[key] || 0;
+                              const hasValue = totalSeconds > 0;
+                              const inMonth = day.getMonth() === monthDate.getMonth();
+                              const isToday = key === todayKey();
+                              return (
+                                <Pressable
+                                  key={key}
+                                  style={[
+                                    styles.overallDayCell,
+                                    !inMonth && styles.overallDayCellOut,
+                                    isToday && styles.overallDayCellToday,
+                                  ]}
+                                  onPress={() => setOverallDayKey(key)}
+                                >
+                                  <Text style={styles.overallWeekday}>
+                                    {weekdayLabels[index]}
+                                  </Text>
+                                  <Text style={styles.overallDayNumber}>
+                                    {day.getDate()}
+                                  </Text>
+                                  <Text style={styles.overallDayValue}>
+                                    {hasValue ? formatScreenTime(totalSeconds) : "-"}
+                                  </Text>
+                                </Pressable>
+                              );
+                            })}
+                          </View>
+                        ))}
                       </View>
-                    ))}
-                  </View>
-                );
-              })
-            : null}
+                    );
+                  })
+                : null}
+            </>
+          ) : null}
         </ScrollView>
         {editEntryKey ? (
           <View style={styles.modalOverlay}>
@@ -7750,6 +8431,16 @@ const getSpeechLocale = () => {
       WEEKDAY_LABELS_BY_LANG[language] || DEFAULT_WEEKDAY_LABELS;
     const editUnitLabel =
       statsSport.type === "reps" ? repsShort : t("label.timeUnit");
+    const sportChartDayKeys = getRecentDayKeys(30);
+    const sportChartValues = sportChartDayKeys.map((dayKey) => {
+      const entries = (logs[statsSport.id] || {})[dayKey] || [];
+      return sumSportEntryMetric(statsSport, entries);
+    });
+    const sportChartNormalized = normalizeChartSeries(
+      sportChartValues,
+      CHART_SCALE_MODE.sport
+    );
+    const sportChartLabels = sparseLabels(sportChartDayKeys.map(formatChartDayLabel));
 
     const openEditEntry = (dayKey) => {
       const dayStats = sportStats[dayKey] || { reps: 0, seconds: 0 };
@@ -7947,73 +8638,132 @@ const getSpeechLocale = () => {
               <Text style={styles.deleteAllText}>{t("label.deleteAllEntries")}</Text>
             </Pressable>
           </View>
+          <View style={styles.chartToggleRow}>
+            <Pressable
+              style={[
+                styles.chartToggleButton,
+                sportStatsView === "calendar" && styles.chartToggleButtonActive,
+              ]}
+              onPress={() => setSportStatsView("calendar")}
+            >
+              <Text
+                style={[
+                  styles.chartToggleText,
+                  sportStatsView === "calendar" && styles.chartToggleTextActive,
+                ]}
+              >
+                {t("label.calendar")}
+              </Text>
+            </Pressable>
+            <Pressable
+              style={[
+                styles.chartToggleButton,
+                sportStatsView === "chart" && styles.chartToggleButtonActive,
+              ]}
+              onPress={() => setSportStatsView("chart")}
+            >
+              <Text
+                style={[
+                  styles.chartToggleText,
+                  sportStatsView === "chart" && styles.chartToggleTextActive,
+                ]}
+              >
+                {t("label.chart")}
+              </Text>
+            </Pressable>
+          </View>
+          {sportStatsView === "chart" ? (
+            <>
+              <Text style={styles.sectionTitle}>{t("label.chart")}</Text>
+              {sportChartValues.every((value) => value <= 0) ? (
+                <Text style={styles.helperText}>{t("label.noChartData")}</Text>
+              ) : (
+                <ChartLines
+                  labels={sportChartLabels}
+                  series={[
+                    {
+                      sportId: statsSport.id,
+                      label: getSportLabel(statsSport),
+                      color: getSportAccentColor(statsSport.id),
+                      normalized: sportChartNormalized,
+                    },
+                  ]}
+                />
+              )}
+            </>
+          ) : null}
           <View style={styles.infoCard}>
             <Text style={styles.sectionTitle}>{getSportLabel(statsSport)}</Text>
           </View>
-          {months.map((monthDate) => {
-            const monthKey = `${monthDate.getFullYear()}-${String(
-              monthDate.getMonth() + 1
-            ).padStart(2, "0")}`;
-            const weeks = buildWeeksForMonth(monthDate);
-            return (
-              <View key={monthKey} style={styles.overallMonth}>
-                <Text style={styles.calendarMonthTitle}>
-                  {formatMonthLabel(monthDate, language)}
-                </Text>
-                {weeks.map((weekDays, weekIndex) => (
-                  <View key={`${monthKey}-w${weekIndex}`} style={styles.overallWeekRow}>
-                    {weekDays.map((day, index) => {
-                      const key = dateKeyFromDate(day);
-                      const dayStats = sportStats[key] || { reps: 0, seconds: 0 };
-                      const hasValue =
-                        statsSport.type === "reps"
-                          ? dayStats.reps > 0
-                          : (dayStats.seconds || 0) > 0;
-                      const displayValue = hasValue
-                        ? statsSport.type === "reps"
-                          ? `${dayStats.reps}`
-                          : formatSeconds(dayStats.seconds || 0)
-                        : "-";
-                      const inMonth = day.getMonth() === monthDate.getMonth();
-                      const isToday = key === todayKey();
-                      return (
-                        <Pressable
-                          key={key}
-                          style={[
-                            styles.overallDayCell,
-                            !inMonth && styles.overallDayCellOut,
-                            isToday && styles.overallDayCellToday,
-                          ]}
-                          onPress={() => {
-                            if (statsEditMode) {
-                              if (hasValue) {
-                                openEditEntry(key);
-                              }
-                              return;
-                            }
-                            if (!statsEditMode) {
-                              setStatsDayKey(key);
-                            }
-                          }}
-                        >
-                          <Text style={styles.overallWeekday}>
-                            {weekdayLabels[index]}
-                          </Text>
-                          <Text style={styles.overallDayNumber}>{day.getDate()}</Text>
-                          <Text style={styles.overallDayValue}>{displayValue}</Text>
-                          {statsEditMode && hasValue ? (
-                            <View style={styles.calendarEditOverlay} pointerEvents="none">
-                              <Text style={styles.calendarEditMinus}>-</Text>
-                            </View>
-                          ) : null}
-                        </Pressable>
-                      );
-                    })}
+          {sportStatsView === "calendar"
+            ? months.map((monthDate) => {
+                const monthKey = `${monthDate.getFullYear()}-${String(
+                  monthDate.getMonth() + 1
+                ).padStart(2, "0")}`;
+                const weeks = buildWeeksForMonth(monthDate);
+                return (
+                  <View key={monthKey} style={styles.overallMonth}>
+                    <Text style={styles.calendarMonthTitle}>
+                      {formatMonthLabel(monthDate, language)}
+                    </Text>
+                    {weeks.map((weekDays, weekIndex) => (
+                      <View key={`${monthKey}-w${weekIndex}`} style={styles.overallWeekRow}>
+                        {weekDays.map((day, index) => {
+                          const key = dateKeyFromDate(day);
+                          const dayStats = sportStats[key] || { reps: 0, seconds: 0 };
+                          const hasValue =
+                            statsSport.type === "reps"
+                              ? dayStats.reps > 0
+                              : (dayStats.seconds || 0) > 0;
+                          const displayValue = hasValue
+                            ? statsSport.type === "reps"
+                              ? `${dayStats.reps}`
+                              : formatSeconds(dayStats.seconds || 0)
+                            : "-";
+                          const inMonth = day.getMonth() === monthDate.getMonth();
+                          const isToday = key === todayKey();
+                          return (
+                            <Pressable
+                              key={key}
+                              style={[
+                                styles.overallDayCell,
+                                !inMonth && styles.overallDayCellOut,
+                                isToday && styles.overallDayCellToday,
+                              ]}
+                              onPress={() => {
+                                if (statsEditMode) {
+                                  if (hasValue) {
+                                    openEditEntry(key);
+                                  }
+                                  return;
+                                }
+                                if (!statsEditMode) {
+                                  setStatsDayKey(key);
+                                }
+                              }}
+                            >
+                              <Text style={styles.overallWeekday}>
+                                {weekdayLabels[index]}
+                              </Text>
+                              <Text style={styles.overallDayNumber}>{day.getDate()}</Text>
+                              <Text style={styles.overallDayValue}>{displayValue}</Text>
+                              {statsEditMode && hasValue ? (
+                                <View
+                                  style={styles.calendarEditOverlay}
+                                  pointerEvents="none"
+                                >
+                                  <Text style={styles.calendarEditMinus}>-</Text>
+                                </View>
+                              ) : null}
+                            </Pressable>
+                          );
+                        })}
+                      </View>
+                    ))}
                   </View>
-                ))}
-              </View>
-            );
-          })}
+                );
+              })
+            : null}
         </ScrollView>
       </SafeAreaView>
     );
@@ -8121,6 +8871,7 @@ const getSpeechLocale = () => {
             ref={sportDetailScrollRef}
             contentContainerStyle={styles.sportDetailScrollContent}
             keyboardShouldPersistTaps="handled"
+            scrollEnabled={isKeyboardVisible}
           >
             <Pressable
               style={styles.statsCard}
@@ -8138,12 +8889,16 @@ const getSpeechLocale = () => {
                     ]}
                   >
                     {selectedSport.type === "reps"
-                      ? `${todayStats.reps}`
+                      ? selectedSport.weightExercise
+                        ? formatWeightValue(todayWeightTotal)
+                        : `${todayStats.reps}`
                       : formatSeconds(todayStats.seconds || 0)}
                   </Text>
                   <Text style={[styles.counterUnit, styles.statsCounterUnit]}>
                     {selectedSport.type === "reps"
-                      ? repsShort
+                      ? selectedSport.weightExercise
+                        ? t("label.weightUnit")
+                        : repsShort
                       : t("label.timeUnit")}
                   </Text>
                 </View>
@@ -8169,40 +8924,42 @@ const getSpeechLocale = () => {
             <Text style={styles.counterValue}>{workoutDisplayReps}</Text>
             <Text style={styles.plusSign}>+</Text>
             <Text style={styles.helperText}>{t("label.tapAnywhere")}</Text>
-            <View style={styles.voiceRow}>
-              <Pressable
-                style={[
-                  styles.voiceButton,
-                  voiceEnabled && styles.voiceButtonActive,
-                ]}
-                onPress={toggleVoice}
-              >
-                <View style={styles.voiceButtonContent}>
-                  <Text style={styles.voiceButtonIcon}>{micIcon}</Text>
-                  <Text
-                    style={[
-                      styles.voiceButtonLabel,
-                      voiceEnabled && styles.voiceButtonLabelActive,
-                    ]}
-                  >
-                    {voiceEnabled
-                      ? t("label.voiceListening")
-                      : t("label.voiceIdle")}
-                  </Text>
-                </View>
-                {voiceStatusText ? (
-                  <Text
-                    style={[
-                      styles.voiceButtonStatus,
-                      voiceError && styles.voiceButtonStatusError,
-                    ]}
-                  >
-                    {voiceStatusText}
-                  </Text>
-                ) : null}
-              </Pressable>
-              <Text style={styles.voiceHint}>{t("label.voiceHint")}</Text>
-            </View>
+            {isTestMode ? (
+              <View style={styles.voiceRow}>
+                <Pressable
+                  style={[
+                    styles.voiceButton,
+                    voiceEnabled && styles.voiceButtonActive,
+                  ]}
+                  onPress={toggleVoice}
+                >
+                  <View style={styles.voiceButtonContent}>
+                    <Text style={styles.voiceButtonIcon}>{micIcon}</Text>
+                    <Text
+                      style={[
+                        styles.voiceButtonLabel,
+                        voiceEnabled && styles.voiceButtonLabelActive,
+                      ]}
+                    >
+                      {voiceEnabled
+                        ? t("label.voiceListening")
+                        : t("label.voiceIdle")}
+                    </Text>
+                  </View>
+                  {voiceStatusText ? (
+                    <Text
+                      style={[
+                        styles.voiceButtonStatus,
+                        voiceError && styles.voiceButtonStatusError,
+                      ]}
+                    >
+                      {voiceStatusText}
+                    </Text>
+                  ) : null}
+                </Pressable>
+                <Text style={styles.voiceHint}>{t("label.voiceHint")}</Text>
+              </View>
+            ) : null}
               <View style={styles.manualEntryContainer}>
                 <Text style={styles.manualEntryLabel}>
                   {t("label.manualRepsEntryTitle")}
@@ -8340,27 +9097,72 @@ const getSpeechLocale = () => {
               </View>
             ) : (
               <View style={styles.trackingArea} ref={tutorialTrackingAreaRef}>
-            <Text style={styles.counterValue}>
-              {formatSeconds(todayStats.seconds + sessionSeconds)}
+          <Text style={styles.counterValue}>
+              {formatSeconds(
+                todayStats.seconds +
+                  sessionSeconds -
+                  (resumeEntryRef.current?.seconds || 0)
+              )}
             </Text>
             <Text style={[styles.helperText, styles.trackingHelperText]}>
               {t("label.today")}
             </Text>
             <View style={styles.timerRow}>
               {!running ? (
-                <Pressable
-                  style={[styles.primaryButton, styles.detailPrimaryButton]}
-                  onPress={handleStart}
-                >
-                  <Text
-                    style={[
-                      styles.primaryButtonText,
-                      styles.detailPrimaryButtonText,
-                    ]}
-                  >
-                    {t("label.start")}
-                  </Text>
-                </Pressable>
+                (() => {
+                  const recentEntry = recentTimeEntries[0];
+                  const canResume =
+                    recentEntry &&
+                    recentEntry.ts &&
+                    Date.now() - recentEntry.ts <= RESUME_WINDOW_MS;
+                  if (canResume) {
+                    return (
+                      <View style={styles.resumeActionRow}>
+                        <Pressable
+                          style={[styles.primaryButton, styles.detailPrimaryButton, styles.resumeButton]}
+                          onPress={() => handleResumeStart(recentEntry)}
+                        >
+                          <Text
+                            style={[
+                              styles.primaryButtonText,
+                              styles.detailPrimaryButtonText,
+                            ]}
+                          >
+                            {t("label.resume")}
+                          </Text>
+                        </Pressable>
+                        <Pressable
+                          style={[styles.secondaryButton, styles.detailSecondaryButton, styles.resumeButton]}
+                          onPress={handleStart}
+                        >
+                          <Text
+                            style={[
+                              styles.secondaryButtonText,
+                              styles.detailSecondaryButtonText,
+                            ]}
+                          >
+                            {t("label.startNew")}
+                          </Text>
+                        </Pressable>
+                      </View>
+                    );
+                  }
+                  return (
+                    <Pressable
+                      style={[styles.primaryButton, styles.detailPrimaryButton]}
+                      onPress={handleStart}
+                    >
+                      <Text
+                        style={[
+                          styles.primaryButtonText,
+                          styles.detailPrimaryButtonText,
+                        ]}
+                      >
+                        {t("label.start")}
+                      </Text>
+                    </Pressable>
+                  );
+                })()
               ) : (
                 <Pressable
                   style={[styles.dangerButton, styles.detailDangerButton]}
@@ -8378,9 +9180,11 @@ const getSpeechLocale = () => {
               )}
             </View>
             {running ? (
-              <Text style={[styles.helperText, styles.trackingHelperText]}>
-                {t("label.runningSession")}: {formatSeconds(sessionSeconds)}
-              </Text>
+              <View style={styles.runningSessionBadge}>
+                <Text style={[styles.helperText, styles.trackingHelperText]}>
+                  {t("label.runningSession")}: {formatSeconds(sessionSeconds)}
+                </Text>
+              </View>
             ) : null}
             <View style={styles.manualEntryContainer}>
               <Text style={styles.manualEntryLabel}>
@@ -8480,6 +9284,51 @@ const getSpeechLocale = () => {
                 <Text style={styles.formulaBadgeValue}>{formulaBadgeValue}</Text>
               </Pressable>
             </View>
+            {isWeightMode && recentWeightEntries.length > 0 ? (
+              <View style={styles.weightHistoryCard}>
+                <Text style={styles.sectionTitle}>{t("label.weightHistory")}</Text>
+                {recentWeightEntries.map((entry, index) => (
+                  <View
+                    key={entry.id || entry.ts}
+                    style={[
+                      styles.weightHistoryRow,
+                      index === recentWeightEntries.length - 1 &&
+                        styles.weightHistoryRowLast,
+                    ]}
+                  >
+                    <Text style={styles.weightHistoryTime}>
+                      {formatTime(entry.ts || Date.now())}
+                    </Text>
+                    <Text style={styles.weightHistorySet}>
+                      {formatWeightValue(entry.weight)} × {entry.reps}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            ) : null}
+            {selectedSport.type === "time" && recentTimeEntries.length > 0 ? (
+              <View style={styles.weightHistoryCard}>
+                <Text style={styles.sectionTitle}>{t("label.timeHistory")}</Text>
+                {recentTimeEntries.map((entry, index) => (
+                  <View
+                    key={entry.id || entry.ts}
+                    style={[
+                      styles.weightHistoryRow,
+                      index === recentTimeEntries.length - 1 &&
+                        styles.weightHistoryRowLast,
+                    ]}
+                  >
+                    <Text style={styles.weightHistoryTime}>
+                      {formatTime(entry.ts || Date.now())}
+                    </Text>
+                    <Text style={styles.weightHistorySet}>
+                      {formatSeconds(entry.seconds)}
+                      {entry.km > 0 ? ` · ${formatDistanceValue(entry.km)} ${t("label.distanceKm")}` : ""}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            ) : null}
           </ScrollView>
         </KeyboardAvoidingView>
         <Modal
@@ -8612,28 +9461,6 @@ const getSpeechLocale = () => {
             </View>
           </View>
           <Text style={styles.sectionTitle}>
-            {t("label.remainingBySport")}
-          </Text>
-          <View style={styles.infoCard}>
-            {remainingBySportList.length === 0 ? (
-              <Text style={styles.helperText}>
-                {t("label.noRemainingBySport")}
-              </Text>
-            ) : (
-              remainingBySportList.map((entry) => (
-                <View key={entry.sportId} style={styles.detailListItem}>
-                  <View style={styles.detailListLeft}>
-                    <Text style={styles.detailListIcon}>{entry.icon}</Text>
-                    <Text style={styles.detailListLabel}>{entry.label}</Text>
-                  </View>
-                  <Text style={styles.detailListValue}>
-                    {formatScreenTime(entry.seconds)}
-                  </Text>
-                </View>
-              ))
-            )}
-          </View>
-          <Text style={styles.sectionTitle}>
             {t("label.screenTimeEntriesCurrent")}
           </Text>
           <View style={styles.infoCard}>
@@ -8668,6 +9495,11 @@ const getSpeechLocale = () => {
                           {t("label.timeUnit")}: {formatSeconds(entry.seconds)}
                         </Text>
                       ) : null}
+                      {entry.decayCount > 0 ? (
+                        <Text style={styles.detailEntryMeta}>
+                          {t("label.halvings")}: {entry.decayCount}
+                        </Text>
+                      ) : null}
                     </View>
                   </View>
                   <View style={styles.detailEntryRight}>
@@ -8690,6 +9522,12 @@ const getSpeechLocale = () => {
             {t("label.screenTimeEntriesCarryover")}
           </Text>
           <View style={styles.infoCard}>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>{t("label.carryover")}</Text>
+              <Text style={styles.detailValue}>
+                {formatScreenTime(carryoverEntriesTotalSeconds)}
+              </Text>
+            </View>
             <Text style={styles.helperText}>
               {t("label.carryoverEntriesHint")}
             </Text>
@@ -8722,6 +9560,11 @@ const getSpeechLocale = () => {
                       {entry.seconds > 0 ? (
                         <Text style={styles.detailEntryMeta}>
                           {t("label.timeUnit")}: {formatSeconds(entry.seconds)}
+                        </Text>
+                      ) : null}
+                      {entry.decayCount > 0 ? (
+                        <Text style={styles.detailEntryMeta}>
+                          {t("label.halvings")}: {entry.decayCount}
                         </Text>
                       ) : null}
                     </View>
@@ -8762,6 +9605,28 @@ const getSpeechLocale = () => {
               ))
             )}
           </View>
+          <Text style={styles.sectionTitle}>
+            {t("label.remainingBySport")}
+          </Text>
+          <View style={styles.infoCard}>
+            {remainingBySportList.length === 0 ? (
+              <Text style={styles.helperText}>
+                {t("label.noRemainingBySport")}
+              </Text>
+            ) : (
+              remainingBySportList.map((entry) => (
+                <View key={entry.sportId} style={styles.detailListItem}>
+                  <View style={styles.detailListLeft}>
+                    <Text style={styles.detailListIcon}>{entry.icon}</Text>
+                    <Text style={styles.detailListLabel}>{entry.label}</Text>
+                  </View>
+                  <Text style={styles.detailListValue}>
+                    {formatScreenTime(entry.seconds)}
+                  </Text>
+                </View>
+              ))
+            )}
+          </View>
           <Text style={styles.sectionTitle}>{t("label.usageBreakdown")}</Text>
           <View style={styles.infoCard}>
             <View style={styles.detailRow}>
@@ -8782,16 +9647,6 @@ const getSpeechLocale = () => {
                 </View>
               ))
             )}
-          </View>
-          <Text style={styles.sectionTitle}>{t("label.carryover")}</Text>
-          <View style={styles.infoCard}>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>{t("label.carryover")}</Text>
-              <Text style={styles.detailValue}>
-                {formatScreenTime(usageState.carryoverSeconds || 0)}
-              </Text>
-            </View>
-            <Text style={styles.helperText}>{t("label.carryoverHint")}</Text>
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -9725,12 +10580,18 @@ const getSpeechLocale = () => {
                               </Text>
                               <Text style={styles.counterValueSmall}>
                                 {sport.type === "reps"
-                                  ? `${daily.reps}`
+                                  ? sport.weightExercise
+                                    ? formatWeightValue(
+                                        getRollingWeightTotal(logs, sport.id)
+                                      )
+                                    : `${daily.reps}`
                                   : formatSeconds(daily.seconds || 0)}
                               </Text>
                               <Text style={styles.counterUnit}>
                                 {sport.type === "reps"
-                                  ? repsShort
+                                  ? sport.weightExercise
+                                    ? t("label.weightUnit")
+                                    : repsShort
                                   : t("label.timeUnit")}
                               </Text>
                             </View>
@@ -9824,7 +10685,7 @@ const getSpeechLocale = () => {
                       </View>
                       <View style={styles.sportTopIconsRight}>
                         <Pressable
-                          style={styles.iconAction}
+                          style={[styles.iconAction, styles.iconActionWithLabel]}
                           onPress={() =>
                             confirmAction(t("label.confirmShow"), () =>
                               handleHideSport(sport.id, false)
@@ -9832,6 +10693,7 @@ const getSpeechLocale = () => {
                           }
                         >
                           <ActionGlyph type="hide" color={COLORS.text} />
+                          <Text style={styles.iconActionLabel}>{t("label.show")}</Text>
                         </Pressable>
                         {canDeleteSport(sport) ? (
                           <Pressable
@@ -9882,12 +10744,18 @@ const getSpeechLocale = () => {
                                 </Text>
                                 <Text style={styles.counterValueSmall}>
                                   {sport.type === "reps"
-                                    ? `${daily.reps}`
+                                    ? sport.weightExercise
+                                      ? formatWeightValue(
+                                          getRollingWeightTotal(logs, sport.id)
+                                        )
+                                      : `${daily.reps}`
                                     : formatSeconds(daily.seconds || 0)}
                                 </Text>
                                 <Text style={styles.counterUnit}>
                                   {sport.type === "reps"
-                                    ? repsShort
+                                    ? sport.weightExercise
+                                      ? t("label.weightUnit")
+                                      : repsShort
                                     : t("label.timeUnit")}
                                 </Text>
                               </View>
@@ -10338,6 +11206,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  navIconGearTeeth: {
+    position: "absolute",
+    width: 22,
+    height: 22,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  navIconGearTooth: {
+    position: "absolute",
+    width: 4,
+    height: 3,
+    borderRadius: 1,
+  },
   navIconGearCenter: {
     width: 6,
     height: 6,
@@ -10376,6 +11257,28 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 12,
   },
+  chartToggleRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 12,
+  },
+  chartToggleButton: {
+    backgroundColor: COLORS.cardAlt,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 999,
+  },
+  chartToggleButtonActive: {
+    backgroundColor: COLORS.accent,
+  },
+  chartToggleText: {
+    color: COLORS.text,
+    fontWeight: "700",
+    fontSize: 12,
+  },
+  chartToggleTextActive: {
+    color: COLORS.ink,
+  },
   filterChip: {
     backgroundColor: COLORS.cardAlt,
     paddingVertical: 6,
@@ -10392,6 +11295,81 @@ const styles = StyleSheet.create({
   },
   filterChipTextActive: {
     color: COLORS.ink,
+  },
+  chartCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "rgba(148, 163, 184, 0.2)",
+    marginBottom: 12,
+  },
+  chartBarsRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    gap: 6,
+  },
+  chartBarColumn: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "flex-end",
+  },
+  chartBar: {
+    width: "100%",
+    borderRadius: 6,
+  },
+  chartPlot: {
+    height: 140,
+    position: "relative",
+    width: "100%",
+    marginBottom: 8,
+  },
+  chartLineSegment: {
+    position: "absolute",
+    height: 2,
+    borderRadius: 999,
+    transformOrigin: "left center",
+  },
+  chartLineDot: {
+    position: "absolute",
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  chartAxisRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  chartAxisLabel: {
+    color: COLORS.muted,
+    fontSize: 10,
+  },
+  chartValueLabel: {
+    color: COLORS.muted,
+    fontSize: 9,
+    marginTop: 2,
+  },
+  chartLegendRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  chartLegendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    maxWidth: 140,
+  },
+  chartLegendSwatch: {
+    width: 10,
+    height: 10,
+    borderRadius: 2,
+  },
+  chartLegendText: {
+    color: COLORS.muted,
+    fontSize: 10,
   },
   quickActionsRow: {
     flexDirection: "row",
@@ -10701,6 +11679,16 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 16,
   },
+  runningSessionBadge: {
+    marginTop: 8,
+    alignSelf: "center",
+    backgroundColor: "rgba(245, 158, 11, 0.12)",
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: "rgba(245, 158, 11, 0.35)",
+  },
   manualRepsInput: {
     textAlign: "center",
   },
@@ -10744,10 +11732,10 @@ const styles = StyleSheet.create({
     elevation: 7,
   },
   hiddenCard: {
-    backgroundColor: COLORS.cardAlt,
-    borderColor: COLORS.cardAlt,
+    backgroundColor: "rgba(148, 163, 184, 0.12)",
+    borderColor: "rgba(148, 163, 184, 0.2)",
     marginTop: 8,
-    opacity: 0.9,
+    opacity: 0.72,
   },
   sportInfo: {
     marginBottom: 6,
@@ -11321,6 +12309,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 10,
   },
+  detailSecondaryButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+  },
   trackButtonTop: {
     alignSelf: "stretch",
     width: "100%",
@@ -11336,6 +12329,10 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   detailPrimaryButtonText: {
+    fontSize: 13,
+    letterSpacing: 0.2,
+  },
+  detailSecondaryButtonText: {
     fontSize: 13,
     letterSpacing: 0.2,
   },
@@ -11406,6 +12403,15 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 14,
     borderRadius: 10,
+  },
+  resumeActionRow: {
+    flexDirection: "row",
+    gap: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  resumeButton: {
+    flex: 1,
   },
   addCard: {
     backgroundColor: COLORS.cardAlt,
@@ -12034,12 +13040,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   formulaBadgeWrap: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 14,
     alignItems: "center",
-    zIndex: 6,
+    marginTop: 16,
+    marginBottom: 12,
   },
   formulaBadge: {
     backgroundColor: "rgba(15, 23, 42, 0.9)",
