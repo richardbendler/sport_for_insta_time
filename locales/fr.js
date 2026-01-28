@@ -308,6 +308,7 @@ const fr = {
     "label.voiceHint": "Dis les numeros a voix haute pour compter (micro requis, beta).",
     "label.voicePermissionMissing": "Acces micro manquant",
     "label.voiceError": "Echec de reconnaissance vocale",
+    "label.voiceServiceMissing": "Aucun service de reconnaissance vocale installe",
     "label.voiceUnavailable": "Reconnaissance vocale indisponible",
     "label.back": "Retour",
     "label.start": "Démarrer",

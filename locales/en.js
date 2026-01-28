@@ -311,6 +311,7 @@ const en = {
     "label.voiceHint": "Say numbers out loud to count (microphone access required, beta).",
     "label.voicePermissionMissing": "Microphone access missing",
     "label.voiceError": "Speech recognition failed",
+    "label.voiceServiceMissing": "No speech recognition service installed",
     "label.voiceUnavailable": "Speech recognition unavailable",
     "label.back": "Back",
     "label.start": "Start",
