@@ -2647,8 +2647,10 @@ function AppContent() {
     useState(false);
   const [grayscalePermissionGranted, setGrayscalePermissionGranted] =
     useState(true);
-  const [permissionsPanelOpen, setPermissionsPanelOpen] = useState(false);
-  const [permissionsPanelTouched, setPermissionsPanelTouched] = useState(false);
+  const [gettingStartedOpen, setGettingStartedOpen] = useState(false);
+  const [gettingStartedTouched, setGettingStartedTouched] = useState(false);
+  const [motivationOpen, setMotivationOpen] = useState(false);
+  const [motivationTouched, setMotivationTouched] = useState(false);
   const [permissionsCheckTick, setPermissionsCheckTick] = useState(0);
   const [dismissedMotivationActionId, setDismissedMotivationActionId] =
     useState(null);
@@ -3220,8 +3222,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           setWorkoutSeconds(elapsedWorkout);
         }
         refreshUsageState();
-        checkAccessibility();
-        checkUsageAccess();
+        refreshMainPermissions();
         refreshNotificationPermission();
       }
     });
@@ -3268,12 +3269,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   }, [isAppActive, runningSportId, selectedSportId]);
 
   useEffect(() => {
-    checkAccessibility();
-  }, []);
-
-  useEffect(() => {
-    checkUsageAccess();
-  }, []);
+    refreshMainPermissions();
+  }, [refreshMainPermissions]);
 
   useEffect(() => {
     if (!running) {
@@ -4130,6 +4127,19 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     return !!hasAccess;
   };
 
+  const refreshMainPermissions = useCallback(async () => {
+    try {
+      await checkAccessibility();
+    } catch (error) {
+      console.warn("checkAccessibility failed", error);
+    }
+    try {
+      await checkUsageAccess();
+    } catch (error) {
+      console.warn("checkUsageAccess failed", error);
+    }
+  }, []);
+
   const checkGrayscalePermission = useCallback(async () => {
     if (Platform.OS !== "android" || !InstaControl?.canWriteSecureSettings) {
       setGrayscalePermissionGranted(true);
@@ -4302,12 +4312,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   }, [isAppsSettingsOpen]);
 
   useEffect(() => {
-    if (permissionsPanelOpen) {
+    if (gettingStartedOpen || motivationOpen) {
       checkAccessibility();
       checkUsageAccess();
       refreshNotificationPermission();
     }
-  }, [permissionsPanelOpen]);
+  }, [gettingStartedOpen, motivationOpen]);
 
   useEffect(() => {
     if (!settings.grayscaleRestrictedApps) {
@@ -7045,8 +7055,9 @@ const getSpeechLocale = () => {
     if (
       !hasLoaded ||
       !experimentalFeaturesEnabled ||
-      !permissionsPanelOpen ||
-      missingPermissions
+      !motivationOpen ||
+      missingPermissions ||
+      !showMotivationBlock
     ) {
       return;
     }
@@ -7054,10 +7065,23 @@ const getSpeechLocale = () => {
   }, [
     hasLoaded,
     missingPermissions,
-    permissionsPanelOpen,
+    motivationOpen,
     selectRandomFunFact,
     experimentalFeaturesEnabled,
+    showMotivationBlock,
   ]);
+
+  const showGettingStartedSection = Platform.OS === "android";
+  const accessibilityMissing = needsAccessibility !== false;
+  const usageAccessMissing = usageAccessGranted !== true;
+  const missingPermissions = accessibilityMissing || usageAccessMissing;
+  const showPermissionPrompt =
+    showGettingStartedSection && missingPermissions;
+  const completedGettingStarted =
+    !missingPermissions &&
+    (permissionsPrompted ||
+      usagePermissionsPrompted ||
+      accessibilityDisclosureAccepted);
 
   const activeFunFact = funFacts.find((fact) => fact.id === activeFunFactId);
   const activeQuoteTitle = t("label.motivationQuoteStartTitle");
@@ -7088,7 +7112,6 @@ const getSpeechLocale = () => {
     !missingPermissions &&
     experimentalFeaturesEnabled &&
     shouldShowMotivationAction;
-  const showPermissionCard = showGettingStartedBlock || showMotivationBlock;
 
   const handleMotivationAction = (actionItem) => {
     if (!actionItem?.action) {
@@ -7751,44 +7774,42 @@ const getSpeechLocale = () => {
     }
   }, [voiceEnabled]);
 
-  const showGettingStartedSection = Platform.OS === "android";
-  const accessibilityMissing = needsAccessibility !== false;
-  const usageAccessMissing = usageAccessGranted !== true;
-  const missingPermissions = accessibilityMissing || usageAccessMissing;
-  const showPermissionPrompt =
-    showGettingStartedSection && missingPermissions;
-  const completedGettingStarted =
-    !missingPermissions &&
-    (permissionsPrompted ||
-      usagePermissionsPrompted ||
-      accessibilityDisclosureAccepted);
-
-  const prevShowMotivationBlockRef = useRef(showPermissionCard);
+  const prevShowGettingStartedRef = useRef(showGettingStartedBlock);
   useEffect(() => {
-    if (prevShowMotivationBlockRef.current && !showPermissionCard) {
-      setPermissionsPanelTouched(false);
-      setPermissionsPanelOpen(false);
+    if (prevShowGettingStartedRef.current && !showGettingStartedBlock) {
+      setGettingStartedTouched(false);
+      setGettingStartedOpen(false);
     }
-    prevShowMotivationBlockRef.current = showPermissionCard;
-  }, [showPermissionCard]);
+    prevShowGettingStartedRef.current = showGettingStartedBlock;
+  }, [showGettingStartedBlock]);
+
+  const prevShowMotivationRef = useRef(showMotivationBlock);
+  useEffect(() => {
+    if (prevShowMotivationRef.current && !showMotivationBlock) {
+      setMotivationTouched(false);
+      setMotivationOpen(false);
+    }
+    prevShowMotivationRef.current = showMotivationBlock;
+  }, [showMotivationBlock]);
 
   useEffect(() => {
-    if (permissionsPanelTouched || !showPermissionCard) {
+    if (gettingStartedTouched || !showGettingStartedBlock) {
       return;
     }
     if (missingPermissions) {
-      setPermissionsPanelOpen(true);
+      setGettingStartedOpen(true);
+    }
+  }, [gettingStartedTouched, showGettingStartedBlock, missingPermissions]);
+
+  useEffect(() => {
+    if (!isAppActive || !showGettingStartedBlock) {
       return;
     }
-    if (shouldShowMotivationAction) {
-      setPermissionsPanelOpen(false);
-    }
-  }, [
-    permissionsPanelTouched,
-    showPermissionCard,
-    missingPermissions,
-    shouldShowMotivationAction,
-  ]);
+    const interval = setInterval(() => {
+      refreshMainPermissions();
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [isAppActive, showGettingStartedBlock, refreshMainPermissions]);
 
   useEffect(() => {
     if (!hasLoaded) {
@@ -10144,20 +10165,20 @@ const getSpeechLocale = () => {
             </Text>
             {accessibilityMissing ? (
               <Pressable
-                style={styles.primaryButton}
+                style={styles.permissionActionButton}
                 onPress={requestAccessibilityAccess}
               >
-                <Text style={styles.primaryButtonText}>
-                  {t("label.permissionNeeded")}
+                <Text style={styles.permissionActionButtonText}>
+                  {t("label.accessibilityDisclosureConfirm")}
                 </Text>
               </Pressable>
             ) : null}
             {usageAccessMissing ? (
               <Pressable
-                style={styles.secondaryButton}
+                style={styles.permissionActionButton}
                 onPress={openUsageAccessSettings}
               >
-                <Text style={styles.secondaryButtonText}>
+                <Text style={styles.permissionActionButtonText}>
                   {t("label.openUsageAccess")}
                 </Text>
               </Pressable>
@@ -10255,14 +10276,14 @@ const getSpeechLocale = () => {
           <View
             style={[
               styles.permissionCardLarge,
-              !permissionsPanelOpen && styles.permissionCardCollapsed,
+              !gettingStartedOpen && styles.permissionCardCollapsed,
             ]}
           >
               <Pressable
                 style={styles.permissionHeaderRow}
                 onPress={() => {
-                  setPermissionsPanelTouched(true);
-                  setPermissionsPanelOpen((prev) => !prev);
+                  setGettingStartedTouched(true);
+                  setGettingStartedOpen((prev) => !prev);
                 }}
               >
               <View>
@@ -10277,7 +10298,7 @@ const getSpeechLocale = () => {
                 </Text>
               </View>
               <Text style={styles.permissionToggle}>
-                {permissionsPanelOpen ? "-" : "+"}
+                {gettingStartedOpen ? "-" : "+"}
               </Text>
             </Pressable>
             <View style={styles.permissionReminder}>
@@ -10285,7 +10306,7 @@ const getSpeechLocale = () => {
                 {t("label.permissionsReminder")}
               </Text>
             </View>
-            {permissionsPanelOpen ? (
+            {gettingStartedOpen ? (
               <View style={styles.permissionList}>
                 <View
                   style={[
@@ -10351,18 +10372,18 @@ const getSpeechLocale = () => {
           <View
             style={[
               styles.permissionCardLarge,
-              !permissionsPanelOpen && styles.permissionCardCollapsed,
+              !motivationOpen && styles.permissionCardCollapsed,
             ]}
           >
             <Pressable
               style={styles.permissionHeaderRow}
               onPress={() => {
-                setPermissionsPanelTouched(true);
-                setPermissionsPanelOpen((prev) => !prev);
+                setMotivationTouched(true);
+                setMotivationOpen((prev) => !prev);
               }}
             >
               <View>
-                {permissionsPanelOpen ? (
+                {motivationOpen ? (
                   <>
                     <Text style={styles.motivationQuoteTitle}>
                       {activeQuoteTitle}
@@ -10378,10 +10399,10 @@ const getSpeechLocale = () => {
                 )}
               </View>
               <Text style={styles.permissionToggle}>
-                {permissionsPanelOpen ? "-" : "+"}
+                {motivationOpen ? "-" : "+"}
               </Text>
             </Pressable>
-            {permissionsPanelOpen && shouldShowMotivationAction ? (
+            {motivationOpen && shouldShowMotivationAction ? (
               <View style={styles.permissionList}>
                 <Text style={styles.motivationCardTitle}>
                   {activeActionTitle}
