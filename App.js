@@ -104,7 +104,7 @@ const SPEECH_LOCALES = {
 };
 
 const normalizeSpeechLocale = (locale) =>
-  typeof locale === "string" ? locale.replace(/-/g, "_") : "";
+  typeof locale === "string" ? locale.replace(/_/g, "-") : "";
 
 const DEFAULT_ICON = "⭐";
 const USER_FACTOR_OPTIONS = (() => {
@@ -5957,9 +5957,12 @@ const getSpeechLocale = () => {
     if (Platform.OS !== "android") {
       return true;
     }
-    const granted = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.RECORD_AUDIO
-    );
+    const permission = PermissionsAndroid.PERMISSIONS.RECORD_AUDIO;
+    const alreadyGranted = await PermissionsAndroid.check(permission);
+    if (alreadyGranted) {
+      return true;
+    }
+    const granted = await PermissionsAndroid.request(permission);
     return granted === PermissionsAndroid.RESULTS.GRANTED;
   };
 
@@ -6046,6 +6049,18 @@ const getSpeechLocale = () => {
     setVoiceListening(value);
   };
 
+  const getAndroidSpeechServices = async () => {
+    if (Platform.OS !== "android") {
+      return null;
+    }
+    try {
+      const services = await Voice.getSpeechRecognitionServices();
+      return Array.isArray(services) ? services : null;
+    } catch (error) {
+      return null;
+    }
+  };
+
   const startVoice = async () => {
     if (voiceListeningRef.current) {
       return;
@@ -6058,13 +6073,31 @@ const getSpeechLocale = () => {
       return;
     }
     try {
-      const available = await Voice.isAvailable();
-      if (!available) {
-        setVoiceError(t("label.voiceUnavailable"));
-        setVoiceEnabled(false);
-        return;
+      if (Platform.OS === "ios") {
+        const available = await Voice.isAvailable();
+        if (!available) {
+          setVoiceError(t("label.voiceUnavailable"));
+          setVoiceEnabled(false);
+          return;
+        }
+      } else {
+        const available = await Voice.isAvailable();
+        if (!available) {
+          const services = await getAndroidSpeechServices();
+          if (!services || services.length === 0) {
+            setVoiceError(t("label.voiceServiceMissing"));
+            setVoiceEnabled(false);
+            return;
+          }
+        }
       }
-      await Voice.start(getSpeechLocale());
+      if (Platform.OS === "android") {
+        await Voice.start(getSpeechLocale(), {
+          REQUEST_PERMISSIONS_AUTO: true,
+        });
+      } else {
+        await Voice.start(getSpeechLocale());
+      }
       setListeningState(true);
     } catch (error) {
       setListeningState(false);

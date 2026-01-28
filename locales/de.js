@@ -317,6 +317,7 @@ const de = {
     "label.voiceHint": "Zähle laut, die App zählt mit (Mikrofonzugriff nötig, Beta).",
     "label.voicePermissionMissing": "Mikrofon-Zugriff fehlt",
     "label.voiceError": "Spracherkennung fehlgeschlagen",
+    "label.voiceServiceMissing": "Kein Spracherkennungsdienst installiert",
     "label.voiceUnavailable": "Spracherkennung nicht verfügbar",
     "label.back": "Zurück",
     "label.start": "Start",

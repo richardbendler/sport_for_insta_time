@@ -313,6 +313,7 @@ const es = {
     "label.voiceHint": "Di numeros en voz alta para contar (requiere microfono, beta).",
     "label.voicePermissionMissing": "Falta acceso al microfono",
     "label.voiceError": "Fallo de reconocimiento de voz",
+    "label.voiceServiceMissing": "No hay servicio de reconocimiento de voz instalado",
     "label.voiceUnavailable": "Reconocimiento de voz no disponible",
     "label.back": "Atrás",
     "label.start": "Iniciar",
