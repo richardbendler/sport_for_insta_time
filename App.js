@@ -7082,9 +7082,13 @@ const getSpeechLocale = () => {
     !completedMotivationActionIdsSet.has(recommendedActionId) &&
     (!dismissedMotivationActionId ||
       dismissedMotivationActionId !== recommendedActionId);
+  const showGettingStartedBlock =
+    showGettingStartedSection && missingPermissions;
   const showMotivationBlock =
-    missingPermissions ||
-    (experimentalFeaturesEnabled && shouldShowMotivationAction);
+    !missingPermissions &&
+    experimentalFeaturesEnabled &&
+    shouldShowMotivationAction;
+  const showPermissionCard = showGettingStartedBlock || showMotivationBlock;
 
   const handleMotivationAction = (actionItem) => {
     if (!actionItem?.action) {
@@ -7759,17 +7763,17 @@ const getSpeechLocale = () => {
       usagePermissionsPrompted ||
       accessibilityDisclosureAccepted);
 
-  const prevShowMotivationBlockRef = useRef(showMotivationBlock);
+  const prevShowMotivationBlockRef = useRef(showPermissionCard);
   useEffect(() => {
-    if (prevShowMotivationBlockRef.current && !showMotivationBlock) {
+    if (prevShowMotivationBlockRef.current && !showPermissionCard) {
       setPermissionsPanelTouched(false);
       setPermissionsPanelOpen(false);
     }
-    prevShowMotivationBlockRef.current = showMotivationBlock;
-  }, [showMotivationBlock]);
+    prevShowMotivationBlockRef.current = showPermissionCard;
+  }, [showPermissionCard]);
 
   useEffect(() => {
-    if (permissionsPanelTouched || !showMotivationBlock) {
+    if (permissionsPanelTouched || !showPermissionCard) {
       return;
     }
     if (missingPermissions) {
@@ -7781,7 +7785,7 @@ const getSpeechLocale = () => {
     }
   }, [
     permissionsPanelTouched,
-    showMotivationBlock,
+    showPermissionCard,
     missingPermissions,
     shouldShowMotivationAction,
   ]);
@@ -10247,7 +10251,7 @@ const getSpeechLocale = () => {
         </View>
         {renderMainNav("home")}
         {/* {renderWorkoutBanner()} */}
-        {showMotivationBlock ? (
+        {showGettingStartedBlock ? (
           <View
             style={[
               styles.permissionCardLarge,
@@ -10262,19 +10266,103 @@ const getSpeechLocale = () => {
                 }}
               >
               <View>
-                {missingPermissions ? (
-                  <>
-                    <Text style={styles.permissionTitle}>
-                      {t("label.gettingStarted")}
-                    </Text>
-                    <Text style={styles.permissionSubtitle}>
-                      {t("label.permissionsNeeded")}
-                    </Text>
-                    <Text style={styles.permissionHint}>
-                      {t("label.permissionsHint")}
-                    </Text>
-                  </>
-                ) : permissionsPanelOpen ? (
+                <Text style={styles.permissionTitle}>
+                  {t("label.gettingStarted")}
+                </Text>
+                <Text style={styles.permissionSubtitle}>
+                  {t("label.permissionsNeeded")}
+                </Text>
+                <Text style={styles.permissionHint}>
+                  {t("label.permissionsHint")}
+                </Text>
+              </View>
+              <Text style={styles.permissionToggle}>
+                {permissionsPanelOpen ? "-" : "+"}
+              </Text>
+            </Pressable>
+            <View style={styles.permissionReminder}>
+              <Text style={styles.permissionReminderText}>
+                {t("label.permissionsReminder")}
+              </Text>
+            </View>
+            {permissionsPanelOpen ? (
+              <View style={styles.permissionList}>
+                <View
+                  style={[
+                    styles.permissionItem,
+                    !accessibilityMissing && styles.permissionItemGranted,
+                  ]}
+                >
+                  <Text style={styles.permissionItemTitle}>
+                    {t("label.accessibilityTitle")}
+                  </Text>
+                  <Text style={styles.permissionItemText}>
+                    {t("label.accessibilityReason")}
+                  </Text>
+                  <Text style={styles.permissionItemSteps}>
+                    {t("label.accessibilitySteps")}
+                  </Text>
+                  {!accessibilityMissing ? null : (
+                    <View style={styles.permissionItemActions}>
+                      <Pressable
+                        style={styles.permissionActionButton}
+                        onPress={requestAccessibilityAccess}
+                      >
+                        <Text style={styles.permissionActionButtonText}>
+                          {t("label.accessibilityDisclosureConfirm")}
+                        </Text>
+                      </Pressable>
+                    </View>
+                  )}
+                </View>
+                <View
+                  style={[
+                    styles.permissionItem,
+                    !usageAccessMissing && styles.permissionItemGranted,
+                  ]}
+                >
+                  <Text style={styles.permissionItemTitle}>
+                    {t("label.usageAccessTitle")}
+                  </Text>
+                  <Text style={styles.permissionItemText}>
+                    {t("label.usageAccessReason")}
+                  </Text>
+                  <Text style={styles.permissionItemSteps}>
+                    {t("label.usageAccessSteps")}
+                  </Text>
+                  {usageAccessMissing ? (
+                    <View style={styles.permissionItemActions}>
+                      <Pressable
+                        style={styles.permissionActionButton}
+                        onPress={openUsageAccessSettings}
+                      >
+                        <Text style={styles.permissionActionButtonText}>
+                          {t("label.openUsageAccess")}
+                        </Text>
+                      </Pressable>
+                    </View>
+                  ) : null}
+                </View>
+              </View>
+            ) : null}
+          </View>
+        ) : null}
+        {showMotivationBlock ? (
+          <View
+            style={[
+              styles.permissionCardLarge,
+              !permissionsPanelOpen && styles.permissionCardCollapsed,
+            ]}
+          >
+            <Pressable
+              style={styles.permissionHeaderRow}
+              onPress={() => {
+                setPermissionsPanelTouched(true);
+                setPermissionsPanelOpen((prev) => !prev);
+              }}
+            >
+              <View>
+                {permissionsPanelOpen ? (
                   <>
                     <Text style={styles.motivationQuoteTitle}>
                       {activeQuoteTitle}
@@ -10293,100 +10381,29 @@ const getSpeechLocale = () => {
                 {permissionsPanelOpen ? "-" : "+"}
               </Text>
             </Pressable>
-            {missingPermissions ? (
-              <View style={styles.permissionReminder}>
-                <Text style={styles.permissionReminderText}>
-                  {t("label.permissionsReminder")}
+            {permissionsPanelOpen && shouldShowMotivationAction ? (
+              <View style={styles.permissionList}>
+                <Text style={styles.motivationCardTitle}>
+                  {activeActionTitle}
                 </Text>
+                <Text style={styles.motivationCardBody}>
+                  {activeActionBody}
+                </Text>
+                <Pressable
+                  style={[
+                    styles.motivationActionButton,
+                    activeAction?.disabled &&
+                      styles.motivationActionButtonDisabled,
+                  ]}
+                  onPress={() => handleMotivationAction(activeAction)}
+                  disabled={activeAction?.disabled}
+                >
+                  <Text style={styles.motivationActionText}>
+                    {activeActionLabel}
+                  </Text>
+                </Pressable>
               </View>
             ) : null}
-            {permissionsPanelOpen &&
-              (missingPermissions || shouldShowMotivationAction) && (
-                <View style={styles.permissionList}>
-                  {missingPermissions ? (
-                    <>
-                      <View
-                        style={[
-                          styles.permissionItem,
-                          !accessibilityMissing && styles.permissionItemGranted,
-                        ]}
-                      >
-                        <Text style={styles.permissionItemTitle}>
-                          {t("label.accessibilityTitle")}
-                        </Text>
-                        <Text style={styles.permissionItemText}>
-                          {t("label.accessibilityReason")}
-                        </Text>
-                        <Text style={styles.permissionItemSteps}>
-                          {t("label.accessibilitySteps")}
-                        </Text>
-                        {!accessibilityMissing ? null : (
-                          <View style={styles.permissionItemActions}>
-                            <Pressable
-                              style={styles.permissionActionButton}
-                              onPress={requestAccessibilityAccess}
-                            >
-                              <Text style={styles.permissionActionButtonText}>
-                                {t("label.accessibilityDisclosureConfirm")}
-                              </Text>
-                            </Pressable>
-                          </View>
-                        )}
-                      </View>
-                      <View
-                        style={[
-                          styles.permissionItem,
-                          !usageAccessMissing && styles.permissionItemGranted,
-                        ]}
-                      >
-                        <Text style={styles.permissionItemTitle}>
-                          {t("label.usageAccessTitle")}
-                        </Text>
-                        <Text style={styles.permissionItemText}>
-                          {t("label.usageAccessReason")}
-                        </Text>
-                        <Text style={styles.permissionItemSteps}>
-                          {t("label.usageAccessSteps")}
-                        </Text>
-                        {usageAccessMissing ? (
-                          <View style={styles.permissionItemActions}>
-                            <Pressable
-                              style={styles.permissionActionButton}
-                              onPress={openUsageAccessSettings}
-                            >
-                              <Text style={styles.permissionActionButtonText}>
-                                {t("label.openUsageAccess")}
-                              </Text>
-                            </Pressable>
-                          </View>
-                        ) : null}
-                      </View>
-                    </>
-                  ) : (
-                    <>
-                      <Text style={styles.motivationCardTitle}>
-                        {activeActionTitle}
-                      </Text>
-                      <Text style={styles.motivationCardBody}>
-                        {activeActionBody}
-                      </Text>
-                      <Pressable
-                        style={[
-                          styles.motivationActionButton,
-                          activeAction?.disabled &&
-                            styles.motivationActionButtonDisabled,
-                        ]}
-                        onPress={() => handleMotivationAction(activeAction)}
-                        disabled={activeAction?.disabled}
-                      >
-                        <Text style={styles.motivationActionText}>
-                          {activeActionLabel}
-                        </Text>
-                      </Pressable>
-                    </>
-                  )}
-                </View>
-              )}
           </View>
         ) : null}
         {/*
