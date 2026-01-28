@@ -212,6 +212,7 @@ const de = {
     "label.manualRepsEntryHint":
       "Trage die Anzahl der Wiederholungen ein, die du gemacht hast.",
     "label.manualTimeEntryTitle": "Zeit manuell erfassen",
+    "label.manualTimeEntryHours": "Stunden",
     "label.manualTimeEntryMinutes": "Minuten",
     "label.manualTimeEntrySeconds": "Sekunden",
     "label.distanceKm": "Kilometer (optional)",

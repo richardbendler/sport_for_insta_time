@@ -209,6 +209,7 @@ const en = {
     "label.manualRepsEntryHint":
       "Enter how many repetitions you completed and tap the button.",
     "label.manualTimeEntryTitle": "Log time manually",
+    "label.manualTimeEntryHours": "Hours",
     "label.manualTimeEntryMinutes": "Minutes",
     "label.manualTimeEntrySeconds": "Seconds",
     "label.distanceKm": "Kilometers (optional)",
