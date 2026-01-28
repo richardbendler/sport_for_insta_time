@@ -205,6 +205,7 @@ const fr = {
     "label.manualRepsEntryHint":
       "Indique le nombre de répétitions effectuées puis appuie sur le bouton.",
     "label.manualTimeEntryTitle": "Saisir le temps manuellement",
+    "label.manualTimeEntryHours": "Heures",
     "label.manualTimeEntryMinutes": "Minutes",
     "label.manualTimeEntrySeconds": "Secondes",
     "label.distanceKm": "KilomÃ¨tres (optionnel)",

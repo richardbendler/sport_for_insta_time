@@ -9,7 +9,6 @@ import {
   TextInput,
   ScrollView,
   KeyboardAvoidingView,
-  Keyboard,
   StyleSheet,
   ActivityIndicator,
   Animated,
@@ -2685,9 +2684,9 @@ function AppContent() {
   const isTestMode = __DEV__ === true;
   const [manualTimeMinutes, setManualTimeMinutes] = useState("");
   const [manualTimeSeconds, setManualTimeSeconds] = useState("");
+  const [manualTimeHours, setManualTimeHours] = useState("");
   const [manualTimeKm, setManualTimeKm] = useState("");
   const [manualRepsInput, setManualRepsInput] = useState("");
-  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const [isAppActive, setIsAppActive] = useState(
     AppState.currentState === "active"
   );
@@ -2701,6 +2700,7 @@ function AppContent() {
   const workoutIntervalRef = useRef(null);
   const sportDetailScrollRef = useRef(null);
   const manualRepsInputRef = useRef(null);
+  const manualTimeHoursRef = useRef(null);
   const manualTimeMinutesRef = useRef(null);
   const manualTimeSecondsRef = useRef(null);
   const manualTimeKmRef = useRef(null);
@@ -3228,19 +3228,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     });
     return () => {
       subscription.remove();
-    };
-  }, []);
-
-  useEffect(() => {
-    const showSub = Keyboard.addListener("keyboardDidShow", () => {
-      setIsKeyboardVisible(true);
-    });
-    const hideSub = Keyboard.addListener("keyboardDidHide", () => {
-      setIsKeyboardVisible(false);
-    });
-    return () => {
-      showSub.remove();
-      hideSub.remove();
     };
   }, []);
 
@@ -5648,9 +5635,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     if (!currentSport || currentSport.type !== "time") {
       return;
     }
+    const hours = Math.max(0, Number.parseInt(manualTimeHours, 10) || 0);
     const minutes = Math.max(0, Number.parseInt(manualTimeMinutes, 10) || 0);
     const seconds = Math.max(0, Number.parseInt(manualTimeSeconds, 10) || 0);
-    const totalSeconds = minutes * 60 + seconds;
+    const totalSeconds = hours * 3600 + minutes * 60 + seconds;
     if (totalSeconds <= 0) {
       return;
     }
@@ -5669,6 +5657,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }));
     setManualTimeMinutes("");
     setManualTimeSeconds("");
+    setManualTimeHours("");
     setManualTimeKm("");
     maybeAdvanceTutorial("trackAction");
   };
@@ -5883,6 +5872,14 @@ const getSpeechLocale = () => {
     if (tutorialStep?.id !== "samplePushupInfo") {
       return;
     }
+    if (running) {
+      setRunning(false);
+      setSessionSeconds(0);
+      sessionStartRef.current = null;
+      resumeEntryRef.current = null;
+      setRunningSportId(null);
+      setRunningSportLabel("");
+    }
     const info = tutorialSamplePushupRef.current;
     if (!info?.entry || info.cleaned) {
       return;
@@ -5892,7 +5889,7 @@ const getSpeechLocale = () => {
       return;
     }
     cleanupTutorialSamplePushup(sport, info.entry);
-  }, [tutorialStep, cleanupTutorialSamplePushup, sports]);
+  }, [tutorialStep, cleanupTutorialSamplePushup, sports, running]);
 
   const incrementReps = () => {
     const currentSport = selectedSportRef.current;
@@ -6501,6 +6498,7 @@ const getSpeechLocale = () => {
         titleKey: "tutorial.step.singleExercises.title",
         bodyKey: "tutorial.step.singleExercises.body",
         targetRef: tutorialFirstSportRef,
+        blockTargetTouches: true,
       });
       steps.push({
         id: "openSport",
@@ -7552,6 +7550,8 @@ const getSpeechLocale = () => {
     const showHighlight = hasEffectiveTarget && !tutorialStep.hideHighlight;
     const shouldBlockTouches =
       tutorialStep.blocksTouches ?? !tutorialStep.requiresAction;
+    const blockTargetTouches =
+      tutorialStep.blockTargetTouches ?? !tutorialStep.requiresAction;
     const showPointer = tutorialStep.requiresAction && hasEffectiveTarget;
     const highlightBackground =
       tutorialStep.highlightColor ??
@@ -7668,7 +7668,8 @@ const getSpeechLocale = () => {
                   backgroundColor: highlightBackground,
                 },
               ]}
-              pointerEvents="none"
+              {...(blockTargetTouches ? blockingResponder : {})}
+              pointerEvents={blockTargetTouches ? "auto" : "none"}
             />
           ) : null}
         {showPointer ? (
@@ -8831,6 +8832,16 @@ const getSpeechLocale = () => {
     const isReps = selectedSport.type === "reps";
     const isWeightMode = isReps && selectedSport.weightExercise;
     const isSimpleReps = isReps && !selectedSport.weightExercise;
+    const resumeLabelRaw = t("label.resume");
+    const startNewLabelRaw = t("label.startNew");
+    const resumeLabel =
+      resumeLabelRaw && resumeLabelRaw.trim()
+        ? resumeLabelRaw
+        : t("label.start");
+    const startNewLabel =
+      startNewLabelRaw && startNewLabelRaw.trim()
+        ? startNewLabelRaw
+        : t("label.start");
     const userFactor = difficultyLevelForSport(selectedSport); // Screen Time Faktor (userFactor)
     // Admin factor is displayed as "Fix Factor" in the UI.
     const adminFactor = isWeightMode
@@ -8929,39 +8940,8 @@ const getSpeechLocale = () => {
             ref={sportDetailScrollRef}
             contentContainerStyle={styles.sportDetailScrollContent}
             keyboardShouldPersistTaps="handled"
-            scrollEnabled={isKeyboardVisible}
+            scrollEnabled
           >
-            <Pressable
-              style={styles.statsCard}
-              onPress={() => setStatsSportId(selectedSport.id)}
-            >
-              <View style={styles.counterRow}>
-                <View style={[styles.counterBlock, styles.statsCounterBlock]}>
-                  <Text style={[styles.counterLabel, styles.statsCounterLabel]}>
-                    {t("label.today")}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.counterValueSmall,
-                      styles.statsCounterValueSmall,
-                    ]}
-                  >
-                    {selectedSport.type === "reps"
-                      ? selectedSport.weightExercise
-                        ? formatWeightValue(todayWeightTotal)
-                        : `${todayStats.reps}`
-                      : formatSeconds(todayStats.seconds || 0)}
-                  </Text>
-                  <Text style={[styles.counterUnit, styles.statsCounterUnit]}>
-                    {selectedSport.type === "reps"
-                      ? selectedSport.weightExercise
-                        ? t("label.weightUnit")
-                        : repsShort
-                      : t("label.timeUnit")}
-                  </Text>
-                </View>
-              </View>
-            </Pressable>
             <Pressable
               style={styles.editSportButton}
               onPress={() => openSportModal(selectedSport)}
@@ -9056,6 +9036,20 @@ const getSpeechLocale = () => {
               </Pressable>
             ) : isWeightMode ? (
               <View style={styles.weightEntryArea} ref={tutorialTrackingAreaRef}>
+                <View style={styles.weightTopCounter}>
+                  <Text style={styles.counterValue}>
+                    {formatWeightValue(todayWeightTotal)}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.helperText,
+                      styles.trackingHelperText,
+                      styles.weightTopHelper,
+                    ]}
+                  >
+                    {t("label.today")} {t("label.weightUnit")}
+                  </Text>
+                </View>
             {/*
             <View style={styles.weightSummaryRow}>
               <View style={styles.weightSummaryColumn}>
@@ -9186,7 +9180,7 @@ const getSpeechLocale = () => {
                               styles.detailPrimaryButtonText,
                             ]}
                           >
-                            {t("label.resume")}
+                            {resumeLabel}
                           </Text>
                         </Pressable>
                         <Pressable
@@ -9199,7 +9193,7 @@ const getSpeechLocale = () => {
                               styles.detailSecondaryButtonText,
                             ]}
                           >
-                            {t("label.startNew")}
+                            {startNewLabel}
                           </Text>
                         </Pressable>
                       </View>
@@ -9249,6 +9243,22 @@ const getSpeechLocale = () => {
                 {t("label.manualTimeEntryTitle")}
               </Text>
                 <View style={styles.manualTimeInputsRow}>
+                  <View style={styles.manualTimeInputWrap}>
+                    <Text style={styles.manualTimeInputLabel}>
+                      {t("label.manualTimeEntryHours")}
+                    </Text>
+                    <TextInput
+                      style={[styles.input, styles.manualTimeInput]}
+                      ref={manualTimeHoursRef}
+                      value={manualTimeHours}
+                      onChangeText={setManualTimeHours}
+                      onFocus={() => scrollToInput(manualTimeHoursRef)}
+                      placeholder={t("label.manualTimeEntryHours")}
+                      placeholderTextColor="#7a7a7a"
+                      keyboardType="number-pad"
+                      maxLength={3}
+                    />
+                  </View>
                   <View style={styles.manualTimeInputWrap}>
                     <Text style={styles.manualTimeInputLabel}>
                       {t("label.manualTimeEntryMinutes")}
@@ -9387,6 +9397,7 @@ const getSpeechLocale = () => {
                 ))}
               </View>
             ) : null}
+            <View style={styles.sportDetailBottomSpacer} />
           </ScrollView>
         </KeyboardAvoidingView>
         <Modal
@@ -11038,6 +11049,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 120,
   },
+  sportDetailBottomSpacer: {
+    height: 16,
+  },
   title: {
     fontSize: 28,
     fontWeight: "700",
@@ -11281,6 +11295,8 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: 22,
     height: 22,
+    top: 1,
+    left: 1,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -11586,6 +11602,13 @@ const styles = StyleSheet.create({
     borderColor: "rgba(148, 163, 184, 0.2)",
     padding: 18,
     alignItems: "stretch",
+  },
+  weightTopCounter: {
+    alignItems: "center",
+    marginBottom: 14,
+  },
+  weightTopHelper: {
+    marginTop: 6,
   },
   weightFieldsRow: {
     flexDirection: "row",

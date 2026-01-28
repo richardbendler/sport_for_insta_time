@@ -210,6 +210,7 @@ const es = {
     "label.manualRepsEntryHint":
       "Escribe cuántas repeticiones hiciste y toca el botón.",
     "label.manualTimeEntryTitle": "Registrar tiempo manualmente",
+    "label.manualTimeEntryHours": "Horas",
     "label.manualTimeEntryMinutes": "Minutos",
     "label.manualTimeEntrySeconds": "Segundos",
     "label.distanceKm": "KilÃ³metros (opcional)",
