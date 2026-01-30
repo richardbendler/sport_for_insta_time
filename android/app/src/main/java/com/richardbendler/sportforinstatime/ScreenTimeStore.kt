@@ -6,6 +6,7 @@ import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.comparisons.compareBy
 
 object ScreenTimeStore {
   private const val PREF_KEY_ENTRIES = "screen_time_entries"
@@ -175,7 +176,9 @@ object ScreenTimeStore {
     }
     val entries = ensureLegacyMigration(loadEntries(prefs), prefs, now)
     var changed = applyDecay(entries, now)
-    val sorted = entries.sortedBy { it.createdAt }.toMutableList()
+    val sorted = entries
+      .sortedWith(compareBy({ it.createdAt }, { it.id }))
+      .toMutableList()
     var remainingToConsume = seconds
     for (entry in sorted) {
       if (remainingToConsume <= 0) {
