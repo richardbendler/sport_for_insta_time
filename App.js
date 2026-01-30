@@ -12434,9 +12434,9 @@ const styles = StyleSheet.create({
     borderColor: "rgba(248, 250, 252, 0.3)",
   },
   colorBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
+    width: 20,
+    height: 20,
+    borderRadius: 6,
     backgroundColor: COLORS.accent,
   },
   colorPickerCard: {
