@@ -12102,6 +12102,8 @@ const styles = StyleSheet.create({
   timerRow: {
     flexDirection: "row",
     marginTop: 24,
+    width: "100%",
+    justifyContent: "center",
   },
   sportCard: {
     backgroundColor: "rgba(30, 41, 59, 0.9)",
@@ -12757,12 +12759,16 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   detailPrimaryButtonText: {
-    fontSize: 13,
+    fontSize: 14,
     letterSpacing: 0.2,
+    textAlign: "center",
+    lineHeight: 18,
   },
   detailSecondaryButtonText: {
-    fontSize: 13,
+    fontSize: 14,
     letterSpacing: 0.2,
+    textAlign: "center",
+    lineHeight: 18,
   },
   addSportButton: {
     backgroundColor: "rgba(245, 158, 11, 0.18)",
@@ -12835,11 +12841,15 @@ const styles = StyleSheet.create({
   resumeActionRow: {
     flexDirection: "row",
     gap: 10,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: "stretch",
+    justifyContent: "space-between",
+    width: "100%",
+    alignSelf: "stretch",
   },
   resumeButton: {
     flex: 1,
+    justifyContent: "center",
+    minHeight: 44,
   },
   addCard: {
     backgroundColor: COLORS.cardAlt,
