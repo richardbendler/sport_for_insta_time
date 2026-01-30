@@ -91,7 +91,7 @@ const DEFAULT_SETTINGS = {
   language: "en",
   prefaceDelaySeconds: 10,
   grayscaleRestrictedApps: false,
-  sportSortMode: "manual",
+  sportSortMode: "recent",
   experimentalFeaturesEnabled: false,
 };
 
@@ -267,7 +267,36 @@ const RAW_STANDARD_SPORTS = [
       es: "Ciclismo",
       fr: "Cyclisme",
     },
-    aliases: ["Cycling"],
+    aliases: [
+      "Cycling",
+      "Bike",
+      "Biking",
+      "Radfahren",
+      "Radeln",
+      "Fahrrad fahren",
+      "Fahrradfahren",
+      "Radtour",
+      "Radrennen",
+      "Mountainbiken",
+      "MTB",
+      "Rennradfahren",
+      "Velo",
+      "Velofahren",
+      "Bicicleta",
+      "Ciclismo",
+      "Ciclismo de ruta",
+      "Bicicleta de carretera",
+      "Ciclismo de montaña",
+      "Bicicleta de montaña",
+      "Outdoor cycling",
+      "Outdoor bike",
+      "Cyclisme",
+      "Vélo",
+      "Vélo de route",
+      "Vélo tout-terrain",
+      "Vélo de montagne",
+      "VTT",
+    ],
     icon: "??",
     type: "time",
     defaultRateMinutes: 1,
@@ -283,7 +312,33 @@ const RAW_STANDARD_SPORTS = [
       es: "Bicicleta est?tica",
       fr: "V?lo d'appartement",
     },
-    aliases: ["Ergometer"],
+    aliases: [
+      "Stationary Bike",
+      "Stationary Bicycle",
+      "Indoor cycling",
+      "Indoor bike",
+      "Indoor bicycle",
+      "Spinning",
+      "Spinningbike",
+      "Spin Bike",
+      "Cycling trainer",
+      "Bike trainer",
+      "Heimtrainer",
+      "Fahrradergometer",
+      "Ergometer",
+      "Radtrainer",
+      "Radtraining",
+      "Bicicleta estacionaria",
+      "Bicicleta estática",
+      "Bicicleta fija",
+      "Bicicleta de interior",
+      "Bicicleta de sala",
+      "Bicicleta indoor",
+      "Bicicleta spinning",
+      "Vélo d'appartement",
+      "Vélo stationnaire",
+      "Vélo indoor",
+    ],
     icon: "??",
     type: "time",
     defaultRateMinutes: 1,
@@ -2582,7 +2637,7 @@ function AppContent() {
   const workoutTrackingMode = false;
   const [showHidden, setShowHidden] = useState(false);
   const [sportSearch, setSportSearch] = useState("");
-  const [sportSortMode, setSportSortMode] = useState("manual");
+  const [sportSortMode, setSportSortMode] = useState(DEFAULT_SETTINGS.sportSortMode);
   const [newName, setNewName] = useState("");
   const [newType, setNewType] = useState("reps");
   const [newIcon, setNewIcon] = useState("");
@@ -2632,6 +2687,7 @@ function AppContent() {
     usedByApp: {},
   });
   const [screenTimeEntries, setScreenTimeEntries] = useState([]);
+  const refreshScreenTimeEntriesRef = useRef(null);
   const [needsAccessibility, setNeedsAccessibility] = useState(true);
   const [accessibilityDisclosureVisible, setAccessibilityDisclosureVisible] =
     useState(false);
@@ -3506,6 +3562,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       screenSeconds
     );
     InstaControl?.updateOverallWidgets?.();
+    if (isScreenTimeDetailsOpen) {
+      refreshScreenTimeEntriesRef.current?.();
+    }
   };
 
   const removeScreenTimeEntry = (entryId) => {
@@ -3514,6 +3573,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
     InstaControl.removeScreenTimeEntry(entryId);
     InstaControl?.updateOverallWidgets?.();
+    if (isScreenTimeDetailsOpen) {
+      refreshScreenTimeEntriesRef.current?.();
+    }
   };
 
   const updateLogEntry = (sport, entryId, updater) => {
@@ -4180,6 +4242,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       setScreenTimeEntries([]);
     }
   }, []);
+  refreshScreenTimeEntriesRef.current = refreshScreenTimeEntries;
 
   const refreshNotificationPermission = async () => {
     if (Platform.OS !== "android") {
@@ -4398,6 +4461,20 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     isWorkoutOpen,
     workoutRunning,
     isPrefaceSettingsOpen,
+  ]);
+
+  useEffect(() => {
+    if (!isScreenTimeDetailsOpen) {
+      return;
+    }
+    refreshScreenTimeEntries();
+  }, [
+    isScreenTimeDetailsOpen,
+    refreshScreenTimeEntries,
+    usageState.remainingSeconds,
+    usageState.carryoverSeconds,
+    usageState.entryCount,
+    usageState.usedSeconds,
   ]);
 
   useEffect(() => {
@@ -6463,7 +6540,16 @@ const getSpeechLocale = () => {
           weight: Number.isFinite(logEntry?.weight) ? logEntry.weight : 0,
         };
       })
-      .sort((a, b) => b.createdAt - a.createdAt);
+      .sort((a, b) => {
+        const tsA = Number(a.createdAt || 0);
+        const tsB = Number(b.createdAt || 0);
+        if (tsA !== tsB) {
+          return tsA - tsB;
+        }
+        const keyA = a.key || "";
+        const keyB = b.key || "";
+        return keyA.localeCompare(keyB);
+      });
   }, [screenTimeEntries, sports, language, t, logEntryById]);
   const screenTimeEntryCutoff = Date.now() - 24 * 60 * 60 * 1000;
   const currentScreenTimeEntries = screenTimeEntryRows.filter(
@@ -11311,9 +11397,14 @@ const styles = StyleSheet.create({
     marginTop: -1.5,
   },
   navIconGearCenter: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
     width: 6,
     height: 6,
     borderRadius: 3,
+    marginLeft: -3,
+    marginTop: -3,
     backgroundColor: COLORS.muted,
   },
   settingsSectionTitle: {
