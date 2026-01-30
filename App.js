@@ -9,6 +9,7 @@ import {
   TextInput,
   ScrollView,
   KeyboardAvoidingView,
+  Keyboard,
   StyleSheet,
   ActivityIndicator,
   Animated,
@@ -2663,6 +2664,14 @@ function AppContent() {
   const [showIconInput, setShowIconInput] = useState(false);
   const [customSuggestionUsed, setCustomSuggestionUsed] = useState(false);
   const [infoModalKey, setInfoModalKey] = useState(null);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [sportDetailScrollHeight, setSportDetailScrollHeight] = useState(0);
+  const [sportDetailContentHeight, setSportDetailContentHeight] = useState(0);
+  const [sportModalColorId, setSportModalColorId] = useState(() =>
+    Math.floor(Math.random() * SPORT_COLOR_POOL.length)
+  );
+  const [colorPickerVisible, setColorPickerVisible] = useState(false);
+  const [colorPickerSelection, setColorPickerSelection] = useState(null);
   const scrollViewRef = useRef(null);
   const homeScrollRef = useRef(null);
   const screenTimeDetailsScrollRef = useRef(null);
@@ -2772,6 +2781,18 @@ function AppContent() {
   const languageRef = useRef(language);
   const selectedSportRef = useRef(null);
   const lastTutorialTargetRef = useRef(null);
+  useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", () =>
+      setKeyboardVisible(true)
+    );
+    const hideSub = Keyboard.addListener("keyboardDidHide", () =>
+      setKeyboardVisible(false)
+    );
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
   const tutorialScreenTimeRef = useRef(null);
   const tutorialFirstSportRef = useRef(null);
   const tutorialTrackingAreaRef = useRef(null);
@@ -3019,6 +3040,9 @@ function AppContent() {
     }
     return sport.name;
   };
+
+  const pickRandomSportColorId = () =>
+    Math.floor(Math.random() * SPORT_COLOR_POOL.length);
 
   const getSportAccentColor = (sportId) => {
     const colorId = sportColorLinks?.[sportId];
@@ -3450,6 +3474,19 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     await persistStorageValue(
       STORAGE_KEYS.sports,
       JSON.stringify(nextSports),
+      t("menu.sports")
+    );
+  };
+
+  const updateSportColorLink = async (sportId, colorId) => {
+    if (!sportId || !Number.isInteger(colorId)) {
+      return;
+    }
+    const nextLinks = { ...sportColorLinks, [sportId]: colorId };
+    setSportColorLinks(nextLinks);
+    await persistStorageValue(
+      STORAGE_KEYS.sportColors,
+      JSON.stringify(nextLinks),
       t("menu.sports")
     );
   };
@@ -4000,6 +4037,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   };
 
   const openSportModal = (sport = null) => {
+    const linkedColorId =
+      sport && Number.isInteger(sportColorLinks?.[sport.id])
+        ? sportColorLinks[sport.id]
+        : pickRandomSportColorId();
+    setSportModalColorId(linkedColorId);
     if (sport) {
       const rateMinutes =
         sport.type === "reps"
@@ -4035,6 +4077,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setEditingSportId(null);
     setShowIconInput(false);
     setCustomSuggestionUsed(false);
+    setColorPickerVisible(false);
   };
 
   const handleIncreaseDifficulty = () => {
@@ -4080,6 +4123,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         };
       });
       await saveSports(nextSports);
+      await updateSportColorLink(editingSportId, sportModalColorId);
     } else {
       const newSport = {
         id: generateId(),
@@ -4094,6 +4138,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         standardSportId: selectedStandardSportId ?? undefined,
       };
       await saveSports([newSport, ...sports]);
+      await updateSportColorLink(newSport.id, sportModalColorId);
       markMotivationActionCompleted("newSport");
       if (tutorialActive && tutorialStep?.id === "createSportSave") {
         setTutorialWaitingForSportCreation(true);
@@ -5199,10 +5244,25 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     );
   };
 
+  const openColorPicker = () => {
+    const defaultSelection =
+      Number.isInteger(sportModalColorId) && sportModalColorId >= 0
+        ? sportModalColorId
+        : pickRandomSportColorId();
+    setColorPickerSelection(defaultSelection);
+    setColorPickerVisible(true);
+  };
+
   const renderSportModal = () => {
     if (!isSportModalOpen) {
       return null;
     }
+    const normalizedColorId =
+      Number.isInteger(sportModalColorId) && sportModalColorId >= 0
+        ? sportModalColorId % SPORT_COLOR_POOL.length
+        : 0;
+    const indicatorColor =
+      SPORT_COLOR_POOL[normalizedColorId] || COLORS.accent;
     return (
       <Modal
         visible={isSportModalOpen}
@@ -5212,9 +5272,24 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>
-              {editingSportId ? t("label.editSport") : t("label.addSport")}
-            </Text>
+            <View style={styles.modalHeaderRow}>
+              <Text style={styles.modalTitle}>
+                {editingSportId ? t("label.editSport") : t("label.addSport")}
+              </Text>
+              <Pressable
+                style={styles.colorBadgeButton}
+                onPress={openColorPicker}
+                accessibilityRole="button"
+                accessibilityLabel={t("label.chooseSportColor")}
+              >
+                <View
+                  style={[
+                    styles.colorBadge,
+                    { backgroundColor: indicatorColor },
+                  ]}
+                />
+              </Pressable>
+            </View>
             <View
               style={styles.createSportField}
               ref={tutorialSportNameRef}
@@ -5501,6 +5576,66 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               {renderTutorialOverlay()}
             </View>
           ) : null}
+        </View>
+      </Modal>
+    );
+  };
+
+  const renderColorPickerModal = () => {
+    if (!colorPickerVisible) {
+      return null;
+    }
+    return (
+      <Modal
+        visible
+        animationType="slide"
+        transparent
+        onRequestClose={() => setColorPickerVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalCard, styles.colorPickerCard]}>
+            <Text style={styles.modalTitle}>{t("label.chooseSportColor")}</Text>
+            <Text style={styles.modalSubtitle}>
+              {t("label.chooseSportColorHint")}
+            </Text>
+            <View style={styles.colorPickerGrid}>
+              {SPORT_COLOR_POOL.map((color, index) => (
+                <Pressable
+                  key={`sport-color-${color}-${index}`}
+                  style={[
+                    styles.colorPickerSwatch,
+                    colorPickerSelection === index &&
+                      styles.colorPickerSwatchActive,
+                    { backgroundColor: color },
+                  ]}
+                  onPress={() => setColorPickerSelection(index)}
+                />
+              ))}
+            </View>
+            <View style={styles.modalActions}>
+              <Pressable
+                style={styles.secondaryButton}
+                onPress={() => setColorPickerVisible(false)}
+              >
+                <Text style={styles.secondaryButtonText}>
+                  {t("label.cancel")}
+                </Text>
+              </Pressable>
+              <Pressable
+                style={styles.primaryButton}
+                onPress={() => {
+                  if (Number.isInteger(colorPickerSelection)) {
+                    setSportModalColorId(colorPickerSelection);
+                  }
+                  setColorPickerVisible(false);
+                }}
+              >
+                <Text style={styles.primaryButtonText}>
+                  {t("label.confirm")}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
         </View>
       </Modal>
     );
@@ -6402,21 +6537,6 @@ const getSpeechLocale = () => {
     0,
     totalRemainingSeconds - (usageState.carryoverSeconds || 0)
   );
-  const remainingBySportList = useMemo(() => {
-    const entries = Object.entries(usageState.remainingBySport || {});
-    return entries
-      .map(([sportId, seconds]) => {
-        const sport = sports.find((item) => item.id === sportId);
-        return {
-          sportId,
-          seconds: Number(seconds) || 0,
-          label: sport ? getSportLabel(sport) : sportId,
-          icon: sport?.icon || DEFAULT_ICON,
-        };
-      })
-      .filter((entry) => entry.seconds > 0)
-      .sort((a, b) => b.seconds - a.seconds);
-  }, [sports, usageState.remainingBySport, language]);
   const overallChartDayKeys = useMemo(() => {
     const days = CHART_RANGE_DAYS[statsRange] || CHART_RANGE_DAYS.month;
     return getRecentDayKeys(days);
@@ -6549,8 +6669,54 @@ const getSpeechLocale = () => {
         const keyA = a.key || "";
         const keyB = b.key || "";
         return keyA.localeCompare(keyB);
-      });
+    });
   }, [screenTimeEntries, sports, language, t, logEntryById]);
+  const halvingCounter = useMemo(
+    () =>
+      screenTimeEntryRows.reduce(
+        (sum, entry) => sum + (Number(entry.decayCount) || 0),
+        0
+      ),
+    [screenTimeEntryRows]
+  );
+  const remainingSportStatuses = useMemo(() => {
+    const map = new Map();
+    screenTimeEntryRows.forEach((entry) => {
+      const key = entry.sportId || "overall";
+      if (!map.has(key)) {
+        map.set(key, {
+          sportId: key,
+          label: entry.label,
+          icon: entry.icon,
+          remainingSeconds: 0,
+          originalSeconds: 0,
+          decayCount: 0,
+        });
+      }
+      const current = map.get(key);
+      current.remainingSeconds += entry.remainingSeconds;
+      current.originalSeconds += entry.originalSeconds;
+      current.decayCount = Math.max(current.decayCount, entry.decayCount || 0);
+    });
+    const statusOrder = { full: 0, partial: 1, empty: 2 };
+    return Array.from(map.values())
+      .filter((item) => item.originalSeconds > 0)
+      .map((item) => {
+        const status =
+          item.remainingSeconds <= 0
+            ? "empty"
+            : item.remainingSeconds >= item.originalSeconds
+            ? "full"
+            : "partial";
+        return { ...item, status };
+      })
+      .sort((a, b) => {
+        const order =
+          statusOrder[a.status] - statusOrder[b.status] ||
+          (b.remainingSeconds - a.remainingSeconds);
+        return order;
+      });
+  }, [screenTimeEntryRows]);
   const screenTimeEntryCutoff = Date.now() - 24 * 60 * 60 * 1000;
   const currentScreenTimeEntries = screenTimeEntryRows.filter(
     (entry) =>
@@ -8984,6 +9150,8 @@ const getSpeechLocale = () => {
       setWeightEntryWeight("");
       setWeightEntryReps("");
     };
+    const sportDetailScrollEnabled =
+      keyboardVisible || sportDetailContentHeight > sportDetailScrollHeight;
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
@@ -9026,7 +9194,13 @@ const getSpeechLocale = () => {
             ref={sportDetailScrollRef}
             contentContainerStyle={styles.sportDetailScrollContent}
             keyboardShouldPersistTaps="handled"
-            scrollEnabled
+            scrollEnabled={sportDetailScrollEnabled}
+            onLayout={(event) =>
+              setSportDetailScrollHeight(event.nativeEvent.layout.height)
+            }
+            onContentSizeChange={(_, height) =>
+              setSportDetailContentHeight(height)
+            }
           >
             <Pressable
               style={styles.editSportButton}
@@ -9558,6 +9732,11 @@ const getSpeechLocale = () => {
   }
 
   if (isScreenTimeDetailsOpen) {
+    const statusLabelMap = {
+      full: t("label.remainingStatusFull"),
+      partial: t("label.remainingStatusPartial"),
+      empty: t("label.remainingStatusEmpty"),
+    };
     return (
       <SafeAreaView style={styles.container}>
         <ScrollView
@@ -9613,6 +9792,10 @@ const getSpeechLocale = () => {
               <Text style={[styles.detailValue, styles.detailValueStrong]}>
                 {formatScreenTime(totalRemainingSeconds)}
               </Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>{t("label.halvingCounter")}</Text>
+              <Text style={styles.detailValue}>{halvingCounter}</Text>
             </View>
           </View>
           <Text style={styles.sectionTitle}>
@@ -9764,19 +9947,34 @@ const getSpeechLocale = () => {
             {t("label.remainingBySport")}
           </Text>
           <View style={styles.infoCard}>
-            {remainingBySportList.length === 0 ? (
+            {remainingSportStatuses.length === 0 ? (
               <Text style={styles.helperText}>
                 {t("label.noRemainingBySport")}
               </Text>
             ) : (
-              remainingBySportList.map((entry) => (
+              remainingSportStatuses.map((entry) => (
                 <View key={entry.sportId} style={styles.detailListItem}>
                   <View style={styles.detailListLeft}>
                     <Text style={styles.detailListIcon}>{entry.icon}</Text>
-                    <Text style={styles.detailListLabel}>{entry.label}</Text>
+                    <View>
+                      <Text style={styles.detailListLabel}>{entry.label}</Text>
+                      <View
+                        style={[
+                          styles.detailListStatusBadge,
+                          entry.status === "full" && styles.detailListStatusFull,
+                          entry.status === "partial" &&
+                            styles.detailListStatusPartial,
+                          entry.status === "empty" && styles.detailListStatusEmpty,
+                        ]}
+                      >
+                        <Text style={styles.detailListStatusText}>
+                          {statusLabelMap[entry.status]}
+                        </Text>
+                      </View>
+                    </View>
                   </View>
                   <Text style={styles.detailListValue}>
-                    {formatScreenTime(entry.seconds)}
+                    {formatScreenTime(entry.remainingSeconds)}
                   </Text>
                 </View>
               ))
@@ -11111,6 +11309,7 @@ const getSpeechLocale = () => {
         ) : null}
         {renderPrefaceSettingsModal()}
         {renderSportModal()}
+        {renderColorPickerModal()}
         {renderInfoModal()}
       </View>
     </I18nextProvider>
@@ -12219,6 +12418,46 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     width: "100%",
+  },
+  modalHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  colorBadgeButton: {
+    padding: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(248, 250, 252, 0.3)",
+  },
+  colorBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: COLORS.accent,
+  },
+  colorPickerCard: {
+    maxWidth: 480,
+    width: "100%",
+  },
+  colorPickerGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    marginBottom: 10,
+    marginTop: 6,
+  },
+  colorPickerSwatch: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: "transparent",
+    marginBottom: 8,
+  },
+  colorPickerSwatchActive: {
+    borderColor: COLORS.white,
   },
   tutorialPortal: {
     ...StyleSheet.absoluteFillObject,
@@ -13517,6 +13756,33 @@ const styles = StyleSheet.create({
     color: COLORS.muted,
     fontSize: 12,
     fontWeight: "600",
+  },
+  detailListStatusBadge: {
+    marginTop: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 999,
+    borderWidth: 1,
+    alignSelf: "flex-start",
+  },
+  detailListStatusFull: {
+    borderColor: "rgba(34, 197, 94, 0.8)",
+    backgroundColor: "rgba(34, 197, 94, 0.12)",
+  },
+  detailListStatusPartial: {
+    borderColor: "rgba(245, 158, 11, 0.9)",
+    backgroundColor: "rgba(245, 158, 11, 0.16)",
+  },
+  detailListStatusEmpty: {
+    borderColor: "rgba(148, 163, 184, 0.8)",
+    backgroundColor: "rgba(148, 163, 184, 0.12)",
+  },
+  detailListStatusText: {
+    color: COLORS.text,
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 0.3,
+    textTransform: "uppercase",
   },
   detailEntryRow: {
     flexDirection: "row",
