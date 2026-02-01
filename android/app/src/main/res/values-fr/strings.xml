@@ -19,4 +19,8 @@
   <string name="preface_remaining_label">Restant :</string>
   <string name="preface_countdown_label">D\u00e9marre dans</string>
   <string name="preface_button">Ouvrir l\'app</string>
+  <string name="preface_credit_title">Emprunter du temps</string>
+  <string name="preface_credit_minutes">%d minutes</string>
+  <string name="preface_credit_penalty_hint">Les nouvelles séances rapportent seulement %d%% du temps habituel.</string>
+  <string name="preface_credit_button">Emprunter</string>
 </resources>

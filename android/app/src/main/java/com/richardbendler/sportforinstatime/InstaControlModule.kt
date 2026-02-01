@@ -284,6 +284,10 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
       map.putString("day", today)
       map.putInt("carryoverSeconds", breakdown.carryoverSeconds)
       map.putInt("entryCount", totals.entryCount)
+      map.putDouble(
+        "creditPenaltyMultiplier",
+        ScreenTimeStore.getCreditPenalty(prefs).toDouble()
+      )
       val bySport = Arguments.createMap()
       totals.remainingBySport.forEach { (sportKey, value) ->
         bySport.putInt(sportKey, value)
