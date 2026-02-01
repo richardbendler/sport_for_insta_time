@@ -19,8 +19,4 @@
   <string name="preface_remaining_label">Verbleibend:</string>
   <string name="preface_countdown_label">Start in</string>
   <string name="preface_button">App \u00f6ffnen</string>
-  <string name="preface_credit_title">Kredit freischalten</string>
-  <string name="preface_credit_minutes">%d Minuten</string>
-  <string name="preface_credit_penalty_hint">Neue Einträge liefern nur noch %d%% Screen Time.</string>
-  <string name="preface_credit_button">Kredit nehmen</string>
 </resources>
