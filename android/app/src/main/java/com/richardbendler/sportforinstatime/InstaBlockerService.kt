@@ -38,6 +38,7 @@ class InstaBlockerService : AccessibilityService() {
   private var workoutOverlayParams: WindowManager.LayoutParams? = null
   private var lastWidgetUpdateAt: Long = 0
   private var notificationManager: NotificationManager? = null
+  private var notificationShadeActive: Boolean = false
 
   private val notificationChannelId = "restricted_timer"
   private val notificationId = 1001
@@ -86,12 +87,20 @@ class InstaBlockerService : AccessibilityService() {
     if (event.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
       return
     }
+    if (isNotificationShadeEvent(pkg, className)) {
+      notificationShadeActive = true
+      return
+    }
+    if (pkg.startsWith("com.android.systemui")) {
+      return
+    }
     if (isInputMethodPackage(pkg)) {
       return
     }
     if (ignoredPackagePrefixes.any { pkg.startsWith(it) }) {
       return
     }
+    notificationShadeActive = false
     if (!isLaunchablePackage(pkg)) {
       if (isHomePackage(pkg)) {
         scheduleForegroundClear()
@@ -161,6 +170,11 @@ class InstaBlockerService : AccessibilityService() {
 
   private fun tickUsage() {
     val pkg = currentPackage
+    if (notificationShadeActive) {
+      updateWorkoutOverlay()
+      maybeUpdateWidgets()
+      return
+    }
     if (pkg == null) {
       syncGrayscaleState(false)
       updateWorkoutOverlay()
@@ -535,6 +549,17 @@ class InstaBlockerService : AccessibilityService() {
       prefs.edit().putString("workout_overlay_open_sport_id", sportId).apply()
     }
     openApp()
+  }
+
+  private fun isNotificationShadeEvent(pkg: String, className: String?): Boolean {
+    if (!pkg.startsWith("com.android.systemui")) {
+      return false
+    }
+    val normalized = className?.lowercase(Locale.getDefault()) ?: return true
+    return normalized.contains("statusbar") ||
+      normalized.contains("notification") ||
+      normalized.contains("shade") ||
+      normalized.contains("quicksettings")
   }
 
   private fun getControlledApps(): Set<String> {
