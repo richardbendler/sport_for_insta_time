@@ -139,6 +139,18 @@ const ADMIN_FACTOR_TIME = 0.0025; // "Fix Factor" in UI; global base multiplier 
 const ADMIN_FACTOR_REPS = 0.055; // "Fix Factor" in UI; base multiplier for reps-based sports
 const ADMIN_FACTOR_WEIGHTED = 0.0005; // "Fix Factor" in UI; base multiplier for weighted reps entries
 const DEFAULT_WEIGHT_RATE = 0.04;
+let globalCreditPenaltyMultiplier = 1;
+const setGlobalCreditPenaltyMultiplier = (value) => {
+  const numeric = Number(value);
+  globalCreditPenaltyMultiplier = Number.isFinite(numeric)
+    ? Math.max(0, numeric)
+    : 1;
+};
+const applyCreditPenaltyMultiplier = (value) => {
+  const numeric = Number(value);
+  const base = Number.isFinite(numeric) ? numeric : 0;
+  return base * globalCreditPenaltyMultiplier;
+};
 const WORKOUT_CONTINUE_WINDOW_MS = 30 * 60 * 1000;
 const TUTORIAL_STRONG_HIGHLIGHT = "rgba(249, 115, 22, 0.2)";
 const interpolateTemplate = (template = "", values = {}) =>
@@ -2195,16 +2207,20 @@ const screenSecondsForStats = (sport, dayStats) => {
   if (!sport || !dayStats) {
     return 0;
   }
-  if (sport.weightExercise && sport.type === "reps") {
-    return Math.max(0, Math.floor(dayStats.screenSeconds || 0));
+  const storedScreenSeconds =
+    Number.isFinite(dayStats.screenSeconds) && dayStats.screenSeconds >= 0
+      ? Math.max(0, Math.floor(dayStats.screenSeconds))
+      : null;
+  if (storedScreenSeconds !== null) {
+    return storedScreenSeconds;
   }
   const userFactor = difficultyLevelForSport(sport);
   if (sport.type === "reps") {
     const value = (dayStats.reps || 0) * ADMIN_FACTOR_REPS * userFactor;
-    return Math.max(0, Math.round(value));
+    return Math.max(0, Math.round(applyCreditPenaltyMultiplier(value)));
   }
   const value = (dayStats.seconds || 0) * ADMIN_FACTOR_TIME * userFactor;
-  return Math.max(0, Math.round(value));
+  return Math.max(0, Math.round(applyCreditPenaltyMultiplier(value)));
 };
 
 const screenSecondsForEntry = (sport, entry) => {
@@ -2216,16 +2232,16 @@ const screenSecondsForEntry = (sport, entry) => {
     const reps = parsePositiveInteger(entry.reps);
     const weight = parsePositiveNumber(entry.weight);
     const value = weight * reps * userFactor * ADMIN_FACTOR_WEIGHTED;
-    return Math.max(0, Math.round(value));
+    return Math.max(0, Math.round(applyCreditPenaltyMultiplier(value)));
   }
   if (sport.type === "reps") {
     const reps = parsePositiveInteger(entry.reps);
     const value = reps * ADMIN_FACTOR_REPS * userFactor;
-    return Math.max(0, Math.round(value));
+    return Math.max(0, Math.round(applyCreditPenaltyMultiplier(value)));
   }
   const seconds = parsePositiveNumber(entry.seconds);
   const value = seconds * ADMIN_FACTOR_TIME * userFactor;
-  return Math.max(0, Math.round(value));
+  return Math.max(0, Math.round(applyCreditPenaltyMultiplier(value)));
 };
 
 const resolveEntryScreenSeconds = (sport, entry) => {
@@ -2694,7 +2710,11 @@ function AppContent() {
     entryCount: 0,
     carryoverSeconds: 0,
     usedByApp: {},
+    creditPenaltyMultiplier: 1,
   });
+  useEffect(() => {
+    setGlobalCreditPenaltyMultiplier(usageState.creditPenaltyMultiplier ?? 1);
+  }, [usageState.creditPenaltyMultiplier]);
   const [screenTimeEntries, setScreenTimeEntries] = useState([]);
   const refreshScreenTimeEntriesRef = useRef(null);
   const [needsAccessibility, setNeedsAccessibility] = useState(true);
@@ -3302,6 +3322,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           setWorkoutSeconds(elapsedWorkout);
         }
         refreshUsageState();
+        refreshScreenTimeEntriesRef.current?.();
         refreshMainPermissions();
         refreshNotificationPermission();
       }
@@ -4019,6 +4040,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       remainingBySport: {},
       entryCount: 0,
       carryoverSeconds: 0,
+      usedByApp: {},
+      creditPenaltyMultiplier: 1,
     });
     if (InstaControl?.setControlledApps) {
       InstaControl.setControlledApps([]);
@@ -4270,6 +4293,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         entryCount: state.entryCount || 0,
         carryoverSeconds: state.carryoverSeconds || 0,
         usedByApp: state.usedByApp || {},
+        creditPenaltyMultiplier:
+          Number.isFinite(state.creditPenaltyMultiplier)
+            ? state.creditPenaltyMultiplier
+            : 1,
       });
     }
   };
@@ -8325,13 +8352,13 @@ const getSpeechLocale = () => {
     InstaControl?.setOverallWidgetData?.(
       usageState.remainingSeconds || 0,
       rollingEarnedSeconds,
-      usageState.carryoverSeconds || 0
+      carryoverEntriesTotalSeconds
     );
   }, [
     usageState.remainingSeconds,
     usageState.usedSeconds,
-    usageState.carryoverSeconds,
     rollingEarnedSeconds,
+    carryoverEntriesTotalSeconds,
   ]);
   const renderAppContent = () => {
     if (overallStatsOpen) {
@@ -9113,6 +9140,13 @@ const getSpeechLocale = () => {
     const formulaBadgeValue = `${formulaBaseLabel} × ${formatFactorValue(
       combinedFactor
     )}`;
+    const screenTimePerRepSeconds = isSimpleReps
+      ? screenSecondsForEntry(selectedSport, { reps: 1 })
+      : null;
+    const screenTimePerMinuteSeconds =
+      selectedSport.type === "time"
+        ? screenSecondsForEntry(selectedSport, { seconds: 60 })
+        : null;
     const userFactorDeltaPercent = Math.round((userFactor - 1) * 100);
     const userFactorPercentText = `${userFactorDeltaPercent > 0 ? "+" : ""}${userFactorDeltaPercent}%`;
     const previewWeight = parsePositiveNumber(weightEntryWeight);
@@ -9687,6 +9721,18 @@ const getSpeechLocale = () => {
               <Text style={styles.formulaEquation}>
                 {t("label.screenTime")}: {formulaShort}
               </Text>
+              {screenTimePerRepSeconds != null ? (
+                <Text style={styles.formulaDetailText}>
+                  {t("label.screenRateReps")}:{" "}
+                  {formatScreenTime(screenTimePerRepSeconds)}
+                </Text>
+              ) : null}
+              {screenTimePerMinuteSeconds != null ? (
+                <Text style={styles.formulaDetailText}>
+                  {t("label.screenRateTime")}:{" "}
+                  {formatScreenTime(screenTimePerMinuteSeconds)}
+                </Text>
+              ) : null}
               <View style={styles.formulaFactorsRow}>
                 <View style={styles.formulaFactorCard}>
                   <Text style={styles.formulaFactorLabel}>
@@ -11258,7 +11304,7 @@ const getSpeechLocale = () => {
               <Text style={styles.infoLabel}>{t("label.remainingTotal")}</Text>
               <Text style={styles.infoSubLabel}>
                 {t("label.carryover")}:{" "}
-                {formatScreenTime(usageState.carryoverSeconds || 0)}
+                {formatScreenTime(carryoverEntriesTotalSeconds)}
               </Text>
             </Pressable>
           </View>
