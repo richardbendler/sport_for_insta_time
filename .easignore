@@ -9,8 +9,12 @@ android/.gradle
 android/.cxx
 android/.idea
 android/app/build
+android/app/build/**
 android/build
+android/build/**
 android/**/build
+android/**/build/**
+**/build/**
 
 # Logs / temporary
 **/*.log
