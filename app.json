@@ -11,8 +11,6 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.richardbendler.sportforscreentime",
-      "buildNumber": "1",
       "infoPlist": {
         "NSMicrophoneUsageDescription": "Allow microphone access to count reps by voice.",
         "NSSpeechRecognitionUsageDescription": "Allow speech recognition to count reps by voice.",

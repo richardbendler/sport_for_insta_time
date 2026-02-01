@@ -52,42 +52,6 @@
     android:textSize="42sp"
     android:textStyle="bold" />
 
-  <TextView
-    android:id="@+id/preface_credit_title"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="24dp"
-    android:text="@string/preface_credit_title"
-    android:textColor="#94a3b8"
-    android:textSize="14sp" />
-
-  <TextView
-    android:id="@+id/preface_credit_value"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="4dp"
-    android:text="@string/preface_credit_minutes"
-    android:textColor="#f8fafc"
-    android:textSize="18sp"
-    android:textStyle="bold" />
-
-  <SeekBar
-    android:id="@+id/preface_credit_slider"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="6dp"
-    android:max="14"
-    android:progress="4" />
-
-  <TextView
-    android:id="@+id/preface_credit_penalty"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="4dp"
-    android:text="@string/preface_credit_penalty_hint"
-    android:textColor="#f59e0b"
-    android:textSize="12sp" />
-
   <Button
     android:id="@+id/preface_button"
     android:layout_width="wrap_content"
@@ -96,15 +60,4 @@
     android:text="@string/preface_button"
     android:backgroundTint="#f59e0b"
     android:textColor="#0b1020" />
-
-  <Button
-    android:id="@+id/preface_credit_button"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="12dp"
-    android:text="@string/preface_credit_button"
-    android:backgroundTint="#334155"
-    android:textColor="#f8fafc"
-    android:alpha="0.5"
-    android:enabled="false" />
 </LinearLayout>

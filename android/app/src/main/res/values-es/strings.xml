@@ -19,8 +19,4 @@
   <string name="preface_remaining_label">Restante:</string>
   <string name="preface_countdown_label">Empieza en</string>
   <string name="preface_button">Abrir app</string>
-  <string name="preface_credit_title">Pedir crédito</string>
-  <string name="preface_credit_minutes">%d minutos</string>
-  <string name="preface_credit_penalty_hint">Las nuevas entradas solo dan el %d%% del tiempo habitual.</string>
-  <string name="preface_credit_button">Pedir crédito</string>
 </resources>
