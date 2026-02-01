@@ -1,12 +1,22 @@
-﻿node_modules
+﻿# Expo artifacts
+node_modules
+node_modules/**
 .expo
 .expo-shared
+
+# Android build caches
 android/.gradle
 android/.cxx
-android/app/build
 android/.idea
+android/app/build
+android/build
+android/**/build
+
+# Logs / temporary
 **/*.log
 **/dist
 .coverage
 *.lock
-\nnode_modules/**\nandroid/**/build\n
+
+# Misc
+*.keystore
