@@ -18,4 +18,8 @@
   <string name="preface_remaining_label">Remaining:</string>
   <string name="preface_countdown_label">Starts in</string>
   <string name="preface_button">Open app</string>
+  <string name="preface_credit_title">Borrow time</string>
+  <string name="preface_credit_minutes">%d minutes</string>
+  <string name="preface_credit_penalty_hint">New entries yield only %d%% of your usual screen time.</string>
+  <string name="preface_credit_button">Borrow credit</string>
 </resources>

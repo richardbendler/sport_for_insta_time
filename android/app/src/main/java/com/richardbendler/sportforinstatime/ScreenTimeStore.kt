@@ -14,6 +14,10 @@ object ScreenTimeStore {
   private const val PREF_KEY_USED_BY_APP = "used_seconds_by_app"
   private const val PREF_KEY_LAST_DAY = "last_day"
   private const val PREF_KEY_LEGACY_ALLOWANCE = "allowance_seconds"
+  private const val PREF_KEY_CREDIT_PENALTY = "credit_penalty_multiplier"
+  private const val CREDIT_ENTRY_PREFIX = "credit_"
+  private const val MIN_CREDIT_MINUTES = 1
+  private const val MAX_CREDIT_MINUTES = 15
   private const val DAY_MS = 24L * 60L * 60L * 1000L
 
   data class Entry(
@@ -98,11 +102,40 @@ object ScreenTimeStore {
     saveEntries(prefs, entries)
   }
 
+  fun grantCredit(
+    prefs: SharedPreferences,
+    minutes: Int,
+    penaltyMultiplier: Float
+  ): Boolean {
+    val safeMinutes = minutes.coerceIn(MIN_CREDIT_MINUTES, MAX_CREDIT_MINUTES)
+    if (safeMinutes <= 0) {
+      return false
+    }
+    val entries = loadEntries(prefs)
+    val now = System.currentTimeMillis()
+    val seconds = safeMinutes * 60
+    entries.add(
+      Entry(
+        id = "$CREDIT_ENTRY_PREFIX$now",
+        sportId = "credit",
+        createdAt = now,
+        remainingSeconds = seconds,
+        lastDecayAt = now,
+        originalSeconds = seconds,
+        decayCount = 0
+      )
+    )
+    prefs.edit().putFloat(PREF_KEY_CREDIT_PENALTY, penaltyMultiplier.coerceAtLeast(0f)).apply()
+    saveEntries(prefs, entries)
+    return true
+  }
+
   fun clearAllEntries(prefs: SharedPreferences) {
     prefs.edit()
       .remove(PREF_KEY_ENTRIES)
       .putInt(PREF_KEY_LEGACY_ALLOWANCE, 0)
       .apply()
+    updateCreditPenalty(prefs, emptyList())
   }
 
   fun clearEntriesForSport(prefs: SharedPreferences, sportId: String) {
@@ -167,6 +200,10 @@ object ScreenTimeStore {
       saveEntries(prefs, persisted)
     }
     return Breakdown(remainingTotal, totalToday, carryover)
+  }
+
+  fun getCreditPenalty(prefs: SharedPreferences): Float {
+    return prefs.getFloat(PREF_KEY_CREDIT_PENALTY, 1f).coerceAtLeast(0f)
   }
 
   fun consumeSeconds(prefs: SharedPreferences, now: Long, seconds: Int): ConsumptionResult {
@@ -299,6 +336,18 @@ object ScreenTimeStore {
       array.put(obj)
     }
     prefs.edit().putString(PREF_KEY_ENTRIES, array.toString()).apply()
+    updateCreditPenalty(prefs, entries)
+  }
+
+  private fun updateCreditPenalty(prefs: SharedPreferences, entries: List<Entry>) {
+    val hasActiveCredit = entries.any {
+      it.id.startsWith(CREDIT_ENTRY_PREFIX) && it.remainingSeconds > 0
+    }
+    val current = prefs.getFloat(PREF_KEY_CREDIT_PENALTY, 1f)
+    val target = if (hasActiveCredit) current else 1f
+    if (current != target) {
+      prefs.edit().putFloat(PREF_KEY_CREDIT_PENALTY, target).apply()
+    }
   }
 
   private fun ensureToday(prefs: SharedPreferences, now: Long): String {

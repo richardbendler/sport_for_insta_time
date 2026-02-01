@@ -6,19 +6,31 @@ import android.os.Handler
 import android.os.Looper
 import android.view.View
 import android.widget.Button
+import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import java.util.Locale
 
 class InstaPrefaceActivity : AppCompatActivity() {
+  private companion object {
+    private const val DEFAULT_CREDIT_MINUTES = 5
+    private const val MIN_CREDIT_MINUTES = 1
+    private const val MAX_CREDIT_MINUTES = 15
+  }
+
   private val handler = Handler(Looper.getMainLooper())
   private var delaySeconds = 10
   private var remainingSeconds = 0
   private var targetPackage: String? = null
+  private var borrowMinutes = DEFAULT_CREDIT_MINUTES
 
   private lateinit var countdownText: TextView
   private lateinit var remainingText: TextView
   private lateinit var openButton: Button
+  private lateinit var creditButton: Button
+  private lateinit var creditSlider: SeekBar
+  private lateinit var creditValue: TextView
+  private lateinit var creditPenalty: TextView
 
   private val ticker = object : Runnable {
     override fun run() {
@@ -47,9 +59,28 @@ class InstaPrefaceActivity : AppCompatActivity() {
     countdownText = findViewById(R.id.preface_countdown)
     remainingText = findViewById(R.id.preface_remaining)
     openButton = findViewById(R.id.preface_button)
+    creditValue = findViewById(R.id.preface_credit_value)
+    creditPenalty = findViewById(R.id.preface_credit_penalty)
+    creditSlider = findViewById(R.id.preface_credit_slider)
+    creditButton = findViewById(R.id.preface_credit_button)
 
     remainingText.text = formatTime(remainingSeconds)
     updateCountdown()
+
+    creditSlider.max = MAX_CREDIT_MINUTES - MIN_CREDIT_MINUTES
+    creditSlider.progress = borrowMinutes - MIN_CREDIT_MINUTES
+    creditSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+      override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+        borrowMinutes = MIN_CREDIT_MINUTES + progress
+        updateCreditDisplay()
+      }
+
+      override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+      override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+    })
+    updateCreditDisplay()
+
+    creditButton.setOnClickListener { useCredit() }
 
     openButton.setOnClickListener { openTargetApp() }
     handler.postDelayed(ticker, 1000)
@@ -69,6 +100,8 @@ class InstaPrefaceActivity : AppCompatActivity() {
     val enabled = delaySeconds <= 0
     openButton.isEnabled = enabled
     openButton.alpha = if (enabled) 1f else 0.5f
+    creditButton.isEnabled = enabled
+    creditButton.alpha = if (enabled) 1f else 0.5f
   }
 
   private fun openTargetApp() {
@@ -88,6 +121,36 @@ class InstaPrefaceActivity : AppCompatActivity() {
       startActivity(intent)
     }
     finish()
+  }
+
+  private fun updateCreditDisplay() {
+    creditValue.text = getString(R.string.preface_credit_minutes, borrowMinutes)
+    val penaltyPercent = computePenaltyPercent(borrowMinutes)
+    creditPenalty.text = getString(R.string.preface_credit_penalty_hint, penaltyPercent)
+  }
+
+  private fun computePenaltyMultiplier(minutes: Int): Float {
+    val base = 1f - minutes * 0.02f
+    return base.coerceAtLeast(0.5f)
+  }
+
+  private fun computePenaltyPercent(minutes: Int): Int {
+    return (computePenaltyMultiplier(minutes) * 100).toInt()
+  }
+
+  private fun useCredit() {
+    if (delaySeconds > 0) {
+      return
+    }
+    val prefs = getSharedPreferences("insta_control", MODE_PRIVATE)
+    val penalty = computePenaltyMultiplier(borrowMinutes)
+    val granted = ScreenTimeStore.grantCredit(prefs, borrowMinutes, penalty)
+    if (!granted) {
+      return
+    }
+    remainingSeconds += borrowMinutes * 60
+    remainingText.text = formatTime(remainingSeconds)
+    openTargetApp()
   }
 
   private fun goHome() {
