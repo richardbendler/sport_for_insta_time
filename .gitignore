@@ -3,4 +3,5 @@ node_modules
 android/.gradle
 android/app/build
 android/local.properties
+android/.kotlin
 npm-debug.log
