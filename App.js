@@ -2692,7 +2692,7 @@ function AppContent() {
   }, []);
   const handleDifficultyButtonPress = useCallback(
     (delta) => {
-      const lockExpiresAt = Number(usageState.creditLockExpiresAt || 0);
+    const lockExpiresAt = Number(usageState?.creditLockExpiresAt || 0);
       if (editingSportId && lockExpiresAt > Date.now()) {
         const formatted = formatLockExpiryLabel(lockExpiresAt, language);
         Alert.alert(
@@ -2703,14 +2703,14 @@ function AppContent() {
       }
       adjustDifficultyLevel(delta);
     },
-    [adjustDifficultyLevel, editingSportId, language, t, usageState.creditLockExpiresAt]
+    [adjustDifficultyLevel, editingSportId, language, t, usageState?.creditLockExpiresAt]
   );
   const newDifficultyIndex = getDifficultyOptionIndex(newDifficultyLevel);
   const difficultyFillPercent =
     (newDifficultyIndex /
       Math.max(1, USER_FACTOR_OPTIONS.length - 1)) *
     100;
-  const creditLockExpiresAtValue = Number(usageState.creditLockExpiresAt || 0);
+  const creditLockExpiresAtValue = Number(usageState?.creditLockExpiresAt || 0);
   const difficultyLockActive =
     editingSportId && creditLockExpiresAtValue > Date.now();
   const [showIconInput, setShowIconInput] = useState(false);
