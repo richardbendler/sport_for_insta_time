@@ -4382,14 +4382,19 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
     const state = await InstaControl.getUsageState();
     if (state) {
-      const noAppsControlled =
-        !settings?.controlledApps || settings.controlledApps.length === 0;
-      const fallbackRemaining = noAppsControlled
-        ? rollingScreenSecondsTotal(logs, sports)
-        : 0;
+      const stateRemaining =
+        typeof state.remainingSeconds === "number"
+          ? state.remainingSeconds
+          : null;
+      const fallbackRemaining =
+        stateRemaining === null
+          ? rollingScreenSecondsTotal(logs, sports)
+          : 0;
       setUsageState({
-        remainingSeconds:
-          Math.max(state.remainingSeconds || 0, fallbackRemaining),
+        remainingSeconds: Math.max(
+          stateRemaining ?? 0,
+          fallbackRemaining
+        ),
         usedSeconds: state.usedSeconds || 0,
         day: state.day || todayKey(),
         remainingBySport: state.remainingBySport || {},
