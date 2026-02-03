@@ -80,6 +80,7 @@ const STORAGE_KEYS = {
   carryover: "@carryover_seconds_v1",
   carryoverDay: "@carryover_day_v1",
   usageSnapshot: "@usage_snapshot_v1",
+  screenTimeSyncedEntries: "@screen_time_synced_entries_v1",
   logs: "@logs_v1",
   tutorialSeen: "@tutorial_seen_v1",
   workouts: "@workouts_v1",
@@ -2753,6 +2754,7 @@ function AppContent() {
   }, [usageState.creditPenaltyMultiplier]);
   const [screenTimeEntries, setScreenTimeEntries] = useState([]);
   const refreshScreenTimeEntriesRef = useRef(null);
+  const screenTimeSyncedEntryIdsRef = useRef(new Set());
   const [needsAccessibility, setNeedsAccessibility] = useState(true);
   const [accessibilityDisclosureVisible, setAccessibilityDisclosureVisible] =
     useState(false);
@@ -2924,6 +2926,35 @@ function AppContent() {
       }
     },
     [handleStorageError]
+  );
+  const persistSyncedEntryIds = useCallback(() => {
+    const ids = Array.from(screenTimeSyncedEntryIdsRef.current);
+    persistStorageValue(
+      STORAGE_KEYS.screenTimeSyncedEntries,
+      JSON.stringify(ids),
+      "screen time synced entries"
+    );
+  }, [persistStorageValue]);
+  const addSyncedEntryIds = useCallback(
+    (ids = []) => {
+      if (!ids.length) {
+        return;
+      }
+      const current = screenTimeSyncedEntryIdsRef.current;
+      let changed = false;
+      ids.forEach((id) => {
+        if (!id || current.has(id)) {
+          return;
+        }
+        current.add(id);
+        changed = true;
+      });
+      if (!changed) {
+        return;
+      }
+      persistSyncedEntryIds();
+    },
+    [persistSyncedEntryIds]
   );
   const markMotivationActionCompleted = useCallback(
     (actionId) => {
@@ -3245,6 +3276,23 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       if (statsJson !== statsRaw) {
         await AsyncStorage.setItem(STORAGE_KEYS.stats, statsJson);
       }
+      const syncedEntryIdsRaw = await AsyncStorage.getItem(
+        STORAGE_KEYS.screenTimeSyncedEntries
+      );
+      let parsedSyncedIds = [];
+      if (syncedEntryIdsRaw) {
+        try {
+          const parsed = JSON.parse(syncedEntryIdsRaw);
+          if (Array.isArray(parsed)) {
+            parsedSyncedIds = parsed.filter(
+              (id) => typeof id === "string" && id
+            );
+          }
+        } catch (error) {
+          console.warn("Failed to load synced screen time entries", error);
+        }
+      }
+      screenTimeSyncedEntryIdsRef.current = new Set(parsedSyncedIds);
       setLogs(normalizedLogs);
       if (logsChanged || logsMigrated) {
         await AsyncStorage.setItem(
@@ -3655,6 +3703,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       entry.ts,
       screenSeconds
     );
+    addSyncedEntryIds([entry.id]);
     InstaControl?.updateOverallWidgets?.();
     if (isScreenTimeDetailsOpen) {
       refreshScreenTimeEntriesRef.current?.();
@@ -3745,6 +3794,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       return;
     }
     const sportMap = new Map(sports.map((sport) => [sport.id, sport]));
+    const toSync = [];
     Object.entries(logs || {}).forEach(([sportId, sportLogs]) => {
       const sport = sportMap.get(sportId);
       if (!sport) {
@@ -3753,6 +3803,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       Object.values(sportLogs || {}).forEach((dayEntries) => {
         (dayEntries || []).forEach((entry) => {
           if (!entry?.id || !entry?.ts) {
+            return;
+          }
+          if (screenTimeSyncedEntryIdsRef.current.has(entry.id)) {
             return;
           }
           const screenSeconds = Number.isFinite(entry.screenSeconds)
@@ -3764,10 +3817,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
             entry.ts,
             screenSeconds
           );
+          toSync.push(entry.id);
         });
       });
     });
-  }, [logs, sports]);
+    if (toSync.length > 0) {
+      addSyncedEntryIds(toSync);
+    }
+  }, [logs, sports, addSyncedEntryIds]);
 
   useEffect(() => {
     if (!InstaControl?.upsertScreenTimeEntry) {
@@ -4011,7 +4068,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       STORAGE_KEYS.carryover,
       STORAGE_KEYS.carryoverDay,
       STORAGE_KEYS.usageSnapshot,
+      STORAGE_KEYS.screenTimeSyncedEntries,
     ]);
+    screenTimeSyncedEntryIdsRef.current = new Set();
     if (InstaControl?.clearAllScreenTimeEntries) {
       InstaControl.clearAllScreenTimeEntries();
       InstaControl?.updateOverallWidgets?.();
@@ -4020,20 +4079,22 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   };
 
   const resetAllData = async () => {
-  const nextSports = createDefaultPresetSports();
-  const { normalized: normalizedSports } = normalizeSports(nextSports);
-  await AsyncStorage.multiRemove([
+    const nextSports = createDefaultPresetSports();
+    const { normalized: normalizedSports } = normalizeSports(nextSports);
+    await AsyncStorage.multiRemove([
       STORAGE_KEYS.sports,
       STORAGE_KEYS.stats,
       STORAGE_KEYS.settings,
       STORAGE_KEYS.carryover,
       STORAGE_KEYS.carryoverDay,
       STORAGE_KEYS.usageSnapshot,
+      STORAGE_KEYS.screenTimeSyncedEntries,
       STORAGE_KEYS.logs,
       STORAGE_KEYS.tutorialSeen,
       STORAGE_KEYS.workouts,
     ]);
-  await saveSports(normalizedSports);
+    screenTimeSyncedEntryIdsRef.current = new Set();
+    await saveSports(normalizedSports);
     await saveStats({});
     await saveLogs({});
     await saveSettings(DEFAULT_SETTINGS);

@@ -18,6 +18,9 @@ class InstaBlockerActivity : AppCompatActivity() {
   private lateinit var creditButton: Button
   private lateinit var creditPenalty: TextView
   private lateinit var creditLockNotice: TextView
+  private lateinit var sickButton: Button
+  private lateinit var sickStatus: TextView
+  private val SICK_OVERRIDE_DURATION_MS = 24L * 60L * 60L * 1000L
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -34,7 +37,11 @@ class InstaBlockerActivity : AppCompatActivity() {
     creditButton = findViewById(R.id.blocker_credit_button)
     creditPenalty = findViewById(R.id.blocker_credit_penalty)
     creditLockNotice = findViewById(R.id.blocker_credit_lock_notice)
+    sickButton = findViewById(R.id.blocker_sick_button)
+    sickStatus = findViewById(R.id.blocker_sick_status)
+    sickButton.setOnClickListener { activateSickMode() }
     updateCreditSection(true)
+    updateSickSection()
   }
 
   override fun onBackPressed() {
@@ -115,6 +122,42 @@ class InstaBlockerActivity : AppCompatActivity() {
       this,
       getString(R.string.preface_credit_success, safeMinutes, penaltyPercent),
       Toast.LENGTH_SHORT
+    ).show()
+    goHome()
+    finish()
+  }
+
+  override fun onResume() {
+    super.onResume()
+    updateSickSection()
+  }
+
+  private fun updateSickSection() {
+    val prefs = getSharedPreferences("insta_control", MODE_PRIVATE)
+    val now = System.currentTimeMillis()
+    val active = SickOverrideStore.isOverrideActive(prefs, now)
+    sickStatus.visibility = if (active) {
+      val until = SickOverrideStore.getOverrideUntil(prefs)
+      sickStatus.text = getString(
+        R.string.blocker_sick_status,
+        formatLockExpiryLabel(until)
+      )
+      View.VISIBLE
+    } else {
+      View.GONE
+    }
+    sickButton.isEnabled = !active
+  }
+
+  private fun activateSickMode() {
+    val prefs = getSharedPreferences("insta_control", MODE_PRIVATE)
+    val now = System.currentTimeMillis()
+    val until = now + SICK_OVERRIDE_DURATION_MS
+    SickOverrideStore.setOverrideUntil(prefs, until)
+    Toast.makeText(
+      this,
+      getString(R.string.blocker_sick_success, formatLockExpiryLabel(until)),
+      Toast.LENGTH_LONG
     ).show()
     goHome()
     finish()

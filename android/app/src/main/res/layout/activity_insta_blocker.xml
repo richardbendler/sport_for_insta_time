@@ -106,9 +106,66 @@
       android:id="@+id/blocker_credit_lock_notice"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
+    android:layout_marginTop="6dp"
+    android:text="@string/preface_credit_locked"
+    android:textColor="#94a3b8"
+    android:textSize="12sp"
+    android:visibility="gone" />
+  </LinearLayout>
+
+  <LinearLayout
+    android:id="@+id/blocker_sick_section"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="16dp"
+    android:layout_marginBottom="8dp"
+    android:layout_marginHorizontal="4dp"
+    android:orientation="vertical"
+    android:padding="18dp"
+    android:background="#111827"
+    android:elevation="4dp">
+
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/blocker_sick_title"
+      android:textColor="#f8fafc"
+      android:textSize="16sp"
+      android:textStyle="bold" />
+
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
       android:layout_marginTop="6dp"
-      android:text="@string/preface_credit_locked"
+      android:text="@string/blocker_sick_label"
       android:textColor="#94a3b8"
+      android:textSize="14sp" />
+
+    <TextView
+      android:id="@+id/blocker_sick_hint"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="4dp"
+      android:text="@string/blocker_sick_hint"
+      android:textColor="#94a3b8"
+      android:textSize="12sp" />
+
+    <Button
+      android:id="@+id/blocker_sick_button"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="12dp"
+      android:text="@string/blocker_sick_button"
+      android:backgroundTint="#14b8a6"
+      android:textColor="#0b1020" />
+
+    <TextView
+      android:id="@+id/blocker_sick_status"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="6dp"
+      android:text="@string/blocker_sick_status"
+      android:textColor="#34d399"
       android:textSize="12sp"
       android:visibility="gone" />
   </LinearLayout>
