@@ -52,15 +52,14 @@
     android:id="@+id/blocker_credit_section"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="16dp"
-    android:layout_marginBottom="8dp"
+    android:layout_marginTop="10dp"
+    android:layout_marginBottom="4dp"
     android:layout_marginHorizontal="4dp"
-    android:gravity="center"
     android:orientation="vertical"
     android:visibility="gone"
-    android:padding="18dp"
+    android:padding="12dp"
     android:background="#1e293b"
-    android:elevation="4dp">
+    android:elevation="2dp">
 
     <TextView
       android:layout_width="wrap_content"
@@ -73,22 +72,16 @@
     <TextView
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_marginTop="6dp"
+      android:layout_marginTop="4dp"
       android:text="@string/preface_credit_label"
       android:textColor="#94a3b8"
-      android:textSize="14sp" />
-
-    <NumberPicker
-      android:id="@+id/blocker_credit_picker"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="4dp" />
+      android:textSize="12sp" />
 
     <Button
       android:id="@+id/blocker_credit_button"
-      android:layout_width="wrap_content"
+      android:layout_width="130dp"
       android:layout_height="wrap_content"
-      android:layout_marginTop="12dp"
+      android:layout_marginTop="8dp"
       android:text="@string/preface_credit_button"
       android:backgroundTint="#f59e0b"
       android:textColor="#0b1020" />
@@ -97,10 +90,10 @@
       android:id="@+id/blocker_credit_penalty"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_marginTop="6dp"
+      android:layout_marginTop="4dp"
       android:text="@string/preface_credit_penalty"
       android:textColor="#f8fafc"
-      android:textSize="12sp" />
+      android:textSize="11sp" />
 
     <TextView
       android:id="@+id/blocker_credit_lock_notice"
@@ -117,13 +110,13 @@
     android:id="@+id/blocker_sick_section"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="16dp"
-    android:layout_marginBottom="8dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="4dp"
     android:layout_marginHorizontal="4dp"
     android:orientation="vertical"
-    android:padding="18dp"
+    android:padding="12dp"
     android:background="#111827"
-    android:elevation="4dp">
+    android:elevation="2dp">
 
     <TextView
       android:layout_width="wrap_content"
