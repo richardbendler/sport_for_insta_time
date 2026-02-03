@@ -55,15 +55,15 @@
 
   <LinearLayout
     android:id="@+id/blocker_credit_section"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_gravity="center_horizontal"
     android:layout_marginTop="12dp"
     android:layout_marginBottom="4dp"
+    android:layout_marginHorizontal="18dp"
     android:orientation="vertical"
     android:visibility="gone"
-    android:padding="8dp"
-    android:background="#1e293b"
+    android:padding="12dp"
+    android:background="#1b2432"
     android:gravity="center_horizontal">
 
     <TextView
@@ -71,7 +71,7 @@
       android:layout_height="wrap_content"
       android:text="@string/preface_credit_title"
       android:textColor="#f8fafc"
-      android:textSize="14sp"
+      android:textSize="15sp"
       android:textStyle="bold" />
 
     <TextView
@@ -79,8 +79,8 @@
       android:layout_height="wrap_content"
       android:layout_marginTop="4dp"
       android:text="@string/preface_credit_label"
-      android:textColor="#94a3b8"
-      android:textSize="11sp"
+      android:textColor="#cbd5f5"
+      android:textSize="12sp"
       android:gravity="center" />
 
     <Button
@@ -99,7 +99,7 @@
       android:layout_marginTop="4dp"
       android:text="@string/preface_credit_penalty"
       android:textColor="#f8fafc"
-      android:textSize="10sp" />
+      android:textSize="11sp" />
 
     <TextView
       android:id="@+id/blocker_credit_lock_notice"
@@ -114,14 +114,14 @@
 
   <LinearLayout
     android:id="@+id/blocker_sick_section"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_gravity="center_horizontal"
     android:layout_marginTop="6dp"
     android:layout_marginBottom="8dp"
+    android:layout_marginHorizontal="18dp"
     android:orientation="vertical"
-    android:padding="10dp"
-    android:background="#111827"
+    android:padding="12dp"
+    android:background="#0f172a"
     android:gravity="center_horizontal">
 
     <TextView
@@ -129,7 +129,7 @@
       android:layout_height="wrap_content"
       android:text="@string/blocker_sick_title"
       android:textColor="#f8fafc"
-      android:textSize="14sp"
+      android:textSize="15sp"
       android:textStyle="bold" />
 
     <TextView
@@ -137,8 +137,8 @@
       android:layout_height="wrap_content"
       android:layout_marginTop="6dp"
       android:text="@string/blocker_sick_label"
-      android:textColor="#94a3b8"
-      android:textSize="12sp"
+      android:textColor="#cbd5f5"
+      android:textSize="13sp"
       android:gravity="center" />
 
     <TextView
@@ -148,7 +148,7 @@
       android:layout_marginTop="4dp"
       android:text="@string/blocker_sick_hint"
       android:textColor="#94a3b8"
-      android:textSize="11sp"
+      android:textSize="12sp"
       android:gravity="center" />
 
     <Button
@@ -167,7 +167,7 @@
       android:layout_marginTop="6dp"
       android:text="@string/blocker_sick_status"
       android:textColor="#34d399"
-      android:textSize="10sp"
+      android:textSize="11sp"
       android:visibility="gone" />
   </LinearLayout>
 </LinearLayout>
