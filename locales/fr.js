@@ -307,6 +307,13 @@ const fr = {
     "label.changeLanguage": "Changer de langue",
     "label.prefaceSettings": "Ecran preface",
     "label.prefaceDelay": "Delai (secondes)",
+    "label.sickModeSection": "Mode maladie",
+    "label.sickModeLimitSubtitle":
+      "Le mode maladie autorise jusqu'à {{minutes}} min par jour.",
+    "label.sickModeLimitAction": "Modifier la limite",
+    "label.sickModeLimitTitle": "Limite du mode maladie",
+    "label.sickModeLimitDescription":
+      "Définis combien de minutes par jour sont disponibles en mode maladie.",
     "label.creditLockTitle": "Facteurs bloqués",
     "label.creditLockBody": "Les facteurs utilisateurs sont bloqués jusqu'au {{date}}.",
     "label.creditLockNotice": "Facteurs bloqués jusqu'au {{date}}.",

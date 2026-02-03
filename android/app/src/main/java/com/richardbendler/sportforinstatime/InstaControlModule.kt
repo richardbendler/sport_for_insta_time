@@ -19,6 +19,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.facebook.react.bridge.*
 import com.richardbendler.sportforinstatime.R
+import com.richardbendler.sportforinstatime.SickOverrideStore
 import org.json.JSONArray
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -203,6 +204,12 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
     val prefs = getPrefs()
     val safeSeconds = if (seconds < 0) 0 else seconds
     prefs.edit().putInt("preface_delay_seconds", safeSeconds).apply()
+  }
+
+  @ReactMethod
+  fun setSickModeLimitMinutes(minutes: Int) {
+    val prefs = getPrefs()
+    SickOverrideStore.setDailyLimitMinutes(prefs, minutes)
   }
 
   @ReactMethod
