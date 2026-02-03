@@ -145,6 +145,20 @@ object ScreenTimeStore {
     return entries.sortedByDescending { it.createdAt }
   }
 
+  fun getEntryById(prefs: SharedPreferences, now: Long, entryId: String): Entry? {
+    if (entryId.isBlank()) {
+      return null
+    }
+    val entries = ensureLegacyMigration(loadEntries(prefs), prefs, now)
+    val changed = applyDecay(entries, now)
+    val match = entries.find { it.id == entryId }
+    val persisted = entries.filter { shouldKeepEntry(it, now) }
+    if (changed || persisted.size != entries.size) {
+      saveEntries(prefs, persisted)
+    }
+    return match
+  }
+
   fun getBreakdown(prefs: SharedPreferences, now: Long): Breakdown {
     val entries = ensureLegacyMigration(loadEntries(prefs), prefs, now)
     val changed = applyDecay(entries, now)

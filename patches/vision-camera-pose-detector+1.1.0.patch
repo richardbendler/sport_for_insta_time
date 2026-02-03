@@ -120,3 +120,52 @@ index 921f353..90e2a34 100644
  
  type Landmark = {
    x: number;
+diff --git a/node_modules/vision-camera-pose-detector/ios/VisionCameraPoseDetector.m b/node_modules/vision-camera-pose-detector/ios/VisionCameraPoseDetector.m
+index d459077..c282f39 100644
+--- a/node_modules/vision-camera-pose-detector/ios/VisionCameraPoseDetector.m
++++ b/node_modules/vision-camera-pose-detector/ios/VisionCameraPoseDetector.m
+@@ -1,18 +1,23 @@
+ #import <VisionCamera/FrameProcessorPlugin.h>
+ #import <VisionCamera/FrameProcessorPluginRegistry.h>
++#import <VisionCamera/VisionCameraProxyHolder.h>
+ #import <VisionCamera/Frame.h>
+ #import <MLKit.h>
+ 
+ @interface PoseDetectorPlugin : FrameProcessorPlugin
+ 
+-+ (MLKPoseDetector*) detector;
++- (instancetype)initWithProxy:(VisionCameraProxyHolder*)proxy
++                   withOptions:(NSDictionary* _Nullable)options;
++
++- (MLKPoseDetector*) detector;
+ 
+ @end
+ 
+ @implementation PoseDetectorPlugin
+ 
+-- (instancetype) initWithOptions:(NSDictionary*)options; {
+-  self = [super init];
++- (instancetype)initWithProxy:(VisionCameraProxyHolder*)proxy
++                   withOptions:(NSDictionary* _Nullable)options {
++  self = [super initWithProxy:proxy withOptions:options];
+   return self;
+ }
+ 
+@@ -94,11 +99,11 @@
+   return nil;
+ }
+  
+-+ (void) load {
+-  [FrameProcessorPluginRegistry addFrameProcessorPlugin:@"detectPose"
+-                                        withInitializer:^FrameProcessorPlugin*(NSDictionary* options) {
+-    return [[PoseDetectorPlugin alloc] initWithOptions:options];
+-  }];
+-}
++ + (void)load {
++   [FrameProcessorPluginRegistry addFrameProcessorPlugin:@"detectPose"
++                                         withInitializer:^FrameProcessorPlugin*(VisionCameraProxyHolder* proxy, NSDictionary* options) {
++     return [[PoseDetectorPlugin alloc] initWithProxy:proxy withOptions:options];
++   }];
++ }
+ 
+ @end

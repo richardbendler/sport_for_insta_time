@@ -22,6 +22,7 @@ import android.widget.TextView
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import org.json.JSONArray
+import java.util.Locale
 import kotlin.math.abs
 
 class InstaBlockerService : AccessibilityService() {
@@ -154,7 +155,7 @@ class InstaBlockerService : AccessibilityService() {
       return
     }
     if ((previousPackage != pkg || openedFromHome) && shouldShowPreface(pkg) && openedFromHome) {
-      launchPreface(pkg, remaining)
+      launchPreface(pkg, remaining, remaining <= 0)
     }
   }
 
@@ -494,11 +495,12 @@ class InstaBlockerService : AccessibilityService() {
     return !(allowedPkg == pkg && now < allowUntil)
   }
 
-  private fun launchPreface(pkg: String, remainingSeconds: Int) {
+  private fun launchPreface(pkg: String, remainingSeconds: Int, showCredit: Boolean = false) {
     val intent = Intent(this, InstaPrefaceActivity::class.java)
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
     intent.putExtra("target_package", pkg)
     intent.putExtra("remaining_seconds", remainingSeconds)
+    intent.putExtra("preface_show_credit", showCredit)
     startActivity(intent)
   }
 

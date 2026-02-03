@@ -10,6 +10,7 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
@@ -273,6 +274,7 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
     try {
       val prefs = getPrefs()
       val now = System.currentTimeMillis()
+      ensureCreditInfo(prefs, now)
       val today = todayKey()
       val used = ScreenTimeStore.getUsedSecondsToday(prefs, now)
       val totals = ScreenTimeStore.getTotals(prefs, now)
@@ -294,10 +296,22 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
         byAppMap.putInt(pkg, seconds)
       }
       map.putMap("usedByApp", byAppMap)
+      val creditMultiplier = CreditStore.getCreditMultiplier(prefs)
+      map.putDouble("creditPenaltyMultiplier", creditMultiplier.toDouble())
+      val lockExpiresAt = CreditStore.getCreditLockExpiresAt(prefs, now)
+      map.putDouble("creditLockExpiresAt", lockExpiresAt.toDouble())
       OverallWidgetProvider.refreshAll(reactContext)
       promise.resolve(map)
     } catch (e: Exception) {
       promise.reject("USAGE_STATE_ERROR", e)
+    }
+  }
+
+  private fun ensureCreditInfo(prefs: SharedPreferences, now: Long) {
+    val entryId = CreditStore.getCreditEntryId(prefs) ?: return
+    val entry = ScreenTimeStore.getEntryById(prefs, now, entryId)
+    if (entry == null || entry.remainingSeconds <= 0) {
+      CreditStore.clearCreditInfo(prefs)
     }
   }
 

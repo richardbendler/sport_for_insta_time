@@ -1677,6 +1677,23 @@ const formatDateLabel = (key) => {
   return `${day}.${month}.${date.getFullYear()}`;
 };
 
+const formatLockExpiryLabel = (timestamp, languageCode) => {
+  if (!timestamp || !Number.isFinite(timestamp)) {
+    return "";
+  }
+  const normalizedLanguage =
+    typeof languageCode === "string" ? languageCode.replace(/_/g, "-") : undefined;
+  const date = new Date(timestamp);
+  const options = {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  };
+  return date.toLocaleString(normalizedLanguage, options);
+};
+
 const getMonthsForCalendar = (keysSet) => {
   const earliestKey = keysSet.size > 0 ? [...keysSet].sort()[0] : todayKey();
   const earliestDate = parseDateKey(earliestKey);
@@ -2672,11 +2689,29 @@ function AppContent() {
       return USER_FACTOR_OPTIONS[nextIndex];
     });
   }, []);
+  const handleDifficultyButtonPress = useCallback(
+    (delta) => {
+      const lockExpiresAt = Number(usageState.creditLockExpiresAt || 0);
+      if (editingSportId && lockExpiresAt > Date.now()) {
+        const formatted = formatLockExpiryLabel(lockExpiresAt, language);
+        Alert.alert(
+          t("label.creditLockTitle"),
+          t("label.creditLockBody", { date: formatted })
+        );
+        return;
+      }
+      adjustDifficultyLevel(delta);
+    },
+    [adjustDifficultyLevel, editingSportId, language, t, usageState.creditLockExpiresAt]
+  );
   const newDifficultyIndex = getDifficultyOptionIndex(newDifficultyLevel);
   const difficultyFillPercent =
     (newDifficultyIndex /
       Math.max(1, USER_FACTOR_OPTIONS.length - 1)) *
     100;
+  const creditLockExpiresAtValue = Number(usageState.creditLockExpiresAt || 0);
+  const difficultyLockActive =
+    editingSportId && creditLockExpiresAtValue > Date.now();
   const [showIconInput, setShowIconInput] = useState(false);
   const [customSuggestionUsed, setCustomSuggestionUsed] = useState(false);
   const [infoModalKey, setInfoModalKey] = useState(null);
@@ -2711,6 +2746,7 @@ function AppContent() {
     carryoverSeconds: 0,
     usedByApp: {},
     creditPenaltyMultiplier: 1,
+    creditLockExpiresAt: 0,
   });
   useEffect(() => {
     setGlobalCreditPenaltyMultiplier(usageState.creditPenaltyMultiplier ?? 1);
@@ -4042,6 +4078,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       carryoverSeconds: 0,
       usedByApp: {},
       creditPenaltyMultiplier: 1,
+      creditLockExpiresAt: 0,
     });
     if (InstaControl?.setControlledApps) {
       InstaControl.setControlledApps([]);
@@ -4297,6 +4334,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           Number.isFinite(state.creditPenaltyMultiplier)
             ? state.creditPenaltyMultiplier
             : 1,
+        creditLockExpiresAt:
+          Number.isFinite(state.creditLockExpiresAt)
+            ? state.creditLockExpiresAt
+            : 0,
       });
     }
   };
@@ -5532,20 +5573,52 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                   />
                 </View>
               </View>
-              <View style={styles.difficultyButtonsRow}>
-                <Pressable
-                  style={styles.difficultyButton}
-                  onPress={() => adjustDifficultyLevel(-1)}
+            <View style={styles.difficultyButtonsRow}>
+              <Pressable
+                style={[
+                  styles.difficultyButton,
+                  difficultyLockActive && styles.difficultyButtonDisabled,
+                ]}
+                onPress={() => handleDifficultyButtonPress(-1)}
+              >
+                <Text
+                  style={[
+                    styles.difficultyButtonText,
+                    difficultyLockActive && styles.difficultyButtonTextDisabled,
+                  ]}
                 >
-                  <Text style={styles.difficultyButtonText}>-</Text>
-                </Pressable>
-                <Pressable
-                  style={styles.difficultyButton}
-                  onPress={() => adjustDifficultyLevel(1)}
+                  -
+                </Text>
+              </Pressable>
+              <Pressable
+                style={[
+                  styles.difficultyButton,
+                  difficultyLockActive && styles.difficultyButtonDisabled,
+                ]}
+                onPress={() => handleDifficultyButtonPress(1)}
+              >
+                <Text
+                  style={[
+                    styles.difficultyButtonText,
+                    difficultyLockActive && styles.difficultyButtonTextDisabled,
+                  ]}
                 >
-                  <Text style={styles.difficultyButtonText}>+</Text>
-                </Pressable>
+                  +
+                </Text>
+              </Pressable>
+            </View>
+            {difficultyLockActive && (
+              <View style={styles.lockNotice}>
+                <Text style={styles.lockNoticeText}>
+                  {t("label.creditLockNotice", {
+                    date: formatLockExpiryLabel(
+                      creditLockExpiresAtValue,
+                      language
+                    ),
+                  })}
+                </Text>
               </View>
+            )}
             </View>
             {newType === "reps" ? (
               <View
@@ -9646,6 +9719,22 @@ const getSpeechLocale = () => {
                 <Text style={styles.formulaBadgeValue}>{formulaBadgeValue}</Text>
               </Pressable>
             </View>
+            {(screenTimePerRepSeconds != null || screenTimePerMinuteSeconds != null) ? (
+              <View style={styles.formulaRateRow}>
+                {screenTimePerRepSeconds != null ? (
+                  <Text style={styles.formulaRateText}>
+                    {t("label.screenRateReps")}:{" "}
+                    {formatScreenTime(screenTimePerRepSeconds)}
+                  </Text>
+                ) : null}
+                {screenTimePerMinuteSeconds != null ? (
+                  <Text style={styles.formulaRateText}>
+                    {t("label.screenRateTime")}:{" "}
+                    {formatScreenTime(screenTimePerMinuteSeconds)}
+                  </Text>
+                ) : null}
+              </View>
+            ) : null}
             {isWeightMode && recentWeightEntries.length > 0 ? (
               <View style={styles.weightHistoryCard}>
                 <Text style={styles.sectionTitle}>{t("label.weightHistory")}</Text>
@@ -11304,7 +11393,7 @@ const getSpeechLocale = () => {
               <Text style={styles.infoLabel}>{t("label.remainingTotal")}</Text>
               <Text style={styles.infoSubLabel}>
                 {t("label.carryover")}:{" "}
-                {formatScreenTime(carryoverEntriesTotalSeconds)}
+                {formatScreenTime(usageState.carryoverSeconds || 0)}
               </Text>
             </Pressable>
           </View>
@@ -13141,6 +13230,20 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontSize: 18,
   },
+  difficultyButtonDisabled: {
+    borderColor: "rgba(148, 163, 184, 0.35)",
+    backgroundColor: "rgba(148, 163, 184, 0.08)",
+  },
+  difficultyButtonTextDisabled: {
+    color: "rgba(148, 163, 184, 0.65)",
+  },
+  lockNotice: {
+    marginTop: 6,
+  },
+  lockNoticeText: {
+    fontSize: 12,
+    color: COLORS.muted,
+  },
   hiddenSection: {
     marginTop: 20,
   },
@@ -13565,6 +13668,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "600",
     marginTop: 2,
+  },
+  formulaRateRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    marginBottom: 12,
+  },
+  formulaRateText: {
+    color: COLORS.muted,
+    fontSize: 12,
+    marginHorizontal: 4,
   },
   formulaModalOverlay: {
     flex: 1,
