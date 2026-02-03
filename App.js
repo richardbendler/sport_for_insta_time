@@ -137,6 +137,24 @@ const DEFAULT_DIFFICULTY_INDEX = (() => {
 })();
 const DEFAULT_TIME_RATE = 0.5;
 const DEFAULT_REPS_RATE = 0.5;
+const SICK_MODE_SPORT_ID = "sick_mode";
+const SICK_MODE_SPORT_LABELS = {
+  de: "Krankheitsmodus",
+  en: "Sick mode",
+  es: "Modo enfermedad",
+  fr: "Mode maladie",
+};
+const SICK_MODE_SPORT_TEMPLATE = {
+  id: SICK_MODE_SPORT_ID,
+  name: SICK_MODE_SPORT_LABELS.en,
+  labels: SICK_MODE_SPORT_LABELS,
+  type: "time",
+  difficultyLevel: DEFAULT_DIFFICULTY,
+  icon: "🤒",
+  category: "Health",
+  screenSecondsPerUnit: DEFAULT_TIME_RATE,
+  nonDeletable: true,
+};
 const ADMIN_FACTOR_TIME = 0.0025; // "Fix Factor" in UI; global base multiplier for time-based sports
 const ADMIN_FACTOR_REPS = 0.055; // "Fix Factor" in UI; base multiplier for reps-based sports
 const ADMIN_FACTOR_WEIGHTED = 0.0005; // "Fix Factor" in UI; base multiplier for weighted reps entries
@@ -1472,6 +1490,13 @@ const ensurePushupPreset = (sportsList) => {
     (sport) => sport.id === "pushups"
   );
   return pushupPreset ? [pushupPreset, ...sportsList] : sportsList;
+};
+
+const ensureSickSport = (sportsList) => {
+  if (sportsList.some((sport) => sport.id === SICK_MODE_SPORT_ID)) {
+    return sportsList;
+  }
+  return [...sportsList, { ...SICK_MODE_SPORT_TEMPLATE }];
 };
 
 const COLORS = {
@@ -3241,8 +3266,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       const baseSports = cleanedSports.length
         ? ensurePushupPreset(cleanedSports)
         : createDefaultPresetSports();
+      const sportsWithSick = ensureSickSport(baseSports);
       const { list: migratedSports, changed: sportsMigrated } =
-        migrateSportsList(baseSports);
+        migrateSportsList(sportsWithSick);
       const { normalized, changed } = normalizeSports(migratedSports);
       setSports(normalized);
       if (changed || sportsMigrated || !parsedSports.length) {
@@ -3568,9 +3594,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   }, [isAppActive, permissionsCheckTick]);
 
   const saveSports = async (nextSports) => {
-    setSports(nextSports);
+    const nextWithSick = ensureSickSport(nextSports);
+    setSports(nextWithSick);
     const { map: normalizedSportColors, changed } = ensureSportColorLinks(
-      nextSports,
+      nextWithSick,
       sportColorLinks
     );
     if (changed) {
@@ -3583,7 +3610,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
     await persistStorageValue(
       STORAGE_KEYS.sports,
-      JSON.stringify(nextSports),
+      JSON.stringify(nextWithSick),
       t("menu.sports")
     );
   };

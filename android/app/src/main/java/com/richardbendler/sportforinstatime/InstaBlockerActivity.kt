@@ -1,15 +1,17 @@
 package com.richardbendler.sportforinstatime
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import java.util.Locale
 import java.text.DateFormat
+import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 
 class InstaBlockerActivity : AppCompatActivity() {
   private lateinit var creditSection: View
@@ -20,6 +22,7 @@ class InstaBlockerActivity : AppCompatActivity() {
   private lateinit var sickStatus: TextView
   private val CREDIT_MINUTES = 10
   private val SICK_OVERRIDE_DURATION_MS = 24L * 60L * 60L * 1000L
+  private val SICK_MODE_ID = "sick_mode"
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -86,6 +89,23 @@ class InstaBlockerActivity : AppCompatActivity() {
     return formatter.format(Date(timestamp))
   }
 
+  private fun sickEntryIdForTimestamp(timestamp: Long): String {
+    val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+    val day = formatter.format(Date(timestamp))
+    return "$SICK_MODE_ID_$day"
+  }
+
+  private fun creditSickModeMinutes(prefs: SharedPreferences, now: Long) {
+    val limitMinutes = SickOverrideStore.getDailyLimitMinutes(prefs)
+    if (limitMinutes <= 0) {
+      return
+    }
+    val totalSeconds = limitMinutes * 60
+    val entryId = sickEntryIdForTimestamp(now)
+    ScreenTimeStore.upsertEntry(prefs, entryId, SICK_MODE_ID, now, totalSeconds)
+    OverallWidgetProvider.refreshAll(this)
+  }
+
   private fun updateCreditPenaltyText(minutes: Int) {
     val penaltyPercent = CreditStore.computePenaltyPercentForMinutes(minutes)
     creditPenalty.text = getString(R.string.preface_credit_penalty, penaltyPercent)
@@ -138,6 +158,7 @@ class InstaBlockerActivity : AppCompatActivity() {
     val now = System.currentTimeMillis()
     val until = now + SICK_OVERRIDE_DURATION_MS
     SickOverrideStore.setOverrideUntil(prefs, until)
+    creditSickModeMinutes(prefs, now)
     Toast.makeText(
       this,
       getString(R.string.blocker_sick_success, formatLockExpiryLabel(until)),
