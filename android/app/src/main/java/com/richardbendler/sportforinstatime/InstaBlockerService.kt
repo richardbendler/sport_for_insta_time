@@ -205,23 +205,11 @@ class InstaBlockerService : AccessibilityService() {
     val now = System.currentTimeMillis()
     if (SickOverrideStore.isOverrideActive(prefs, now)) {
       val limitMinutes = SickOverrideStore.getDailyLimitMinutes(prefs)
-      var allowBypass = limitMinutes <= 0
       if (limitMinutes > 0) {
         val usedSeconds = SickOverrideStore.addUsedSeconds(prefs, now, 1)
         if (usedSeconds >= limitMinutes * 60) {
-          allowBypass = false
           SickOverrideStore.clearOverride(prefs)
-        } else {
-          allowBypass = true
         }
-      }
-      if (allowBypass) {
-        updateCountdownOverlay(0, false)
-        updateCountdownNotification(0, false, null)
-        syncGrayscaleState(false)
-        updateWorkoutOverlay()
-        maybeUpdateWidgets()
-        return
       }
     }
     val result = ScreenTimeStore.consumeSeconds(prefs, now, 1)
