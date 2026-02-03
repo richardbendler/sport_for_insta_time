@@ -316,6 +316,13 @@ const de = {
     "label.changeLanguage": "Sprache ändern",
     "label.prefaceSettings": "Vorschaltseite",
     "label.prefaceDelay": "Wartezeit (Sekunden)",
+    "label.sickModeSection": "Krankheitsmodus",
+    "label.sickModeLimitSubtitle":
+      "Der Krankheitsmodus erlaubt bis zu {{minutes}} Min. pro Tag.",
+    "label.sickModeLimitAction": "Limit anpassen",
+    "label.sickModeLimitTitle": "Limit im Krankheitsmodus",
+    "label.sickModeLimitDescription":
+      "Lege fest, wie viele Minuten der Krankheitsmodus pro Tag freischaltet.",
     "label.creditLockTitle": "Userfaktoren gesperrt",
     "label.creditLockBody": "Userfaktoren bleiben bis {{date}} gesperrt.",
     "label.creditLockNotice": "Userfaktoren gesperrt bis {{date}}.",

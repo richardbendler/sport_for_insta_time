@@ -312,6 +312,13 @@ const es = {
     "label.changeLanguage": "Cambiar idioma",
     "label.prefaceSettings": "Pantalla previa",
     "label.prefaceDelay": "Tiempo de espera (segundos)",
+    "label.sickModeSection": "Modo enfermedad",
+    "label.sickModeLimitSubtitle":
+      "El modo enfermedad permite hasta {{minutes}} min al día.",
+    "label.sickModeLimitAction": "Ajustar límite",
+    "label.sickModeLimitTitle": "Límite del modo enfermedad",
+    "label.sickModeLimitDescription":
+      "Define cuántos minutos al día tienes con el modo enfermedad activo.",
     "label.creditLockTitle": "Factores bloqueados",
     "label.creditLockBody": "Los factores de usuario están bloqueados hasta {{date}}.",
     "label.creditLockNotice": "Factores bloqueados hasta {{date}}.",

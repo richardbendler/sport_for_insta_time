@@ -310,6 +310,12 @@ const en = {
     "label.changeLanguage": "Change language",
     "label.prefaceSettings": "Preface screen",
     "label.prefaceDelay": "Wait time (seconds)",
+    "label.sickModeSection": "Sick mode",
+    "label.sickModeLimitSubtitle": "Sick mode unlocks up to {{minutes}} min per day.",
+    "label.sickModeLimitAction": "Adjust limit",
+    "label.sickModeLimitTitle": "Sick-mode limit",
+    "label.sickModeLimitDescription":
+      "Set how many minutes you can use the app during sick mode each day.",
     "label.creditLockTitle": "Difficulty locked",
     "label.creditLockBody": "User factors are locked until {{date}}.",
     "label.creditLockNotice": "User factors stay locked until {{date}}.",

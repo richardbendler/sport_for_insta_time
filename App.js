@@ -95,6 +95,7 @@ const DEFAULT_SETTINGS = {
   grayscaleRestrictedApps: false,
   sportSortMode: "recent",
   experimentalFeaturesEnabled: false,
+  sickModeDailyMinutes: 30,
 };
 
 const SPEECH_LOCALES = {
@@ -140,6 +141,8 @@ const ADMIN_FACTOR_TIME = 0.0025; // "Fix Factor" in UI; global base multiplier 
 const ADMIN_FACTOR_REPS = 0.055; // "Fix Factor" in UI; base multiplier for reps-based sports
 const ADMIN_FACTOR_WEIGHTED = 0.0005; // "Fix Factor" in UI; base multiplier for weighted reps entries
 const DEFAULT_WEIGHT_RATE = 0.04;
+const SICK_MODE_MINUTES_MIN = 1;
+const SICK_MODE_MINUTES_MAX = 240;
 let globalCreditPenaltyMultiplier = 1;
 const setGlobalCreditPenaltyMultiplier = (value) => {
   const numeric = Number(value);
@@ -2659,6 +2662,8 @@ function AppContent() {
   const [isScreenTimeDetailsOpen, setIsScreenTimeDetailsOpen] =
     useState(false);
   const [prefaceDelayInput, setPrefaceDelayInput] = useState("");
+  const [isSickLimitSettingsOpen, setIsSickLimitSettingsOpen] = useState(false);
+  const [sickLimitInput, setSickLimitInput] = useState("");
   const [currentWorkout, setCurrentWorkout] = useState(null);
   const [workoutHistory, setWorkoutHistory] = useState([]);
   const [workoutDetailId, setWorkoutDetailId] = useState(null);
@@ -4529,6 +4534,16 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   }, [isSettingsOpen, statsSportId, settings.grayscaleRestrictedApps, checkGrayscalePermission]);
 
   useEffect(() => {
+    if (!InstaControl?.setSickModeLimitMinutes) {
+      return;
+    }
+    const nextLimit = Number.isFinite(settings.sickModeDailyMinutes)
+      ? Math.max(0, Math.round(settings.sickModeDailyMinutes))
+      : DEFAULT_SETTINGS.sickModeDailyMinutes;
+    InstaControl.setSickModeLimitMinutes(nextLimit);
+  }, [settings.sickModeDailyMinutes]);
+
+  useEffect(() => {
     if (!isAppsSettingsOpen) {
       return;
     }
@@ -4791,6 +4806,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       : DEFAULT_SETTINGS.prefaceDelaySeconds;
     setPrefaceDelayInput(String(delay));
     setIsPrefaceSettingsOpen(true);
+  };
+
+  const openSickLimitSettings = () => {
+    const limit = Number.isFinite(settings.sickModeDailyMinutes)
+      ? settings.sickModeDailyMinutes
+      : DEFAULT_SETTINGS.sickModeDailyMinutes;
+    setSickLimitInput(String(limit));
+    setIsSickLimitSettingsOpen(true);
   };
 
   const handleHomeScroll = useCallback((event) => {
@@ -5333,6 +5356,21 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setIsPrefaceSettingsOpen(false);
   };
 
+  const saveSickLimitSettings = async () => {
+    const parsed = Number.parseInt(sickLimitInput, 10);
+    const normalized = Number.isFinite(parsed)
+      ? Math.max(
+          SICK_MODE_MINUTES_MIN,
+          Math.min(SICK_MODE_MINUTES_MAX, parsed)
+        )
+      : DEFAULT_SETTINGS.sickModeDailyMinutes;
+    await saveSettings({
+      ...settings,
+      sickModeDailyMinutes: normalized,
+    });
+    setIsSickLimitSettingsOpen(false);
+  };
+
   const renderPrefaceSettingsModal = () => {
     if (!isPrefaceSettingsOpen) {
       return null;
@@ -5794,6 +5832,53 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 <Text style={styles.primaryButtonText}>
                   {t("label.confirm")}
                 </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+
+  const renderSickLimitSettingsModal = () => {
+    if (!isSickLimitSettingsOpen) {
+      return null;
+    }
+    return (
+      <Modal
+        visible={isSickLimitSettingsOpen}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setIsSickLimitSettingsOpen(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>{t("label.sickModeLimitTitle")}</Text>
+            <Text style={styles.modalSubtitle}>
+              {t("label.sickModeLimitDescription")}
+            </Text>
+            <TextInput
+              style={styles.input}
+              value={sickLimitInput}
+              onChangeText={setSickLimitInput}
+              keyboardType="number-pad"
+              placeholder="30"
+              placeholderTextColor="#7a7a7a"
+            />
+            <View style={styles.modalActions}>
+              <Pressable
+                style={styles.secondaryButton}
+                onPress={() => setIsSickLimitSettingsOpen(false)}
+              >
+                <Text style={styles.secondaryButtonText}>
+                  {t("label.cancel")}
+                </Text>
+              </Pressable>
+              <Pressable
+                style={styles.primaryButton}
+                onPress={saveSickLimitSettings}
+              >
+                <Text style={styles.primaryButtonText}>{t("label.save")}</Text>
               </Pressable>
             </View>
           </View>
@@ -10612,6 +10697,29 @@ const getSpeechLocale = () => {
           </View>
           <View style={styles.settingsDivider} />
           <Text style={styles.settingsSectionTitle}>
+            {t("label.sickModeSection")}
+          </Text>
+          <View style={styles.infoCard}>
+            <Text style={styles.helperText}>
+              {t("label.sickModeLimitSubtitle", {
+                minutes:
+                  Number.isFinite(settings.sickModeDailyMinutes) &&
+                  settings.sickModeDailyMinutes > 0
+                    ? settings.sickModeDailyMinutes
+                    : DEFAULT_SETTINGS.sickModeDailyMinutes,
+              })}
+            </Text>
+            <Pressable
+              style={styles.secondaryButton}
+              onPress={openSickLimitSettings}
+            >
+              <Text style={styles.secondaryButtonText}>
+                {t("label.sickModeLimitAction")}
+              </Text>
+            </Pressable>
+          </View>
+          <View style={styles.settingsDivider} />
+          <Text style={styles.settingsSectionTitle}>
             {t("label.notificationsTitle")}
           </Text>
           <View style={styles.infoCard}>
@@ -11504,6 +11612,7 @@ const getSpeechLocale = () => {
           </View>
         ) : null}
         {renderPrefaceSettingsModal()}
+        {renderSickLimitSettingsModal()}
         {renderSportModal()}
         {renderColorPickerModal()}
         {renderInfoModal()}

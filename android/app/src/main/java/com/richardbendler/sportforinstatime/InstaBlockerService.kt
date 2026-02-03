@@ -24,6 +24,7 @@ import androidx.core.content.ContextCompat
 import org.json.JSONArray
 import java.util.Locale
 import kotlin.math.abs
+import com.richardbendler.sportforinstatime.SickOverrideStore
 
 class InstaBlockerService : AccessibilityService() {
   private val handler = Handler(Looper.getMainLooper())
@@ -203,12 +204,25 @@ class InstaBlockerService : AccessibilityService() {
     val prefs = getPrefs()
     val now = System.currentTimeMillis()
     if (SickOverrideStore.isOverrideActive(prefs, now)) {
-      updateCountdownOverlay(0, false)
-      updateCountdownNotification(0, false, null)
-      syncGrayscaleState(false)
-      updateWorkoutOverlay()
-      maybeUpdateWidgets()
-      return
+      val limitMinutes = SickOverrideStore.getDailyLimitMinutes(prefs)
+      var allowBypass = limitMinutes <= 0
+      if (limitMinutes > 0) {
+        val usedSeconds = SickOverrideStore.addUsedSeconds(prefs, now, 1)
+        if (usedSeconds >= limitMinutes * 60) {
+          allowBypass = false
+          SickOverrideStore.clearOverride(prefs)
+        } else {
+          allowBypass = true
+        }
+      }
+      if (allowBypass) {
+        updateCountdownOverlay(0, false)
+        updateCountdownNotification(0, false, null)
+        syncGrayscaleState(false)
+        updateWorkoutOverlay()
+        maybeUpdateWidgets()
+        return
+      }
     }
     val result = ScreenTimeStore.consumeSeconds(prefs, now, 1)
     val remaining = result.remainingSeconds
