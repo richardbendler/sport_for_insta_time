@@ -92,7 +92,7 @@ class InstaBlockerActivity : AppCompatActivity() {
   private fun sickEntryIdForTimestamp(timestamp: Long): String {
     val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
     val day = formatter.format(Date(timestamp))
-    return "$SICK_MODE_ID_$day"
+    return "${SICK_MODE_ID}_$day"
   }
 
   private fun creditSickModeMinutes(prefs: SharedPreferences, now: Long) {
