@@ -25,4 +25,10 @@
   <string name="preface_credit_penalty">Userfaktoren sind um %1$d%% strenger</string>
   <string name="preface_credit_success">%1$d Minuten Kredit erhalten · Userfaktoren +%2$d%%</string>
   <string name="preface_credit_locked">Kredit gesperrt bis %1$s</string>
+  <string name="blocker_sick_title">Ich bin krank</string>
+  <string name="blocker_sick_label">Wenn du krank bist und keinen Sport machen kannst, kannst du die Einschränkungen vorübergehend pausieren.</string>
+  <string name="blocker_sick_hint">Nutze es bitte nur im echten Krankheitsfall, damit die Regeln für alle fair bleiben.</string>
+  <string name="blocker_sick_button">Krankheitsmodus aktivieren</string>
+  <string name="blocker_sick_status">Krankheitsmodus aktiv bis %1$s</string>
+  <string name="blocker_sick_success">Krankheitsmodus aktiviert bis %1$s. Bis dahin pausiert die Blockade.</string>
 </resources>

@@ -202,6 +202,14 @@ class InstaBlockerService : AccessibilityService() {
     }
     val prefs = getPrefs()
     val now = System.currentTimeMillis()
+    if (SickOverrideStore.isOverrideActive(prefs, now)) {
+      updateCountdownOverlay(0, false)
+      updateCountdownNotification(0, false, null)
+      syncGrayscaleState(false)
+      updateWorkoutOverlay()
+      maybeUpdateWidgets()
+      return
+    }
     val result = ScreenTimeStore.consumeSeconds(prefs, now, 1)
     val remaining = result.remainingSeconds
     if (result.consumedSeconds > 0) {
@@ -238,6 +246,9 @@ class InstaBlockerService : AccessibilityService() {
     }
     val prefs = getPrefs()
     val now = System.currentTimeMillis()
+    if (SickOverrideStore.isOverrideActive(prefs, now)) {
+      return false
+    }
     val totals = ScreenTimeStore.getTotals(prefs, now)
     return totals.remainingSeconds <= 0
   }

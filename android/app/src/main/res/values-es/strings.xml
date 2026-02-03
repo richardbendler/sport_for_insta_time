@@ -25,4 +25,10 @@
   <string name="preface_credit_penalty">Factores de usuario más estrictos en %1$d%%</string>
   <string name="preface_credit_success">Crédito de %1$d minutos concedido · factores +%2$d%%</string>
   <string name="preface_credit_locked">Crédito bloqueado hasta %1$s</string>
+  <string name="blocker_sick_title">Estoy enfermo</string>
+  <string name="blocker_sick_label">Si estás enfermo y no puedes hacer deporte, puedes pausar las restricciones temporalmente.</string>
+  <string name="blocker_sick_hint">Úsalo solo cuando realmente estés enfermo para que las reglas sigan siendo justas.</string>
+  <string name="blocker_sick_button">Activar modo enfermedad</string>
+  <string name="blocker_sick_status">Modo enfermedad activo hasta %1$s</string>
+  <string name="blocker_sick_success">Modo enfermedad activado hasta %1$s. Las restricciones quedan pausadas hasta entonces.</string>
 </resources>

@@ -24,4 +24,10 @@
   <string name="preface_credit_penalty">User factors tightened by %1$d%%</string>
   <string name="preface_credit_success">%1$d minutes of credit granted · user factors +%2$d%%</string>
   <string name="preface_credit_locked">Credit locked until %1$s</string>
+  <string name="blocker_sick_title">I am sick</string>
+  <string name="blocker_sick_label">If you are too sick for sports, you can temporarily pause these restrictions.</string>
+  <string name="blocker_sick_hint">Use this only when genuinely sick so the limits stay fair for everyone.</string>
+  <string name="blocker_sick_button">Enable sick mode</string>
+  <string name="blocker_sick_status">Sick mode active until %1$s</string>
+  <string name="blocker_sick_success">Sick mode enabled until %1$s. Restrictions stay paused until then.</string>
 </resources>
