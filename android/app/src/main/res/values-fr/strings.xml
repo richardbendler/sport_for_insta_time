@@ -19,4 +19,10 @@
   <string name="preface_remaining_label">Restant :</string>
   <string name="preface_countdown_label">D\u00e9marre dans</string>
   <string name="preface_button">Ouvrir l\'app</string>
+  <string name="preface_credit_title">Crédit</string>
+  <string name="preface_credit_label">Empruntez 1 à 15 minutes</string>
+  <string name="preface_credit_button">Prendre un crédit</string>
+  <string name="preface_credit_penalty">Facteurs utilisateurs plus stricts de %1$d%%</string>
+  <string name="preface_credit_success">%1$d minutes de crédit accordées · facteurs +%2$d%%</string>
+  <string name="preface_credit_locked">Crédit bloqué jusqu\'à %1$s</string>
 </resources>

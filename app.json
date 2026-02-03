@@ -14,8 +14,12 @@
       "infoPlist": {
         "NSMicrophoneUsageDescription": "Allow microphone access to count reps by voice.",
         "NSSpeechRecognitionUsageDescription": "Allow speech recognition to count reps by voice.",
-        "NSCameraUsageDescription": "Allow camera access to count push-ups."
-      }
+        "NSCameraUsageDescription": "Allow camera access to count push-ups.",
+        "NSPhotoLibraryUsageDescription": "Let users pick or celebrate workout photos and share progress snapshots.",
+        "NSLocationWhenInUseUsageDescription": "Enable optional location-based guidance so outdoor workouts can tie into the nearby routes and stats.",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "bundleIdentifier": "com.richardbendler.sportforscreentime"
     },
     "android": {
       "package": "com.richardbendler.sportforinstatime",

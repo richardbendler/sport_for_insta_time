@@ -7,6 +7,8 @@ object CreditStore {
   private const val PREF_CREDIT_ENTRY_ID = "credit_entry_id"
   private const val PREF_CREDIT_MULTIPLIER = "credit_multiplier"
   private const val PREF_CREDIT_MINUTES = "credit_minutes"
+  private const val PREF_CREDIT_LOCK_EXPIRES_AT = "credit_lock_expires_at"
+  private const val CREDIT_LOCK_DURATION_MS = 3L * 24L * 60L * 60L * 1000L
 
   fun setCreditInfo(
     prefs: SharedPreferences,
@@ -43,18 +45,27 @@ object CreditStore {
   }
 
   fun computeCreditMultiplier(totalSeconds: Int): Float {
-    if (totalSeconds <= 0) {
-      return 1f
-    }
-    val minutes = (totalSeconds / 60f).coerceAtLeast(1f)
-    val normalized = (minutes / 15f).coerceAtMost(1f)
-    val multiplier = 1f - 0.2f * normalized
-    return multiplier.coerceIn(0.7f, 1f)
+    return if (totalSeconds <= 0) 1f else 0.8f
   }
 
   fun computePenaltyPercentForMinutes(minutes: Int): Int {
-    val capped = minutes.coerceIn(1, 15)
-    val normalized = capped / 15f
-    return (0.2f * normalized * 100f).roundToInt()
+    return if (minutes <= 0) 0 else 20
+  }
+
+  fun scheduleCreditLock(prefs: SharedPreferences, now: Long) {
+    prefs.edit()
+      .putLong(PREF_CREDIT_LOCK_EXPIRES_AT, now + CREDIT_LOCK_DURATION_MS)
+      .apply()
+  }
+
+  fun getCreditLockExpiresAt(prefs: SharedPreferences, now: Long): Long {
+    val stored = prefs.getLong(PREF_CREDIT_LOCK_EXPIRES_AT, 0L)
+    if (stored <= now) {
+      if (stored != 0L) {
+        prefs.edit().remove(PREF_CREDIT_LOCK_EXPIRES_AT).apply()
+      }
+      return 0L
+    }
+    return stored
   }
 }

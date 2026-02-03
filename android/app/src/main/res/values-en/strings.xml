@@ -18,4 +18,10 @@
   <string name="preface_remaining_label">Remaining:</string>
   <string name="preface_countdown_label">Starts in</string>
   <string name="preface_button">Open app</string>
+  <string name="preface_credit_title">Credit</string>
+  <string name="preface_credit_label">Borrow 1-15 minutes</string>
+  <string name="preface_credit_button">Take credit</string>
+  <string name="preface_credit_penalty">User factors tightened by %1$d%%</string>
+  <string name="preface_credit_success">%1$d minutes of credit granted · user factors +%2$d%%</string>
+  <string name="preface_credit_locked">Credit locked until %1$s</string>
 </resources>
