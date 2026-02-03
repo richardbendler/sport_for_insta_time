@@ -20,8 +20,8 @@
   <string name="preface_countdown_label">Empieza en</string>
   <string name="preface_button">Abrir app</string>
   <string name="preface_credit_title">Crédito</string>
-  <string name="preface_credit_label">Pide prestado 1-15 minutos</string>
-  <string name="preface_credit_button">Pedir crédito</string>
+  <string name="preface_credit_label">Pide prestado 10 minutos</string>
+  <string name="preface_credit_button">Pedir crédito de 10 minutos</string>
   <string name="preface_credit_penalty">Factores de usuario más estrictos en %1$d%%</string>
   <string name="preface_credit_success">Crédito de %1$d minutos concedido · factores +%2$d%%</string>
   <string name="preface_credit_locked">Crédito bloqueado hasta %1$s</string>

@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
-import android.widget.NumberPicker
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -14,12 +13,12 @@ import java.util.Date
 
 class InstaBlockerActivity : AppCompatActivity() {
   private lateinit var creditSection: View
-  private lateinit var creditPicker: NumberPicker
   private lateinit var creditButton: Button
   private lateinit var creditPenalty: TextView
   private lateinit var creditLockNotice: TextView
   private lateinit var sickButton: Button
   private lateinit var sickStatus: TextView
+  private val CREDIT_MINUTES = 10
   private val SICK_OVERRIDE_DURATION_MS = 24L * 60L * 60L * 1000L
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,10 +32,10 @@ class InstaBlockerActivity : AppCompatActivity() {
     val openAppButton = findViewById<Button>(R.id.blocker_open_app)
     openAppButton.setOnClickListener { openApp() }
     creditSection = findViewById(R.id.blocker_credit_section)
-    creditPicker = findViewById(R.id.blocker_credit_picker)
     creditButton = findViewById(R.id.blocker_credit_button)
     creditPenalty = findViewById(R.id.blocker_credit_penalty)
     creditLockNotice = findViewById(R.id.blocker_credit_lock_notice)
+    creditButton.setOnClickListener { grantCredit() }
     sickButton = findViewById(R.id.blocker_sick_button)
     sickStatus = findViewById(R.id.blocker_sick_status)
     sickButton.setOnClickListener { activateSickMode() }
@@ -46,21 +45,6 @@ class InstaBlockerActivity : AppCompatActivity() {
 
   override fun onBackPressed() {
     goHome()
-  }
-
-  private fun setupCreditControls() {
-    creditSection.visibility = View.VISIBLE
-    creditPicker.minValue = 1
-    creditPicker.maxValue = 15
-    creditPicker.wrapSelectorWheel = false
-    creditPicker.value = creditPicker.minValue
-    creditPicker.setOnValueChangedListener { _, _, newVal ->
-      updateCreditPenaltyText(newVal)
-    }
-    updateCreditPenaltyText(creditPicker.value)
-    creditButton.setOnClickListener {
-      grantCredit(creditPicker.value)
-    }
   }
 
   private fun updateCreditSection(showCredit: Boolean) {
@@ -76,18 +60,18 @@ class InstaBlockerActivity : AppCompatActivity() {
       return
     }
     creditLockNotice.visibility = View.GONE
-    creditPicker.visibility = View.VISIBLE
     creditButton.visibility = View.VISIBLE
     creditPenalty.visibility = View.VISIBLE
     creditSection.visibility = View.VISIBLE
-    setupCreditControls()
+    creditButton.isEnabled = true
+    updateCreditPenaltyText(CREDIT_MINUTES)
   }
 
   private fun showCreditLocked(lockExpiresAt: Long) {
     creditSection.visibility = View.VISIBLE
     creditLockNotice.visibility = View.VISIBLE
-    creditPicker.visibility = View.GONE
-    creditButton.visibility = View.GONE
+    creditButton.visibility = View.VISIBLE
+    creditButton.isEnabled = false
     creditPenalty.visibility = View.GONE
     creditLockNotice.text =
       getString(R.string.preface_credit_locked, formatLockExpiryLabel(lockExpiresAt))
@@ -107,8 +91,8 @@ class InstaBlockerActivity : AppCompatActivity() {
     creditPenalty.text = getString(R.string.preface_credit_penalty, penaltyPercent)
   }
 
-  private fun grantCredit(minutes: Int) {
-    val safeMinutes = minutes.coerceIn(1, 15)
+  private fun grantCredit() {
+    val safeMinutes = CREDIT_MINUTES
     val totalSeconds = safeMinutes * 60
     val entryId = "credit_${System.currentTimeMillis()}"
     val prefs = getSharedPreferences("insta_control", MODE_PRIVATE)

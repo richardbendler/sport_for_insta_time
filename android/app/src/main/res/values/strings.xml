@@ -20,8 +20,8 @@
   <string name="preface_countdown_label">Start in</string>
   <string name="preface_button">App \u00f6ffnen</string>
   <string name="preface_credit_title">Kredit</string>
-  <string name="preface_credit_label">Leih dir 1-15 Minuten</string>
-  <string name="preface_credit_button">Kredit nehmen</string>
+  <string name="preface_credit_label">Kredit für 10 Minuten</string>
+  <string name="preface_credit_button">10 Minuten Kredit</string>
   <string name="preface_credit_penalty">Userfaktoren sind um %1$d%% strenger</string>
   <string name="preface_credit_success">%1$d Minuten Kredit erhalten · Userfaktoren +%2$d%%</string>
   <string name="preface_credit_locked">Kredit gesperrt bis %1$s</string>
