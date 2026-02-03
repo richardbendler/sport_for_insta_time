@@ -156,7 +156,7 @@ class InstaBlockerService : AccessibilityService() {
       return
     }
     if ((previousPackage != pkg || openedFromHome) && shouldShowPreface(pkg) && openedFromHome) {
-      launchPreface(pkg, remaining, remaining <= 0)
+      launchPreface(pkg, remaining)
     }
   }
 
@@ -520,12 +520,11 @@ class InstaBlockerService : AccessibilityService() {
     return !(allowedPkg == pkg && now < allowUntil)
   }
 
-  private fun launchPreface(pkg: String, remainingSeconds: Int, showCredit: Boolean = false) {
+  private fun launchPreface(pkg: String, remainingSeconds: Int) {
     val intent = Intent(this, InstaPrefaceActivity::class.java)
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
     intent.putExtra("target_package", pkg)
     intent.putExtra("remaining_seconds", remainingSeconds)
-    intent.putExtra("preface_show_credit", showCredit)
     startActivity(intent)
   }
 
