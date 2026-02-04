@@ -17,6 +17,7 @@ const en = {
     "label.calendar": "Calendar",
     "label.weekScreenTime": "Earned time week",
     "label.screenTime": "Earned time",
+    "label.creditEntry": "Credit",
     "label.screenTimeTitle": "Screen Time",
     "label.screenTimeHint": "Total earned screen time from the last 24h.",
     "label.remaining": "Remaining",

@@ -109,6 +109,9 @@ const normalizeSpeechLocale = (locale) =>
   typeof locale === "string" ? locale.replace(/_/g, "-") : "";
 
 const DEFAULT_ICON = "⭐";
+const CREDIT_ENTRY_PREFIX = "credit_";
+const CREDIT_STATS_GROUP_ID = "screen_time_credit";
+const CREDIT_ENTRY_ICON = "💳";
 const USER_FACTOR_OPTIONS = (() => {
   const options = [];
   let value = 1;
@@ -6932,11 +6935,22 @@ const getSpeechLocale = () => {
         const dayKey = createdAt
           ? dateKeyFromDate(new Date(createdAt))
           : todayKey();
+        const isCreditEntry = !!entry?.id?.startsWith(CREDIT_ENTRY_PREFIX);
+        const entryLabel = sport
+          ? getSportLabel(sport)
+          : isCreditEntry
+            ? t("label.creditEntry")
+            : t("label.screenTime");
+        const entryIcon = sport?.icon || (isCreditEntry ? CREDIT_ENTRY_ICON : DEFAULT_ICON);
+        const statsGroupId = isCreditEntry
+          ? CREDIT_STATS_GROUP_ID
+          : entry.sportId || null;
         return {
           key: entry.id || `${entry.sportId || "entry"}-${index}`,
           sportId: entry.sportId || null,
-          label: sport ? getSportLabel(sport) : t("label.screenTime"),
-          icon: sport?.icon || DEFAULT_ICON,
+          statsGroupId,
+          label: entryLabel,
+          icon: entryIcon,
           createdAt,
           dayKey,
           remainingSeconds,
@@ -6968,19 +6982,19 @@ const getSpeechLocale = () => {
   );
   const remainingSportStatuses = useMemo(() => {
     const map = new Map();
-    screenTimeEntryRows.forEach((entry) => {
-      const key = entry.sportId || "overall";
-      if (!map.has(key)) {
-        map.set(key, {
-          sportId: key,
-          label: entry.label,
-          icon: entry.icon,
-          remainingSeconds: 0,
-          originalSeconds: 0,
-          decayCount: 0,
-        });
-      }
-      const current = map.get(key);
+      screenTimeEntryRows.forEach((entry) => {
+        const key = entry.statsGroupId || entry.sportId || "overall";
+        if (!map.has(key)) {
+          map.set(key, {
+            sportId: key,
+            label: entry.label,
+            icon: entry.icon,
+            remainingSeconds: 0,
+            originalSeconds: 0,
+            decayCount: 0,
+          });
+        }
+        const current = map.get(key);
       current.remainingSeconds += entry.remainingSeconds;
       current.originalSeconds += entry.originalSeconds;
       current.decayCount = Math.max(current.decayCount, entry.decayCount || 0);

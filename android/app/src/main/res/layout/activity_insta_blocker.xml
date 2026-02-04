@@ -57,40 +57,43 @@
     android:id="@+id/blocker_credit_section"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="12dp"
+    android:layout_marginTop="10dp"
     android:layout_marginBottom="4dp"
-    android:layout_marginHorizontal="18dp"
+    android:layout_marginHorizontal="12dp"
     android:orientation="vertical"
     android:visibility="gone"
-    android:padding="12dp"
-    android:background="#1b2432"
-    android:gravity="center_horizontal">
+    android:padding="10dp"
+    android:gravity="center_horizontal"
+    android:background="@drawable/blocker_section_card_credit">
 
     <TextView
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:text="@string/preface_credit_title"
       android:textColor="#f8fafc"
-      android:textSize="15sp"
+      android:textSize="14sp"
       android:textStyle="bold" />
 
     <TextView
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_marginTop="4dp"
+      android:layout_marginTop="3dp"
       android:text="@string/preface_credit_label"
       android:textColor="#cbd5f5"
-      android:textSize="12sp"
+      android:textSize="11sp"
       android:gravity="center" />
 
     <Button
       android:id="@+id/blocker_credit_button"
-      android:layout_width="wrap_content"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_marginTop="8dp"
+      android:layout_marginTop="6dp"
+      android:paddingTop="6dp"
+      android:paddingBottom="6dp"
       android:text="@string/preface_credit_button"
       android:backgroundTint="#f59e0b"
-      android:textColor="#0b1020" />
+      android:textColor="#0b1020"
+      android:textSize="14sp" />
 
     <TextView
       android:id="@+id/blocker_credit_penalty"
@@ -98,14 +101,14 @@
       android:layout_height="wrap_content"
       android:layout_marginTop="4dp"
       android:text="@string/preface_credit_penalty"
-      android:textColor="#f8fafc"
-      android:textSize="11sp" />
+      android:textColor="#d1d5ff"
+      android:textSize="10sp" />
 
     <TextView
       android:id="@+id/blocker_credit_lock_notice"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_marginTop="6dp"
+      android:layout_marginTop="4dp"
       android:text="@string/preface_credit_locked"
       android:textColor="#94a3b8"
       android:textSize="10sp"
@@ -118,56 +121,59 @@
     android:layout_height="wrap_content"
     android:layout_marginTop="6dp"
     android:layout_marginBottom="8dp"
-    android:layout_marginHorizontal="18dp"
+    android:layout_marginHorizontal="12dp"
     android:orientation="vertical"
-    android:padding="12dp"
-    android:background="#0f172a"
-    android:gravity="center_horizontal">
+    android:padding="10dp"
+    android:gravity="center_horizontal"
+    android:background="@drawable/blocker_section_card_sick">
 
     <TextView
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:text="@string/blocker_sick_title"
       android:textColor="#f8fafc"
-      android:textSize="15sp"
+      android:textSize="14sp"
       android:textStyle="bold" />
 
     <TextView
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_marginTop="6dp"
+      android:layout_marginTop="4dp"
       android:text="@string/blocker_sick_label"
       android:textColor="#cbd5f5"
-      android:textSize="13sp"
+      android:textSize="11sp"
       android:gravity="center" />
 
     <TextView
       android:id="@+id/blocker_sick_hint"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_marginTop="4dp"
+      android:layout_marginTop="2dp"
       android:text="@string/blocker_sick_hint"
-      android:textColor="#94a3b8"
-      android:textSize="12sp"
+      android:textColor="#9ee4d3"
+      android:textSize="10sp"
       android:gravity="center" />
 
     <Button
       android:id="@+id/blocker_sick_button"
-      android:layout_width="wrap_content"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_marginTop="10dp"
+      android:layout_marginTop="8dp"
+      android:paddingTop="6dp"
+      android:paddingBottom="6dp"
       android:text="@string/blocker_sick_button"
       android:backgroundTint="#14b8a6"
-      android:textColor="#0b1020" />
+      android:textColor="#0b1020"
+      android:textSize="14sp" />
 
     <TextView
       android:id="@+id/blocker_sick_status"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_marginTop="6dp"
+      android:layout_marginTop="4dp"
       android:text="@string/blocker_sick_status"
       android:textColor="#34d399"
-      android:textSize="11sp"
+      android:textSize="10sp"
       android:visibility="gone" />
   </LinearLayout>
 </LinearLayout>
