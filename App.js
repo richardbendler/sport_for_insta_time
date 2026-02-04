@@ -66,6 +66,8 @@ import {
 } from "./locales";
 
 const InstaControl = NativeModules.InstaControl;
+const isAndroid = Platform.OS === "android";
+const isIos = Platform.OS === "ios";
 const STORAGE_KEYS = {
   sports: "@sports_v1",
   stats: "@stats_v1",
@@ -2704,6 +2706,8 @@ function AppContent() {
   const [workoutRunning, setWorkoutRunning] = useState(false);
   const [workoutSeconds, setWorkoutSeconds] = useState(0);
   const [workoutSessionCount, setWorkoutSessionCount] = useState(0);
+  const [iosWorkoutNotificationHintShown, setIosWorkoutNotificationHintShown] =
+    useState(false);
   /*
   const workoutTrackingMode = workoutRunning && isWorkoutOpen;
   */
@@ -3576,18 +3580,74 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     };
   }, [workoutRunning]);
 
-  const notificationsSupported =
-    Platform.OS === "android" && Number(Platform.Version) >= 33;
+  const androidNotificationsSupported =
+    isAndroid && Number(Platform.Version) >= 33;
+  const notificationsSupported = androidNotificationsSupported || isIos;
+  const notificationStatusText = isIos
+    ? t("label.notificationsStatusIos")
+    : androidNotificationsSupported
+    ? notificationsGranted
+      ? t("label.active")
+      : t("label.off")
+    : t("label.notificationsNotRequired");
+  const showNotificationAction = isIos || androidNotificationsSupported;
 
   useEffect(() => {
-    if (!notificationsSupported || !notificationsGranted || !workoutRunning) {
+    if (
+      !androidNotificationsSupported ||
+      !notificationsGranted ||
+      !workoutRunning
+    ) {
       InstaControl?.clearWorkoutNotification?.();
       return;
     }
     const title = t("label.workoutRunning");
     const timerText = formatSeconds(workoutSeconds);
     InstaControl?.showWorkoutNotification?.(title, timerText);
-  }, [notificationsSupported, notificationsGranted, workoutRunning, workoutSeconds, t]);
+  }, [
+    androidNotificationsSupported,
+    notificationsGranted,
+    workoutRunning,
+    workoutSeconds,
+    t,
+  ]);
+
+  useEffect(() => {
+    if (!isIos) {
+      return;
+    }
+    if (!workoutRunning) {
+      if (iosWorkoutNotificationHintShown) {
+        setIosWorkoutNotificationHintShown(false);
+      }
+      return;
+    }
+    if (iosWorkoutNotificationHintShown) {
+      return;
+    }
+    Alert.alert(
+      t("label.iosWorkoutNotificationTitle"),
+      t("label.iosWorkoutNotificationBody"),
+      [
+        {
+          text: t("label.notificationsPromptCancel"),
+          style: "cancel",
+        },
+        {
+          text: t("label.notificationsButton"),
+          onPress: openIosNotificationSettings,
+        },
+      ],
+      { cancelable: true }
+    );
+    setIosWorkoutNotificationHintShown(true);
+  }, [
+    isIos,
+    iosWorkoutNotificationHintShown,
+    openIosNotificationSettings,
+    t,
+    workoutRunning,
+  ]);
 
   useEffect(() => {
     if (!isAppActive) {
@@ -4396,7 +4456,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   }, []);
 
   const checkGrayscalePermission = useCallback(async () => {
-    if (Platform.OS !== "android" || !InstaControl?.canWriteSecureSettings) {
+    if (!isAndroid || !InstaControl?.canWriteSecureSettings) {
       setGrayscalePermissionGranted(true);
       return true;
     }
@@ -4464,7 +4524,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   refreshScreenTimeEntriesRef.current = refreshScreenTimeEntries;
 
   const refreshNotificationPermission = async () => {
-    if (Platform.OS !== "android") {
+    if (!isAndroid) {
       return;
     }
     if (Number(Platform.Version) < 33) {
@@ -4495,13 +4555,43 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     [showWidgetInstructions]
   );
 
+  const IOS_ACCESSIBILITY_SETTINGS_URL =
+    "App-Prefs:root=General&path=ACCESSIBILITY";
+  const IOS_SCREEN_TIME_SETTINGS_URL = "App-Prefs:root=SCREEN_TIME";
+
+  const openIosSettingsUrl = useCallback(async (url) => {
+    try {
+      await Linking.openURL(url);
+      return true;
+    } catch (error) {
+      console.warn("Failed to open iOS settings URL", url, error);
+      return false;
+    }
+  }, []);
+
+  const openIosAccessibilitySettings = useCallback(
+    () => openIosSettingsUrl(IOS_ACCESSIBILITY_SETTINGS_URL),
+    [IOS_ACCESSIBILITY_SETTINGS_URL, openIosSettingsUrl]
+  );
+
+  const openIosScreenTimeSettings = useCallback(
+    () => openIosSettingsUrl(IOS_SCREEN_TIME_SETTINGS_URL),
+    [IOS_SCREEN_TIME_SETTINGS_URL, openIosSettingsUrl]
+  );
+
   const openAccessibilitySettingsDirect = async () => {
     if (InstaControl?.openAccessibilitySettings) {
       InstaControl.openAccessibilitySettings();
-    } else {
-      showPermissionInstruction("label.accessibilityTitle", "label.accessibilitySteps");
-      await openAppSettingsFallback();
+      return;
     }
+    showPermissionInstruction("label.accessibilityTitle", "label.accessibilitySteps");
+    if (isIos) {
+      const opened = await openIosAccessibilitySettings();
+      if (opened) {
+        return;
+      }
+    }
+    await openAppSettingsFallback();
   };
 
   const openAccessibilitySettings = async () => {
@@ -4539,7 +4629,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       InstaControl.openUsageAccessSettings();
     } else {
       showPermissionInstruction("label.usageAccessTitle", "label.usageAccessSteps");
-      await openAppSettingsFallback();
+      if (isIos) {
+        const opened = await openIosScreenTimeSettings();
+        if (!opened) {
+          await openAppSettingsFallback();
+        }
+      } else {
+        await openAppSettingsFallback();
+      }
     }
     await AsyncStorage.setItem(STORAGE_KEYS.usagePermissions, "true");
     setUsagePermissionsPrompted(true);
@@ -4797,7 +4894,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       await saveSettings(nextSettings);
       return;
     }
-    if (Platform.OS === "android" && InstaControl?.canWriteSecureSettings) {
+    if (isAndroid && InstaControl?.canWriteSecureSettings) {
       let canWrite = false;
       try {
         canWrite = await InstaControl.canWriteSecureSettings();
@@ -6459,7 +6556,7 @@ const getSpeechLocale = () => {
   };
 
   const ensureAudioPermission = async () => {
-    if (Platform.OS !== "android") {
+    if (!isAndroid) {
       return true;
     }
     const permission = PermissionsAndroid.PERMISSIONS.RECORD_AUDIO;
@@ -6472,7 +6569,7 @@ const getSpeechLocale = () => {
   };
 
   const requestNotificationPermission = async () => {
-    if (Platform.OS !== "android") {
+    if (!isAndroid) {
       return;
     }
     if (Number(Platform.Version) < 33) {
@@ -6489,64 +6586,114 @@ const getSpeechLocale = () => {
   };
 
   const openNotificationSettings = () => {
-    if (Platform.OS !== "android") {
+    if (isAndroid) {
+      if (Number(Platform.Version) < 33) {
+        return;
+      }
+      Linking.openSettings();
       return;
     }
-    if (Number(Platform.Version) < 33) {
-      return;
+    if (isIos) {
+      openIosNotificationSettings();
     }
-    Linking.openSettings();
   };
 
-  const openAppSettingsFallback = async () => {
+  const openAppSettingsFallback = useCallback(async () => {
     try {
       await Linking.openSettings();
     } catch (error) {
       console.warn("Failed to open settings fallback", error);
     }
-  };
+  }, []);
+
+  const openIosNotificationSettings = useCallback(() => {
+    openAppSettingsFallback();
+  }, [openAppSettingsFallback]);
 
   const maybePromptNotifications = async () => {
-    if (Platform.OS !== "android") {
-      return;
-    }
-    if (Number(Platform.Version) < 33) {
-      return;
-    }
     if (notificationsPromptedRef.current) {
       return;
     }
-    const prompted = await AsyncStorage.getItem(
-      STORAGE_KEYS.notificationsPermissions
-    );
-    if (prompted) {
+    if (isAndroid) {
+      if (Number(Platform.Version) < 33) {
+        notificationsPromptedRef.current = true;
+        await AsyncStorage.setItem(STORAGE_KEYS.notificationsPermissions, "1");
+        setNotificationsPrompted(true);
+        return;
+      }
+      const prompted = await AsyncStorage.getItem(
+        STORAGE_KEYS.notificationsPermissions
+      );
+      if (prompted) {
+        notificationsPromptedRef.current = true;
+        setNotificationsPrompted(true);
+        return;
+      }
       notificationsPromptedRef.current = true;
-      setNotificationsPrompted(true);
+      Alert.alert(
+        t("label.notificationsPromptTitle"),
+        t("label.notificationsPromptBody"),
+        [
+          {
+            text: t("label.notificationsPromptCancel"),
+            style: "cancel",
+            onPress: async () => {
+              await AsyncStorage.setItem(
+                STORAGE_KEYS.notificationsPermissions,
+                "1"
+              );
+              setNotificationsPrompted(true);
+            },
+          },
+          {
+            text: t("label.notificationsPromptConfirm"),
+            onPress: requestNotificationPermission,
+          },
+        ],
+        { cancelable: true }
+      );
       return;
     }
-    notificationsPromptedRef.current = true;
-    Alert.alert(
-      t("label.notificationsPromptTitle"),
-      t("label.notificationsPromptBody"),
-      [
-        {
-          text: t("label.notificationsPromptCancel"),
-          style: "cancel",
-          onPress: async () => {
-            await AsyncStorage.setItem(
-              STORAGE_KEYS.notificationsPermissions,
-              "1"
-            );
-            setNotificationsPrompted(true);
+    if (isIos) {
+      const prompted = await AsyncStorage.getItem(
+        STORAGE_KEYS.notificationsPermissions
+      );
+      if (prompted) {
+        notificationsPromptedRef.current = true;
+        setNotificationsPrompted(true);
+        return;
+      }
+      notificationsPromptedRef.current = true;
+      Alert.alert(
+        t("label.notificationsPromptTitle"),
+        t("label.notificationsPromptBody"),
+        [
+          {
+            text: t("label.notificationsPromptCancel"),
+            style: "cancel",
+            onPress: async () => {
+              await AsyncStorage.setItem(
+                STORAGE_KEYS.notificationsPermissions,
+                "1"
+              );
+              setNotificationsPrompted(true);
+            },
           },
-        },
-        {
-          text: t("label.notificationsPromptConfirm"),
-          onPress: requestNotificationPermission,
-        },
-      ],
-      { cancelable: true }
-    );
+          {
+            text: t("label.notificationsPromptConfirm"),
+            onPress: async () => {
+              await AsyncStorage.setItem(
+                STORAGE_KEYS.notificationsPermissions,
+                "1"
+              );
+              setNotificationsPrompted(true);
+              await openIosNotificationSettings();
+            },
+          },
+        ],
+        { cancelable: true }
+      );
+    }
   };
 
   const setListeningState = (value) => {
@@ -6555,7 +6702,7 @@ const getSpeechLocale = () => {
   };
 
   const getAndroidSpeechServices = async () => {
-    if (Platform.OS !== "android") {
+    if (!isAndroid) {
       return null;
     }
     try {
@@ -6578,7 +6725,7 @@ const getSpeechLocale = () => {
       return;
     }
     try {
-      if (Platform.OS === "ios") {
+      if (isIos) {
         const available = await Voice.isAvailable();
         if (!available) {
           setVoiceError(t("label.voiceUnavailable"));
@@ -6596,7 +6743,7 @@ const getSpeechLocale = () => {
           }
         }
       }
-      if (Platform.OS === "android") {
+      if (isAndroid) {
         await Voice.start(getSpeechLocale(), {
           REQUEST_PERMISSIONS_AUTO: true,
         });
@@ -7200,7 +7347,7 @@ const getSpeechLocale = () => {
       actionId: "openSettings",
       requiresAction: true,
     });
-    if (Platform.OS === "android") {
+    if (isAndroid) {
       steps.push({
         id: "openApps",
         titleKey: "tutorial.step.openApps.title",
@@ -7622,10 +7769,12 @@ const getSpeechLocale = () => {
     showMotivationBlock,
   ]);
 
-  const showGettingStartedSection = Platform.OS === "android";
-  const accessibilityMissing = needsAccessibility !== false;
-  const usageAccessMissing = usageAccessGranted !== true;
-  const missingPermissions = accessibilityMissing || usageAccessMissing;
+  const showGettingStartedSection = isAndroid || isIos;
+  const accessibilityMissing = isAndroid && needsAccessibility !== false;
+  const usageAccessMissing = isAndroid && usageAccessGranted !== true;
+  const missingPermissions = isAndroid
+    ? accessibilityMissing || usageAccessMissing
+    : !(permissionsPrompted && usagePermissionsPrompted && accessibilityDisclosureAccepted);
   const showPermissionPrompt =
     showGettingStartedSection && missingPermissions;
   const completedGettingStarted =
@@ -8511,9 +8660,7 @@ const getSpeechLocale = () => {
           </Pressable>
           <Text style={styles.headerTitle}>{t("label.apps")}</Text>
         </View>
-        {Platform.OS !== "android" ? (
-          <Text style={styles.helperText}>{t("label.androidOnly")}</Text>
-        ) : (
+        {isAndroid ? (
           <>
             <TextInput
               style={styles.searchInput}
@@ -8539,6 +8686,19 @@ const getSpeechLocale = () => {
               </View>
             ) : null}
           </>
+        ) : (
+          <View style={styles.appsHeaderIosFallback}>
+            <Text style={styles.helperText}>{t("label.androidOnly")}</Text>
+            <Text style={styles.helperText}>{t("label.iosScreenTimeHint")}</Text>
+            <Pressable
+              style={[styles.secondaryButton, styles.appsHeaderFallbackButton]}
+              onPress={openIosScreenTimeSettings}
+            >
+              <Text style={styles.secondaryButtonText}>
+                {t("label.iosScreenTimeOpen")}
+              </Text>
+            </Pressable>
+          </View>
         )}
       </View>
     ),
@@ -8554,7 +8714,7 @@ const getSpeechLocale = () => {
   );
 
   const renderAppListEmpty = useCallback(() => {
-    if (Platform.OS !== "android" || appsLoading || sortedApps.length > 0) {
+    if (!isAndroid || appsLoading || sortedApps.length > 0) {
       return null;
     }
     return <Text style={styles.helperText}>{t("label.noApps")}</Text>;
@@ -8597,7 +8757,7 @@ const getSpeechLocale = () => {
   }, []);
 
   useEffect(() => {
-    if (Platform.OS !== "android") {
+    if (!isAndroid) {
       return;
     }
     if (!InstaControl?.setWidgetSportData || !InstaControl?.updateWidgets) {
@@ -8619,7 +8779,7 @@ const getSpeechLocale = () => {
   }, [sports, logs, stats, language, usageState.remainingBySport]);
 
   useEffect(() => {
-    if (Platform.OS !== "android") {
+    if (!isAndroid) {
       return;
     }
     InstaControl?.updateOverallWidgets?.();
@@ -9495,8 +9655,8 @@ const getSpeechLocale = () => {
         </View>
         <KeyboardAvoidingView
           style={styles.flexGrow}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
+          behavior={isIos ? "padding" : "height"}
+          keyboardVerticalOffset={isIos ? 80 : 0}
         >
           <ScrollView
             ref={sportDetailScrollRef}
@@ -10664,6 +10824,9 @@ const getSpeechLocale = () => {
           </Text>
           <View style={styles.infoCard}>
             <Text style={styles.helperText}>{t("label.widgetOverall")}</Text>
+            {isIos ? (
+              <Text style={styles.helperText}>{t("label.iosWidgetHint")}</Text>
+            ) : null}
             <Pressable
               style={[styles.secondaryButton, styles.widgetButton]}
               onPress={() =>
@@ -10683,18 +10846,30 @@ const getSpeechLocale = () => {
           <View style={styles.settingsDivider} />
           <Text style={styles.settingsSectionTitle}>{t("label.apps")}</Text>
           <View style={styles.infoCard}>
-            {Platform.OS !== "android" ? (
-              <Text style={styles.helperText}>{t("label.androidOnly")}</Text>
-            ) : (
-                <Pressable
-                  ref={tutorialAppsButtonRef}
-                  style={styles.secondaryButton}
-                  onPress={openAppsSettings}
-                >
+            {isAndroid ? (
+              <Pressable
+                ref={tutorialAppsButtonRef}
+                style={styles.secondaryButton}
+                onPress={openAppsSettings}
+              >
                 <Text style={styles.secondaryButtonText}>
                   {t("label.openApps")}
                 </Text>
               </Pressable>
+            ) : (
+              <>
+                <Text style={styles.helperText}>{t("label.androidOnly")}</Text>
+                <Text style={styles.helperText}>{t("label.iosScreenTimeHint")}</Text>
+                <Pressable
+                  ref={tutorialAppsButtonRef}
+                  style={styles.secondaryButton}
+                  onPress={openIosScreenTimeSettings}
+                >
+                  <Text style={styles.secondaryButtonText}>
+                    {t("label.iosScreenTimeOpen")}
+                  </Text>
+                </Pressable>
+              </>
             )}
             <View style={styles.settingsSwitchRow}>
               <Text style={styles.settingsSwitchLabel}>
@@ -10717,7 +10892,7 @@ const getSpeechLocale = () => {
             </Text>
             {settings.grayscaleRestrictedApps &&
             !grayscalePermissionGranted &&
-            Platform.OS === "android" ? (
+            isAndroid ? (
               <View style={styles.grayscalePermissionNotice}>
                 <Text style={styles.helperText}>
                   {t("label.grayscalePermissionBody")}
@@ -10782,14 +10957,9 @@ const getSpeechLocale = () => {
               {t("label.notificationsReason")}
             </Text>
             <Text style={styles.helperText}>
-              {t("label.status")}:{" "}
-              {notificationsSupported
-                ? notificationsGranted
-                  ? t("label.active")
-                  : t("label.off")
-                : t("label.notificationsNotRequired")}
+              {t("label.status")}: {notificationStatusText}
             </Text>
-              {notificationsSupported ? (
+            {showNotificationAction ? (
                 <Pressable
                   style={styles.secondaryButton}
                   onPress={openNotificationSettings}
@@ -14316,6 +14486,13 @@ const styles = StyleSheet.create({
   appsHeaderWrap: {
     paddingTop: 68,
     paddingHorizontal: 16,
+  },
+  appsHeaderIosFallback: {
+    marginTop: 12,
+  },
+  appsHeaderFallbackButton: {
+    alignSelf: "flex-start",
+    marginTop: 6,
   },
   appsLoadingOverlay: {
     ...StyleSheet.absoluteFillObject,

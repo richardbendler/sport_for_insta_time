@@ -234,6 +234,16 @@ const en = {
     "label.activateNow": "Enable now",
     "label.loadApps": "Load apps",
     "label.androidOnly": "App selection is Android-only.",
+    "label.iosScreenTimeHint":
+      "On iOS, manage blocked apps via Settings > Screen Time > App Limits.",
+    "label.iosScreenTimeOpen": "Open Screen Time",
+    "label.iosWidgetHint":
+      "Add the widget from the iOS Home Screen widget gallery (long press the home screen, tap Widgets, and pick Sport for Screen Time).",
+    "label.notificationsStatusIos":
+      "Notifications are managed via Settings > Notifications on iOS.",
+    "label.iosWorkoutNotificationTitle": "Workout reminders",
+    "label.iosWorkoutNotificationBody":
+      "iOS does not keep a persistent workout notification. Allow notifications in Settings so timers and workouts can still notify you.",
     "label.accessibilityHint": "Enable accessibility to block social apps.",
     "label.settingsHint":
       "Enable accessibility so the app can block social apps when time is up.",

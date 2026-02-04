@@ -230,6 +230,16 @@ const fr = {
     "label.activateNow": "Activer",
     "label.loadApps": "Charger les apps",
     "label.androidOnly": "La sélection des apps est uniquement sur Android.",
+    "label.iosScreenTimeHint":
+      "Sur iOS, gère les apps bloquées via Réglages > Temps d'écran > Limites d'apps.",
+    "label.iosScreenTimeOpen": "Ouvrir Temps d'écran",
+    "label.iosWidgetHint":
+      "Ajoute le widget depuis la galerie de widgets iOS (maintien appuyé sur l'écran d'accueil, touche + puis Sport for Screen Time).",
+    "label.notificationsStatusIos":
+      "Les notifications iOS se règlent via Réglages > Notifications.",
+    "label.iosWorkoutNotificationTitle": "Rappels d'entraînement",
+    "label.iosWorkoutNotificationBody":
+      "iOS n'affiche pas de notification persistante. Active les notifications dans Réglages pour continuer à recevoir des alertes pendant les entraînements.",
     "label.accessibilityHint":
       "Activez l’accessibilité pour bloquer les apps sociales.",
     "label.settingsHint":
