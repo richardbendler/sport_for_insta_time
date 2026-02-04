@@ -154,6 +154,8 @@ const SICK_MODE_SPORT_TEMPLATE = {
   category: "Health",
   screenSecondsPerUnit: DEFAULT_TIME_RATE,
   nonDeletable: true,
+  hidden: true,
+  system: true,
 };
 const ADMIN_FACTOR_TIME = 0.0025; // "Fix Factor" in UI; global base multiplier for time-based sports
 const ADMIN_FACTOR_REPS = 0.055; // "Fix Factor" in UI; base multiplier for reps-based sports
@@ -1498,6 +1500,9 @@ const ensureSickSport = (sportsList) => {
   }
   return [...sportsList, { ...SICK_MODE_SPORT_TEMPLATE }];
 };
+
+const isSystemSportId = (sportId) => sportId === SICK_MODE_SPORT_ID;
+const isSystemSport = (sport) => !!sport && isSystemSportId(sport.id);
 
 const COLORS = {
   ink: "#0b1020",
@@ -6668,8 +6673,12 @@ const getSpeechLocale = () => {
     setVoiceEnabled((current) => !current);
   };
 
-  const activeSports = sports.filter((sport) => !sport.hidden);
-  const hiddenSports = sports.filter((sport) => sport.hidden);
+  const userSports = useMemo(
+    () => sports.filter((sport) => !isSystemSport(sport)),
+    [sports]
+  );
+  const activeSports = userSports.filter((sport) => !sport.hidden);
+  const hiddenSports = userSports.filter((sport) => sport.hidden);
   const normalizedSportSearchTerm = normalizeTextForSearch(sportSearch);
   const sportLastUsageMap = useMemo(() => {
     const map = new Map();

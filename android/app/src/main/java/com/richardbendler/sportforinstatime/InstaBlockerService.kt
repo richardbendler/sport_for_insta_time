@@ -93,6 +93,7 @@ class InstaBlockerService : AccessibilityService() {
       notificationShadeActive = true
       return
     }
+    notificationShadeActive = false
     if (pkg.startsWith("com.android.systemui")) {
       return
     }
@@ -102,7 +103,6 @@ class InstaBlockerService : AccessibilityService() {
     if (ignoredPackagePrefixes.any { pkg.startsWith(it) }) {
       return
     }
-    notificationShadeActive = false
     if (!isLaunchablePackage(pkg)) {
       if (isHomePackage(pkg)) {
         scheduleForegroundClear()
