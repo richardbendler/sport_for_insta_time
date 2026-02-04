@@ -140,24 +140,50 @@ class InstaBlockerActivity : AppCompatActivity() {
     val prefs = getSharedPreferences("insta_control", MODE_PRIVATE)
     val now = System.currentTimeMillis()
     val active = SickOverrideStore.isOverrideActive(prefs, now)
-    sickStatus.visibility = if (active) {
-      val until = SickOverrideStore.getOverrideUntil(prefs)
-      sickStatus.text = getString(
-        R.string.blocker_sick_status,
-        formatLockExpiryLabel(until)
-      )
-      View.VISIBLE
-    } else {
-      View.GONE
+    val lockedUntil = SickOverrideStore.getActivationCooldownUntil(prefs, now)
+    val locked = lockedUntil > now
+    sickStatus.visibility = when {
+      active -> {
+        val until = SickOverrideStore.getOverrideUntil(prefs)
+        sickStatus.text = getString(
+          R.string.blocker_sick_status,
+          formatLockExpiryLabel(until)
+        )
+        View.VISIBLE
+      }
+      locked -> {
+        sickStatus.text = getString(
+          R.string.blocker_sick_locked_status,
+          formatLockExpiryLabel(lockedUntil)
+        )
+        View.VISIBLE
+      }
+      else -> View.GONE
     }
-    sickButton.isEnabled = !active
+    sickButton.isEnabled = !active && !locked
   }
 
   private fun activateSickMode() {
     val prefs = getSharedPreferences("insta_control", MODE_PRIVATE)
     val now = System.currentTimeMillis()
+    val lockedUntil = SickOverrideStore.getActivationCooldownUntil(prefs, now)
+    if (lockedUntil > now) {
+      Toast.makeText(
+        this,
+        getString(
+          R.string.blocker_sick_locked_status,
+          formatLockExpiryLabel(lockedUntil)
+        ),
+        Toast.LENGTH_SHORT
+      ).show()
+      return
+    }
+    if (SickOverrideStore.isOverrideActive(prefs, now)) {
+      return
+    }
     val until = now + SICK_OVERRIDE_DURATION_MS
     SickOverrideStore.setOverrideUntil(prefs, until)
+    SickOverrideStore.scheduleActivationCooldown(prefs, now)
     creditSickModeMinutes(prefs, now)
     Toast.makeText(
       this,

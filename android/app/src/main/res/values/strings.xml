@@ -20,15 +20,16 @@
   <string name="preface_countdown_label">Start in</string>
   <string name="preface_button">App \u00f6ffnen</string>
   <string name="preface_credit_title">Zusätzliche Minuten</string>
-  <string name="preface_credit_label">10 Minuten extra, wenn du noch kurz weiterarbeiten willst.</string>
+  <string name="preface_credit_label">10 Minuten extra, die du dir einmal innerhalb von 24 Stunden nehmen kannst, wenn du noch kurz weiterarbeiten willst.</string>
   <string name="preface_credit_button">10 Minuten dazu nehmen</string>
   <string name="preface_credit_penalty">Userfaktoren steigen kurzzeitig um %1$d%%, damit alles fair bleibt.</string>
   <string name="preface_credit_success">%1$d zusätzliche Minuten gutgeschrieben · Faktoren +%2$d%%</string>
   <string name="preface_credit_locked">Kredit bis %1$s gesperrt</string>
   <string name="blocker_sick_title">Krankheitsmodus</string>
-  <string name="blocker_sick_label">Stecke die Einschränkungen kurz zurück, wenn du wirklich zu krank für Sport bist.</string>
+  <string name="blocker_sick_label">Stecke die Einschränkungen kurz zurück, wenn du wirklich zu krank für Sport bist — nur einmal alle 24 Stunden möglich.</string>
   <string name="blocker_sick_hint">Bitte nur im echten Krankheitsfall nutzen, damit alles fair bleibt.</string>
   <string name="blocker_sick_button">Krankheitsmodus aktivieren</string>
   <string name="blocker_sick_status">Krankheitsmodus läuft bis %1$s</string>
   <string name="blocker_sick_success">Krankheitsmodus bis %1$s aktiv. Die Blockade bleibt bis dahin aus.</string>
+  <string name="blocker_sick_locked_status">Nächster Krankheitsmodus ab %1$s.</string>
 </resources>

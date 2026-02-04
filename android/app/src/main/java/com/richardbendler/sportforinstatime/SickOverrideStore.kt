@@ -7,11 +7,13 @@ import java.util.Locale
 
 object SickOverrideStore {
   private const val PREF_KEY_SICK_OVERRIDE_UNTIL = "sick_override_until"
+  private const val PREF_KEY_SICK_ACTIVATION_LOCK_UNTIL = "sick_activation_lock_until"
   private const val PREF_KEY_SICK_DAILY_LIMIT_MINUTES = "sick_daily_limit_minutes"
   private const val PREF_KEY_SICK_USED_SECONDS = "sick_used_seconds"
   private const val PREF_KEY_SICK_USED_DAY = "sick_used_day"
   private const val DAY_FORMAT = "yyyy-MM-dd"
   const val DEFAULT_SICK_DAILY_LIMIT_MINUTES = 30
+  private const val SICK_ACTIVATION_COOLDOWN_MS = 24L * 60L * 60L * 1000L
 
   fun setOverrideUntil(prefs: SharedPreferences, until: Long) {
     prefs.edit()
@@ -28,6 +30,12 @@ object SickOverrideStore {
   fun setDailyLimitMinutes(prefs: SharedPreferences, minutes: Int) {
     prefs.edit()
       .putInt(PREF_KEY_SICK_DAILY_LIMIT_MINUTES, minutes.coerceAtLeast(0))
+      .apply()
+  }
+
+  fun scheduleActivationCooldown(prefs: SharedPreferences, now: Long) {
+    prefs.edit()
+      .putLong(PREF_KEY_SICK_ACTIVATION_LOCK_UNTIL, now + SICK_ACTIVATION_COOLDOWN_MS)
       .apply()
   }
 
@@ -75,6 +83,17 @@ object SickOverrideStore {
       return false
     }
     return true
+  }
+
+  fun getActivationCooldownUntil(prefs: SharedPreferences, now: Long): Long {
+    val stored = prefs.getLong(PREF_KEY_SICK_ACTIVATION_LOCK_UNTIL, 0L)
+    if (stored <= now) {
+      if (stored != 0L) {
+        prefs.edit().remove(PREF_KEY_SICK_ACTIVATION_LOCK_UNTIL).apply()
+      }
+      return 0L
+    }
+    return stored
   }
 
   private fun resetDailyUsageIfNeeded(prefs: SharedPreferences, now: Long) {
