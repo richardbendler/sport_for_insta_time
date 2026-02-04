@@ -238,6 +238,16 @@ const de = {
     "label.activateNow": "Jetzt aktivieren",
     "label.loadApps": "Apps laden",
     "label.androidOnly": "App-Auswahl ist nur auf Android verfügbar.",
+    "label.iosScreenTimeHint":
+      "Auf iOS verwaltest du eingeschränkte Apps über Einstellungen > Bildschirmzeit > App-Limits.",
+    "label.iosScreenTimeOpen": "Bildschirmzeit öffnen",
+    "label.iosWidgetHint":
+      "Widgets fügst du über den Startbildschirm hinzu: lange drücken, auf + tippen und das Sport für Screen Time-Widget wählen.",
+    "label.notificationsStatusIos":
+      "iOS-Benachrichtigungen werden über Einstellungen > Mitteilungen gesteuert.",
+    "label.iosWorkoutNotificationTitle": "Workout-Erinnerungen",
+    "label.iosWorkoutNotificationBody":
+      "iOS zeigt keine permanente Workout-Benachrichtigung an. Erlaube Benachrichtigungen in den Einstellungen, damit Timer und Workouts dich weiter alarmieren.",
     "label.accessibilityHint":
       "Aktiviere die Zugriffshilfe, damit Social Apps gesperrt werden können.",
     "label.settingsHint":

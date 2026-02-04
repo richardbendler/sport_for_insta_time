@@ -235,6 +235,16 @@ const es = {
     "label.activateNow": "Activar ahora",
     "label.loadApps": "Cargar apps",
     "label.androidOnly": "La selección de apps es solo para Android.",
+    "label.iosScreenTimeHint":
+      "En iOS gestiona las apps bloqueadas desde Ajustes > Tiempo de pantalla > Límites de apps.",
+    "label.iosScreenTimeOpen": "Abrir Tiempo de pantalla",
+    "label.iosWidgetHint":
+      "Agrega el widget desde la galería de widgets de la pantalla de inicio (mantén presionado el fondo y toca +).",
+    "label.notificationsStatusIos":
+      "Las notificaciones en iOS se configuran desde Ajustes > Notificaciones.",
+    "label.iosWorkoutNotificationTitle": "Recordatorios de entrenamiento",
+    "label.iosWorkoutNotificationBody":
+      "iOS no mantiene una notificación persistente. Activa las notificaciones en Ajustes para seguir recibiendo alertas durante el entrenamiento.",
     "label.accessibilityHint":
       "Activa la accesibilidad para bloquear apps sociales.",
     "label.settingsHint":
