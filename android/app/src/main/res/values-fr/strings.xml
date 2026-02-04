@@ -20,15 +20,16 @@
   <string name="preface_countdown_label">D\u00e9marre dans</string>
   <string name="preface_button">Ouvrir l\'app</string>
   <string name="preface_credit_title">Minutes supplémentaires</string>
-  <string name="preface_credit_label">10 minutes à emprunter quand vous avez besoin d’un peu plus de temps.</string>
+  <string name="preface_credit_label">10 minutes supplémentaires à emprunter une fois toutes les 24 heures quand vous avez besoin de plus de temps.</string>
   <string name="preface_credit_button">Ajouter 10 minutes de crédit</string>
   <string name="preface_credit_penalty">Les facteurs utilisateur augmentent de %1$d%% pendant un instant pour rester équitable.</string>
   <string name="preface_credit_success">%1$d minutes supplémentaires accordées · facteurs +%2$d%%</string>
   <string name="preface_credit_locked">Crédit bloqué jusqu\'à %1$s</string>
   <string name="blocker_sick_title">Mode maladie</string>
-  <string name="blocker_sick_label">Mettez les restrictions en pause quand vous êtes vraiment trop malade pour faire du sport.</string>
+  <string name="blocker_sick_label">Mets les limites en pause quand tu es vraiment trop malade pour faire du sport — disponible une fois toutes les 24 heures.</string>
   <string name="blocker_sick_hint">Utilisez-le uniquement en cas de maladie réelle pour rester équitable.</string>
   <string name="blocker_sick_button">Activer le mode maladie</string>
   <string name="blocker_sick_status">Mode maladie actif jusqu\'à %1$s</string>
   <string name="blocker_sick_success">Mode maladie activé jusqu\'à %1$s. Les restrictions sont suspendues jusque-là.</string>
+  <string name="blocker_sick_locked_status">Le prochain mode maladie est disponible à partir du %1$s.</string>
 </resources>

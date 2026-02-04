@@ -8,7 +8,7 @@ object CreditStore {
   private const val PREF_CREDIT_MULTIPLIER = "credit_multiplier"
   private const val PREF_CREDIT_MINUTES = "credit_minutes"
   private const val PREF_CREDIT_LOCK_EXPIRES_AT = "credit_lock_expires_at"
-  private const val CREDIT_LOCK_DURATION_MS = 3L * 24L * 60L * 60L * 1000L
+  private const val CREDIT_LOCK_DURATION_MS = 24L * 60L * 60L * 1000L
 
   fun setCreditInfo(
     prefs: SharedPreferences,
