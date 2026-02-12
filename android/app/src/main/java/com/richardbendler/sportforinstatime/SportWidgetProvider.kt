@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.view.View
 import android.widget.RemoteViews
 import java.util.Locale
@@ -29,9 +30,13 @@ class SportWidgetProvider : AppWidgetProvider() {
       editor.remove("widget_${id}_sport_name")
     }
     editor.apply()
-  }
+    }
 
   companion object {
+    private const val APP_SCHEME = "com.richardbendler.sportforinstatime"
+    private const val SPORT_PATH = "sport"
+    private const val OVERVIEW_PATH = "overall"
+
     @JvmStatic
     fun updateAppWidget(
       context: Context,
@@ -94,7 +99,10 @@ class SportWidgetProvider : AppWidgetProvider() {
       views.setTextViewText(R.id.widget_value, value)
       views.setViewVisibility(R.id.widget_screen_time, View.GONE)
 
-      val intent = Intent(context, MainActivity::class.java)
+      val targetPath = sportId?.let { "$SPORT_PATH/$it" } ?: OVERVIEW_PATH
+      val uri = Uri.parse("$APP_SCHEME://$targetPath")
+      val intent = Intent(Intent.ACTION_VIEW, uri)
+      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
       val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
       val pendingIntent = PendingIntent.getActivity(context, 0, intent, flags)
       views.setOnClickPendingIntent(R.id.widget_root, pendingIntent)

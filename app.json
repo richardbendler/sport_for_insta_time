@@ -10,6 +10,7 @@
       "**/*"
     ],
     "ios": {
+      "displayName": "Sport Tracker",
       "supportsTablet": true,
       "infoPlist": {
         "NSMicrophoneUsageDescription": "Allow microphone access to count reps by voice.",

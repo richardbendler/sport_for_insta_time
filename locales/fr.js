@@ -1,5 +1,6 @@
 const fr = {
     "app.title": "Sport pour le temps d’écran",
+    "label.sportTrackerTitle": "Sport Tracker",
     "menu.home": "Sport",
     "menu.sports": "Tes sports",
     "menu.apps": "Modifier les apps restreintes",
@@ -222,6 +223,7 @@ const fr = {
     "label.kmhUnit": "km/h",
     "label.manualTimeEntryHint":
       "Indique la durée de ton entraînement et appuie sur le bouton.",
+    "label.manualTimeEntryPreview": "Aperçu du temps d'écran",
     "label.timeBased": "Basé sur le temps",
     "label.typePickerTitle": "Mode de suivi",
     "label.typeInfoTitle": "Comment fonctionnent les modes",

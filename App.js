@@ -64,10 +64,9 @@ import {
   NUMBER_WORDS,
   WEEKDAY_LABELS_BY_LANG,
 } from "./locales";
+import { isAndroid, isIos } from "./platform";
 
 const InstaControl = NativeModules.InstaControl;
-const isAndroid = Platform.OS === "android";
-const isIos = Platform.OS === "ios";
 const STORAGE_KEYS = {
   sports: "@sports_v1",
   stats: "@stats_v1",
@@ -114,6 +113,43 @@ const DEFAULT_ICON = "⭐";
 const CREDIT_ENTRY_PREFIX = "credit_";
 const CREDIT_STATS_GROUP_ID = "screen_time_credit";
 const CREDIT_ENTRY_ICON = "💳";
+const WIDGET_BASE_SCHEME = "com.richardbendler.sportforinstatime";
+const WIDGET_ALT_SCHEMES = ["exp+sport-for-insta-time"];
+
+const normalizeWidgetDeepLink = (rawUrl) => {
+  if (!rawUrl) {
+    return null;
+  }
+  let normalized = rawUrl.trim();
+  if (!normalized) {
+    return null;
+  }
+  WIDGET_ALT_SCHEMES.forEach((scheme) => {
+    const prefix = `${scheme}://`;
+    if (normalized.startsWith(prefix)) {
+      normalized = normalized.replace(prefix, `${WIDGET_BASE_SCHEME}://`);
+    }
+  });
+  return normalized;
+};
+
+const extractWidgetSportIdFromUrl = (rawUrl) => {
+  const normalized = normalizeWidgetDeepLink(rawUrl);
+  if (!normalized) {
+    return null;
+  }
+  try {
+    const parsed = new URL(normalized);
+    const pathSegments = (parsed.pathname || "").split("/").filter(Boolean);
+    if (pathSegments[0] === "sport" && pathSegments[1]) {
+      return pathSegments[1];
+    }
+    return parsed.searchParams.get("sportId") || parsed.searchParams.get("id");
+  } catch (error) {
+    console.warn("Invalid widget deep link", rawUrl, error);
+    return null;
+  }
+};
 const USER_FACTOR_OPTIONS = (() => {
   const options = [];
   let value = 1;
@@ -1514,6 +1550,8 @@ const COLORS = {
   amber: "#f59e0b",
   ember: "#ef4444",
   olive: "#22c55e",
+  teal: "#14b8a6",
+  tealDark: "rgba(20, 184, 166, 0.45)",
   background: "#0f172a",
   surface: "rgba(148, 163, 184, 0.12)",
   card: "rgba(15, 23, 42, 0.72)",
@@ -5114,6 +5152,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   };
 
   const openScreenTimeDetails = () => {
+    if (!isAndroid) {
+      return;
+    }
     setIsSettingsOpen(false);
     setOverallStatsOpen(false);
     setIsPrefaceSettingsOpen(false);
@@ -5142,6 +5183,38 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setAppSearchInput("");
     maybeAdvanceTutorial("openApps");
   };
+
+  const handleWidgetDeepLink = useCallback(
+    (linkUrl) => {
+      const sportId = extractWidgetSportIdFromUrl(linkUrl);
+      if (sportId) {
+        openSportFromOverlay(sportId);
+      }
+    },
+    [openSportFromOverlay]
+  );
+
+  useEffect(() => {
+    const handleUrl = ({ url }) => {
+      handleWidgetDeepLink(url);
+    };
+    Linking.getInitialURL()
+      .then(handleWidgetDeepLink)
+      .catch((error) => {
+        console.warn("Could not read widget deep link", error);
+      });
+    let subscription = null;
+    try {
+      subscription = Linking.addEventListener("url", handleUrl);
+    } catch (error) {
+      console.warn("Widget link listener unavailable", error);
+    }
+    return () => {
+      if (subscription?.remove) {
+        subscription.remove();
+      }
+    };
+  }, [handleWidgetDeepLink]);
 
   const startTutorial = () => {
     tutorialSamplePushupRef.current = {
@@ -7499,7 +7572,7 @@ const getSpeechLocale = () => {
 
   const motivationActions = useMemo(() => {
     const defaultSport = motivationSport ?? activeSports[0];
-    return [
+    const actions = [
       {
         id: "startSport",
         icon: "Start",
@@ -7517,16 +7590,6 @@ const getSpeechLocale = () => {
         action: handleIncreaseDifficulty,
         disabled: !motivationSport,
       },
-      /*
-      {
-        id: "workout",
-        icon: "Work",
-        titleKey: "label.motivationWorkoutTitle",
-        bodyKey: "label.motivationWorkoutBody",
-        actionLabelKey: "label.motivationActionWorkout",
-        action: () => openWorkout(),
-      },
-      */
       {
         id: "stats",
         icon: "Stats",
@@ -7560,7 +7623,9 @@ const getSpeechLocale = () => {
         actionLabelKey: "label.motivationActionNotifications",
         action: openNotificationSettings,
       },
-      {
+    ];
+    if (isAndroid) {
+      actions.push({
         id: "apps",
         icon: "Apps",
         titleKey: "label.motivationAppsTitle",
@@ -7568,7 +7633,9 @@ const getSpeechLocale = () => {
         actionLabelKey: "label.motivationActionApps",
         action: openAppsSettings,
         bodyParams: { minutes: highestAppUsageMinutes },
-      },
+      });
+    }
+    actions.push(
       {
         id: "settings",
         icon: "Set",
@@ -7635,8 +7702,9 @@ const getSpeechLocale = () => {
         actionLabelKey: "label.motivationActionChallenge",
         action: () =>
           showMotivationAlert("label.motivationChallengeTitle", "label.motivationChallengeBody"),
-      },
-    ];
+      }
+    );
+    return actions;
   }, [
     activeSports,
     handleIncreaseDifficulty,
@@ -7654,6 +7722,7 @@ const getSpeechLocale = () => {
     toggleVoice,
     motivationSport,
     highestAppUsageMinutes,
+    isAndroid,
   ]);
   const motivationActionMap = useMemo(
     () => new Map(motivationActions.map((item) => [item.id, item])),
@@ -7769,7 +7838,7 @@ const getSpeechLocale = () => {
     showMotivationBlock,
   ]);
 
-  const showGettingStartedSection = isAndroid || isIos;
+  const showGettingStartedSection = isAndroid;
   const accessibilityMissing = isAndroid && needsAccessibility !== false;
   const usageAccessMissing = isAndroid && usageAccessGranted !== true;
   const missingPermissions = isAndroid
@@ -7782,6 +7851,7 @@ const getSpeechLocale = () => {
     (permissionsPrompted ||
       usagePermissionsPrompted ||
       accessibilityDisclosureAccepted);
+  const appTitle = isIos ? t("label.sportTrackerTitle") : t("app.title");
 
   const activeFunFact = funFacts.find((fact) => fact.id === activeFunFactId);
   const activeQuoteTitle = t("label.motivationQuoteStartTitle");
@@ -8250,8 +8320,7 @@ const getSpeechLocale = () => {
       width - pointerSize - pointerSpacing
     );
     const showHighlight = hasEffectiveTarget && !tutorialStep.hideHighlight;
-    const shouldBlockTouches =
-      tutorialStep.blocksTouches ?? !tutorialStep.requiresAction;
+    const shouldBlockTouches = tutorialStep.blocksTouches ?? true;
     const blockTargetTouches =
       tutorialStep.blockTargetTouches ?? !tutorialStep.requiresAction;
     const showPointer = tutorialStep.requiresAction && hasEffectiveTarget;
@@ -8937,7 +9006,7 @@ const getSpeechLocale = () => {
           <View style={styles.headerRow}>
             <View style={styles.headerTitleBlock}>
               <View style={styles.titleWrap}>
-                <Text style={styles.title}>{t("app.title")}</Text>
+                <Text style={styles.title}>{appTitle}</Text>
                 <View style={styles.titleDecoration} />
               </View>
               <Text style={styles.subtitle}>{t("menu.stats")}</Text>
@@ -9581,6 +9650,30 @@ const getSpeechLocale = () => {
       selectedSport.type === "time"
         ? screenSecondsForEntry(selectedSport, { seconds: 60 })
         : null;
+    const manualTimeHoursValue = Math.max(
+      0,
+      Number.parseInt(manualTimeHours, 10) || 0
+    );
+    const manualTimeMinutesValue = Math.max(
+      0,
+      Number.parseInt(manualTimeMinutes, 10) || 0
+    );
+    const manualTimeSecondsValue = Math.max(
+      0,
+      Number.parseInt(manualTimeSeconds, 10) || 0
+    );
+    const manualTimeInputSeconds =
+      manualTimeHoursValue * 3600 +
+      manualTimeMinutesValue * 60 +
+      manualTimeSecondsValue;
+    const manualTimeKmValue = parsePositiveNumber(manualTimeKm);
+    const manualTimePreviewSeconds =
+      selectedSport.type === "time" && manualTimeInputSeconds > 0
+        ? screenSecondsForEntry(selectedSport, {
+            seconds: manualTimeInputSeconds,
+            km: manualTimeKmValue,
+          })
+        : 0;
     const userFactorDeltaPercent = Math.round((userFactor - 1) * 100);
     const userFactorPercentText = `${userFactorDeltaPercent > 0 ? "+" : ""}${userFactorDeltaPercent}%`;
     const previewWeight = parsePositiveNumber(weightEntryWeight);
@@ -9835,7 +9928,7 @@ const getSpeechLocale = () => {
             </Text>
             <Pressable
               style={[
-                styles.primaryButton,
+                styles.detailAccentButton,
                 styles.detailPrimaryButton,
                 styles.fullWidthButton,
               ]}
@@ -9843,7 +9936,7 @@ const getSpeechLocale = () => {
             >
               <Text
                 style={[
-                  styles.primaryButtonText,
+                  styles.detailAccentButtonText,
                   styles.detailPrimaryButtonText,
                 ]}
               >
@@ -9899,12 +9992,12 @@ const getSpeechLocale = () => {
                     return (
                       <View style={styles.resumeActionRow}>
                         <Pressable
-                          style={[styles.primaryButton, styles.detailPrimaryButton, styles.resumeButton]}
+                          style={[styles.detailAccentButton, styles.detailPrimaryButton, styles.resumeButton]}
                           onPress={() => handleResumeStart(recentEntry)}
                         >
                           <Text
                             style={[
-                              styles.primaryButtonText,
+                              styles.detailAccentButtonText,
                               styles.detailPrimaryButtonText,
                             ]}
                           >
@@ -9929,12 +10022,12 @@ const getSpeechLocale = () => {
                   }
                   return (
                     <Pressable
-                      style={[styles.primaryButton, styles.detailPrimaryButton]}
+                      style={[styles.detailAccentButton, styles.detailPrimaryButton]}
                       onPress={handleStart}
                     >
                       <Text
                         style={[
-                          styles.primaryButtonText,
+                          styles.detailAccentButtonText,
                           styles.detailPrimaryButtonText,
                         ]}
                       >
@@ -9945,7 +10038,7 @@ const getSpeechLocale = () => {
                 })()
               ) : (
                 <Pressable
-                  style={[styles.dangerButton, styles.detailDangerButton]}
+                  style={[styles.detailDangerAccentButton, styles.detailDangerButton]}
                   onPress={handleStop}
                 >
                   <Text
@@ -10040,6 +10133,10 @@ const getSpeechLocale = () => {
                 </View>
               <Text style={styles.manualEntryHelper}>
                 {t("label.distanceKmHint")}
+              </Text>
+              <Text style={styles.manualEntryPreview}>
+                {t("label.manualTimeEntryPreview")}:{" "}
+                {formatScreenTime(manualTimePreviewSeconds)}
               </Text>
               <Pressable
                 style={[
@@ -10246,7 +10343,7 @@ const getSpeechLocale = () => {
               </Pressable>
               <View style={styles.headerTitleBlock}>
                 <View style={styles.titleWrap}>
-                  <Text style={styles.title}>{t("app.title")}</Text>
+                  <Text style={styles.title}>{appTitle}</Text>
                   <View style={styles.titleDecoration} />
                 </View>
                 <Text style={styles.subtitle}>
@@ -10523,7 +10620,7 @@ const getSpeechLocale = () => {
               </Pressable>
               <View style={styles.headerTitleBlock}>
                 <View style={styles.titleWrap}>
-                  <Text style={styles.title}>{t("app.title")}</Text>
+                  <Text style={styles.title}>{appTitle}</Text>
                   <View style={styles.titleDecoration} />
                 </View>
                 <Text style={styles.subtitle}>{t("menu.workout")}</Text>
@@ -10770,7 +10867,7 @@ const getSpeechLocale = () => {
           <View style={styles.headerRow}>
             <View style={styles.headerTitleBlock}>
               <View style={styles.titleWrap}>
-                <Text style={styles.title}>{t("app.title")}</Text>
+                <Text style={styles.title}>{appTitle}</Text>
                 <View style={styles.titleDecoration} />
               </View>
               <Text style={styles.subtitle}>{t("menu.settings")}</Text>
@@ -10843,71 +10940,58 @@ const getSpeechLocale = () => {
               </View>
             </Pressable>
           </View>
-          <View style={styles.settingsDivider} />
-          <Text style={styles.settingsSectionTitle}>{t("label.apps")}</Text>
-          <View style={styles.infoCard}>
-            {isAndroid ? (
-              <Pressable
-                ref={tutorialAppsButtonRef}
-                style={styles.secondaryButton}
-                onPress={openAppsSettings}
-              >
-                <Text style={styles.secondaryButtonText}>
-                  {t("label.openApps")}
-                </Text>
-              </Pressable>
-            ) : (
-              <>
-                <Text style={styles.helperText}>{t("label.androidOnly")}</Text>
-                <Text style={styles.helperText}>{t("label.iosScreenTimeHint")}</Text>
+          {isAndroid ? (
+            <>
+              <View style={styles.settingsDivider} />
+              <Text style={styles.settingsSectionTitle}>{t("label.apps")}</Text>
+              <View style={styles.infoCard}>
                 <Pressable
                   ref={tutorialAppsButtonRef}
                   style={styles.secondaryButton}
-                  onPress={openIosScreenTimeSettings}
+                  onPress={openAppsSettings}
                 >
                   <Text style={styles.secondaryButtonText}>
-                    {t("label.iosScreenTimeOpen")}
+                    {t("label.openApps")}
                   </Text>
                 </Pressable>
-              </>
-            )}
-            <View style={styles.settingsSwitchRow}>
-              <Text style={styles.settingsSwitchLabel}>
-                {t("label.grayscaleRestrictedApps")}
-              </Text>
-              <Switch
-                value={!!settings.grayscaleRestrictedApps}
-                onValueChange={toggleGrayscaleRestrictedApps}
-                trackColor={{
-                  true: "rgba(245, 158, 11, 0.4)",
-                  false: "rgba(148, 163, 184, 0.2)",
-                }}
-                thumbColor={
-                  settings.grayscaleRestrictedApps ? COLORS.ember : "#f4f3f4"
-                }
-              />
-            </View>
-            <Text style={styles.helperText}>
-              {t("label.grayscaleRestrictedAppsHint")}
-            </Text>
-            {settings.grayscaleRestrictedApps &&
-            !grayscalePermissionGranted &&
-            isAndroid ? (
-              <View style={styles.grayscalePermissionNotice}>
+                <View style={styles.settingsSwitchRow}>
+                  <Text style={styles.settingsSwitchLabel}>
+                    {t("label.grayscaleRestrictedApps")}
+                  </Text>
+                  <Switch
+                    value={!!settings.grayscaleRestrictedApps}
+                    onValueChange={toggleGrayscaleRestrictedApps}
+                    trackColor={{
+                      true: "rgba(245, 158, 11, 0.4)",
+                      false: "rgba(148, 163, 184, 0.2)",
+                    }}
+                    thumbColor={
+                      settings.grayscaleRestrictedApps ? COLORS.ember : "#f4f3f4"
+                    }
+                  />
+                </View>
                 <Text style={styles.helperText}>
-                  {t("label.grayscalePermissionBody")}
+                  {t("label.grayscaleRestrictedAppsHint")}
                 </Text>
-                <Pressable
-                  style={styles.secondaryButton}
-                  onPress={openAccessibilitySettingsDirect}
-                >
-                  <Text style={styles.secondaryButtonText}>
-                    {t("label.openAccessibilitySettings")}
-                  </Text>
-                </Pressable>
+                {settings.grayscaleRestrictedApps &&
+                !grayscalePermissionGranted ? (
+                  <View style={styles.grayscalePermissionNotice}>
+                    <Text style={styles.helperText}>
+                      {t("label.grayscalePermissionBody")}
+                    </Text>
+                    <Pressable
+                      style={styles.secondaryButton}
+                      onPress={openAccessibilitySettingsDirect}
+                    >
+                      <Text style={styles.secondaryButtonText}>
+                        {t("label.openAccessibilitySettings")}
+                      </Text>
+                    </Pressable>
+                  </View>
+                ) : null}
               </View>
-            ) : null}
-          </View>
+            </>
+          ) : null}
           <View style={styles.settingsDivider} />
           <Text style={styles.settingsSectionTitle}>
             {t("label.prefaceSettings")}
@@ -11087,7 +11171,7 @@ const getSpeechLocale = () => {
         <View style={styles.headerRow}>
           <View style={styles.headerTitleBlock}>
             <View style={styles.titleWrap}>
-              <Text style={styles.title}>{t("app.title")}</Text>
+              <Text style={styles.title}>{appTitle}</Text>
               <View style={styles.titleDecoration} />
             </View>
             <Text style={styles.subtitle}>{t("menu.sports")}</Text>
@@ -11728,101 +11812,103 @@ const getSpeechLocale = () => {
       
 
     </ScrollView>
-          <View style={styles.fixedTimers}>
-        <Pressable
-          style={[styles.infoCard, styles.infoCardNoAlpha, styles.infoCardMain]}
-          ref={tutorialScreenTimeRef}
-          onLayout={(event) => setInfoCardWidth(event.nativeEvent.layout.width)}
-          onPress={() => {
-            setInfoHint(null);
-            maybeAdvanceTutorial("overviewCard");
-          }}
-        >
-            <Text style={styles.sectionTitle}>{t("label.screenTimeTitle")}</Text>
-          <View style={styles.infoRow}>
-            <Pressable
-              style={styles.infoItem}
-              onLayout={(event) => {
-                const layout = event.nativeEvent.layout;
-                setInfoAnchors((prev) => ({
-                  ...prev,
-                  screenTime: layout,
-                }));
-              }}
-              onPress={() =>
-                showInfoHint(
-                  "screenTime",
-                  "label.screenTime",
-                  "label.screenTimeHint"
-                )
-              }
-            >
-              <InfoGlyph type="earned" color={COLORS.text} />
-              <Text style={styles.infoValue}>
-                {formatScreenTime(rollingEarnedSeconds)}
-              </Text>
-              <Text style={styles.infoLabel}>{t("label.screenTime")}</Text>
-            </Pressable>
-            <Pressable
-              style={styles.infoItem}
-              onLayout={(event) => {
-                const layout = event.nativeEvent.layout;
-                setInfoAnchors((prev) => ({
-                  ...prev,
-                  remaining: layout,
-                }));
-              }}
-              onPress={() =>
-                showInfoHint(
-                  "remaining",
-                  "label.remainingTotal",
-                  "label.remainingTotalHint"
-                )
-              }
-            >
-              <InfoGlyph type="remaining" color={COLORS.text} />
-              <Text style={styles.infoValue}>
-                {formatScreenTime(totalRemainingSeconds)}
-              </Text>
-              <Text style={styles.infoLabel}>{t("label.remainingTotal")}</Text>
-              <Text style={styles.infoSubLabel}>
-                {t("label.carryover")}:{" "}
-                {formatScreenTime(usageState.carryoverSeconds || 0)}
-              </Text>
-            </Pressable>
-          </View>
-          {infoHint ? (
-            <Pressable
-              style={[
-                styles.infoTooltip,
-                {
-                  left:
-                    infoCardWidth > 0
-                      ? Math.max(12, (infoCardWidth - tooltipWidth) / 2)
-                      : 12,
-                  top: Math.max(8, infoHint.y + infoHint.height / 2 - 24),
-                  width: tooltipWidth,
-                },
-              ]}
-              onPress={() => setInfoHint(null)}
-            >
-              <Text style={styles.infoTooltipTitle}>{infoHint.title}</Text>
-              <Text style={styles.infoTooltipText}>{infoHint.body}</Text>
+          {isAndroid ? (
+            <View style={styles.fixedTimers}>
               <Pressable
-                onPress={(event) => {
-                  event.stopPropagation?.();
+                style={[styles.infoCard, styles.infoCardNoAlpha, styles.infoCardMain]}
+                ref={tutorialScreenTimeRef}
+                onLayout={(event) => setInfoCardWidth(event.nativeEvent.layout.width)}
+                onPress={() => {
                   setInfoHint(null);
-                  openScreenTimeDetails();
+                  maybeAdvanceTutorial("overviewCard");
                 }}
               >
-                <Text style={styles.infoTooltipLink}>
-                  {t("label.moreInfo")}
-                </Text>
+                <Text style={styles.sectionTitle}>{t("label.screenTimeTitle")}</Text>
+                <View style={styles.infoRow}>
+                  <Pressable
+                    style={styles.infoItem}
+                    onLayout={(event) => {
+                      const layout = event.nativeEvent.layout;
+                      setInfoAnchors((prev) => ({
+                        ...prev,
+                        screenTime: layout,
+                      }));
+                    }}
+                    onPress={() =>
+                      showInfoHint(
+                        "screenTime",
+                        "label.screenTime",
+                        "label.screenTimeHint"
+                      )
+                    }
+                  >
+                    <InfoGlyph type="earned" color={COLORS.text} />
+                    <Text style={styles.infoValue}>
+                      {formatScreenTime(rollingEarnedSeconds)}
+                    </Text>
+                    <Text style={styles.infoLabel}>{t("label.screenTime")}</Text>
+                  </Pressable>
+                  <Pressable
+                    style={styles.infoItem}
+                    onLayout={(event) => {
+                      const layout = event.nativeEvent.layout;
+                      setInfoAnchors((prev) => ({
+                        ...prev,
+                        remaining: layout,
+                      }));
+                    }}
+                    onPress={() =>
+                      showInfoHint(
+                        "remaining",
+                        "label.remainingTotal",
+                        "label.remainingTotalHint"
+                      )
+                    }
+                  >
+                    <InfoGlyph type="remaining" color={COLORS.text} />
+                    <Text style={styles.infoValue}>
+                      {formatScreenTime(totalRemainingSeconds)}
+                    </Text>
+                    <Text style={styles.infoLabel}>{t("label.remainingTotal")}</Text>
+                    <Text style={styles.infoSubLabel}>
+                      {t("label.carryover")}:{" "}
+                      {formatScreenTime(usageState.carryoverSeconds || 0)}
+                    </Text>
+                  </Pressable>
+                </View>
+                {infoHint ? (
+                  <Pressable
+                    style={[
+                      styles.infoTooltip,
+                      {
+                        left:
+                          infoCardWidth > 0
+                            ? Math.max(12, (infoCardWidth - tooltipWidth) / 2)
+                            : 12,
+                        top: Math.max(8, infoHint.y + infoHint.height / 2 - 24),
+                        width: tooltipWidth,
+                      },
+                    ]}
+                    onPress={() => setInfoHint(null)}
+                  >
+                    <Text style={styles.infoTooltipTitle}>{infoHint.title}</Text>
+                    <Text style={styles.infoTooltipText}>{infoHint.body}</Text>
+                    <Pressable
+                      onPress={(event) => {
+                        event.stopPropagation?.();
+                        setInfoHint(null);
+                        openScreenTimeDetails();
+                      }}
+                    >
+                      <Text style={styles.infoTooltipLink}>
+                        {t("label.moreInfo")}
+                      </Text>
+                    </Pressable>
+                  </Pressable>
+                ) : null}
               </Pressable>
-            </Pressable>
+            </View>
           ) : null}
-        </Pressable>
-      </View>
     </SafeAreaView>
   );
 };
@@ -12597,6 +12683,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 16,
   },
+  manualEntryPreview: {
+    marginTop: 6,
+    color: COLORS.text,
+    fontSize: 13,
+    textAlign: "center",
+    fontWeight: "600",
+  },
   runningSessionBadge: {
     marginTop: 8,
     alignSelf: "center",
@@ -13267,12 +13360,29 @@ const styles = StyleSheet.create({
   detailPrimaryButton: {
     paddingVertical: 10,
     paddingHorizontal: 14,
-    borderRadius: 10,
+    borderRadius: 12,
   },
   detailSecondaryButton: {
     paddingVertical: 10,
     paddingHorizontal: 14,
-    borderRadius: 10,
+    borderRadius: 12,
+  },
+  detailAccentButton: {
+    backgroundColor: COLORS.teal,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: COLORS.tealDark,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.45,
+    shadowRadius: 16,
+    elevation: 6,
+  },
+  detailAccentButtonText: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+    textAlign: "center",
   },
   trackButtonTop: {
     alignSelf: "stretch",
@@ -13367,6 +13477,16 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 14,
     borderRadius: 10,
+  },
+  detailDangerAccentButton: {
+    backgroundColor: COLORS.danger,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "rgba(239, 68, 68, 0.4)",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 5,
   },
   resumeActionRow: {
     flexDirection: "row",
