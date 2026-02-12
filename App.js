@@ -11847,7 +11847,7 @@ const getSpeechLocale = () => {
                     <Text style={styles.infoValue}>
                       {formatScreenTime(rollingEarnedSeconds)}
                     </Text>
-                    <Text style={styles.infoLabel}>{t("label.screenTime")}</Text>
+                    <Text style={styles.infoLabel}>{t("label.earnedTimeToday")}</Text>
                   </Pressable>
                   <Pressable
                     style={styles.infoItem}

@@ -19,6 +19,7 @@ const fr = {
     "label.calendar": "Calendrier",
     "label.weekScreenTime": "Temps gagné hebdo",
     "label.screenTime": "Temps gagné",
+    "label.earnedTimeToday": "Temps gagné aujourd'hui",
     "label.creditEntry": "Crédit",
     "label.screenTimeTitle": "Temps d'ecran",
     "label.screenTimeHint": "Temps total gagne pendant les dernieres 24h.",

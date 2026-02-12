@@ -19,6 +19,7 @@ const de = {
     "label.calendar": "Kalender",
     "label.weekScreenTime": "Erspielte Zeit Woche",
     "label.screenTime": "Erspielte Zeit",
+    "label.earnedTimeToday": "Erspielte Zeit heute",
     "label.creditEntry": "Kredit",
     "label.screenTimeTitle": "Screen Time",
     "label.screenTimeHint": "Summe der erspielten Bildschirmzeit aus den letzten 24h.",

@@ -37,7 +37,7 @@ class OverallWidgetProvider : AppWidgetProvider() {
       val storedTotal = widgetPrefs.getInt("overall_total", 0)
       val storedCarryover = widgetPrefs.getInt("overall_carryover", 0)
       val useStored = totals.entryCount <= 0 && storedRemaining > 0
-      val remaining = if (useStored) storedRemaining else breakdown.remainingSeconds
+      val remaining = if (useStored) storedRemaining else totals.remainingSeconds
       val totalToday = if (useStored) storedTotal else breakdown.totalTodaySeconds
       val carryover = if (useStored) storedCarryover else breakdown.carryoverSeconds
 
