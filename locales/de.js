@@ -15,6 +15,7 @@ const de = {
     "label.chartLines": "Linien",
     "label.chartSummary": "Summe",
     "label.chart": "Chart",
+    "label.chartAllSports": "Alle Sportarten",
     "label.calendar": "Kalender",
     "label.weekScreenTime": "Erspielte Zeit Woche",
     "label.screenTime": "Erspielte Zeit",

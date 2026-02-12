@@ -15,6 +15,7 @@ const fr = {
     "label.chartLines": "Lignes",
     "label.chartSummary": "Somme",
     "label.chart": "Graphique",
+    "label.chartAllSports": "Tous les sports",
     "label.calendar": "Calendrier",
     "label.weekScreenTime": "Temps gagné hebdo",
     "label.screenTime": "Temps gagné",

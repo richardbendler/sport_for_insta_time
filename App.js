@@ -2862,8 +2862,8 @@ function AppContent() {
   const [activeFunFactId, setActiveFunFactId] = useState(null);
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [statsRange, setStatsRange] = useState("month");
-  const [overallStatsView, setOverallStatsView] = useState("calendar");
-  const [overallChartMode, setOverallChartMode] = useState("summary");
+  const [overallStatsView, setOverallStatsView] = useState("chart");
+  const [chartSportFilter, setChartSportFilter] = useState(null);
   const [sportStatsView, setSportStatsView] = useState("calendar");
   const [infoHint, setInfoHint] = useState(null);
   const [infoAnchors, setInfoAnchors] = useState({});
@@ -6901,6 +6901,13 @@ const getSpeechLocale = () => {
     [sports]
   );
   const activeSports = userSports.filter((sport) => !sport.hidden);
+  const chartFilterOptions = [
+    { key: null, label: t("label.chartAllSports") },
+    ...activeSports.map((sport) => ({
+      key: sport.id,
+      label: `${sport.icon || DEFAULT_ICON} ${getSportLabel(sport)}`,
+    })),
+  ];
   const hiddenSports = userSports.filter((sport) => sport.hidden);
   const normalizedSportSearchTerm = normalizeTextForSearch(sportSearch);
   const sportLastUsageMap = useMemo(() => {
@@ -7093,6 +7100,39 @@ const getSpeechLocale = () => {
       series: normalizedSeries,
     };
   }, [overallChartDayKeys, logs, sports, language, getSportAccentColor]);
+  const aggregatedChartSeries = useMemo(() => {
+    const hasData = overallSummaryChart.values.some((value) => value > 0);
+    if (!hasData) {
+      return null;
+    }
+    const scaled = overallSummaryChart.values.map((value) =>
+      scaleChartValue(value, CHART_SCALE_MODE.overallLines)
+    );
+    const max = Math.max(1, ...scaled);
+    return {
+      sportId: "all",
+      label: t("label.chartAllSports"),
+      color: COLORS.accent,
+      normalized: scaled.map((value) => value / max),
+    };
+  }, [overallSummaryChart, t]);
+  const chartLinesSeries = useMemo(() => {
+    if (chartSportFilter) {
+      const sportSeries = overallLinesChart.series.find(
+        (line) => line.sportId === chartSportFilter
+      );
+      return sportSeries ? [sportSeries] : [];
+    }
+    return aggregatedChartSeries ? [aggregatedChartSeries] : [];
+  }, [chartSportFilter, overallLinesChart.series, aggregatedChartSeries]);
+  useEffect(() => {
+    if (
+      chartSportFilter &&
+      !overallLinesChart.series.some((line) => line.sportId === chartSportFilter)
+    ) {
+      setChartSportFilter(null);
+    }
+  }, [chartSportFilter, overallLinesChart.series]);
   const earnedBySportList = useMemo(() => {
     const cutoff = Date.now() - 24 * 60 * 60 * 1000;
     return sports
@@ -9018,22 +9058,6 @@ const getSpeechLocale = () => {
             <Pressable
               style={[
                 styles.chartToggleButton,
-                overallStatsView === "calendar" && styles.chartToggleButtonActive,
-              ]}
-              onPress={() => setOverallStatsView("calendar")}
-            >
-              <Text
-                style={[
-                  styles.chartToggleText,
-                  overallStatsView === "calendar" && styles.chartToggleTextActive,
-                ]}
-              >
-                {t("label.calendar")}
-              </Text>
-            </Pressable>
-            <Pressable
-              style={[
-                styles.chartToggleButton,
                 overallStatsView === "chart" && styles.chartToggleButtonActive,
               ]}
               onPress={() => setOverallStatsView("chart")}
@@ -9047,69 +9071,32 @@ const getSpeechLocale = () => {
                 {t("label.chart")}
               </Text>
             </Pressable>
+            <Pressable
+              style={[
+                styles.chartToggleButton,
+                overallStatsView === "calendar" && styles.chartToggleButtonActive,
+              ]}
+              onPress={() => setOverallStatsView("calendar")}
+            >
+              <Text
+                style={[
+                  styles.chartToggleText,
+                  overallStatsView === "calendar" && styles.chartToggleTextActive,
+                ]}
+              >
+                {t("label.calendar")}
+              </Text>
+            </Pressable>
           </View>
           {overallStatsView === "chart" ? (
             <>
-              <View style={styles.chartToggleRow}>
-                <Pressable
-                  style={[
-                    styles.chartToggleButton,
-                    overallChartMode === "summary" &&
-                      styles.chartToggleButtonActive,
-                  ]}
-                  onPress={() => setOverallChartMode("summary")}
-                >
-                  <Text
-                    style={[
-                      styles.chartToggleText,
-                      overallChartMode === "summary" &&
-                        styles.chartToggleTextActive,
-                    ]}
-                  >
-                    {t("label.chartSummary")}
-                  </Text>
-                </Pressable>
-                <Pressable
-                  style={[
-                    styles.chartToggleButton,
-                    overallChartMode === "lines" &&
-                      styles.chartToggleButtonActive,
-                  ]}
-                  onPress={() => setOverallChartMode("lines")}
-                >
-                  <Text
-                    style={[
-                      styles.chartToggleText,
-                      overallChartMode === "lines" &&
-                        styles.chartToggleTextActive,
-                    ]}
-                  >
-                    {t("label.chartLines")}
-                  </Text>
-                </Pressable>
-              </View>
-              {overallChartMode === "summary" ? (
-                overallSummaryChart.values.every((value) => value <= 0) ? (
-                  <Text style={styles.helperText}>{t("label.noChartData")}</Text>
-                ) : (
-                  <ChartBars
-                    labels={overallSummaryChart.labels}
-                    normalizedValues={overallSummaryChart.normalized}
-                    valueLabels={overallSummaryChart.values.map((value) =>
-                      value ? Math.round(value).toString() : "-"
-                    )}
-                    color={COLORS.accent}
-                  />
-                )
+              {chartLinesSeries.length === 0 ? (
+                <Text style={styles.helperText}>{t("label.noChartData")}</Text>
               ) : (
-                overallLinesChart.series.length === 0 ? (
-                  <Text style={styles.helperText}>{t("label.noChartData")}</Text>
-                ) : (
-                  <ChartLines
-                    labels={overallLinesChart.labels}
-                    series={overallLinesChart.series}
-                  />
-                )
+                <ChartLines
+                  labels={overallLinesChart.labels}
+                  series={chartLinesSeries}
+                />
               )}
             </>
           ) : null}
@@ -9119,17 +9106,30 @@ const getSpeechLocale = () => {
               {activeSports.length === 0 ? (
                 <Text style={styles.helperText}>{t("label.noSports")}</Text>
               ) : (
-                activeSports.map((sport) => (
-                  <Pressable
-                    key={sport.id}
-                    style={styles.quickActionButton}
-                    onPress={() => openSportStats(sport.id)}
-                  >
-                    <Text style={styles.quickActionText}>
-                      {sport.icon || DEFAULT_ICON} {getSportLabel(sport)}
-                    </Text>
-                  </Pressable>
-                ))
+                chartFilterOptions.map((option) => {
+                  const isActive =
+                    (option.key === null && chartSportFilter === null) ||
+                    option.key === chartSportFilter;
+                  return (
+                    <Pressable
+                      key={`chart-filter-${option.key ?? "all"}`}
+                      style={[
+                        styles.quickActionButton,
+                        isActive && styles.quickActionButtonActive,
+                      ]}
+                      onPress={() => setChartSportFilter(option.key)}
+                    >
+                      <Text
+                        style={[
+                          styles.quickActionText,
+                          isActive && styles.quickActionTextActive,
+                        ]}
+                      >
+                        {option.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })
               )}
             </View>
           </View>
@@ -9711,8 +9711,9 @@ const getSpeechLocale = () => {
       setWeightEntryWeight("");
       setWeightEntryReps("");
     };
-    const sportDetailScrollEnabled =
-      keyboardVisible || sportDetailContentHeight > sportDetailScrollHeight;
+    const sportDetailScrollEnabled = isSimpleReps
+      ? keyboardVisible
+      : keyboardVisible || sportDetailContentHeight > sportDetailScrollHeight;
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
@@ -10915,31 +10916,6 @@ const getSpeechLocale = () => {
               </Pressable>
             </View>
           </View>
-          <View style={styles.settingsDivider} />
-          <Text style={styles.settingsSectionTitle}>
-            {t("label.widgets")}
-          </Text>
-          <View style={styles.infoCard}>
-            <Text style={styles.helperText}>{t("label.widgetOverall")}</Text>
-            {isIos ? (
-              <Text style={styles.helperText}>{t("label.iosWidgetHint")}</Text>
-            ) : null}
-            <Pressable
-              style={[styles.secondaryButton, styles.widgetButton]}
-              onPress={() =>
-                requestWidgetPin("overall", t("label.todayScreenTime"))
-              }
-            >
-              <View style={styles.widgetButtonContent}>
-                <WidgetGlyph color={COLORS.text} />
-                <Text
-                  style={[styles.secondaryButtonText, styles.widgetButtonText]}
-                >
-                  {t("label.widgetOverall")}
-                </Text>
-              </View>
-            </Pressable>
-          </View>
           {isAndroid ? (
             <>
               <View style={styles.settingsDivider} />
@@ -10992,6 +10968,31 @@ const getSpeechLocale = () => {
               </View>
             </>
           ) : null}
+          <View style={styles.settingsDivider} />
+          <Text style={styles.settingsSectionTitle}>
+            {t("label.widgets")}
+          </Text>
+          <View style={styles.infoCard}>
+            <Text style={styles.helperText}>{t("label.widgetOverall")}</Text>
+            {isIos ? (
+              <Text style={styles.helperText}>{t("label.iosWidgetHint")}</Text>
+            ) : null}
+            <Pressable
+              style={[styles.secondaryButton, styles.widgetButton]}
+              onPress={() =>
+                requestWidgetPin("overall", t("label.todayScreenTime"))
+              }
+            >
+              <View style={styles.widgetButtonContent}>
+                <WidgetGlyph color={COLORS.text} />
+                <Text
+                  style={[styles.secondaryButtonText, styles.widgetButtonText]}
+                >
+                  {t("label.widgetOverall")}
+                </Text>
+              </View>
+            </Pressable>
+          </View>
           <View style={styles.settingsDivider} />
           <Text style={styles.settingsSectionTitle}>
             {t("label.prefaceSettings")}
@@ -12379,12 +12380,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 10,
   },
+  quickActionButtonActive: {
+    backgroundColor: COLORS.accent,
+  },
   quickActionText: {
     color: COLORS.text,
     fontWeight: "700",
     fontSize: 11,
     textTransform: "uppercase",
     letterSpacing: 0.4,
+  },
+  quickActionTextActive: {
+    color: COLORS.ink,
   },
   recentGroup: {
     marginTop: 10,
@@ -13069,7 +13076,7 @@ const styles = StyleSheet.create({
   colorPickerGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     marginBottom: 10,
     marginTop: 6,
   },
@@ -13080,6 +13087,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "transparent",
     marginBottom: 8,
+    marginRight: 8,
   },
   colorPickerSwatchActive: {
     borderColor: COLORS.white,
