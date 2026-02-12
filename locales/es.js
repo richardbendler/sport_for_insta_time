@@ -1,5 +1,6 @@
 const es = {
     "app.title": "Deporte por tiempo de pantalla",
+    "label.sportTrackerTitle": "Sport Tracker",
     "menu.home": "Deporte",
     "menu.sports": "Tus deportes",
     "menu.apps": "Editar apps restringidas",
@@ -227,6 +228,7 @@ const es = {
     "label.kmhUnit": "km/h",
     "label.manualTimeEntryHint":
       "Indica cuánto tiempo entrenaste y toca el botón.",
+    "label.manualTimeEntryPreview": "Vista previa del tiempo de pantalla",
     "label.timeBased": "Por tiempo",
     "label.typePickerTitle": "Modo de seguimiento",
     "label.typeInfoTitle": "Cómo funcionan los modos",

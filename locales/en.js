@@ -1,5 +1,6 @@
 const en = {
     "app.title": "Sport for Screen Time",
+    "label.sportTrackerTitle": "Sport Tracker",
     "menu.home": "Sport",
     "menu.sports": "Your sports",
     "menu.apps": "Edit restricted apps",
@@ -224,6 +225,7 @@ const en = {
     "label.manualTimeEntryButton": "Add time",
     "label.manualTimeEntryHint":
       "Enter how long you trained and tap the button to log it.",
+    "label.manualTimeEntryPreview": "Screen time preview",
     "label.kmUnit": "km",
     "label.kmhUnit": "km/h",
     "label.timeBased": "Time-based",
