@@ -92,6 +92,7 @@ android {
         applicationId 'com.richardbendler.sportforinstatime'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
+        resConfigs "de", "en", "es"
         versionCode 1
         versionName "1.0.0"
 
