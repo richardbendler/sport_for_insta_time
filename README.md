@@ -44,6 +44,18 @@ oder im Expo Dashboard.
 eas build --platform ios --profile production
 ```
 
+### iOS (lokal vorbereiten / auf macOS)
+```bash
+# Falls noch nicht installiert:
+npm install
+
+# Auf macOS (oder im Apple-Build-Cloud-Job) vor dem Build:
+npx expo prebuild --platform ios
+
+# Danach generischen iOS-Build (Expo Cloud oder lokal auf macOS):
+npx eas build --platform ios --profile production
+```
+
 4. Nach Abschluss erhältst du im Expo Dashboard den Download-Link für das `.ipa`; du findest dort auch Build-Logs.
 
 ## Apple: TestFlight / App Store Distribution
