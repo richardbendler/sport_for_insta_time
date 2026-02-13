@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content">
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="@string/blocker_sick_question_reason_label"
+      android:textSize="14sp"
+      android:textColor="#0f172a"
+      android:textStyle="bold" />
+
+    <EditText
+      android:id="@+id/sick_question_reason"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="4dp"
+      android:hint="@string/blocker_sick_question_reason_hint"
+      android:inputType="textCapSentences"
+      android:background="@android:drawable/edit_text"
+      android:padding="8dp" />
+
+    <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="16dp"
+      android:text="@string/blocker_sick_question_severity_label"
+      android:textSize="14sp"
+      android:textColor="#0f172a"
+      android:textStyle="bold" />
+
+    <Spinner
+      android:id="@+id/sick_question_severity"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="4dp" />
+
+    <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="16dp"
+      android:text="@string/blocker_sick_question_note_label"
+      android:textSize="14sp"
+      android:textColor="#0f172a"
+      android:textStyle="bold" />
+
+    <EditText
+      android:id="@+id/sick_question_note"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="4dp"
+      android:minLines="2"
+      android:hint="@string/blocker_sick_question_note_hint"
+      android:inputType="textMultiLine"
+      android:background="@android:drawable/edit_text"
+      android:gravity="top"
+      android:padding="8dp" />
+  </LinearLayout>
+</ScrollView>

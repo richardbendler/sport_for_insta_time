@@ -42,6 +42,9 @@ class InstaBlockerService : AccessibilityService() {
   private var notificationManager: NotificationManager? = null
   private var notificationShadeActive: Boolean = false
 
+  private val notificationShadeGraceMs = 1000L
+  private var lastNotificationShadeEventAt: Long = 0
+
   private val notificationChannelId = "restricted_timer"
   private val notificationId = 1001
   private var pendingHomeClear: Runnable? = null
@@ -86,14 +89,17 @@ class InstaBlockerService : AccessibilityService() {
   override fun onAccessibilityEvent(event: AccessibilityEvent?) {
     val pkg = event?.packageName?.toString() ?: return
     val className = event.className?.toString()
+    val eventTime = System.currentTimeMillis()
     if (event.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
       return
     }
     if (isNotificationShadeEvent(pkg, className)) {
       notificationShadeActive = true
+      lastNotificationShadeEventAt = eventTime
       return
     }
     notificationShadeActive = false
+    lastNotificationShadeEventAt = 0L
     if (pkg.startsWith("com.android.systemui")) {
       return
     }
@@ -172,10 +178,16 @@ class InstaBlockerService : AccessibilityService() {
 
   private fun tickUsage() {
     val pkg = currentPackage
+    val now = System.currentTimeMillis()
     if (notificationShadeActive) {
       updateWorkoutOverlay()
       maybeUpdateWidgets()
-      return
+      if (lastNotificationShadeEventAt > 0 &&
+        now - lastNotificationShadeEventAt >= notificationShadeGraceMs
+      ) {
+        notificationShadeActive = false
+        lastNotificationShadeEventAt = 0L
+      }
     }
     if (pkg == null) {
       syncGrayscaleState(false)
@@ -202,7 +214,6 @@ class InstaBlockerService : AccessibilityService() {
       return
     }
     val prefs = getPrefs()
-    val now = System.currentTimeMillis()
     if (SickOverrideStore.isOverrideActive(prefs, now)) {
       val limitMinutes = SickOverrideStore.getDailyLimitMinutes(prefs)
       if (limitMinutes > 0) {
