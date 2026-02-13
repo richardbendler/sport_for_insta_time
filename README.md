@@ -35,6 +35,28 @@ eas build --platform android --profile production
 Hinweis: Der Build laeuft in der Expo Cloud. Den Download-Link findest du danach in der Konsole
 oder im Expo Dashboard.
 
+## Apple (iOS) über Expo Cloud
+1. Apple-Zugangsdaten: `eas credentials` hilft beim Hochladen von Zertifikaten/Profilen; beim ersten Build legt Expo das für dich an, wenn du mit deinem Apple Developer Account verknüpft bist.
+2. Stelle sicher, dass die App in App Store Connect angelegt ist (Bundle-ID `com.richardbendler.sportforscreentime`, Sprache Englisch US).
+3. Starte den Cloud Build mit dem iOS-Profil:
+
+```bash
+eas build --platform ios --profile production
+```
+
+4. Nach Abschluss erhältst du im Expo Dashboard den Download-Link für das `.ipa`; du findest dort auch Build-Logs.
+
+## Apple: TestFlight / App Store Distribution
+1. Lade das `.ipa` aus dem Expo Dashboard herunter oder verwende `eas submit --platform ios --profile production`, um den Upload direkt in App Store Connect zu erledigen.
+2. In App Store Connect:
+   - Wähle deine App, öffne den „Build“-Reiter unter „App-Informationen“, und füge den neuen Build hinzu.
+   - Fülle die Metadaten (Screenshots, Beschreibung, Kategorien, Datenschutz, Altersfreigabe) aus, falls noch nicht geschehen.
+   - Veröffentliche den Build für eine interne/beta TestFlight-Runde oder reiche ihn zur Prüfung ein.
+3. TestFlight: Nach Freigabe kannst du Tester:innen via E-Mail oder öffentlichem Link einladen (Einstellungen > TestFlight > Gruppe/Tester).
+4. Für die finale Veröffentlichung: Stelle sicher, dass alle App-Infos, Screenshots und Preisangaben in App Store Connect stehen, und reiche die neue Version zur Prüfung ein („Preparing for Submission“ > „Submit for Review“).
+
+Hinweis: Apple verlangt pro Version Zertifikate/Provisioning-Profile; `eas credentials` bzw. das Expo-Dashboard hilft dabei, diese automatisch zu verwalten.
+
 ## Android APK lokal bauen (Windows + WSL / Ubuntu)
 
 ### Voraussetzungen

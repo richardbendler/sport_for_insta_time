@@ -1,13 +1,20 @@
 package com.richardbendler.sportforinstatime
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
+import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.EditText
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -23,6 +30,7 @@ class InstaBlockerActivity : AppCompatActivity() {
   private val CREDIT_MINUTES = 10
   private val SICK_OVERRIDE_DURATION_MS = 24L * 60L * 60L * 1000L
   private val SICK_MODE_ID = "sick_mode"
+  private val SICK_QUESTION_HISTORY_KEY = "sick_question_history"
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -41,7 +49,7 @@ class InstaBlockerActivity : AppCompatActivity() {
     creditButton.setOnClickListener { grantCredit() }
     sickButton = findViewById(R.id.blocker_sick_button)
     sickStatus = findViewById(R.id.blocker_sick_status)
-    sickButton.setOnClickListener { activateSickMode() }
+    sickButton.setOnClickListener { showSickQuestionDialog() }
     updateCreditSection(true)
     updateSickSection()
   }
@@ -142,12 +150,12 @@ class InstaBlockerActivity : AppCompatActivity() {
     val active = SickOverrideStore.isOverrideActive(prefs, now)
     val lockedUntil = SickOverrideStore.getActivationCooldownUntil(prefs, now)
     val locked = lockedUntil > now
+    val limitMinutes = SickOverrideStore.getDailyLimitMinutes(prefs).coerceAtLeast(0)
     sickStatus.visibility = when {
       active -> {
-        val until = SickOverrideStore.getOverrideUntil(prefs)
         sickStatus.text = getString(
           R.string.blocker_sick_status,
-          formatLockExpiryLabel(until)
+          limitMinutes
         )
         View.VISIBLE
       }
@@ -187,11 +195,62 @@ class InstaBlockerActivity : AppCompatActivity() {
     creditSickModeMinutes(prefs, now)
     Toast.makeText(
       this,
-      getString(R.string.blocker_sick_success, formatLockExpiryLabel(until)),
+      getString(R.string.blocker_sick_success, SickOverrideStore.getDailyLimitMinutes(prefs)),
       Toast.LENGTH_LONG
     ).show()
     goHome()
     finish()
+  }
+
+  private fun showSickQuestionDialog() {
+    val prefs = getSharedPreferences("insta_control", MODE_PRIVATE)
+    val dialogView = layoutInflater.inflate(R.layout.dialog_sick_questions, null)
+    val reasonInput = dialogView.findViewById<EditText>(R.id.sick_question_reason)
+    val severitySpinner = dialogView.findViewById<Spinner>(R.id.sick_question_severity)
+    val noteInput = dialogView.findViewById<EditText>(R.id.sick_question_note)
+    val adapter = ArrayAdapter.createFromResource(
+      this,
+      R.array.blocker_sick_severity_options,
+      android.R.layout.simple_spinner_item
+    )
+    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+    severitySpinner.adapter = adapter
+    AlertDialog.Builder(this)
+      .setTitle(R.string.blocker_sick_question_title)
+      .setView(dialogView)
+      .setPositiveButton(R.string.blocker_sick_question_submit) { _, _ ->
+        val reason = reasonInput.text?.toString()?.trim().orEmpty()
+        val severity = severitySpinner.selectedItem?.toString().orEmpty()
+        val note = noteInput.text?.toString()?.trim().orEmpty()
+        logSickQuestion(prefs, reason, severity, note, System.currentTimeMillis())
+        activateSickMode()
+      }
+      .setNegativeButton(android.R.string.cancel, null)
+      .show()
+  }
+
+  private fun logSickQuestion(
+    prefs: SharedPreferences,
+    reason: String,
+    severity: String,
+    note: String,
+    timestamp: Long
+  ) {
+    val history = try {
+      JSONArray(prefs.getString(SICK_QUESTION_HISTORY_KEY, "[]"))
+    } catch (error: JSONException) {
+      JSONArray()
+    }
+    val entry = JSONObject()
+    entry.put("timestamp", timestamp)
+    entry.put("reason", reason)
+    entry.put("severity", severity)
+    entry.put("note", note)
+    history.put(entry)
+    while (history.length() > 20) {
+      history.remove(0)
+    }
+    prefs.edit().putString(SICK_QUESTION_HISTORY_KEY, history.toString()).apply()
   }
 
   private fun goHome() {

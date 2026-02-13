@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string-array name="blocker_sick_severity_options">
+    <item>Leve</item>
+    <item>Moderado</item>
+    <item>Grave</item>
+  </string-array>
+</resources>
