@@ -569,7 +569,7 @@ const funFacts = [
   },
   {
     id: "funfact-029",
-    text: "Le savais-tu ? Le mouvement est un investissement avec un retour de 100 %.",
+    text: "Le savais-tu ? Le mouvement est un investissement avec un retour total.",
   },
 ];
 
