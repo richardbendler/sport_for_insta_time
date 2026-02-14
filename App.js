@@ -5567,7 +5567,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   };
 
   const saveSickLimitSettings = async () => {
-    const parsed = Number.parseInt(sickLimitInput, 10);
+    const trimmedInput = sickLimitInput.trim();
+    if (!trimmedInput) {
+      Alert.alert(t("label.sickModeLimitTitle"), t("label.sickModeLimitRequired"));
+      return;
+    }
+    const parsed = Number.parseInt(trimmedInput, 10);
     const normalized = Number.isFinite(parsed)
       ? Math.max(
           SICK_MODE_MINUTES_MIN,
@@ -6054,6 +6059,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     if (!isSickLimitSettingsOpen) {
       return null;
     }
+    const isSickLimitSaveDisabled = !sickLimitInput.trim();
     return (
       <Modal
         visible={isSickLimitSettingsOpen}
@@ -6085,8 +6091,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 </Text>
               </Pressable>
               <Pressable
-                style={styles.primaryButton}
+                style={[
+                  styles.primaryButton,
+                  isSickLimitSaveDisabled && { opacity: 0.5 },
+                ]}
                 onPress={saveSickLimitSettings}
+                disabled={isSickLimitSaveDisabled}
               >
                 <Text style={styles.primaryButtonText}>{t("label.save")}</Text>
               </Pressable>

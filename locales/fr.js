@@ -329,6 +329,7 @@ const fr = {
     "label.sickModeLimitTitle": "Limite du mode maladie",
     "label.sickModeLimitDescription":
       "Définis combien de minutes par jour sont disponibles en mode maladie.",
+    "label.sickModeLimitRequired": "Saisis une valeur avant d'enregistrer.",
     "label.creditLockTitle": "Facteurs bloqués",
     "label.creditLockBody": "Les facteurs utilisateurs sont bloqués jusqu'au {{date}}.",
     "label.creditLockNotice": "Facteurs bloqués jusqu'au {{date}}.",
