@@ -1,6 +1,6 @@
 const en = {
     "app.title": "Sport for Screen Time",
-    "label.sportTrackerTitle": "Sport Tracker",
+    "label.sportTrackerTitle": "Sport Habit Coach",
     "menu.home": "Sport",
     "menu.sports": "Your sports",
     "menu.apps": "Edit restricted apps",
@@ -244,7 +244,7 @@ const en = {
       "On iOS, manage blocked apps via Settings > Screen Time > App Limits.",
     "label.iosScreenTimeOpen": "Open Screen Time",
     "label.iosWidgetHint":
-      "Add the widget from the iOS Home Screen widget gallery (long press the home screen, tap Widgets, and pick Sport for Screen Time).",
+      "Add the widget from the iOS Home Screen widget gallery (long press the home screen, tap Widgets, and pick Sport Habit Coach).",
     "label.notificationsStatusIos":
       "Notifications are managed via Settings > Notifications on iOS.",
     "label.iosWorkoutNotificationTitle": "Workout reminders",

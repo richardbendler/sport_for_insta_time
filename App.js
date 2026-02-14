@@ -5852,11 +5852,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 </Pressable>
               </View>
             </View>
-            <View
-              style={[styles.sliderSection, styles.createSportField]}
-              ref={tutorialSportDifficultyRef}
-              collapsable={false}
-            >
+            {screenTimeFeaturesEnabled ? (
+              <View
+                style={[styles.sliderSection, styles.createSportField]}
+                ref={tutorialSportDifficultyRef}
+                collapsable={false}
+              >
               <View style={styles.difficultyHeaderRow}>
                 <Text style={styles.rateLabel}>{t("label.difficultyLabel")}</Text>
                 <View style={styles.difficultyHeaderActions}>
@@ -5921,19 +5922,20 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 </Text>
               </Pressable>
             </View>
-            {difficultyLockActive && (
-              <View style={styles.lockNotice}>
-                <Text style={styles.lockNoticeText}>
-                  {t("label.creditLockNotice", {
-                    date: formatLockExpiryLabel(
-                      creditLockExpiresAtValue,
-                      language
-                    ),
-                  })}
-                </Text>
+                {difficultyLockActive && (
+                  <View style={styles.lockNotice}>
+                    <Text style={styles.lockNoticeText}>
+                      {t("label.creditLockNotice", {
+                        date: formatLockExpiryLabel(
+                          creditLockExpiresAtValue,
+                          language
+                        ),
+                      })}
+                    </Text>
+                  </View>
+                )}
               </View>
-            )}
-            </View>
+            ) : null}
             {newType === "reps" ? (
               <View
                 style={styles.weightToggleRow}
@@ -6140,7 +6142,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 ? t("label.difficultyDescription")
                 : t("label.weightExerciseInfoBody")}
             </Text>
-            {infoModalKey === "difficulty" ? (
+            {infoModalKey === "difficulty" && screenTimeFeaturesEnabled ? (
               <View style={styles.difficultyFormulaList}>
                 <View style={styles.difficultyFormulaRow}>
                   <Text style={styles.difficultyFormulaLabel}>
@@ -7620,6 +7622,8 @@ const getSpeechLocale = () => {
     }
   }, [funFacts, markFunFactUsed, usedFunFactIds]);
 
+  const screenTimeFeaturesEnabled = isAndroid;
+
   const motivationActions = useMemo(() => {
     const defaultSport = motivationSport ?? activeSports[0];
     const actions = [
@@ -7631,15 +7635,19 @@ const getSpeechLocale = () => {
         actionLabelKey: "label.motivationActionStartSport",
         action: () => openSportModal(),
       },
-      {
-        id: "difficulty",
-        icon: "Diff",
-        titleKey: "label.motivationDifficultyTitle",
-        bodyKey: "label.motivationDifficultyBody",
-        actionLabelKey: "label.motivationActionDifficulty",
-        action: handleIncreaseDifficulty,
-        disabled: !motivationSport,
-      },
+      ...(screenTimeFeaturesEnabled
+        ? [
+            {
+              id: "difficulty",
+              icon: "Diff",
+              titleKey: "label.motivationDifficultyTitle",
+              bodyKey: "label.motivationDifficultyBody",
+              actionLabelKey: "label.motivationActionDifficulty",
+              action: handleIncreaseDifficulty,
+              disabled: !motivationSport,
+            },
+          ]
+        : []),
       {
         id: "stats",
         icon: "Stats",
@@ -7694,14 +7702,18 @@ const getSpeechLocale = () => {
         actionLabelKey: "label.motivationActionSettings",
         action: openSettings,
       },
-      {
-        id: "preface",
-        icon: "Pref",
-        titleKey: "label.motivationPrefaceTitle",
-        bodyKey: "label.motivationPrefaceBody",
-        actionLabelKey: "label.motivationActionPreface",
-        action: openPrefaceSettings,
-      },
+      ...(screenTimeFeaturesEnabled
+        ? [
+            {
+              id: "preface",
+              icon: "Pref",
+              titleKey: "label.motivationPrefaceTitle",
+              bodyKey: "label.motivationPrefaceBody",
+              actionLabelKey: "label.motivationActionPreface",
+              action: openPrefaceSettings,
+            },
+          ]
+        : []),
       {
         id: "voice",
         icon: "Voice",
@@ -7773,6 +7785,7 @@ const getSpeechLocale = () => {
     motivationSport,
     highestAppUsageMinutes,
     isAndroid,
+    screenTimeFeaturesEnabled,
   ]);
   const motivationActionMap = useMemo(
     () => new Map(motivationActions.map((item) => [item.id, item])),
@@ -9934,9 +9947,11 @@ const getSpeechLocale = () => {
                 />
               </View>
             </View>
-            <Text style={styles.weightPreviewText}>
-              {t("label.weightEntryPreview")}: {formatScreenTime(weightPreviewSeconds)}
-            </Text>
+            {screenTimeFeaturesEnabled ? (
+              <Text style={styles.weightPreviewText}>
+                {t("label.weightEntryPreview")}: {formatScreenTime(weightPreviewSeconds)}
+              </Text>
+            ) : null}
             <Pressable
               style={[
                 styles.detailAccentButton,
@@ -10145,10 +10160,12 @@ const getSpeechLocale = () => {
               <Text style={styles.manualEntryHelper}>
                 {t("label.distanceKmHint")}
               </Text>
-              <Text style={styles.manualEntryPreview}>
-                {t("label.manualTimeEntryPreview")}:{" "}
-                {formatScreenTime(manualTimePreviewSeconds)}
-              </Text>
+              {screenTimeFeaturesEnabled ? (
+                <Text style={styles.manualEntryPreview}>
+                  {t("label.manualTimeEntryPreview")}:{" "}
+                  {formatScreenTime(manualTimePreviewSeconds)}
+                </Text>
+              ) : null}
               <Pressable
                 style={[
                   styles.primaryButton,
@@ -10172,23 +10189,26 @@ const getSpeechLocale = () => {
             </View>
               </View>
             )}
-            <View style={styles.formulaBadgeWrap} pointerEvents="box-none">
-              <Pressable
-                style={styles.formulaBadge}
-                onPress={() => setIsFormulaModalOpen(true)}
-                accessibilityRole="button"
-                accessibilityLabel={t("label.formulaTitle")}
-              >
-                <View style={styles.formulaBadgeHeader}>
-                  <Text style={styles.formulaBadgeTitle}>
-                    {t("label.formulaBadge")}
-                  </Text>
-                  <Text style={styles.formulaBadgeChevron}>›</Text>
-                </View>
-                <Text style={styles.formulaBadgeValue}>{formulaBadgeValue}</Text>
-              </Pressable>
-            </View>
-            {(screenTimePerRepSeconds != null || screenTimePerMinuteSeconds != null) ? (
+            {screenTimeFeaturesEnabled ? (
+              <View style={styles.formulaBadgeWrap} pointerEvents="box-none">
+                <Pressable
+                  style={styles.formulaBadge}
+                  onPress={() => setIsFormulaModalOpen(true)}
+                  accessibilityRole="button"
+                  accessibilityLabel={t("label.formulaTitle")}
+                >
+                  <View style={styles.formulaBadgeHeader}>
+                    <Text style={styles.formulaBadgeTitle}>
+                      {t("label.formulaBadge")}
+                    </Text>
+                    <Text style={styles.formulaBadgeChevron}>›</Text>
+                  </View>
+                  <Text style={styles.formulaBadgeValue}>{formulaBadgeValue}</Text>
+                </Pressable>
+              </View>
+            ) : null}
+            {screenTimeFeaturesEnabled &&
+            (screenTimePerRepSeconds != null || screenTimePerMinuteSeconds != null) ? (
               <View style={styles.formulaRateRow}>
                 {screenTimePerRepSeconds != null ? (
                   <Text style={styles.formulaRateText}>
@@ -10252,90 +10272,92 @@ const getSpeechLocale = () => {
             <View style={styles.sportDetailBottomSpacer} />
           </ScrollView>
         </KeyboardAvoidingView>
-        <Modal
-          visible={isFormulaModalOpen}
-          animationType="slide"
-          transparent
-          onRequestClose={() => setIsFormulaModalOpen(false)}
-        >
-          <View style={styles.formulaModalOverlay}>
-            <View style={styles.formulaModalCard}>
-              <View style={styles.formulaModalHeader}>
-                <Text style={styles.sectionTitle}>
-                  {t("label.formulaTitle")}
+        {screenTimeFeaturesEnabled ? (
+          <Modal
+            visible={isFormulaModalOpen}
+            animationType="slide"
+            transparent
+            onRequestClose={() => setIsFormulaModalOpen(false)}
+          >
+            <View style={styles.formulaModalOverlay}>
+              <View style={styles.formulaModalCard}>
+                <View style={styles.formulaModalHeader}>
+                  <Text style={styles.sectionTitle}>
+                    {t("label.formulaTitle")}
+                  </Text>
+                  <Pressable
+                    style={styles.secondaryButton}
+                    onPress={() => setIsFormulaModalOpen(false)}
+                  >
+                    <Text style={styles.secondaryButtonText}>
+                      {t("label.close")}
+                    </Text>
+                  </Pressable>
+                </View>
+                <Text style={styles.formulaDetailText}>
+                  {t("label.formulaIntro")}
+                </Text>
+                <Text style={styles.formulaEquation}>
+                  {t("label.screenTime")}: {formulaShort}
+                </Text>
+                {screenTimePerRepSeconds != null ? (
+                  <Text style={styles.formulaDetailText}>
+                    {t("label.screenRateReps")}:{" "}
+                    {formatScreenTime(screenTimePerRepSeconds)}
+                  </Text>
+                ) : null}
+                {screenTimePerMinuteSeconds != null ? (
+                  <Text style={styles.formulaDetailText}>
+                    {t("label.screenRateTime")}:{" "}
+                    {formatScreenTime(screenTimePerMinuteSeconds)}
+                  </Text>
+                ) : null}
+                <View style={styles.formulaFactorsRow}>
+                  <View style={styles.formulaFactorCard}>
+                    <Text style={styles.formulaFactorLabel}>
+                      {t("label.formulaAdminFactor")}
+                    </Text>
+                    <Text style={styles.formulaFactorValue}>
+                      {formatFactorValue(adminFactor)}
+                    </Text>
+                  </View>
+                  <View style={styles.formulaFactorCard}>
+                    <Text style={styles.formulaFactorLabel}>
+                      {t("label.formulaUserFactor")}
+                    </Text>
+                    <Text style={styles.formulaFactorValue}>
+                      {formatFactorValue(userFactor)}
+                    </Text>
+                  </View>
+                </View>
+                <Text style={styles.formulaDetailText}>
+                  {t("label.formulaAdminInfo")}
+                </Text>
+                <Text style={styles.formulaDetailText}>
+                  {t("label.formulaUserEffect", {
+                    percent: userFactorPercentText,
+                  })}
                 </Text>
                 <Pressable
-                  style={styles.secondaryButton}
-                  onPress={() => setIsFormulaModalOpen(false)}
+                  style={[styles.primaryButton, styles.fullWidthButton]}
+                  onPress={() => {
+                    setIsFormulaModalOpen(false);
+                    openSportModal(selectedSport);
+                  }}
                 >
-                  <Text style={styles.secondaryButtonText}>
-                    {t("label.close")}
+                  <Text style={styles.primaryButtonText}>
+                    {t("label.formulaEditButton")}
                   </Text>
                 </Pressable>
               </View>
-              <Text style={styles.formulaDetailText}>
-                {t("label.formulaIntro")}
-              </Text>
-              <Text style={styles.formulaEquation}>
-                {t("label.screenTime")}: {formulaShort}
-              </Text>
-              {screenTimePerRepSeconds != null ? (
-                <Text style={styles.formulaDetailText}>
-                  {t("label.screenRateReps")}:{" "}
-                  {formatScreenTime(screenTimePerRepSeconds)}
-                </Text>
-              ) : null}
-              {screenTimePerMinuteSeconds != null ? (
-                <Text style={styles.formulaDetailText}>
-                  {t("label.screenRateTime")}:{" "}
-                  {formatScreenTime(screenTimePerMinuteSeconds)}
-                </Text>
-              ) : null}
-              <View style={styles.formulaFactorsRow}>
-                <View style={styles.formulaFactorCard}>
-                  <Text style={styles.formulaFactorLabel}>
-                    {t("label.formulaAdminFactor")}
-                  </Text>
-                  <Text style={styles.formulaFactorValue}>
-                    {formatFactorValue(adminFactor)}
-                  </Text>
-                </View>
-                <View style={styles.formulaFactorCard}>
-                  <Text style={styles.formulaFactorLabel}>
-                    {t("label.formulaUserFactor")}
-                  </Text>
-                  <Text style={styles.formulaFactorValue}>
-                    {formatFactorValue(userFactor)}
-                  </Text>
-                </View>
-              </View>
-              <Text style={styles.formulaDetailText}>
-                {t("label.formulaAdminInfo")}
-              </Text>
-              <Text style={styles.formulaDetailText}>
-                {t("label.formulaUserEffect", {
-                  percent: userFactorPercentText,
-                })}
-              </Text>
-              <Pressable
-                style={[styles.primaryButton, styles.fullWidthButton]}
-                onPress={() => {
-                  setIsFormulaModalOpen(false);
-                  openSportModal(selectedSport);
-                }}
-              >
-                <Text style={styles.primaryButtonText}>
-                  {t("label.formulaEditButton")}
-                </Text>
-              </Pressable>
             </View>
-          </View>
-        </Modal>
+          </Modal>
+        ) : null}
       </SafeAreaView>
     );
   }
 
-  if (isScreenTimeDetailsOpen) {
+  if (isAndroid && isScreenTimeDetailsOpen) {
     const statusLabelMap = {
       full: t("label.remainingStatusFull"),
       partial: t("label.remainingStatusPartial"),
@@ -11003,46 +11025,50 @@ const getSpeechLocale = () => {
               </View>
             </Pressable>
           </View>
-          <View style={styles.settingsDivider} />
-          <Text style={styles.settingsSectionTitle}>
-            {t("label.prefaceSettings")}
-          </Text>
-          <View style={styles.infoCard}>
-            <Text style={styles.helperText}>
-              {t("label.prefaceDelay")}: {settings.prefaceDelaySeconds} s
-            </Text>
-            <Pressable
-              style={styles.secondaryButton}
-              onPress={openPrefaceSettings}
-            >
-              <Text style={styles.secondaryButtonText}>
+          {screenTimeFeaturesEnabled ? (
+            <>
+              <View style={styles.settingsDivider} />
+              <Text style={styles.settingsSectionTitle}>
                 {t("label.prefaceSettings")}
               </Text>
-            </Pressable>
-          </View>
-          <View style={styles.settingsDivider} />
-          <Text style={styles.settingsSectionTitle}>
-            {t("label.sickModeSection")}
-          </Text>
-          <View style={styles.infoCard}>
-            <Text style={styles.helperText}>
-              {t("label.sickModeLimitSubtitle", {
-                minutes:
-                  Number.isFinite(settings.sickModeDailyMinutes) &&
-                  settings.sickModeDailyMinutes > 0
-                    ? settings.sickModeDailyMinutes
-                    : DEFAULT_SETTINGS.sickModeDailyMinutes,
-              })}
-            </Text>
-            <Pressable
-              style={styles.secondaryButton}
-              onPress={openSickLimitSettings}
-            >
-              <Text style={styles.secondaryButtonText}>
-                {t("label.sickModeLimitAction")}
+              <View style={styles.infoCard}>
+                <Text style={styles.helperText}>
+                  {t("label.prefaceDelay")}: {settings.prefaceDelaySeconds} s
+                </Text>
+                <Pressable
+                  style={styles.secondaryButton}
+                  onPress={openPrefaceSettings}
+                >
+                  <Text style={styles.secondaryButtonText}>
+                    {t("label.prefaceSettings")}
+                  </Text>
+                </Pressable>
+              </View>
+              <View style={styles.settingsDivider} />
+              <Text style={styles.settingsSectionTitle}>
+                {t("label.sickModeSection")}
               </Text>
-            </Pressable>
-          </View>
+              <View style={styles.infoCard}>
+                <Text style={styles.helperText}>
+                  {t("label.sickModeLimitSubtitle", {
+                    minutes:
+                      Number.isFinite(settings.sickModeDailyMinutes) &&
+                      settings.sickModeDailyMinutes > 0
+                        ? settings.sickModeDailyMinutes
+                        : DEFAULT_SETTINGS.sickModeDailyMinutes,
+                  })}
+                </Text>
+                <Pressable
+                  style={styles.secondaryButton}
+                  onPress={openSickLimitSettings}
+                >
+                  <Text style={styles.secondaryButtonText}>
+                    {t("label.sickModeLimitAction")}
+                  </Text>
+                </Pressable>
+              </View>
+            </>
+          ) : null}
           <View style={styles.settingsDivider} />
           <Text style={styles.settingsSectionTitle}>
             {t("label.notificationsTitle")}
@@ -11070,38 +11096,58 @@ const getSpeechLocale = () => {
             {t("label.permissions")}
           </Text>
           <View style={styles.infoCard}>
-            <Text style={styles.helperText}>
-              {t("label.accessibilityTitle")}:{" "}
-              {accessibilityMissing
-                ? t("label.accessibilityMissing")
-                : t("label.accessibilityActive")}
-            </Text>
-            <Text style={styles.helperText}>
-              {t("label.usageAccessTitle")}:{" "}
-              {usageAccessMissing
-                ? t("label.usageAccessMissing")
-                : t("label.usageAccessActive")}
-            </Text>
-            {accessibilityMissing ? (
-              <Pressable
-                style={styles.permissionActionButton}
-                onPress={requestAccessibilityAccess}
-              >
-                <Text style={styles.permissionActionButtonText}>
-                  {t("label.accessibilityDisclosureConfirm")}
+            {isAndroid ? (
+              <>
+                <Text style={styles.helperText}>
+                  {t("label.accessibilityTitle")}:{" "}
+                  {accessibilityMissing
+                    ? t("label.accessibilityMissing")
+                    : t("label.accessibilityActive")}
                 </Text>
-              </Pressable>
-            ) : null}
-            {usageAccessMissing ? (
-              <Pressable
-                style={styles.permissionActionButton}
-                onPress={openUsageAccessSettings}
-              >
-                <Text style={styles.permissionActionButtonText}>
-                  {t("label.openUsageAccess")}
+                <Text style={styles.helperText}>
+                  {t("label.usageAccessTitle")}:{" "}
+                  {usageAccessMissing
+                    ? t("label.usageAccessMissing")
+                    : t("label.usageAccessActive")}
                 </Text>
-              </Pressable>
-            ) : null}
+                {accessibilityMissing ? (
+                  <Pressable
+                    style={styles.permissionActionButton}
+                    onPress={requestAccessibilityAccess}
+                  >
+                    <Text style={styles.permissionActionButtonText}>
+                      {t("label.accessibilityDisclosureConfirm")}
+                    </Text>
+                  </Pressable>
+                ) : null}
+                {usageAccessMissing ? (
+                  <Pressable
+                    style={styles.permissionActionButton}
+                    onPress={openUsageAccessSettings}
+                  >
+                    <Text style={styles.permissionActionButtonText}>
+                      {t("label.openUsageAccess")}
+                    </Text>
+                  </Pressable>
+                ) : null}
+              </>
+            ) : (
+              <>
+                <Text style={styles.helperText}>
+                  {t("label.notificationsTitle")}: {notificationStatusText}
+                </Text>
+                {showNotificationAction ? (
+                  <Pressable
+                    style={styles.secondaryButton}
+                    onPress={openNotificationSettings}
+                  >
+                    <Text style={styles.secondaryButtonText}>
+                      {t("label.notificationsButton")}
+                    </Text>
+                  </Pressable>
+                ) : null}
+              </>
+            )}
           </View>
             <View style={styles.settingsDivider} />
           <Text style={styles.settingsSectionTitle}>
@@ -11118,19 +11164,23 @@ const getSpeechLocale = () => {
               <Text style={styles.deleteAllText}>{t("label.resetData")}</Text>
             </Pressable>
           </View>
-          <View style={styles.settingsDivider} />
-          <Text style={styles.settingsSectionTitle}>
-            {t("label.statusOverview")}
-          </Text>
-          <View style={styles.infoCard}>
-            <Text style={styles.cardTitle}>{t("label.availableToday")}</Text>
-            <Text style={styles.cardValue}>
-              {Math.floor(remainingTodaySeconds / 60)} min
-            </Text>
-            <Text style={styles.cardMeta}>
-              {t("label.used")}: {Math.floor(usageState.usedSeconds / 60)} min
-            </Text>
-          </View>
+          {screenTimeFeaturesEnabled ? (
+            <>
+              <View style={styles.settingsDivider} />
+              <Text style={styles.settingsSectionTitle}>
+                {t("label.statusOverview")}
+              </Text>
+              <View style={styles.infoCard}>
+                <Text style={styles.cardTitle}>{t("label.availableToday")}</Text>
+                <Text style={styles.cardValue}>
+                  {Math.floor(remainingTodaySeconds / 60)} min
+                </Text>
+                <Text style={styles.cardMeta}>
+                  {t("label.used")}: {Math.floor(usageState.usedSeconds / 60)} min
+                </Text>
+              </View>
+            </>
+          ) : null}
           <View style={styles.settingsDivider} />
           <Text style={styles.settingsSectionTitle}>
             {t("label.experimentalFeaturesTitle")}
@@ -11589,9 +11639,11 @@ const getSpeechLocale = () => {
                         </View>
                         <View style={styles.sportGridColumnRight}>
                           <View style={styles.moveActionsRow}>
-                            <Text style={styles.earnedTimeTextRight}>
-                              {t("label.screenTime")}: {formatScreenTime(daily.screenSeconds || 0)}
-                            </Text>
+                            {screenTimeFeaturesEnabled ? (
+                              <Text style={styles.earnedTimeTextRight}>
+                                {t("label.screenTime")}: {formatScreenTime(daily.screenSeconds || 0)}
+                              </Text>
+                            ) : null}
                             {sportSortMode === "manual" ? (
                               <View style={styles.moveButtonColumn}>
                                 <Pressable
@@ -11753,9 +11805,11 @@ const getSpeechLocale = () => {
                           </View>
                           <View style={styles.sportGridColumnRight}>
                             <View style={styles.moveActionsRow}>
-                              <Text style={styles.earnedTimeTextRight}>
-                                {t("label.screenTime")}: {formatScreenTime(daily.screenSeconds || 0)}
-                              </Text>
+                              {screenTimeFeaturesEnabled ? (
+                                <Text style={styles.earnedTimeTextRight}>
+                                  {t("label.screenTime")}: {formatScreenTime(daily.screenSeconds || 0)}
+                                </Text>
+                              ) : null}
                               {sportSortMode === "manual" ? (
                                 <View style={styles.moveButtonColumn}>
                                   <Pressable
