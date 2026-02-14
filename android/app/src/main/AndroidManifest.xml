@@ -10,6 +10,7 @@
   <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
   <uses-permission android:name="android.permission.VIBRATE"/>
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
   <uses-permission
     android:name="android.permission.WRITE_SECURE_SETTINGS"
     tools:ignore="ProtectedPermissions"/>
@@ -64,9 +65,12 @@
       <meta-data android:name="android.appwidget.provider" android:resource="@xml/overall_widget_info"/>
     </receiver>
     <receiver android:name=".WidgetPinReceiver" android:exported="false"/>
-    <receiver android:name=".WidgetUpdateReceiver" android:exported="false">
+    <receiver android:name=".WidgetUpdateReceiver" android:exported="true">
       <intent-filter>
         <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+        <action android:name="android.intent.action.BOOT_COMPLETED"/>
+        <action android:name="android.intent.action.TIME_SET"/>
+        <action android:name="android.intent.action.TIMEZONE_CHANGED"/>
       </intent-filter>
     </receiver>
     <service

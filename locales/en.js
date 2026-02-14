@@ -333,6 +333,7 @@ const en = {
     "label.sickModeLimitTitle": "Sick-mode limit",
     "label.sickModeLimitDescription":
       "Set how many minutes you can use the app during sick mode each day.",
+    "label.sickModeLimitRequired": "Please enter a value before saving.",
     "label.creditLockTitle": "Difficulty locked",
     "label.creditLockBody": "User factors are locked until {{date}}.",
     "label.creditLockNotice": "User factors stay locked until {{date}}.",

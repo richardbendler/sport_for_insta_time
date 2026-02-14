@@ -334,6 +334,7 @@ const es = {
     "label.sickModeLimitTitle": "Límite del modo enfermedad",
     "label.sickModeLimitDescription":
       "Define cuántos minutos al día tienes con el modo enfermedad activo.",
+    "label.sickModeLimitRequired": "Introduce un valor antes de guardar.",
     "label.creditLockTitle": "Factores bloqueados",
     "label.creditLockBody": "Los factores de usuario están bloqueados hasta {{date}}.",
     "label.creditLockNotice": "Factores bloqueados hasta {{date}}.",

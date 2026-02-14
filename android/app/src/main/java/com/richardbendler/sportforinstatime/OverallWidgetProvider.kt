@@ -18,6 +18,17 @@ class OverallWidgetProvider : AppWidgetProvider() {
     appWidgetIds.forEach { appWidgetId ->
       updateAppWidget(context, appWidgetManager, appWidgetId)
     }
+    WidgetRefreshScheduler.ensureScheduled(context)
+  }
+
+  override fun onEnabled(context: Context) {
+    super.onEnabled(context)
+    WidgetRefreshScheduler.ensureScheduled(context)
+  }
+
+  override fun onDisabled(context: Context) {
+    super.onDisabled(context)
+    WidgetRefreshScheduler.ensureScheduled(context)
   }
 
   companion object {

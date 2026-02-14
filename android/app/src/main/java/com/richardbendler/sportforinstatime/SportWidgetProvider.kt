@@ -20,6 +20,12 @@ class SportWidgetProvider : AppWidgetProvider() {
     appWidgetIds.forEach { appWidgetId ->
       updateAppWidget(context, appWidgetManager, appWidgetId)
     }
+    WidgetRefreshScheduler.ensureScheduled(context)
+  }
+
+  override fun onEnabled(context: Context) {
+    super.onEnabled(context)
+    WidgetRefreshScheduler.ensureScheduled(context)
   }
 
   override fun onDeleted(context: Context, appWidgetIds: IntArray) {
@@ -30,7 +36,12 @@ class SportWidgetProvider : AppWidgetProvider() {
       editor.remove("widget_${id}_sport_name")
     }
     editor.apply()
-    }
+  }
+
+  override fun onDisabled(context: Context) {
+    super.onDisabled(context)
+    WidgetRefreshScheduler.ensureScheduled(context)
+  }
 
   companion object {
     private const val APP_SCHEME = "com.richardbendler.sportforinstatime"

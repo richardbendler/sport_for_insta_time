@@ -338,6 +338,7 @@ const de = {
     "label.sickModeLimitTitle": "Limit im Krankheitsmodus",
     "label.sickModeLimitDescription":
       "Lege fest, wie viele Minuten der Krankheitsmodus pro Tag freischaltet.",
+    "label.sickModeLimitRequired": "Bitte gib vor dem Speichern einen Wert ein.",
     "label.creditLockTitle": "Userfaktoren gesperrt",
     "label.creditLockBody": "Userfaktoren bleiben bis {{date}} gesperrt.",
     "label.creditLockNotice": "Userfaktoren gesperrt bis {{date}}.",
