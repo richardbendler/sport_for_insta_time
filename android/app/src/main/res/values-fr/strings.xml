@@ -36,7 +36,14 @@
   <string name="blocker_sick_question_reason_label">Quelle est la g&#x00EA;ne?</string>
   <string name="blocker_sick_question_reason_hint">Ex : mal de gorge, migraine...</string>
   <string name="blocker_sick_question_severity_label">&#x00C0; quel point c&#x2019;est s&#x00E9;rieux?</string>
+  <string name="blocker_sick_question_severity_prompt">Veuillez choisir</string>
   <string name="blocker_sick_question_note_label">Des d&#x00E9;tails suppl&#x00E9;mentaires?</string>
   <string name="blocker_sick_question_note_hint">Optionnel : explique ton cas.</string>
   <string name="blocker_sick_question_submit">Valider l&#x2019;&#x00E9;change maladie</string>
+  <string name="blocker_sick_question_required_field">Champ obligatoire</string>
+  <string name="blocker_sick_question_required_all">Merci de r&#x00E9;pondre &#x00E0; toutes les questions.</string>
+  <string name="blocker_success_title">Activation r&#x00E9;ussie</string>
+  <string name="blocker_success_credit_title">Cr&#x00E9;dit activ&#x00E9;</string>
+  <string name="blocker_success_sick_title">Mode maladie activ&#x00E9;</string>
+  <string name="blocker_success_continue">Continuer vers l&#x2019;app</string>
 </resources>

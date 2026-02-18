@@ -158,7 +158,7 @@ class InstaBlockerService : AccessibilityService() {
     if (shouldBlock(pkg)) {
       updateCountdownOverlay(0, true)
       updateCountdownNotification(0, false, null)
-      launchBlocker()
+      launchBlocker(pkg)
       return
     }
     if ((previousPackage != pkg || openedFromHome) && shouldShowPreface(pkg) && openedFromHome) {
@@ -234,7 +234,7 @@ class InstaBlockerService : AccessibilityService() {
     updateWorkoutOverlay()
     maybeUpdateWidgets()
     if (remaining <= 0) {
-      launchBlocker()
+      launchBlocker(pkg)
     }
   }
 
@@ -266,9 +266,10 @@ class InstaBlockerService : AccessibilityService() {
     return totals.remainingSeconds <= 0
   }
 
-  private fun launchBlocker() {
+  private fun launchBlocker(targetPackage: String?) {
     val intent = Intent(this, InstaBlockerActivity::class.java)
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+    intent.putExtra("target_package", targetPackage)
     startActivity(intent)
   }
 

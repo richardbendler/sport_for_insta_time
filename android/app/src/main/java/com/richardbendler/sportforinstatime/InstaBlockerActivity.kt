@@ -21,12 +21,20 @@ import java.util.Date
 import java.util.Locale
 
 class InstaBlockerActivity : AppCompatActivity() {
+  private lateinit var mainContent: View
+  private lateinit var successContent: View
+  private lateinit var successTitle: TextView
+  private lateinit var successMessage: TextView
+  private lateinit var successContinueButton: Button
   private lateinit var creditSection: View
   private lateinit var creditButton: Button
   private lateinit var creditPenalty: TextView
   private lateinit var creditLockNotice: TextView
+  private lateinit var sickSection: View
   private lateinit var sickButton: Button
   private lateinit var sickStatus: TextView
+  private var targetPackage: String? = null
+  private var pendingContinuePackage: String? = null
   private val CREDIT_MINUTES = 10
   private val SICK_OVERRIDE_DURATION_MS = 24L * 60L * 60L * 1000L
   private val SICK_MODE_ID = "sick_mode"
@@ -37,16 +45,24 @@ class InstaBlockerActivity : AppCompatActivity() {
     applyLocaleFromPrefs()
     setContentView(R.layout.activity_insta_blocker)
     window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
+    targetPackage = intent.getStringExtra("target_package")
 
     val button = findViewById<Button>(R.id.blocker_button)
     button.setOnClickListener { goHome() }
     val openAppButton = findViewById<Button>(R.id.blocker_open_app)
     openAppButton.setOnClickListener { openApp() }
+    mainContent = findViewById(R.id.blocker_main_content)
+    successContent = findViewById(R.id.blocker_success_content)
+    successTitle = findViewById(R.id.blocker_success_title)
+    successMessage = findViewById(R.id.blocker_success_message)
+    successContinueButton = findViewById(R.id.blocker_success_continue_button)
+    successContinueButton.setOnClickListener { continueToBlockedApp() }
     creditSection = findViewById(R.id.blocker_credit_section)
     creditButton = findViewById(R.id.blocker_credit_button)
     creditPenalty = findViewById(R.id.blocker_credit_penalty)
     creditLockNotice = findViewById(R.id.blocker_credit_lock_notice)
     creditButton.setOnClickListener { grantCredit() }
+    sickSection = findViewById(R.id.blocker_sick_section)
     sickButton = findViewById(R.id.blocker_sick_button)
     sickStatus = findViewById(R.id.blocker_sick_status)
     sickButton.setOnClickListener { showSickQuestionDialog() }
@@ -130,13 +146,10 @@ class InstaBlockerActivity : AppCompatActivity() {
     CreditStore.setCreditInfo(prefs, entryId, safeMinutes, multiplier)
     CreditStore.scheduleCreditLock(prefs, now)
     val penaltyPercent = CreditStore.computePenaltyPercentForMinutes(safeMinutes)
-    Toast.makeText(
-      this,
-      getString(R.string.preface_credit_success, safeMinutes, penaltyPercent),
-      Toast.LENGTH_SHORT
-    ).show()
-    goHome()
-    finish()
+    showSuccessScreen(
+      getString(R.string.blocker_success_credit_title),
+      getString(R.string.preface_credit_success, safeMinutes, penaltyPercent)
+    )
   }
 
   override fun onResume() {
@@ -193,13 +206,10 @@ class InstaBlockerActivity : AppCompatActivity() {
     SickOverrideStore.setOverrideUntil(prefs, until)
     SickOverrideStore.scheduleActivationCooldown(prefs, now)
     creditSickModeMinutes(prefs, now)
-    Toast.makeText(
-      this,
-      getString(R.string.blocker_sick_success, SickOverrideStore.getDailyLimitMinutes(prefs)),
-      Toast.LENGTH_LONG
-    ).show()
-    goHome()
-    finish()
+    showSuccessScreen(
+      getString(R.string.blocker_success_sick_title),
+      getString(R.string.blocker_sick_success, SickOverrideStore.getDailyLimitMinutes(prefs))
+    )
   }
 
   private fun showSickQuestionDialog() {
@@ -215,18 +225,46 @@ class InstaBlockerActivity : AppCompatActivity() {
     )
     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
     severitySpinner.adapter = adapter
-    AlertDialog.Builder(this)
+    val dialog = AlertDialog.Builder(this)
       .setTitle(R.string.blocker_sick_question_title)
       .setView(dialogView)
-      .setPositiveButton(R.string.blocker_sick_question_submit) { _, _ ->
+      .setPositiveButton(R.string.blocker_sick_question_submit, null)
+      .setNegativeButton(android.R.string.cancel, null)
+      .create()
+    dialog.setOnShowListener {
+      val submitButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+      submitButton.setOnClickListener {
         val reason = reasonInput.text?.toString()?.trim().orEmpty()
-        val severity = severitySpinner.selectedItem?.toString().orEmpty()
         val note = noteInput.text?.toString()?.trim().orEmpty()
+        val severitySelected = severitySpinner.selectedItemPosition > 0
+
+        reasonInput.error = if (reason.isBlank()) {
+          getString(R.string.blocker_sick_question_required_field)
+        } else {
+          null
+        }
+        noteInput.error = if (note.isBlank()) {
+          getString(R.string.blocker_sick_question_required_field)
+        } else {
+          null
+        }
+
+        if (reason.isBlank() || note.isBlank() || !severitySelected) {
+          Toast.makeText(
+            this,
+            getString(R.string.blocker_sick_question_required_all),
+            Toast.LENGTH_SHORT
+          ).show()
+          return@setOnClickListener
+        }
+
+        val severity = severitySpinner.selectedItem?.toString().orEmpty()
         logSickQuestion(prefs, reason, severity, note, System.currentTimeMillis())
         activateSickMode()
+        dialog.dismiss()
       }
-      .setNegativeButton(android.R.string.cancel, null)
-      .show()
+    }
+    dialog.show()
   }
 
   private fun logSickQuestion(
@@ -264,6 +302,32 @@ class InstaBlockerActivity : AppCompatActivity() {
     val intent = Intent(this, MainActivity::class.java)
     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
     startActivity(intent)
+  }
+
+  private fun showSuccessScreen(title: String, message: String) {
+    pendingContinuePackage = targetPackage
+    successTitle.text = title
+    successMessage.text = message
+    mainContent.visibility = View.GONE
+    creditSection.visibility = View.GONE
+    sickSection.visibility = View.GONE
+    sickStatus.visibility = View.GONE
+    successContent.visibility = View.VISIBLE
+  }
+
+  private fun continueToBlockedApp() {
+    val pkg = pendingContinuePackage ?: targetPackage
+    if (!pkg.isNullOrBlank()) {
+      val launchIntent = packageManager.getLaunchIntentForPackage(pkg)
+      if (launchIntent != null) {
+        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        startActivity(launchIntent)
+        finish()
+        return
+      }
+    }
+    openApp()
+    finish()
   }
 
   private fun applyLocaleFromPrefs() {

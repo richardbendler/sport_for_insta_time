@@ -54,6 +54,44 @@
   </LinearLayout>
 
   <LinearLayout
+    android:id="@+id/blocker_success_content"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_weight="1"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:visibility="gone">
+
+    <TextView
+      android:id="@+id/blocker_success_title"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/blocker_success_title"
+      android:textColor="#f8fafc"
+      android:textSize="22sp"
+      android:textStyle="bold"
+      android:gravity="center" />
+
+    <TextView
+      android:id="@+id/blocker_success_message"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="10dp"
+      android:textColor="#94a3b8"
+      android:textSize="14sp"
+      android:gravity="center" />
+
+    <Button
+      android:id="@+id/blocker_success_continue_button"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="24dp"
+      android:text="@string/blocker_success_continue"
+      android:backgroundTint="#f59e0b"
+      android:textColor="#0b1020" />
+  </LinearLayout>
+
+  <LinearLayout
     android:id="@+id/blocker_credit_section"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"

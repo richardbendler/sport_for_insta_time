@@ -36,7 +36,14 @@
   <string name="blocker_sick_question_reason_label">¿Qué te pasa?</string>
   <string name="blocker_sick_question_reason_hint">p. ej. dolor de garganta, migraña...</string>
   <string name="blocker_sick_question_severity_label">¿Qué tan grave es?</string>
+  <string name="blocker_sick_question_severity_prompt">Selecciona una opción</string>
   <string name="blocker_sick_question_note_label">¿Algo más que agregar?</string>
   <string name="blocker_sick_question_note_hint">Detalle opcional para explicar la situación.</string>
   <string name="blocker_sick_question_submit">Confirmar intercambio</string>
+  <string name="blocker_sick_question_required_field">Campo obligatorio</string>
+  <string name="blocker_sick_question_required_all">Responde todas las preguntas.</string>
+  <string name="blocker_success_title">Activación completada</string>
+  <string name="blocker_success_credit_title">Crédito activado</string>
+  <string name="blocker_success_sick_title">Modo enfermedad activado</string>
+  <string name="blocker_success_continue">Seguir a la app</string>
 </resources>

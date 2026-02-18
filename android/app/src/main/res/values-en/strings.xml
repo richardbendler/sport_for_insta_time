@@ -35,7 +35,14 @@
   <string name="blocker_sick_question_reason_label">What’s the issue?</string>
   <string name="blocker_sick_question_reason_hint">e.g. sore throat, migraine, etc.</string>
   <string name="blocker_sick_question_severity_label">How bad is it?</string>
+  <string name="blocker_sick_question_severity_prompt">Please select</string>
   <string name="blocker_sick_question_note_label">Anything else to share?</string>
   <string name="blocker_sick_question_note_hint">Optional detail that explains your situation.</string>
   <string name="blocker_sick_question_submit">Confirm sick trade</string>
+  <string name="blocker_sick_question_required_field">Required field</string>
+  <string name="blocker_sick_question_required_all">Please answer all questions.</string>
+  <string name="blocker_success_title">Successfully activated</string>
+  <string name="blocker_success_credit_title">Credit activated</string>
+  <string name="blocker_success_sick_title">Sick mode activated</string>
+  <string name="blocker_success_continue">Continue to app</string>
 </resources>

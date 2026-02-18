@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string-array name="blocker_sick_severity_options">
+    <item>@string/blocker_sick_question_severity_prompt</item>
     <item>Mild</item>
     <item>Moderate</item>
     <item>Severe</item>
