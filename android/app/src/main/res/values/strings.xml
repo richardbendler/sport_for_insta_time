@@ -36,7 +36,14 @@
   <string name="blocker_sick_question_reason_label">Was hast du genau?</string>
   <string name="blocker_sick_question_reason_hint">z. B. Halsschmerzen, Migräne, Rückenschmerzen …</string>
   <string name="blocker_sick_question_severity_label">Wie schlimm ist es?</string>
+  <string name="blocker_sick_question_severity_prompt">Bitte auswaehlen</string>
   <string name="blocker_sick_question_note_label">Weitere Hinweise</string>
   <string name="blocker_sick_question_note_hint">Optional: erzähl kurz, was dich sonst noch stört.</string>
   <string name="blocker_sick_question_submit">Krankheitsausgleich bestätigen</string>
+  <string name="blocker_sick_question_required_field">Pflichtfeld</string>
+  <string name="blocker_sick_question_required_all">Bitte beantworte alle Fragen.</string>
+  <string name="blocker_success_title">Erfolgreich aktiviert</string>
+  <string name="blocker_success_credit_title">Kredit aktiviert</string>
+  <string name="blocker_success_sick_title">Krankheitsmodus aktiviert</string>
+  <string name="blocker_success_continue">Weiter zur App</string>
 </resources>
