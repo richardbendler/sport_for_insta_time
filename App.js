@@ -2068,6 +2068,27 @@ const normalizeChartSeries = (seriesValues, mode) => {
   return scaled.map((value) => value / max);
 };
 
+const buildChartYAxisTicks = (maxValue, scaleMode, formatLabel) => {
+  const safeMax = Math.max(0, Number(maxValue) || 0);
+  const maxScaled = Math.max(1, scaleChartValue(safeMax, scaleMode));
+  const fractions = [1, 2 / 3, 1 / 3, 0];
+  const ticks = fractions.map((fraction) => {
+    const rawValue = safeMax * fraction;
+    const scaledValue = scaleChartValue(rawValue, scaleMode);
+    return {
+      rawValue,
+      normalized: scaledValue / maxScaled,
+      label: formatLabel(rawValue),
+    };
+  });
+  return ticks.filter((tick, index) => {
+    if (index === 0 || index === ticks.length - 1) {
+      return true;
+    }
+    return tick.label !== ticks[index - 1].label;
+  });
+};
+
 const ChartBars = ({ labels, normalizedValues, valueLabels, color, style }) => {
   return (
     <View style={[styles.chartCard, style]}>
@@ -2094,7 +2115,7 @@ const ChartBars = ({ labels, normalizedValues, valueLabels, color, style }) => {
   );
 };
 
-const ChartLines = ({ labels, series, style }) => {
+const ChartLines = ({ labels, series, style, yAxisTicks = null }) => {
   const [layoutWidth, setLayoutWidth] = useState(0);
   const plotHeight = 140;
   const usableWidth = Math.max(layoutWidth - 8, 0);
@@ -2102,58 +2123,82 @@ const ChartLines = ({ labels, series, style }) => {
   const stepX = pointCount > 1 ? usableWidth / (pointCount - 1) : 0;
   return (
     <View style={[styles.chartCard, style]}>
-      <View
-        style={styles.chartPlot}
-        onLayout={(event) => setLayoutWidth(event.nativeEvent.layout.width)}
-      >
-        {series.map((line) =>
-          line.normalized.map((value, index) => {
-            const x = stepX * index;
-            const y = (1 - value) * plotHeight;
-            const nextValue = line.normalized[index + 1];
-            const nextX = stepX * (index + 1);
-            const nextY = nextValue != null ? (1 - nextValue) * plotHeight : y;
-            const dx = nextX - x;
-            const dy = nextY - y;
-            const length = Math.sqrt(dx * dx + dy * dy);
-            const angle = Math.atan2(dy, dx);
-            return (
-              <View key={`${line.sportId}-${index}`}>
-                {nextValue != null ? (
-                  <View
-                    style={[
-                      styles.chartLineSegment,
-                      {
-                        backgroundColor: line.color,
-                        width: length,
-                        left: x,
-                        top: y,
-                        transform: [{ rotate: `${angle}rad` }],
-                      },
-                    ]}
-                  />
-                ) : null}
-                <View
-                  style={[
-                    styles.chartLineDot,
-                    {
-                      backgroundColor: line.color,
-                      left: x - 3,
-                      top: y - 3,
-                    },
-                  ]}
-                />
-              </View>
-            );
-          })
-        )}
-      </View>
-      <View style={styles.chartAxisRow}>
-        {labels.map((label, index) => (
-          <Text key={`${label}-${index}`} style={styles.chartAxisLabel}>
-            {label}
-          </Text>
-        ))}
+      <View style={styles.chartMainRow}>
+        {yAxisTicks?.length ? (
+          <View style={[styles.chartYAxisColumn, { height: plotHeight }]}>
+            {yAxisTicks.map((tick, index) => (
+              <Text
+                key={`y-${index}-${tick.label}`}
+                style={[
+                  styles.chartYAxisLabel,
+                  {
+                    top: Math.max(
+                      -2,
+                      Math.min(plotHeight - 12, (1 - tick.normalized) * plotHeight - 6)
+                    ),
+                  },
+                ]}
+              >
+                {tick.label}
+              </Text>
+            ))}
+          </View>
+        ) : null}
+        <View style={styles.chartMainColumn}>
+          <View
+            style={styles.chartPlot}
+            onLayout={(event) => setLayoutWidth(event.nativeEvent.layout.width)}
+          >
+            {series.map((line) =>
+              line.normalized.map((value, index) => {
+                const x = stepX * index;
+                const y = (1 - value) * plotHeight;
+                const nextValue = line.normalized[index + 1];
+                const nextX = stepX * (index + 1);
+                const nextY = nextValue != null ? (1 - nextValue) * plotHeight : y;
+                const dx = nextX - x;
+                const dy = nextY - y;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx);
+                return (
+                  <View key={`${line.sportId}-${index}`}>
+                    {nextValue != null ? (
+                      <View
+                        style={[
+                          styles.chartLineSegment,
+                          {
+                            backgroundColor: line.color,
+                            width: length,
+                            left: x,
+                            top: y,
+                            transform: [{ rotate: `${angle}rad` }],
+                          },
+                        ]}
+                      />
+                    ) : null}
+                    <View
+                      style={[
+                        styles.chartLineDot,
+                        {
+                          backgroundColor: line.color,
+                          left: x - 3,
+                          top: y - 3,
+                        },
+                      ]}
+                    />
+                  </View>
+                );
+              })
+            )}
+          </View>
+          <View style={styles.chartAxisRow}>
+            {labels.map((label, index) => (
+              <Text key={`${label}-${index}`} style={styles.chartAxisLabel}>
+                {label}
+              </Text>
+            ))}
+          </View>
+        </View>
       </View>
       <View style={styles.chartLegendRow}>
         {series.map((line) => (
@@ -7088,7 +7133,7 @@ const getSpeechLocale = () => {
     const series = sports.map((sport) => {
       const values = overallChartDayKeys.map((dayKey) => {
         const entries = (logs[sport.id] || {})[dayKey] || [];
-        return sumBalancedMetric(sport, entries);
+        return sumSportEntryMetric(sport, entries);
       });
       return {
         sportId: sport.id,
@@ -7097,46 +7142,89 @@ const getSpeechLocale = () => {
         values,
       };
     }).filter((item) => item.values.some((value) => value > 0));
-    const scaledValues = series.flatMap((item) =>
-      item.values.map((value) => scaleChartValue(value, CHART_SCALE_MODE.overallLines))
-    );
-    const max = Math.max(1, ...scaledValues);
-    const normalizedSeries = series.map((item) => ({
-      ...item,
-      normalized: item.values.map(
-        (value) => scaleChartValue(value, CHART_SCALE_MODE.overallLines) / max
-      ),
-    }));
     return {
       labels: sparseLabels(overallChartDayKeys.map(formatChartDayLabel)),
-      series: normalizedSeries,
+      series,
     };
   }, [overallChartDayKeys, logs, sports, language, getSportAccentColor]);
+  const overallScreenTimeChart = useMemo(() => {
+    const values = overallChartDayKeys.map((dayKey) =>
+      sports.reduce((sum, sport) => {
+        const entries = (logs[sport.id] || {})[dayKey] || [];
+        return (
+          sum +
+          entries.reduce(
+            (entrySum, entry) => entrySum + resolveEntryScreenSeconds(sport, entry),
+            0
+          )
+        );
+      }, 0)
+    );
+    return {
+      values,
+      normalized: normalizeChartSeries(values, CHART_SCALE_MODE.overallLines),
+    };
+  }, [overallChartDayKeys, logs, sports]);
   const aggregatedChartSeries = useMemo(() => {
-    const hasData = overallSummaryChart.values.some((value) => value > 0);
+    const hasData = overallScreenTimeChart.values.some((value) => value > 0);
     if (!hasData) {
       return null;
     }
-    const scaled = overallSummaryChart.values.map((value) =>
-      scaleChartValue(value, CHART_SCALE_MODE.overallLines)
-    );
-    const max = Math.max(1, ...scaled);
     return {
       sportId: "all",
       label: t("label.chartAllSports"),
       color: COLORS.accent,
-      normalized: scaled.map((value) => value / max),
+      values: overallScreenTimeChart.values,
+      normalized: overallScreenTimeChart.normalized,
     };
-  }, [overallSummaryChart, t]);
+  }, [overallScreenTimeChart, t]);
   const chartLinesSeries = useMemo(() => {
     if (chartSportFilter) {
       const sportSeries = overallLinesChart.series.find(
         (line) => line.sportId === chartSportFilter
       );
-      return sportSeries ? [sportSeries] : [];
+      if (!sportSeries) {
+        return [];
+      }
+      return [
+        {
+          ...sportSeries,
+          normalized: normalizeChartSeries(
+            sportSeries.values,
+            CHART_SCALE_MODE.overallLines
+          ),
+        },
+      ];
     }
     return aggregatedChartSeries ? [aggregatedChartSeries] : [];
   }, [chartSportFilter, overallLinesChart.series, aggregatedChartSeries]);
+  const overallChartYAxisTicks = useMemo(() => {
+    if (chartSportFilter) {
+      const sport = sports.find((entry) => entry.id === chartSportFilter);
+      const line = chartLinesSeries[0];
+      if (!sport || !line) {
+        return null;
+      }
+      const maxValue = Math.max(0, ...(line.values || []));
+      return buildChartYAxisTicks(maxValue, CHART_SCALE_MODE.overallLines, (value) => {
+        if (sport.type === "time") {
+          return formatSeconds(Math.round(value));
+        }
+        if (sport.weightExercise) {
+          return `${Math.round(value)} kg`;
+        }
+        return `${Math.round(value)} ${repsShort}`;
+      });
+    }
+    const line = chartLinesSeries[0];
+    if (!line) {
+      return null;
+    }
+    const maxValue = Math.max(0, ...(line.values || []));
+    return buildChartYAxisTicks(maxValue, CHART_SCALE_MODE.overallLines, (value) =>
+      formatScreenTime(value)
+    );
+  }, [chartSportFilter, chartLinesSeries, sports, repsShort]);
   useEffect(() => {
     if (
       chartSportFilter &&
@@ -9119,6 +9207,7 @@ const getSpeechLocale = () => {
                 <ChartLines
                   labels={overallLinesChart.labels}
                   series={chartLinesSeries}
+                  yAxisTicks={overallChartYAxisTicks}
                 />
               )}
             </>
@@ -9305,6 +9394,19 @@ const getSpeechLocale = () => {
       CHART_SCALE_MODE.sport
     );
     const sportChartLabels = sparseLabels(sportChartDayKeys.map(formatChartDayLabel));
+    const sportChartYAxisTicks = buildChartYAxisTicks(
+      Math.max(0, ...sportChartValues),
+      CHART_SCALE_MODE.sport,
+      (value) => {
+        if (statsSport.type === "time") {
+          return formatSeconds(Math.round(value));
+        }
+        if (statsSport.weightExercise) {
+          return `${Math.round(value)} kg`;
+        }
+        return `${Math.round(value)} ${repsShort}`;
+      }
+    );
 
     const openEditEntry = (dayKey) => {
       const dayStats = sportStats[dayKey] || { reps: 0, seconds: 0 };
@@ -9552,6 +9654,7 @@ const getSpeechLocale = () => {
                       normalized: sportChartNormalized,
                     },
                   ]}
+                  yAxisTicks={sportChartYAxisTicks}
                 />
               )}
             </>
@@ -12386,6 +12489,26 @@ const styles = StyleSheet.create({
     position: "relative",
     width: "100%",
     marginBottom: 8,
+  },
+  chartMainRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+  },
+  chartMainColumn: {
+    flex: 1,
+  },
+  chartYAxisColumn: {
+    width: 58,
+    position: "relative",
+  },
+  chartYAxisLabel: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    color: COLORS.muted,
+    fontSize: 9,
+    textAlign: "right",
   },
   chartLineSegment: {
     position: "absolute",
