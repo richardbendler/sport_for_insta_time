@@ -9,7 +9,7 @@ koennen ausgewaehlte Apps blockiert werden, sobald die erspielte Zeit verbraucht
 npx expo run:android
 npx expo start --dev-client
 eas build --platform android --local
-npx eas build -p android --profile production
+npx eas build -p android --profile production --local
 ```
 
 ## Expo Cloud Build (EAS)
