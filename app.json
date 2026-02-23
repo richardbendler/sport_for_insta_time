@@ -10,9 +10,9 @@
       "**/*"
     ],
     "ios": {
-      "displayName": "Sport Habit Coach",
       "supportsTablet": true,
       "infoPlist": {
+        "CFBundleDisplayName": "Sport Habit Coach",
         "NSMicrophoneUsageDescription": "Allow microphone access to count reps by voice.",
         "NSSpeechRecognitionUsageDescription": "Allow speech recognition to count reps by voice.",
         "NSCameraUsageDescription": "Allow camera access to count push-ups.",
