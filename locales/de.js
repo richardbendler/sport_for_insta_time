@@ -339,9 +339,11 @@
     "label.sickModeLimitDescription":
       "Lege fest, wie viele Minuten der Krankheitsmodus pro Tag freischaltet.",
     "label.sickModeLimitRequired": "Bitte gib vor dem Speichern einen Wert ein.",
-    "label.creditLockTitle": "Userfaktoren gesperrt",
-    "label.creditLockBody": "Userfaktoren bleiben bis {{date}} gesperrt.",
-    "label.creditLockNotice": "Userfaktoren gesperrt bis {{date}}.",
+    "label.creditLockTitle": "Userfaktor-Mindestwert aktiv",
+    "label.creditLockBody":
+      "Bis {{date}} kannst du den Userfaktor nicht unter {{min}} senken.",
+    "label.creditLockNotice":
+      "Bis {{date}} kannst du den Userfaktor nur bis mindestens {{min}} senken.",
     "label.tapAnywhere": "Tippe irgendwo",
     "label.voiceOn": "Mikrofon an",
     "label.voiceOff": "Mikrofon aus",
