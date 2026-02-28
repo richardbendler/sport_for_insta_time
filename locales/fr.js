@@ -330,9 +330,11 @@
     "label.sickModeLimitDescription":
       "DÃ©finis combien de minutes par jour sont disponibles en mode maladie.",
     "label.sickModeLimitRequired": "Saisis une valeur avant d'enregistrer.",
-    "label.creditLockTitle": "Facteurs bloquÃ©s",
-    "label.creditLockBody": "Les facteurs utilisateurs sont bloquÃ©s jusqu'au {{date}}.",
-    "label.creditLockNotice": "Facteurs bloquÃ©s jusqu'au {{date}}.",
+    "label.creditLockTitle": "Minimum du facteur actif",
+    "label.creditLockBody":
+      "Jusqu'au {{date}}, le facteur utilisateur ne peut pas descendre sous {{min}}.",
+    "label.creditLockNotice":
+      "Jusqu'au {{date}}, tu peux baisser le facteur utilisateur seulement jusqu'Ã  {{min}}.",
     "label.tapAnywhere": "Touchez nâ€™importe oÃ¹",
     "label.voiceOn": "Micro actif",
     "label.voiceOff": "Micro inactif",

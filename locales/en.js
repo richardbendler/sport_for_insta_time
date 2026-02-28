@@ -334,9 +334,11 @@ const en = {
     "label.sickModeLimitDescription":
       "Set how many minutes you can use the app during sick mode each day.",
     "label.sickModeLimitRequired": "Please enter a value before saving.",
-    "label.creditLockTitle": "Difficulty locked",
-    "label.creditLockBody": "User factors are locked until {{date}}.",
-    "label.creditLockNotice": "User factors stay locked until {{date}}.",
+    "label.creditLockTitle": "Minimum user factor active",
+    "label.creditLockBody":
+      "Until {{date}}, the user factor cannot be lowered below {{min}}.",
+    "label.creditLockNotice":
+      "Until {{date}}, you can lower the user factor only down to {{min}}.",
     "label.tapAnywhere": "Tap anywhere",
     "label.voiceOn": "Mic on",
     "label.voiceOff": "Mic off",

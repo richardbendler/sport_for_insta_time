@@ -335,9 +335,11 @@ const es = {
     "label.sickModeLimitDescription":
       "Define cuántos minutos al día tienes con el modo enfermedad activo.",
     "label.sickModeLimitRequired": "Introduce un valor antes de guardar.",
-    "label.creditLockTitle": "Factores bloqueados",
-    "label.creditLockBody": "Los factores de usuario están bloqueados hasta {{date}}.",
-    "label.creditLockNotice": "Factores bloqueados hasta {{date}}.",
+    "label.creditLockTitle": "Mínimo de factor activo",
+    "label.creditLockBody":
+      "Hasta {{date}}, el factor de usuario no puede bajar de {{min}}.",
+    "label.creditLockNotice":
+      "Hasta {{date}}, solo puedes bajar el factor de usuario hasta {{min}}.",
     "label.tapAnywhere": "Toca en cualquier lugar",
     "label.voiceOn": "Microfono activado",
     "label.voiceOff": "Microfono desactivado",
