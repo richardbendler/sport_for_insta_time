@@ -4,6 +4,8 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -21,6 +23,7 @@ import java.util.Date
 import java.util.Locale
 
 class InstaBlockerActivity : AppCompatActivity() {
+  private val handler = Handler(Looper.getMainLooper())
   private lateinit var mainContent: View
   private lateinit var successContent: View
   private lateinit var successTitle: TextView
@@ -39,6 +42,15 @@ class InstaBlockerActivity : AppCompatActivity() {
   private val SICK_OVERRIDE_DURATION_MS = 24L * 60L * 60L * 1000L
   private val SICK_MODE_ID = "sick_mode"
   private val SICK_QUESTION_HISTORY_KEY = "sick_question_history"
+  private val autoContinueTicker = object : Runnable {
+    override fun run() {
+      if (canContinueToBlockedApp()) {
+        continueToBlockedApp()
+        return
+      }
+      handler.postDelayed(this, 1000)
+    }
+  }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -155,6 +167,21 @@ class InstaBlockerActivity : AppCompatActivity() {
   override fun onResume() {
     super.onResume()
     updateSickSection()
+    if (canContinueToBlockedApp()) {
+      continueToBlockedApp()
+    } else {
+      handler.postDelayed(autoContinueTicker, 1000)
+    }
+  }
+
+  override fun onPause() {
+    super.onPause()
+    handler.removeCallbacks(autoContinueTicker)
+  }
+
+  override fun onDestroy() {
+    super.onDestroy()
+    handler.removeCallbacks(autoContinueTicker)
   }
 
   private fun updateSickSection() {
@@ -320,7 +347,12 @@ class InstaBlockerActivity : AppCompatActivity() {
     if (!pkg.isNullOrBlank()) {
       val launchIntent = packageManager.getLaunchIntentForPackage(pkg)
       if (launchIntent != null) {
-        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        getSharedPreferences("insta_control", MODE_PRIVATE)
+          .edit()
+          .putString("preface_allow_package", pkg)
+          .putLong("preface_allow_until", System.currentTimeMillis() + 60000L)
+          .apply()
+        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(launchIntent)
         finish()
         return
@@ -328,6 +360,22 @@ class InstaBlockerActivity : AppCompatActivity() {
     }
     openApp()
     finish()
+  }
+
+  private fun canContinueToBlockedApp(): Boolean {
+    if (::successContent.isInitialized && successContent.visibility == View.VISIBLE) {
+      return false
+    }
+    val pkg = pendingContinuePackage ?: targetPackage
+    if (pkg.isNullOrBlank()) {
+      return false
+    }
+    val prefs = getSharedPreferences("insta_control", MODE_PRIVATE)
+    val now = System.currentTimeMillis()
+    if (SickOverrideStore.isOverrideActive(prefs, now)) {
+      return true
+    }
+    return ScreenTimeStore.getTotals(prefs, now).remainingSeconds > 0
   }
 
   private fun applyLocaleFromPrefs() {
