@@ -14,6 +14,7 @@ import java.util.Locale
 class InstaPrefaceActivity : AppCompatActivity() {
   private val handler = Handler(Looper.getMainLooper())
   private var delaySeconds = 10
+  private var countdownEndsAtMillis = 0L
   private var remainingSeconds = 0
   private var targetPackage: String? = null
 
@@ -23,12 +24,10 @@ class InstaPrefaceActivity : AppCompatActivity() {
 
   private val ticker = object : Runnable {
     override fun run() {
+      delaySeconds = secondsUntilCountdownEnd()
+      updateCountdown()
       if (delaySeconds > 0) {
-        delaySeconds -= 1
-        updateCountdown()
         handler.postDelayed(this, 1000)
-      } else {
-        updateCountdown()
       }
     }
   }
@@ -40,10 +39,25 @@ class InstaPrefaceActivity : AppCompatActivity() {
     window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
 
     val prefs = getSharedPreferences("insta_control", MODE_PRIVATE)
-    delaySeconds = prefs.getInt("preface_delay_seconds", delaySeconds).coerceAtLeast(0)
+    val configuredDelaySeconds = prefs.getInt("preface_delay_seconds", delaySeconds).coerceAtLeast(0)
+    val incomingPackage = intent.getStringExtra("target_package")
+    countdownEndsAtMillis = savedInstanceState?.getLong(KEY_COUNTDOWN_ENDS_AT_MILLIS)
+      ?.takeIf { it > 0L }
+      ?: prefs.getLong(KEY_ACTIVE_COUNTDOWN_ENDS_AT_MILLIS, 0L)
+        .takeIf {
+          it > 0L &&
+            prefs.getString(KEY_ACTIVE_TARGET_PACKAGE, null) == incomingPackage &&
+            it > System.currentTimeMillis()
+        }
+      ?: (System.currentTimeMillis() + configuredDelaySeconds * 1000L)
+    prefs.edit()
+      .putString(KEY_ACTIVE_TARGET_PACKAGE, incomingPackage)
+      .putLong(KEY_ACTIVE_COUNTDOWN_ENDS_AT_MILLIS, countdownEndsAtMillis)
+      .apply()
+    delaySeconds = secondsUntilCountdownEnd()
 
     remainingSeconds = intent.getIntExtra("remaining_seconds", 0)
-    targetPackage = intent.getStringExtra("target_package")
+    targetPackage = incomingPackage
     countdownText = findViewById(R.id.preface_countdown)
     remainingText = findViewById(R.id.preface_remaining)
     openButton = findViewById(R.id.preface_button)
@@ -52,7 +66,14 @@ class InstaPrefaceActivity : AppCompatActivity() {
     updateCountdown()
 
     openButton.setOnClickListener { openTargetApp() }
-    handler.postDelayed(ticker, 1000)
+    if (delaySeconds > 0) {
+      handler.postDelayed(ticker, 1000)
+    }
+  }
+
+  override fun onSaveInstanceState(outState: Bundle) {
+    super.onSaveInstanceState(outState)
+    outState.putLong(KEY_COUNTDOWN_ENDS_AT_MILLIS, countdownEndsAtMillis)
   }
 
   override fun onDestroy() {
@@ -71,7 +92,14 @@ class InstaPrefaceActivity : AppCompatActivity() {
     openButton.alpha = if (enabled) 1f else 0.5f
   }
 
+  private fun secondsUntilCountdownEnd(): Int {
+    val remainingMillis = countdownEndsAtMillis - System.currentTimeMillis()
+    return ((remainingMillis + 999L) / 1000L).toInt().coerceAtLeast(0)
+  }
+
   private fun openTargetApp() {
+    delaySeconds = secondsUntilCountdownEnd()
+    updateCountdown()
     if (delaySeconds > 0) {
       return
     }
@@ -81,6 +109,8 @@ class InstaPrefaceActivity : AppCompatActivity() {
     prefs.edit()
       .putString("preface_allow_package", pkg)
       .putLong("preface_allow_until", allowUntil)
+      .remove(KEY_ACTIVE_TARGET_PACKAGE)
+      .remove(KEY_ACTIVE_COUNTDOWN_ENDS_AT_MILLIS)
       .apply()
     val intent = packageManager.getLaunchIntentForPackage(pkg)
     if (intent != null) {
@@ -91,6 +121,7 @@ class InstaPrefaceActivity : AppCompatActivity() {
   }
 
   private fun goHome() {
+    clearActiveCountdown()
     val intent = Intent(Intent.ACTION_MAIN)
     intent.addCategory(Intent.CATEGORY_HOME)
     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -112,5 +143,19 @@ class InstaPrefaceActivity : AppCompatActivity() {
     val config = resources.configuration
     config.setLocale(locale)
     resources.updateConfiguration(config, resources.displayMetrics)
+  }
+
+  private fun clearActiveCountdown() {
+    getSharedPreferences("insta_control", MODE_PRIVATE)
+      .edit()
+      .remove(KEY_ACTIVE_TARGET_PACKAGE)
+      .remove(KEY_ACTIVE_COUNTDOWN_ENDS_AT_MILLIS)
+      .apply()
+  }
+
+  companion object {
+    private const val KEY_COUNTDOWN_ENDS_AT_MILLIS = "countdown_ends_at_millis"
+    private const val KEY_ACTIVE_TARGET_PACKAGE = "preface_active_target_package"
+    private const val KEY_ACTIVE_COUNTDOWN_ENDS_AT_MILLIS = "preface_active_countdown_ends_at_millis"
   }
 }

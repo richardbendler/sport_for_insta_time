@@ -1,11 +1,13 @@
 package com.richardbendler.sportforinstatime
 
 import android.accessibilityservice.AccessibilityService
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.graphics.PixelFormat
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Handler
@@ -30,6 +32,7 @@ class InstaBlockerService : AccessibilityService() {
   private val handler = Handler(Looper.getMainLooper())
   private var currentPackage: String? = null
   private var lastForegroundWasHome: Boolean = false
+  private var suspendedPackage: String? = null
   private var windowManager: WindowManager? = null
   private var overlayView: View? = null
   private var overlayText: TextView? = null
@@ -41,6 +44,7 @@ class InstaBlockerService : AccessibilityService() {
   private var lastWidgetUpdateAt: Long = 0
   private var notificationManager: NotificationManager? = null
   private var notificationShadeActive: Boolean = false
+  private var screenReceiverRegistered: Boolean = false
 
   private val notificationShadeGraceMs = 1000L
   private var lastNotificationShadeEventAt: Long = 0
@@ -78,11 +82,20 @@ class InstaBlockerService : AccessibilityService() {
     }
   }
 
+  private val screenReceiver = object : BroadcastReceiver() {
+    override fun onReceive(context: Context?, intent: Intent?) {
+      when (intent?.action) {
+        Intent.ACTION_SCREEN_OFF -> pauseForegroundAppForResume()
+      }
+    }
+  }
+
   override fun onServiceConnected() {
     super.onServiceConnected()
     setupOverlay()
     setupWorkoutOverlay()
     setupNotificationChannel()
+    registerScreenReceiver()
     handler.post(ticker)
   }
 
@@ -148,7 +161,9 @@ class InstaBlockerService : AccessibilityService() {
       updateCountdownNotification(0, false, null)
     }
     val previousPackage = currentPackage
+    val resumedSuspendedPackage = suspendedPackage == pkg
     currentPackage = pkg
+    suspendedPackage = null
     val openedFromHome = lastForegroundWasHome
     lastForegroundWasHome = false
     val remaining = getRemainingSeconds()
@@ -161,7 +176,12 @@ class InstaBlockerService : AccessibilityService() {
       launchBlocker(pkg)
       return
     }
-    if ((previousPackage != pkg || openedFromHome) && shouldShowPreface(pkg) && openedFromHome) {
+    if (
+      (previousPackage != pkg || openedFromHome) &&
+      shouldShowPreface(pkg) &&
+      openedFromHome &&
+      !resumedSuspendedPackage
+    ) {
       launchPreface(pkg, remaining)
     }
   }
@@ -174,6 +194,7 @@ class InstaBlockerService : AccessibilityService() {
     teardownWorkoutOverlay()
     updateCountdownNotification(0, false, null)
     restoreGrayscale()
+    unregisterScreenReceiver()
   }
 
   private fun tickUsage() {
@@ -247,6 +268,21 @@ class InstaBlockerService : AccessibilityService() {
     updateCountdownOverlay(0, false)
     updateCountdownNotification(0, false, null)
     syncGrayscaleState(false)
+  }
+
+  private fun pauseForegroundAppForResume() {
+    val pkg = currentPackage
+    if (pkg != null && getControlledApps().contains(pkg)) {
+      suspendedPackage = pkg
+    }
+    clearForegroundApp(false)
+  }
+
+  private fun rememberCurrentPackageForResume() {
+    val pkg = currentPackage
+    if (pkg != null && getControlledApps().contains(pkg)) {
+      suspendedPackage = pkg
+    }
   }
 
   private fun shouldBlock(pkg: String): Boolean {
@@ -549,6 +585,7 @@ class InstaBlockerService : AccessibilityService() {
     cancelForegroundClear()
     val runnable = Runnable {
       pendingHomeClear = null
+      rememberCurrentPackageForResume()
       clearForegroundApp(true)
     }
     pendingHomeClear = runnable
@@ -575,6 +612,27 @@ class InstaBlockerService : AccessibilityService() {
       prefs.edit().putString("workout_overlay_open_sport_id", sportId).apply()
     }
     openApp()
+  }
+
+  private fun registerScreenReceiver() {
+    if (screenReceiverRegistered) {
+      return
+    }
+    val filter = IntentFilter(Intent.ACTION_SCREEN_OFF)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+      registerReceiver(screenReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+    } else {
+      registerReceiver(screenReceiver, filter)
+    }
+    screenReceiverRegistered = true
+  }
+
+  private fun unregisterScreenReceiver() {
+    if (!screenReceiverRegistered) {
+      return
+    }
+    unregisterReceiver(screenReceiver)
+    screenReceiverRegistered = false
   }
 
   private fun isNotificationShadeEvent(pkg: String, className: String?): Boolean {
