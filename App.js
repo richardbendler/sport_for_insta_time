@@ -179,6 +179,9 @@ const DEFAULT_DIFFICULTY_INDEX = (() => {
 })();
 const DEFAULT_TIME_RATE = 0.5;
 const DEFAULT_REPS_RATE = 0.5;
+const DAY_MS = 24 * 60 * 60 * 1000;
+const USAGE_SNAPSHOT_INTERVAL_MS = 60 * 1000;
+const USAGE_SNAPSHOT_RETENTION_MS = DAY_MS * 3;
 const INCREMENTAL_TIME_FACTOR_OPTIONS = Array.from(
   { length: 11 },
   (_, index) => Math.round((0.5 + index * 0.05) * 100) / 100
@@ -1800,6 +1803,88 @@ const formatDateLabel = (key) => {
   return `${day}.${month}.${date.getFullYear()}`;
 };
 
+const sanitizeUsageByAppMap = (value) => {
+  if (!value || typeof value !== "object") {
+    return {};
+  }
+  return Object.fromEntries(
+    Object.entries(value)
+      .map(([key, seconds]) => [key, Math.max(0, Number(seconds) || 0)])
+      .filter(([key, seconds]) => key && seconds > 0)
+  );
+};
+
+const normalizeUsageSnapshots = (snapshots = [], now = Date.now()) => {
+  const cutoff = now - USAGE_SNAPSHOT_RETENTION_MS;
+  return (Array.isArray(snapshots) ? snapshots : [])
+    .map((snapshot) => {
+      const ts = Number(snapshot?.ts || 0);
+      if (!Number.isFinite(ts) || ts <= 0) {
+        return null;
+      }
+      const dayKey =
+        typeof snapshot?.dayKey === "string" && snapshot.dayKey
+          ? snapshot.dayKey
+          : dateKeyFromDate(new Date(ts));
+      return {
+        ts,
+        dayKey,
+        usedSeconds: Math.max(0, Number(snapshot?.usedSeconds) || 0),
+        usedByApp: sanitizeUsageByAppMap(snapshot?.usedByApp),
+      };
+    })
+    .filter(Boolean)
+    .filter((snapshot) => snapshot.ts >= cutoff)
+    .sort((a, b) => a.ts - b.ts);
+};
+
+const buildRollingUsageFromSnapshots = (snapshots = [], now = Date.now()) => {
+  const cutoff = now - DAY_MS;
+  let totalUsedSeconds = 0;
+  const usedByApp = {};
+  let previous = null;
+  snapshots.forEach((snapshot) => {
+    const sameDay = previous?.dayKey === snapshot.dayKey;
+    const intervalStart = sameDay
+      ? previous.ts
+      : parseDateKey(snapshot.dayKey).getTime();
+    const intervalEnd = snapshot.ts;
+    const overlapStart = Math.max(cutoff, intervalStart);
+    const overlapEnd = Math.min(now, intervalEnd);
+    if (overlapEnd <= overlapStart) {
+      previous = snapshot;
+      return;
+    }
+    const intervalDuration = Math.max(1, intervalEnd - intervalStart);
+    const overlapRatio = (overlapEnd - overlapStart) / intervalDuration;
+    const usedDelta = sameDay
+      ? Math.max(0, snapshot.usedSeconds - (previous?.usedSeconds || 0))
+      : snapshot.usedSeconds;
+    totalUsedSeconds += usedDelta * overlapRatio;
+    const appKeys = new Set([
+      ...Object.keys(snapshot.usedByApp || {}),
+      ...(sameDay ? Object.keys(previous?.usedByApp || {}) : []),
+    ]);
+    appKeys.forEach((pkg) => {
+      const currentValue = Number(snapshot.usedByApp?.[pkg] || 0);
+      const previousValue = sameDay
+        ? Number(previous?.usedByApp?.[pkg] || 0)
+        : 0;
+      const delta = Math.max(0, currentValue - previousValue);
+      usedByApp[pkg] = (usedByApp[pkg] || 0) + delta * overlapRatio;
+    });
+    previous = snapshot;
+  });
+  return {
+    usedSeconds: Math.round(totalUsedSeconds),
+    usedByApp: Object.fromEntries(
+      Object.entries(usedByApp)
+        .map(([pkg, seconds]) => [pkg, Math.round(seconds)])
+        .filter(([, seconds]) => seconds > 0)
+    ),
+  };
+};
+
 const formatLockExpiryLabel = (timestamp, languageCode) => {
   if (!timestamp || !Number.isFinite(timestamp)) {
     return "";
@@ -2067,6 +2152,23 @@ const getRecentTimeEntriesForSport = (logs, sportId, limit = 5) => {
     .filter((entry) => entry && entry.seconds > 0)
     .sort((a, b) => (b.ts || 0) - (a.ts || 0))
     .slice(0, limit);
+};
+
+const groupEntriesByDay = (entries = []) => {
+  const groups = [];
+  entries.forEach((entry) => {
+    if (!entry) {
+      return;
+    }
+    const dayKey = dateKeyFromDate(entry.ts || Date.now());
+    const lastGroup = groups[groups.length - 1];
+    if (!lastGroup || lastGroup.dayKey !== dayKey) {
+      groups.push({ dayKey, entries: [entry] });
+      return;
+    }
+    lastGroup.entries.push(entry);
+  });
+  return groups;
 };
 
 const sumSportEntryMetric = (sport, entries) => {
@@ -3074,9 +3176,12 @@ function AppContent() {
   );
   const [colorPickerVisible, setColorPickerVisible] = useState(false);
   const [colorPickerSelection, setColorPickerSelection] = useState(null);
+  const [isManualTimeModalOpen, setIsManualTimeModalOpen] = useState(false);
+  const [usageSnapshots, setUsageSnapshots] = useState([]);
   const scrollViewRef = useRef(null);
   const homeScrollRef = useRef(null);
   const screenTimeDetailsScrollRef = useRef(null);
+  const usageSnapshotsRef = useRef([]);
   const homeScrollYRef = useRef(0);
   const screenTimeDetailsScrollYRef = useRef(0);
   const [installedApps, setInstalledApps] = useState([]);
@@ -3524,6 +3629,10 @@ function AppContent() {
     notificationsPromptedRef.current = notificationsPrompted;
   }, [notificationsPrompted]);
 
+  useEffect(() => {
+    usageSnapshotsRef.current = usageSnapshots;
+  }, [usageSnapshots]);
+
   const getSportLabel = (sport) => {
     if (!sport) {
       return "";
@@ -3641,6 +3750,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         STORAGE_KEYS.tutorialSeen
       );
       const workoutsRaw = await AsyncStorage.getItem(STORAGE_KEYS.workouts);
+      const usageSnapshotRaw = await AsyncStorage.getItem(
+        STORAGE_KEYS.usageSnapshot
+      );
       const creditLockMinimumsRaw = await AsyncStorage.getItem(
         STORAGE_KEYS.creditLockMinimums
       );
@@ -3710,6 +3822,18 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       }
       screenTimeSyncedEntryIdsRef.current = new Set(parsedSyncedIds);
       setLogs(normalizedLogs);
+      if (usageSnapshotRaw) {
+        try {
+          setUsageSnapshots(
+            normalizeUsageSnapshots(JSON.parse(usageSnapshotRaw) || [])
+          );
+        } catch (error) {
+          console.warn("Failed to load usage snapshots", error);
+          setUsageSnapshots([]);
+        }
+      } else {
+        setUsageSnapshots([]);
+      }
       if (logsChanged || logsMigrated) {
         await AsyncStorage.setItem(
           STORAGE_KEYS.logs,
@@ -3962,6 +4086,13 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       setRunningSportLabel(label);
     }
   }, [runningSportId, runningSportLabel, sports, language]);
+
+  useEffect(() => {
+    if (selectedSportId) {
+      return;
+    }
+    setIsManualTimeModalOpen(false);
+  }, [selectedSportId]);
 
   useEffect(() => {
     if (!workoutRunning) {
@@ -4589,6 +4720,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       STORAGE_KEYS.usageSnapshot,
       STORAGE_KEYS.screenTimeSyncedEntries,
     ]);
+    setUsageSnapshots([]);
+    usageSnapshotsRef.current = [];
     screenTimeSyncedEntryIdsRef.current = new Set();
     if (InstaControl?.clearAllScreenTimeEntries) {
       InstaControl.clearAllScreenTimeEntries();
@@ -4661,6 +4794,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       creditPenaltyMultiplier: 1,
       creditLockExpiresAt: 0,
     });
+    setUsageSnapshots([]);
+    usageSnapshotsRef.current = [];
     setCreditLockMinimums({});
     creditLockSnapshotExpiresAtRef.current = 0;
     if (InstaControl?.setControlledApps) {
@@ -4951,6 +5086,46 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       });
     }
   };
+
+  useEffect(() => {
+    if (!isAndroid || !usageState.day) {
+      return;
+    }
+    const now = Date.now();
+    const nextSnapshot = {
+      ts: now,
+      dayKey: usageState.day,
+      usedSeconds: Math.max(0, Number(usageState.usedSeconds) || 0),
+      usedByApp: sanitizeUsageByAppMap(usageState.usedByApp),
+    };
+    const bucket = Math.floor(now / USAGE_SNAPSHOT_INTERVAL_MS);
+    const currentSnapshots = usageSnapshotsRef.current;
+    const lastSnapshot = currentSnapshots[currentSnapshots.length - 1];
+    const lastBucket = lastSnapshot
+      ? Math.floor(lastSnapshot.ts / USAGE_SNAPSHOT_INTERVAL_MS)
+      : null;
+    const shouldReplaceLast = lastBucket === bucket;
+    const baseSnapshots = shouldReplaceLast
+      ? currentSnapshots.slice(0, -1)
+      : currentSnapshots;
+    const nextSnapshots = normalizeUsageSnapshots(
+      [...baseSnapshots, nextSnapshot],
+      now
+    );
+    const previousSerialized = JSON.stringify(currentSnapshots);
+    const nextSerialized = JSON.stringify(nextSnapshots);
+    if (previousSerialized === nextSerialized) {
+      return;
+    }
+    usageSnapshotsRef.current = nextSnapshots;
+    setUsageSnapshots(nextSnapshots);
+    AsyncStorage.setItem(
+      STORAGE_KEYS.usageSnapshot,
+      JSON.stringify(nextSnapshots)
+    ).catch((error) => {
+      console.warn("Failed to save usage snapshots", error);
+    });
+  }, [isAndroid, usageState.day, usageState.usedByApp, usageState.usedSeconds]);
 
   const refreshScreenTimeEntries = useCallback(async () => {
     if (!InstaControl?.getScreenTimeEntries) {
@@ -6674,6 +6849,118 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     );
   };
 
+  const renderManualTimeModal = () => {
+    if (!isManualTimeModalOpen || !selectedSport || selectedSport.type !== "time") {
+      return null;
+    }
+    return (
+      <Modal
+        visible={isManualTimeModalOpen}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setIsManualTimeModalOpen(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalCard, styles.manualTimeModalCard]}>
+            <Text style={styles.modalTitle}>{t("label.manualTimeEntryTitle")}</Text>
+            <Text style={styles.modalSubtitle}>{t("label.manualTimeEntryHint")}</Text>
+            <View style={styles.manualTimeModalBody}>
+              <View style={styles.manualTimeInputsRow}>
+                <View style={styles.manualTimeInputWrap}>
+                  <Text style={styles.manualTimeInputLabel}>
+                    {t("label.manualTimeEntryHours")}
+                  </Text>
+                  <TextInput
+                    style={[styles.input, styles.manualTimeInput]}
+                    ref={manualTimeHoursRef}
+                    value={manualTimeHours}
+                    onChangeText={setManualTimeHours}
+                    placeholder={t("label.manualTimeEntryHours")}
+                    placeholderTextColor="#7a7a7a"
+                    keyboardType="number-pad"
+                    maxLength={3}
+                  />
+                </View>
+                <View style={styles.manualTimeInputWrap}>
+                  <Text style={styles.manualTimeInputLabel}>
+                    {t("label.manualTimeEntryMinutes")}
+                  </Text>
+                  <TextInput
+                    style={[styles.input, styles.manualTimeInput]}
+                    ref={manualTimeMinutesRef}
+                    value={manualTimeMinutes}
+                    onChangeText={setManualTimeMinutes}
+                    placeholder={t("label.manualTimeEntryMinutes")}
+                    placeholderTextColor="#7a7a7a"
+                    keyboardType="number-pad"
+                    maxLength={3}
+                  />
+                </View>
+                <View style={styles.manualTimeInputWrap}>
+                  <Text style={styles.manualTimeInputLabel}>
+                    {t("label.manualTimeEntrySeconds")}
+                  </Text>
+                  <TextInput
+                    style={[styles.input, styles.manualTimeInput]}
+                    ref={manualTimeSecondsRef}
+                    value={manualTimeSeconds}
+                    onChangeText={setManualTimeSeconds}
+                    placeholder={t("label.manualTimeEntrySeconds")}
+                    placeholderTextColor="#7a7a7a"
+                    keyboardType="number-pad"
+                    maxLength={2}
+                  />
+                </View>
+              </View>
+              <View style={styles.manualTimeInputsRow}>
+                <View style={styles.manualTimeInputWrap}>
+                  <Text style={styles.manualTimeInputLabel}>
+                    {t("label.distanceKm")}
+                  </Text>
+                  <TextInput
+                    style={[styles.input, styles.manualTimeInput]}
+                    ref={manualTimeKmRef}
+                    value={manualTimeKm}
+                    onChangeText={setManualTimeKm}
+                    placeholder="5.0"
+                    placeholderTextColor="#7a7a7a"
+                    keyboardType="decimal-pad"
+                    maxLength={6}
+                  />
+                </View>
+              </View>
+              <Text style={styles.manualEntryHelper}>
+                {t("label.distanceKmHint")}
+              </Text>
+              {screenTimeFeaturesEnabled ? (
+                <Text style={styles.manualEntryPreview}>
+                  {t("label.manualTimeEntryPreview")}:{" "}
+                  {formatScreenTime(manualTimePreviewSeconds)}
+                </Text>
+              ) : null}
+            </View>
+            <View style={styles.modalActions}>
+              <Pressable
+                style={styles.secondaryButton}
+                onPress={() => setIsManualTimeModalOpen(false)}
+              >
+                <Text style={styles.secondaryButtonText}>{t("label.cancel")}</Text>
+              </Pressable>
+              <Pressable
+                style={styles.primaryButton}
+                onPress={handleManualTimeLog}
+              >
+                <Text style={styles.primaryButtonText}>
+                  {t("label.manualTimeEntryButton")}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+
   const handleStart = () => {
     resumeEntryRef.current = null;
     sessionStartRef.current = Date.now();
@@ -6826,6 +7113,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setManualTimeSeconds("");
     setManualTimeHours("");
     setManualTimeKm("");
+    setIsManualTimeModalOpen(false);
     maybeAdvanceTutorial("trackAction");
   };
 
@@ -7538,12 +7826,20 @@ const getSpeechLocale = () => {
     }
     return getRecentWeightEntriesForSport(logs, selectedSport.id);
   }, [logs, selectedSport?.id]);
+  const recentWeightEntryGroups = useMemo(
+    () => groupEntriesByDay(recentWeightEntries),
+    [recentWeightEntries]
+  );
   const recentTimeEntries = useMemo(() => {
     if (!selectedSport || selectedSport.type !== "time") {
       return [];
     }
     return getRecentTimeEntriesForSport(logs, selectedSport.id);
   }, [logs, selectedSport?.id, selectedSport?.type]);
+  const recentTimeEntryGroups = useMemo(
+    () => groupEntriesByDay(recentTimeEntries),
+    [recentTimeEntries]
+  );
   const statsSport = sports.find((sport) => sport.id === statsSportId);
   const rollingEarnedSeconds = useMemo(
     () => rollingScreenSecondsTotal(logs, sports),
@@ -7713,8 +8009,30 @@ const getSpeechLocale = () => {
     });
     return map;
   }, [logs]);
+  const rollingUsage24h = useMemo(
+    () =>
+      buildRollingUsageFromSnapshots(
+        normalizeUsageSnapshots([
+          ...usageSnapshots,
+          {
+            ts: Date.now(),
+            dayKey: usageState.day || todayKey(),
+            usedSeconds: usageState.usedSeconds || 0,
+            usedByApp: usageState.usedByApp || {},
+          },
+        ]),
+        Date.now()
+      ),
+    [
+      usageSnapshots,
+      usageState.day,
+      usageState.usedByApp,
+      usageState.usedSeconds,
+    ]
+  );
+  const rollingUsedSeconds24h = rollingUsage24h.usedSeconds || 0;
   const usageByAppList = useMemo(() => {
-    const usedByApp = usageState.usedByApp || {};
+    const usedByApp = rollingUsage24h.usedByApp || {};
     return (settings.controlledApps || [])
       .map((pkg) => {
         const app = installedApps.find((entry) => entry.packageName === pkg);
@@ -7726,7 +8044,7 @@ const getSpeechLocale = () => {
       })
       .filter((entry) => entry.seconds > 0 && entry.label)
       .sort((a, b) => b.seconds - a.seconds);
-  }, [installedApps, settings.controlledApps, usageState.usedByApp]);
+  }, [installedApps, rollingUsage24h.usedByApp, settings.controlledApps]);
   const screenTimeEntryRows = useMemo(() => {
     return (screenTimeEntries || [])
       .map((entry, index) => {
@@ -7768,7 +8086,7 @@ const getSpeechLocale = () => {
         const tsA = Number(a.createdAt || 0);
         const tsB = Number(b.createdAt || 0);
         if (tsA !== tsB) {
-          return tsA - tsB;
+          return tsB - tsA;
         }
         const keyA = a.key || "";
         const keyB = b.key || "";
@@ -7812,7 +8130,11 @@ const getSpeechLocale = () => {
             : item.remainingSeconds >= item.originalSeconds
             ? "full"
             : "partial";
-        return { ...item, status };
+        return {
+          ...item,
+          usedSeconds: Math.max(0, item.originalSeconds - item.remainingSeconds),
+          status,
+        };
       })
       .sort((a, b) => {
         const order =
@@ -10645,113 +10967,29 @@ const getSpeechLocale = () => {
                   >
                     {t("label.stop")}
                   </Text>
-                </Pressable>
+                    </Pressable>
                   )}
                 </View>
-                <View style={styles.manualEntryContainer}>
-                  <Text style={styles.manualEntryLabel}>
+                <Pressable
+                  style={[
+                    styles.secondaryButton,
+                    styles.detailSecondaryButton,
+                    styles.manualTimeOpenButton,
+                  ]}
+                  onPress={() => setIsManualTimeModalOpen(true)}
+                >
+                  <Text
+                    style={[
+                      styles.secondaryButtonText,
+                      styles.detailSecondaryButtonText,
+                    ]}
+                  >
                     {t("label.manualTimeEntryTitle")}
                   </Text>
-                <View style={styles.manualTimeInputsRow}>
-                  <View style={styles.manualTimeInputWrap}>
-                    <Text style={styles.manualTimeInputLabel}>
-                      {t("label.manualTimeEntryHours")}
-                    </Text>
-                    <TextInput
-                      style={[styles.input, styles.manualTimeInput]}
-                      ref={manualTimeHoursRef}
-                      value={manualTimeHours}
-                      onChangeText={setManualTimeHours}
-                      onFocus={() => scrollToInput(manualTimeHoursRef)}
-                      placeholder={t("label.manualTimeEntryHours")}
-                      placeholderTextColor="#7a7a7a"
-                      keyboardType="number-pad"
-                      maxLength={3}
-                    />
-                  </View>
-                  <View style={styles.manualTimeInputWrap}>
-                    <Text style={styles.manualTimeInputLabel}>
-                      {t("label.manualTimeEntryMinutes")}
-                    </Text>
-                    <TextInput
-                      style={[styles.input, styles.manualTimeInput]}
-                      ref={manualTimeMinutesRef}
-                      value={manualTimeMinutes}
-                      onChangeText={setManualTimeMinutes}
-                      onFocus={() => scrollToInput(manualTimeMinutesRef)}
-                      placeholder={t("label.manualTimeEntryMinutes")}
-                      placeholderTextColor="#7a7a7a"
-                      keyboardType="number-pad"
-                      maxLength={3}
-                    />
-                  </View>
-                  <View style={styles.manualTimeInputWrap}>
-                    <Text style={styles.manualTimeInputLabel}>
-                      {t("label.manualTimeEntrySeconds")}
-                    </Text>
-                    <TextInput
-                      style={[styles.input, styles.manualTimeInput]}
-                      ref={manualTimeSecondsRef}
-                      value={manualTimeSeconds}
-                      onChangeText={setManualTimeSeconds}
-                      onFocus={() => scrollToInput(manualTimeSecondsRef)}
-                      placeholder={t("label.manualTimeEntrySeconds")}
-                      placeholderTextColor="#7a7a7a"
-                      keyboardType="number-pad"
-                      maxLength={2}
-                    />
-                  </View>
-                </View>
-                <View style={styles.manualTimeInputsRow}>
-                  <View style={styles.manualTimeInputWrap}>
-                    <Text style={styles.manualTimeInputLabel}>
-                      {t("label.distanceKm")}
-                    </Text>
-                    <TextInput
-                      style={[styles.input, styles.manualTimeInput]}
-                      ref={manualTimeKmRef}
-                      value={manualTimeKm}
-                      onChangeText={setManualTimeKm}
-                      onFocus={() => scrollToInput(manualTimeKmRef)}
-                      placeholder="5.0"
-                      placeholderTextColor="#7a7a7a"
-                      keyboardType="decimal-pad"
-                      maxLength={6}
-                    />
-                  </View>
-                </View>
-              <Text style={styles.manualEntryHelper}>
-                {t("label.distanceKmHint")}
-              </Text>
-              {screenTimeFeaturesEnabled ? (
-                <Text style={styles.manualEntryPreview}>
-                  {t("label.manualTimeEntryPreview")}:{" "}
-                  {formatScreenTime(manualTimePreviewSeconds)}
-                </Text>
-              ) : null}
-              <Pressable
-                style={[
-                  styles.primaryButton,
-                  styles.detailPrimaryButton,
-                  styles.manualEntryButton,
-                ]}
-                onPress={handleManualTimeLog}
-              >
-                <Text
-                  style={[
-                    styles.primaryButtonText,
-                    styles.detailPrimaryButtonText,
-                  ]}
-                >
-                  {t("label.manualTimeEntryButton")}
-                </Text>
-              </Pressable>
-              <Text style={styles.manualEntryHelper}>
-                {t("label.manualTimeEntryHint")}
-              </Text>
-            </View>
+                </Pressable>
               </View>
             )}
+            {renderManualTimeModal()}
             {screenTimeFeaturesEnabled ? (
               <View style={styles.formulaBadgeWrap} pointerEvents="box-none">
                 <Pressable
@@ -10790,21 +11028,28 @@ const getSpeechLocale = () => {
             {isWeightMode && recentWeightEntries.length > 0 ? (
               <View style={styles.weightHistoryCard}>
                 <Text style={styles.sectionTitle}>{t("label.weightHistory")}</Text>
-                {recentWeightEntries.map((entry, index) => (
-                  <View
-                    key={entry.id || entry.ts}
-                    style={[
-                      styles.weightHistoryRow,
-                      index === recentWeightEntries.length - 1 &&
-                        styles.weightHistoryRowLast,
-                    ]}
-                  >
-                    <Text style={styles.weightHistoryTime}>
-                      {formatTime(entry.ts || Date.now())}
+                {recentWeightEntryGroups.map((group) => (
+                  <View key={group.dayKey} style={styles.weightHistoryDayGroup}>
+                    <Text style={styles.weightHistoryDateLabel}>
+                      {formatDateLabel(group.dayKey)}
                     </Text>
-                    <Text style={styles.weightHistorySet}>
-                      {formatWeightValue(entry.weight)} × {entry.reps}
-                    </Text>
+                    {group.entries.map((entry, index) => (
+                      <View
+                        key={entry.id || entry.ts}
+                        style={[
+                          styles.weightHistoryRow,
+                          index === group.entries.length - 1 &&
+                            styles.weightHistoryRowLast,
+                        ]}
+                      >
+                        <Text style={styles.weightHistoryTime}>
+                          {formatTime(entry.ts || Date.now())}
+                        </Text>
+                        <Text style={styles.weightHistorySet}>
+                          {formatWeightValue(entry.weight)} × {entry.reps}
+                        </Text>
+                      </View>
+                    ))}
                   </View>
                 ))}
               </View>
@@ -10812,22 +11057,31 @@ const getSpeechLocale = () => {
             {selectedSport.type === "time" && recentTimeEntries.length > 0 ? (
               <View style={styles.weightHistoryCard}>
                 <Text style={styles.sectionTitle}>{t("label.timeHistory")}</Text>
-                {recentTimeEntries.map((entry, index) => (
-                  <View
-                    key={entry.id || entry.ts}
-                    style={[
-                      styles.weightHistoryRow,
-                      index === recentTimeEntries.length - 1 &&
-                        styles.weightHistoryRowLast,
-                    ]}
-                  >
-                    <Text style={styles.weightHistoryTime}>
-                      {formatTime(entry.ts || Date.now())}
+                {recentTimeEntryGroups.map((group) => (
+                  <View key={group.dayKey} style={styles.weightHistoryDayGroup}>
+                    <Text style={styles.weightHistoryDateLabel}>
+                      {formatDateLabel(group.dayKey)}
                     </Text>
-                    <Text style={styles.weightHistorySet}>
-                      {formatSeconds(entry.seconds)}
-                      {entry.km > 0 ? ` · ${formatDistanceValue(entry.km)} ${t("label.distanceKm")}` : ""}
-                    </Text>
+                    {group.entries.map((entry, index) => (
+                      <View
+                        key={entry.id || entry.ts}
+                        style={[
+                          styles.weightHistoryRow,
+                          index === group.entries.length - 1 &&
+                            styles.weightHistoryRowLast,
+                        ]}
+                      >
+                        <Text style={styles.weightHistoryTime}>
+                          {formatTime(entry.ts || Date.now())}
+                        </Text>
+                        <Text style={styles.weightHistorySet}>
+                          {formatSeconds(entry.seconds)}
+                          {entry.km > 0
+                            ? ` · ${formatDistanceValue(entry.km)} ${t("label.distanceKm")}`
+                            : ""}
+                        </Text>
+                      </View>
+                    ))}
                   </View>
                 ))}
               </View>
@@ -10961,7 +11215,7 @@ const getSpeechLocale = () => {
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>{t("label.used")}</Text>
               <Text style={styles.detailValue}>
-                {formatScreenTime(usageState.usedSeconds || 0)}
+                {formatScreenTime(rollingUsedSeconds24h)}
               </Text>
             </View>
             <View style={styles.detailRow}>
@@ -11160,6 +11414,15 @@ const getSpeechLocale = () => {
                           {statusLabelMap[entry.status]}
                         </Text>
                       </View>
+                      {entry.status === "partial" ? (
+                        <Text style={styles.detailListMeta}>
+                          {t("label.screenTime")}:{" "}
+                          {formatScreenTime(entry.originalSeconds)} ·{" "}
+                          {t("label.used")}: {formatScreenTime(entry.usedSeconds)} ·{" "}
+                          {t("label.remaining")}:{" "}
+                          {formatScreenTime(entry.remainingSeconds)}
+                        </Text>
+                      ) : null}
                     </View>
                   </View>
                   <Text style={styles.detailListValue}>
@@ -11174,7 +11437,7 @@ const getSpeechLocale = () => {
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>{t("label.used")}</Text>
               <Text style={styles.detailValue}>
-                {formatScreenTime(usageState.usedSeconds || 0)}
+                {formatScreenTime(rollingUsedSeconds24h)}
               </Text>
             </View>
             {usageByAppList.length === 0 ? (
@@ -11739,7 +12002,7 @@ const getSpeechLocale = () => {
                   {Math.floor(remainingTodaySeconds / 60)} min
                 </Text>
                 <Text style={styles.cardMeta}>
-                  {t("label.used")}: {Math.floor(usageState.usedSeconds / 60)} min
+                  {t("label.used")}: {Math.floor(rollingUsedSeconds24h / 60)} min
                 </Text>
               </View>
             </>
@@ -13261,6 +13524,17 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     backgroundColor: COLORS.cardAlt,
   },
+  weightHistoryDayGroup: {
+    marginTop: 10,
+  },
+  weightHistoryDateLabel: {
+    color: COLORS.muted,
+    fontSize: 11,
+    fontWeight: "700",
+    marginBottom: 6,
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+  },
   weightHistoryRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -13375,6 +13649,11 @@ const styles = StyleSheet.create({
   manualEntryButton: {
     alignSelf: "stretch",
     marginTop: 6,
+  },
+  manualTimeOpenButton: {
+    marginTop: 18,
+    alignSelf: "stretch",
+    width: "100%",
   },
   manualEntryHelper: {
     marginTop: 6,
@@ -13760,6 +14039,13 @@ const styles = StyleSheet.create({
   colorPickerCard: {
     maxWidth: 480,
     width: "100%",
+  },
+  manualTimeModalCard: {
+    maxWidth: 520,
+    width: "100%",
+  },
+  manualTimeModalBody: {
+    marginTop: 4,
   },
   colorPickerGrid: {
     flexDirection: "row",
@@ -15132,6 +15418,12 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     fontSize: 12,
     fontWeight: "600",
+  },
+  detailListMeta: {
+    color: COLORS.muted,
+    fontSize: 10,
+    marginTop: 4,
+    lineHeight: 14,
   },
   detailListValue: {
     color: COLORS.muted,
