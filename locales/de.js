@@ -89,6 +89,7 @@
     "label.overallStatsHint":
       "EintrÃ¤ge bearbeiten geht nur in der jeweiligen Sportart Ã¼ber die Statistik.",
     "label.runningSession": "Laufende Session",
+    "label.lastRunningSession": "Letzte Running Session",
     "label.workoutTimer": "Workout-Timer",
     "label.startWorkout": "Workout starten",
     "label.startWorkoutFirst": "Starte bitte erst ein Workout",
@@ -206,6 +207,10 @@
     "label.repsShort": "Wdh.",
     "label.timeUnit": "Zeit",
     "label.weightExercise": "GewichtsÃ¼bung",
+    "label.incrementalTime": "Inkrementell",
+    "label.incrementalTimeFactor": "Inkrement-Faktor",
+    "label.incrementalTimeHint":
+      "1 = linear. Kleinere Werte bremsen nur laufende Sessions nach der ersten Minute leicht ab.",
     "label.difficultyLabel": "Screen Time Faktor (1-10)",
       "label.difficultyDescription":
         "Der Screen Time Faktor multipliziert Dauer, Wiederholungen oder Gewicht und legt fest, wie viel Screen Time jede Einheit bringt.",

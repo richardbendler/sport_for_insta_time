@@ -179,6 +179,11 @@ const DEFAULT_DIFFICULTY_INDEX = (() => {
 })();
 const DEFAULT_TIME_RATE = 0.5;
 const DEFAULT_REPS_RATE = 0.5;
+const INCREMENTAL_TIME_FACTOR_OPTIONS = Array.from(
+  { length: 11 },
+  (_, index) => Math.round((0.5 + index * 0.05) * 100) / 100
+);
+const DEFAULT_INCREMENTAL_TIME_FACTOR = 0.9;
 const SICK_MODE_SPORT_ID = "sick_mode";
 const SICK_MODE_SPORT_LABELS = {
   de: "Krankheitsmodus",
@@ -257,6 +262,12 @@ const STANDARD_SPORT_TRANSLATIONS = {
     en: "Push-Ups",
     es: "Flexiones",
     fr: "Pompes",
+  },
+  situps: {
+    de: "Situps",
+    en: "Situps",
+    es: "Abdominales",
+    fr: "Abdos",
   },
   pullups: {
     de: "Klimmzüge",
@@ -940,6 +951,22 @@ const RAW_STANDARD_SPORTS = [
     muscleGroups: ["Brust", "Schultern", "Trizeps", "Core"],
   },
   {
+    id: "situps",
+    labels: {
+      de: "Situps",
+      en: "Situps",
+      es: "Abdominales",
+      fr: "Abdos",
+    },
+    aliases: ["Sit-Ups", "Sit Ups", "Crunches", "Bauchpresse"],
+    icon: "??",
+    type: "reps",
+    defaultRateMinutes: 1,
+    difficultyLevel: 3,
+    category: "Eigengewicht",
+    muscleGroups: ["Core", "H?ftbeuger"],
+  },
+  {
     id: "pullups",
     labels: {
       de: "Klimmz?ge",
@@ -983,6 +1010,8 @@ const RAW_STANDARD_SPORTS = [
     icon: "??",
     type: "time",
     defaultRateMinutes: 1,
+    incrementalTimeEnabled: true,
+    incrementalTimeFactor: DEFAULT_INCREMENTAL_TIME_FACTOR,
     difficultyLevel: 3,
     category: "Eigengewicht",
     muscleGroups: ["Core", "R?ckenstrecker"],
@@ -2291,6 +2320,73 @@ const clampDifficultyIndex = (index) =>
 const clampDifficultyLevel = (value) =>
   USER_FACTOR_OPTIONS[getDifficultyOptionIndex(value)];
 
+const getIncrementalTimeFactorIndex = (value) => {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    return INCREMENTAL_TIME_FACTOR_OPTIONS.findIndex(
+      (option) => option === DEFAULT_INCREMENTAL_TIME_FACTOR
+    );
+  }
+  let closestIndex = 0;
+  let smallestDistance = Infinity;
+  INCREMENTAL_TIME_FACTOR_OPTIONS.forEach((option, index) => {
+    const distance = Math.abs(option - parsed);
+    if (distance < smallestDistance) {
+      smallestDistance = distance;
+      closestIndex = index;
+    }
+  });
+  return closestIndex;
+};
+
+const clampIncrementalTimeFactor = (value) =>
+  INCREMENTAL_TIME_FACTOR_OPTIONS[getIncrementalTimeFactorIndex(value)];
+
+const resolveStandardSportTemplate = (sport) => {
+  if (!sport) {
+    return null;
+  }
+  const standardSportId =
+    typeof sport.standardSportId === "string" && sport.standardSportId
+      ? sport.standardSportId
+      : typeof sport.id === "string" && STANDARD_SPORT_BY_ID.has(sport.id)
+      ? sport.id
+      : null;
+  return standardSportId ? STANDARD_SPORT_BY_ID.get(standardSportId) : null;
+};
+
+const isIncrementalTimeSport = (sport) =>
+  !!sport &&
+  sport.type === "time" &&
+  Boolean(
+    sport.incrementalTimeEnabled ??
+      resolveStandardSportTemplate(sport)?.incrementalTimeEnabled
+  );
+
+const incrementalTimeFactorForSport = (sport) =>
+  clampIncrementalTimeFactor(
+    sport?.incrementalTimeFactor ??
+      resolveStandardSportTemplate(sport)?.incrementalTimeFactor ??
+      DEFAULT_INCREMENTAL_TIME_FACTOR
+  );
+
+const effectiveSecondsForIncrementalTime = (seconds, factor) => {
+  const safeSeconds = parsePositiveNumber(seconds);
+  if (safeSeconds <= 0) {
+    return 0;
+  }
+  const baseWindowSeconds = 60;
+  if (safeSeconds <= baseWindowSeconds) {
+    return safeSeconds;
+  }
+  const extraSeconds = safeSeconds - baseWindowSeconds;
+  return (
+    baseWindowSeconds +
+    baseWindowSeconds *
+      (Math.pow(1 + extraSeconds / baseWindowSeconds, factor) - 1)
+  );
+};
+
 const difficultyLevelForSport = (sport) => {
   if (!sport) {
     return DEFAULT_DIFFICULTY;
@@ -2379,7 +2475,7 @@ const screenSecondsForStats = (sport, dayStats) => {
   return Math.max(0, Math.round(applyCreditPenaltyMultiplier(value)));
 };
 
-const screenSecondsForEntry = (sport, entry) => {
+const screenSecondsForEntry = (sport, entry, options = {}) => {
   if (!sport || !entry) {
     return 0;
   }
@@ -2396,7 +2492,21 @@ const screenSecondsForEntry = (sport, entry) => {
     return Math.max(0, Math.round(applyCreditPenaltyMultiplier(value)));
   }
   const seconds = parsePositiveNumber(entry.seconds);
-  const value = seconds * ADMIN_FACTOR_TIME * userFactor;
+  const useIncrementalTime =
+    options.useIncrementalTime === true ||
+    Boolean(entry.incrementalTimeEnabled);
+  const effectiveSeconds =
+    useIncrementalTime && sport.type === "time"
+      ? effectiveSecondsForIncrementalTime(
+          seconds,
+          clampIncrementalTimeFactor(
+            options.incrementalTimeFactor ??
+              entry.incrementalTimeFactor ??
+              incrementalTimeFactorForSport(sport)
+          )
+        )
+      : seconds;
+  const value = effectiveSeconds * ADMIN_FACTOR_TIME * userFactor;
   return Math.max(0, Math.round(applyCreditPenaltyMultiplier(value)));
 };
 
@@ -2617,6 +2727,7 @@ const normalizeIcon = (value) => {
 
 const defaultIconForSport = (sport) => {
   if (sport.id === "pushups") return "💪";
+  if (sport.id === "situps") return "🧘";
   if (sport.id === "pullups") return "🏋️";
   if (sport.id === "pushups_alt") return "🧘";
   if (sport.id === "jogging") return "🏃";
@@ -2632,6 +2743,9 @@ const defaultScreenSecondsPerUnit = (sport) => {
   }
   if (sport.id === "pushups") {
     return DEFAULT_REPS_RATE * 1.2;
+  }
+  if (sport.id === "situps") {
+    return DEFAULT_REPS_RATE * 0.85;
   }
   if (sport.id === "pullups") {
     return DEFAULT_REPS_RATE * 1.4;
@@ -2652,6 +2766,7 @@ const normalizeSports = (sportList) => {
   let changed = false;
   const normalized = sportList.map((sport) => {
     const presetKey = PRESET_KEYS[sport.id];
+    const standardTemplate = resolveStandardSportTemplate(sport);
     let name = sport.name;
     if (sport.id === "pushups_alt" && sport.name === "Pushups") {
       name = "Situps";
@@ -2659,6 +2774,22 @@ const normalizeSports = (sportList) => {
     }
     const difficultyLevel = difficultyLevelForSport(sport);
     const category = deriveSportCategory(sport);
+    const incrementalTimeEnabled =
+      sport.type === "time"
+        ? Boolean(
+            sport.incrementalTimeEnabled ??
+              standardTemplate?.incrementalTimeEnabled ??
+              false
+          )
+        : false;
+    const incrementalTimeFactor =
+      sport.type === "time"
+        ? clampIncrementalTimeFactor(
+            sport.incrementalTimeFactor ??
+              standardTemplate?.incrementalTimeFactor ??
+              DEFAULT_INCREMENTAL_TIME_FACTOR
+          )
+        : DEFAULT_INCREMENTAL_TIME_FACTOR;
     const next = {
       ...sport,
       name,
@@ -2668,6 +2799,8 @@ const normalizeSports = (sportList) => {
       screenSecondsPerUnit:
         sport.screenSecondsPerUnit ?? defaultScreenSecondsPerUnit(sport),
       difficultyLevel,
+      incrementalTimeEnabled,
+      incrementalTimeFactor,
       category,
       nonDeletable: sport.nonDeletable ?? false,
     };
@@ -2675,7 +2808,9 @@ const normalizeSports = (sportList) => {
       !sport.icon ||
       sport.screenSecondsPerUnit == null ||
       presetKey ||
-      !Number.isFinite(Number(sport.difficultyLevel))
+      !Number.isFinite(Number(sport.difficultyLevel)) ||
+      sport.incrementalTimeEnabled !== incrementalTimeEnabled ||
+      Number(sport.incrementalTimeFactor) !== incrementalTimeFactor
     ) {
       changed = true;
     }
@@ -2820,6 +2955,11 @@ function AppContent() {
   const [newIcon, setNewIcon] = useState("");
   const [newRateMinutes, setNewRateMinutes] = useState("1");
   const [newWeightExercise, setNewWeightExercise] = useState(false);
+  const [newIncrementalTimeEnabled, setNewIncrementalTimeEnabled] =
+    useState(false);
+  const [newIncrementalTimeFactor, setNewIncrementalTimeFactor] = useState(
+    DEFAULT_INCREMENTAL_TIME_FACTOR
+  );
   const [newDifficultyLevel, setNewDifficultyLevel] = useState(
     DEFAULT_DIFFICULTY
   );
@@ -2844,6 +2984,19 @@ function AppContent() {
       const currentIndex = getDifficultyOptionIndex(current);
       const nextIndex = clampDifficultyIndex(currentIndex + delta);
       return USER_FACTOR_OPTIONS[nextIndex];
+    });
+  }, []);
+  const adjustIncrementalTimeFactor = useCallback((delta) => {
+    setNewIncrementalTimeFactor((current) => {
+      const currentIndex = getIncrementalTimeFactorIndex(current);
+      const nextIndex = Math.max(
+        0,
+        Math.min(
+          INCREMENTAL_TIME_FACTOR_OPTIONS.length - 1,
+          currentIndex + delta
+        )
+      );
+      return INCREMENTAL_TIME_FACTOR_OPTIONS[nextIndex];
     });
   }, []);
   const handleDifficultyButtonPress = useCallback(
@@ -2897,6 +3050,14 @@ function AppContent() {
     (newDifficultyIndex /
       Math.max(1, USER_FACTOR_OPTIONS.length - 1)) *
     100;
+  const newIncrementalTimeFactorIndex = getIncrementalTimeFactorIndex(
+    newIncrementalTimeFactor
+  );
+  const canDecreaseIncrementalTimeFactor =
+    newIncrementalTimeFactorIndex > 0;
+  const canIncreaseIncrementalTimeFactor =
+    newIncrementalTimeFactorIndex <
+    INCREMENTAL_TIME_FACTOR_OPTIONS.length - 1;
   const canDecreaseDifficulty =
     !editingSportId ||
     !difficultyLockActive ||
@@ -3319,6 +3480,8 @@ function AppContent() {
     );
     setNewIcon(entry.icon || DEFAULT_ICON);
     setNewWeightExercise(!!entry.weightExercise);
+    setNewIncrementalTimeEnabled(isIncrementalTimeSport(entry));
+    setNewIncrementalTimeFactor(incrementalTimeFactorForSport(entry));
     setNewDifficultyLevel(
       clampDifficultyLevel(entry.difficultyLevel ?? DEFAULT_DIFFICULTY)
     );
@@ -3333,6 +3496,8 @@ function AppContent() {
     setShowIconInput(false);
     setNewName(trimmedSportSearch);
     setCustomSuggestionUsed(true);
+    setNewIncrementalTimeEnabled(false);
+    setNewIncrementalTimeFactor(DEFAULT_INCREMENTAL_TIME_FACTOR);
     setNewDifficultyLevel(DEFAULT_DIFFICULTY);
   };
 
@@ -4104,6 +4269,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     if (!sport) {
       return;
     }
+    const incrementalTimeEnabled =
+      sport.type === "time" && Boolean(entry.incrementalTimeEnabled);
     const nextEntry = {
       id: entry.id || generateLogId(),
       ts: entry.ts || Date.now(),
@@ -4111,6 +4278,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       seconds: entry.seconds || 0,
       km: sport.type === "time" ? parsePositiveNumber(entry.km) : 0,
       weight: entry.weight || 0,
+      incrementalTimeEnabled,
+      incrementalTimeFactor: incrementalTimeEnabled
+        ? clampIncrementalTimeFactor(
+            entry.incrementalTimeFactor ?? incrementalTimeFactorForSport(sport)
+          )
+        : undefined,
     };
     nextEntry.screenSeconds =
       Number.isFinite(entry.screenSeconds) && entry.screenSeconds >= 0
@@ -4523,6 +4696,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       setNewIcon(sport.icon || "");
       setNewRateMinutes(String(rateMinutes || getDefaultRateMinutes(sport.type)));
       setNewWeightExercise(!!sport.weightExercise);
+      setNewIncrementalTimeEnabled(isIncrementalTimeSport(sport));
+      setNewIncrementalTimeFactor(incrementalTimeFactorForSport(sport));
       setNewDifficultyLevel(difficultyLevelForSport(sport));
       setSelectedStandardSportId(sport.standardSportId ?? null);
       setIsCustomSportMode(!sport.standardSportId);
@@ -4533,6 +4708,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       setNewIcon("");
       setNewRateMinutes(String(getDefaultRateMinutes("reps")));
       setNewWeightExercise(false);
+      setNewIncrementalTimeEnabled(false);
+      setNewIncrementalTimeFactor(DEFAULT_INCREMENTAL_TIME_FACTOR);
       setNewDifficultyLevel(DEFAULT_DIFFICULTY);
       setSelectedStandardSportId(null);
       setIsCustomSportMode(true);
@@ -4570,6 +4747,12 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     const screenSecondsPerUnit =
       newType === "reps" ? rateMinutes * 60 : rateMinutes;
     const weightMode = newType === "reps" && newWeightExercise;
+    const incrementalTimeEnabled =
+      newType === "time" ? newIncrementalTimeEnabled : false;
+    const incrementalTimeFactor =
+      newType === "time"
+        ? clampIncrementalTimeFactor(newIncrementalTimeFactor)
+        : DEFAULT_INCREMENTAL_TIME_FACTOR;
     const parsedDifficulty = clampDifficultyLevel(newDifficultyLevel);
     const minimumDifficulty =
       editingSportId && difficultyLockActive && Number.isFinite(editingDifficultyMinimum)
@@ -4596,6 +4779,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           screenSecondsPerUnit,
           presetKey: keepPresetKey,
           weightExercise: weightMode,
+          incrementalTimeEnabled,
+          incrementalTimeFactor,
           difficultyLevel: safeDifficulty,
           standardSportId: selectedStandardSportId ?? sport.standardSportId,
         };
@@ -4612,6 +4797,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         screenSecondsPerUnit,
         createdAt: Date.now(),
         weightExercise: weightMode,
+        incrementalTimeEnabled,
+        incrementalTimeFactor,
         difficultyLevel: safeDifficulty,
         standardSportId: selectedStandardSportId ?? undefined,
       };
@@ -6038,6 +6225,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                   onPress={() => {
                     setNewType("reps");
                     setNewRateMinutes(String(getDefaultRateMinutes("reps")));
+                    setNewIncrementalTimeEnabled(false);
                   }}
                 >
                   <Text
@@ -6058,6 +6246,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                     setNewType("time");
                     setNewRateMinutes(String(getDefaultRateMinutes("time")));
                     setNewWeightExercise(false);
+                    setNewIncrementalTimeFactor(DEFAULT_INCREMENTAL_TIME_FACTOR);
                   }}
                 >
                   <Text
@@ -6184,6 +6373,89 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 >
                   <Text style={styles.infoButtonText}>?</Text>
                 </Pressable>
+              </View>
+            ) : null}
+            {newType === "time" ? (
+              <View style={styles.weightToggleRow}>
+                <Pressable
+                  style={[
+                    styles.weightToggleButton,
+                    newIncrementalTimeEnabled && styles.weightToggleButtonActive,
+                  ]}
+                  onPress={() =>
+                    setNewIncrementalTimeEnabled((prev) => !prev)
+                  }
+                >
+                  <View
+                    style={[
+                      styles.weightToggleIcon,
+                      newIncrementalTimeEnabled &&
+                        styles.weightToggleIconActive,
+                    ]}
+                  >
+                    {newIncrementalTimeEnabled ? (
+                      <Text style={styles.weightToggleIconText}>✓</Text>
+                    ) : null}
+                  </View>
+                  <Text style={styles.weightToggleLabel}>
+                    {t("label.incrementalTime")}
+                  </Text>
+                </Pressable>
+              </View>
+            ) : null}
+            {newType === "time" && newIncrementalTimeEnabled ? (
+              <View style={[styles.sliderSection, styles.createSportField]}>
+                <View style={styles.difficultyHeaderRow}>
+                  <Text style={styles.rateLabel}>
+                    {t("label.incrementalTimeFactor")}
+                  </Text>
+                  <Text style={styles.difficultyHeaderValue}>
+                    {formatFactorValue(newIncrementalTimeFactor)}
+                  </Text>
+                </View>
+                <View style={styles.difficultyButtonsRow}>
+                  <Pressable
+                    style={[
+                      styles.difficultyButton,
+                      !canDecreaseIncrementalTimeFactor &&
+                        styles.difficultyButtonDisabled,
+                    ]}
+                    disabled={!canDecreaseIncrementalTimeFactor}
+                    onPress={() => adjustIncrementalTimeFactor(-1)}
+                  >
+                    <Text
+                      style={[
+                        styles.difficultyButtonText,
+                        !canDecreaseIncrementalTimeFactor &&
+                          styles.difficultyButtonTextDisabled,
+                      ]}
+                    >
+                      -
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    style={[
+                      styles.difficultyButton,
+                      !canIncreaseIncrementalTimeFactor &&
+                        styles.difficultyButtonDisabled,
+                    ]}
+                    disabled={!canIncreaseIncrementalTimeFactor}
+                    onPress={() => adjustIncrementalTimeFactor(1)}
+                  >
+                    <Text
+                      style={[
+                        styles.difficultyButtonText,
+                        !canIncreaseIncrementalTimeFactor &&
+                          styles.difficultyButtonTextDisabled,
+                      ]}
+                    >
+                      +
+                    </Text>
+                  </Pressable>
+                </View>
+                <Text style={styles.helperText}>
+                  {t("label.incrementalTimeHint")}
+                </Text>
               </View>
             ) : null}
             <View style={styles.modalActions}>
@@ -6418,7 +6690,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   };
 
   const handleResumeStart = (entry) => {
-    if (!selectedSport || !entry) {
+    if (!selectedSport || !entry || isIncrementalTimeSport(selectedSport)) {
       return;
     }
     const priorSeconds = Number(entry.seconds || 0);
@@ -6505,6 +6777,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         ts: Date.now(),
         seconds: elapsed,
         km,
+        incrementalTimeEnabled: isIncrementalTimeSport(selectedSport),
+        incrementalTimeFactor: incrementalTimeFactorForSport(selectedSport),
       });
       const addedSeconds =
         entry?.screenSeconds ??
@@ -7137,7 +7411,8 @@ const getSpeechLocale = () => {
   const normalizedSportSearchTerm = normalizeTextForSearch(sportSearch);
   const sportLastUsageMap = useMemo(() => {
     const map = new Map();
-    Object.entries(logs || {}).forEach(([sportId, sportLogs]) => {
+    sports.forEach((sport) => {
+      const sportLogs = logs?.[sport.id];
       let latest = 0;
       Object.values(sportLogs || {}).forEach((dayLogs) => {
         (dayLogs || []).forEach((entry) => {
@@ -7147,10 +7422,10 @@ const getSpeechLocale = () => {
           }
         });
       });
-      map.set(sportId, latest);
+      map.set(sport.id, latest || Number(sport.createdAt || 0));
     });
     return map;
-  }, [logs]);
+  }, [logs, sports]);
 
   const filteredActiveSports = useMemo(() => {
     const base = scoreAndSortSportsBySearch(
@@ -9908,6 +10183,7 @@ const getSpeechLocale = () => {
     const isReps = selectedSport.type === "reps";
     const isWeightMode = isReps && selectedSport.weightExercise;
     const isSimpleReps = isReps && !selectedSport.weightExercise;
+    const isIncrementalTimeMode = isIncrementalTimeSport(selectedSport);
     const resumeLabelRaw = t("label.resume");
     const startNewLabelRaw = t("label.startNew");
     const resumeLabel =
@@ -9918,6 +10194,15 @@ const getSpeechLocale = () => {
       startNewLabelRaw && startNewLabelRaw.trim()
         ? startNewLabelRaw
         : t("label.start");
+    const latestTimeEntry = recentTimeEntries[0] || null;
+    const hasLastTimeEntry = !!latestTimeEntry?.ts;
+    const canResumeLatestTimeEntry =
+      hasLastTimeEntry &&
+      Date.now() - latestTimeEntry.ts <= RESUME_WINDOW_MS &&
+      !isIncrementalTimeMode;
+    const timePrimaryActionLabel = hasLastTimeEntry
+      ? startNewLabel
+      : t("label.start");
     const userFactor = difficultyLevelForSport(selectedSport); // Screen Time Faktor (userFactor)
     // Admin factor is displayed as "Fix Factor" in the UI.
     const adminFactor = isWeightMode
@@ -10267,59 +10552,71 @@ const getSpeechLocale = () => {
               </View>
             ) : (
               <View style={styles.trackingArea} ref={tutorialTrackingAreaRef}>
-          <Text style={styles.counterValue}>
-              {formatSeconds(
-                todayStats.seconds +
-                  sessionSeconds -
-                  (resumeEntryRef.current?.seconds || 0)
-              )}
-            </Text>
-            <Text style={[styles.helperText, styles.trackingHelperText]}>
-              {t("label.today")}
-            </Text>
-            <View style={styles.timerRow}>
-              {!running ? (
-                (() => {
-                  const recentEntry = recentTimeEntries[0];
-                  const canResume =
-                    recentEntry &&
-                    recentEntry.ts &&
-                    Date.now() - recentEntry.ts <= RESUME_WINDOW_MS;
-                  if (canResume) {
-                    return (
-                      <View style={styles.resumeActionRow}>
-                        <Pressable
-                          style={[styles.detailAccentButton, styles.detailPrimaryButton, styles.resumeButton]}
-                          onPress={() => handleResumeStart(recentEntry)}
+                {running || hasLastTimeEntry ? (
+                  <View
+                    style={[
+                      styles.timeSessionHighlight,
+                      running
+                        ? styles.timeSessionHighlightActive
+                        : styles.timeSessionHighlightRecent,
+                    ]}
+                  >
+                    <Text style={styles.timeSessionHighlightLabel}>
+                      {running
+                        ? t("label.runningSession")
+                        : t("label.lastRunningSession")}
+                    </Text>
+                    <Text style={styles.timeSessionHighlightValue}>
+                      {formatSeconds(
+                        running
+                          ? sessionSeconds
+                          : Number(latestTimeEntry?.seconds || 0)
+                      )}
+                    </Text>
+                    {!running && latestTimeEntry?.ts ? (
+                      <Text style={styles.timeSessionHighlightMeta}>
+                        {formatTime(latestTimeEntry.ts)}
+                      </Text>
+                    ) : null}
+                    {canResumeLatestTimeEntry ? (
+                      <Pressable
+                        style={[
+                          styles.secondaryButton,
+                          styles.detailSecondaryButton,
+                          styles.timeSessionResumeButton,
+                        ]}
+                        onPress={() => handleResumeStart(latestTimeEntry)}
+                      >
+                        <Text
+                          style={[
+                            styles.secondaryButtonText,
+                            styles.detailSecondaryButtonText,
+                          ]}
                         >
-                          <Text
-                            style={[
-                              styles.detailAccentButtonText,
-                              styles.detailPrimaryButtonText,
-                            ]}
-                          >
-                            {resumeLabel}
-                          </Text>
-                        </Pressable>
-                        <Pressable
-                          style={[styles.secondaryButton, styles.detailSecondaryButton, styles.resumeButton]}
-                          onPress={handleStart}
-                        >
-                          <Text
-                            style={[
-                              styles.secondaryButtonText,
-                              styles.detailSecondaryButtonText,
-                            ]}
-                          >
-                            {startNewLabel}
-                          </Text>
-                        </Pressable>
-                      </View>
-                    );
-                  }
-                  return (
+                          {resumeLabel}
+                        </Text>
+                      </Pressable>
+                    ) : null}
+                  </View>
+                ) : null}
+                <Text style={styles.counterValue}>
+                  {formatSeconds(
+                    todayStats.seconds +
+                      sessionSeconds -
+                      (resumeEntryRef.current?.seconds || 0)
+                  )}
+                </Text>
+                <Text style={[styles.helperText, styles.trackingHelperText]}>
+                  {t("label.today")}
+                </Text>
+                <View style={styles.timerRow}>
+                  {!running ? (
                     <Pressable
-                      style={[styles.detailAccentButton, styles.detailPrimaryButton]}
+                      style={[
+                        styles.detailAccentButton,
+                        styles.detailPrimaryButton,
+                        styles.timePrimaryActionButton,
+                      ]}
                       onPress={handleStart}
                     >
                       <Text
@@ -10328,14 +10625,16 @@ const getSpeechLocale = () => {
                           styles.detailPrimaryButtonText,
                         ]}
                       >
-                        {t("label.start")}
+                        {timePrimaryActionLabel}
                       </Text>
                     </Pressable>
-                  );
-                })()
-              ) : (
+                  ) : (
                 <Pressable
-                  style={[styles.detailDangerAccentButton, styles.detailDangerButton]}
+                  style={[
+                    styles.detailDangerAccentButton,
+                    styles.detailDangerButton,
+                    styles.timePrimaryActionButton,
+                  ]}
                   onPress={handleStop}
                 >
                   <Text
@@ -10347,19 +10646,12 @@ const getSpeechLocale = () => {
                     {t("label.stop")}
                   </Text>
                 </Pressable>
-              )}
-            </View>
-            {running ? (
-              <View style={styles.runningSessionBadge}>
-                <Text style={[styles.helperText, styles.trackingHelperText]}>
-                  {t("label.runningSession")}: {formatSeconds(sessionSeconds)}
-                </Text>
-              </View>
-            ) : null}
-            <View style={styles.manualEntryContainer}>
-              <Text style={styles.manualEntryLabel}>
-                {t("label.manualTimeEntryTitle")}
-              </Text>
+                  )}
+                </View>
+                <View style={styles.manualEntryContainer}>
+                  <Text style={styles.manualEntryLabel}>
+                    {t("label.manualTimeEntryTitle")}
+                  </Text>
                 <View style={styles.manualTimeInputsRow}>
                   <View style={styles.manualTimeInputWrap}>
                     <Text style={styles.manualTimeInputLabel}>
@@ -12861,6 +13153,52 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 24,
   },
+  timeSessionHighlight: {
+    width: "100%",
+    marginBottom: 18,
+    borderRadius: 18,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    alignItems: "center",
+    borderWidth: 1,
+  },
+  timeSessionHighlightActive: {
+    backgroundColor: "rgba(20, 184, 166, 0.16)",
+    borderColor: "rgba(45, 212, 191, 0.45)",
+    shadowColor: "rgba(45, 212, 191, 0.3)",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 18,
+    elevation: 5,
+  },
+  timeSessionHighlightRecent: {
+    backgroundColor: "rgba(245, 158, 11, 0.12)",
+    borderColor: "rgba(245, 158, 11, 0.32)",
+  },
+  timeSessionHighlightLabel: {
+    color: COLORS.muted,
+    fontSize: 11,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+  },
+  timeSessionHighlightValue: {
+    marginTop: 6,
+    color: COLORS.text,
+    fontSize: 34,
+    fontWeight: "800",
+    letterSpacing: 0.3,
+  },
+  timeSessionHighlightMeta: {
+    marginTop: 4,
+    color: COLORS.muted,
+    fontSize: 12,
+  },
+  timeSessionResumeButton: {
+    marginTop: 12,
+    alignSelf: "stretch",
+    width: "100%",
+  },
   weightEntryArea: {
     marginTop: 12,
     marginBottom: 16,
@@ -13052,16 +13390,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "600",
   },
-  runningSessionBadge: {
-    marginTop: 8,
-    alignSelf: "center",
-    backgroundColor: "rgba(245, 158, 11, 0.12)",
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderWidth: 1,
-    borderColor: "rgba(245, 158, 11, 0.35)",
-  },
   manualRepsInput: {
     textAlign: "center",
   },
@@ -13089,6 +13417,11 @@ const styles = StyleSheet.create({
     marginTop: 24,
     width: "100%",
     justifyContent: "center",
+    alignItems: "center",
+  },
+  timePrimaryActionButton: {
+    alignSelf: "center",
+    minWidth: 180,
   },
   sportCard: {
     backgroundColor: "rgba(30, 41, 59, 0.9)",
