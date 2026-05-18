@@ -89,6 +89,7 @@ const es = {
     "label.overallStatsHint":
       "Para editar entradas, abre un deporte y luego su estadística.",
     "label.runningSession": "Sesión activa",
+    "label.lastRunningSession": "Ultima sesiÃ³n",
     "label.workoutTimer": "Temporizador de entrenamiento",
     "label.startWorkout": "Iniciar entrenamiento",
     "label.startWorkoutFirst": "Por favor inicia primero un entrenamiento.",
@@ -203,6 +204,10 @@ const es = {
     "label.repsShort": "rep.",
     "label.timeUnit": "Tiempo",
     "label.weightExercise": "Ejercicio con peso",
+    "label.incrementalTime": "Incremental",
+    "label.incrementalTimeFactor": "Factor incremental",
+    "label.incrementalTimeHint":
+      "1 = lineal. Los valores menores reducen ligeramente solo las sesiones en curso despues del primer minuto.",
     "label.difficultyLabel": "Factor de tiempo de pantalla (1-10)",
       "label.difficultyDescription":
         "El factor de tiempo de pantalla multiplica duraci?n, repeticiones o peso y define cu?nta pantalla aporta cada unidad.",

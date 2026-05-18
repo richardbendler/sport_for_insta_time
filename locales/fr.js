@@ -89,6 +89,7 @@
     "label.overallStatsHint":
       "Pour modifier des entrÃ©es, ouvrez un sport puis sa statistique.",
     "label.runningSession": "Session en cours",
+    "label.lastRunningSession": "Derniere session",
     "label.workoutTimer": "Minuteur d'entraÃ®nement",
     "label.startWorkout": "DÃ©marrer l'entraÃ®nement",
     "label.startWorkoutFirst": "Commence d'abord un entraÃ®nement.",
@@ -198,6 +199,10 @@
     "label.repsShort": "rÃ©p.",
     "label.timeUnit": "Temps",
     "label.weightExercise": "Exercice de force",
+    "label.incrementalTime": "IncrÃ©mental",
+    "label.incrementalTimeFactor": "Facteur incremental",
+    "label.incrementalTimeHint":
+      "1 = lineaire. Les valeurs plus basses reduisent legerement seulement les sessions en cours apres la premiere minute.",
     "label.difficultyLabel": "Facteur de temps d??cran (1-10)",
       "label.difficultyDescription":
         "Le facteur de temps d??cran multiplie la dur?e, les r?p?titions ou le poids et d?termine le temps d??cran gagn? par unit?.",

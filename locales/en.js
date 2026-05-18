@@ -89,6 +89,7 @@ const en = {
     "label.overallStatsHint":
       "To edit entries, open a sport from the main menu and then its stats.",
     "label.runningSession": "Running session",
+    "label.lastRunningSession": "Last running session",
     "label.workoutTimer": "Workout timer",
     "label.startWorkout": "Start workout",
     "label.startWorkoutFirst": "Please start a workout first.",
@@ -203,6 +204,10 @@ const en = {
     "label.repsShort": "reps",
     "label.timeUnit": "Time",
     "label.weightExercise": "Weight exercise",
+    "label.incrementalTime": "Incremental",
+    "label.incrementalTimeFactor": "Increment factor",
+    "label.incrementalTimeHint":
+      "1 = linear. Lower values slightly taper only running sessions after the first minute.",
     "label.difficultyLabel": "Screen Time Factor (1-10)",
       "label.difficultyDescription":
         "The screen time factor multiplies time, reps, or weight and sets how much screen time each unit grants.",
