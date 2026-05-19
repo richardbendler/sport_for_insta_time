@@ -204,10 +204,10 @@ const en = {
     "label.repsShort": "reps",
     "label.timeUnit": "Time",
     "label.weightExercise": "Weight exercise",
-    "label.incrementalTime": "Incremental",
-    "label.incrementalTimeFactor": "Increment factor",
+    "label.incrementalTime": "Incremental Screen Time",
+    "label.incrementalTimeFactor": "User Factor",
     "label.incrementalTimeHint":
-      "1 = linear. For incremental time, seconds above 60 are weighted more. Example: 90s with factor 1.5 ≈ 110 effective seconds; 120s with factor 2.0 ≈ 240 effective seconds.",
+      "Incremental Screen Time rewards longer uninterrupted workout sessions with bonus screen time. The longer you keep going in one session, the more valuable each extra second becomes.\n\nThe User Factor controls how strong this bonus effect is:\n- Lower values feel more balanced and predictable\n- Higher values give stronger rewards for long continuous sessions",
     "label.difficultyLabel": "Screen Time Factor (1-10)",
       "label.difficultyDescription":
         "The screen time factor multiplies time, reps, or weight and sets how much screen time each unit grants.",

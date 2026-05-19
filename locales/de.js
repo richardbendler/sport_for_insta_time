@@ -207,10 +207,10 @@
     "label.repsShort": "Wdh.",
     "label.timeUnit": "Zeit",
     "label.weightExercise": "GewichtsÃ¼bung",
-    "label.incrementalTime": "Inkrementell",
-    "label.incrementalTimeFactor": "Inkrement-Faktor",
+    "label.incrementalTime": "Inkrementelle Bildschirmzeit",
+    "label.incrementalTimeFactor": "Benutzerfaktor",
     "label.incrementalTimeHint":
-      "1 = linear. Bei inkrementell werden Zeiten über 60 s stärker gewichtet. Beispiel: 90 s mit Faktor 1,5 ≈ 110 effektive Sekunden; 120 s mit Faktor 2,0 ≈ 240 effektive Sekunden.",
+      "Inkrementelle Bildschirmzeit belohnt längere, ununterbrochene Trainingseinheiten mit zusätzlicher Bildschirmzeit. Je länger du in einer Sitzung durchhältst, desto wertvoller wird jede zusätzliche Sekunde.\n\nDer Benutzerfaktor steuert, wie stark dieser Bonus wirkt:\n- Niedrigere Werte fühlen sich ausgewogen und vorhersehbar an\n- Höhere Werte belohnen lange, durchgehende Einheiten stärker",
     "label.difficultyLabel": "Screen Time Faktor (1-10)",
       "label.difficultyDescription":
         "Der Screen Time Faktor multipliziert Dauer, Wiederholungen oder Gewicht und legt fest, wie viel Screen Time jede Einheit bringt.",

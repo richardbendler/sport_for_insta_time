@@ -204,10 +204,10 @@ const es = {
     "label.repsShort": "rep.",
     "label.timeUnit": "Tiempo",
     "label.weightExercise": "Ejercicio con peso",
-    "label.incrementalTime": "Incremental",
-    "label.incrementalTimeFactor": "Factor incremental",
+    "label.incrementalTime": "Tiempo de pantalla incremental",
+    "label.incrementalTimeFactor": "Factor de usuario",
     "label.incrementalTimeHint":
-      "1 = lineal. Con incremental, los segundos por encima de 60 se ponderan más. Ejemplo: 90 s con factor 1,5 ≈ 110 segundos efectivos; 120 s con factor 2,0 ≈ 240 segundos efectivos.",
+      "El tiempo de pantalla incremental recompensa las sesiones de ejercicio más largas e ininterrumpidas con tiempo de pantalla extra. Cuanto más tiempo sigas en una sola sesión, más valiosa es cada segundo adicional.\n\nEl Factor de Usuario controla qué tan fuerte es este efecto de bonus:\n- Valores más bajos se sienten equilibrados y predecibles\n- Valores más altos recompensan más las sesiones largas y continuas",
     "label.difficultyLabel": "Factor de tiempo de pantalla (1-10)",
       "label.difficultyDescription":
         "El factor de tiempo de pantalla multiplica duraci?n, repeticiones o peso y define cu?nta pantalla aporta cada unidad.",
