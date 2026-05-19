@@ -199,11 +199,11 @@
     "label.repsShort": "rÃ©p.",
     "label.timeUnit": "Temps",
     "label.weightExercise": "Exercice de force",
-    "label.incrementalTime": "IncrÃ©mental",
-    "label.incrementalTimeFactor": "Facteur incremental",
+    "label.incrementalTime": "Temps d'écran incrémental",
+    "label.incrementalTimeFactor": "Facteur utilisateur",
     "label.incrementalTimeHint":
-      "1 = linÃ©aire. Avec incrÃ©mental, les secondes au-dessus de 60 sont pondÃ©rÃ©es davantage. Exemple : 90 s avec facteur 1,5 ≈ 110 s effectives ; 120 s avec facteur 2,0 ≈ 240 s effectives.",
-    "label.difficultyLabel": "Facteur de temps d??cran (1-10)",
+      "Le temps d'écran incrémental récompense les séances d'entraînement longues et ininterrompues par du temps d'écran bonus. Plus tu tiens longtemps dans une séance, plus chaque seconde supplémentaire devient précieuse.\n\nLe facteur utilisateur contrôle l'intensité de ce bonus :\n- Les valeurs basses sont plus équilibrées et prévisibles\n- Les valeurs hautes renforcent les récompenses pour les séances longues et continues",
+    "label.difficultyLabel": "Facteur de temps d'écran (1-10)",
       "label.difficultyDescription":
         "Le facteur de temps d??cran multiplie la dur?e, les r?p?titions ou le poids et d?termine le temps d??cran gagn? par unit?.",
       "label.difficultyFormula":
