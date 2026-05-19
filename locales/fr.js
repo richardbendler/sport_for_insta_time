@@ -203,7 +203,6 @@
     "label.incrementalTimeFactor": "Facteur incremental",
     "label.incrementalTimeHint":
       "1 = linÃ©aire. Avec incrÃ©mental, les secondes au-dessus de 60 sont pondÃ©rÃ©es davantage. Exemple : 90 s avec facteur 1,5 ≈ 110 s effectives ; 120 s avec facteur 2,0 ≈ 240 s effectives.",
-      "1 = lineaire. Les valeurs plus basses reduisent legerement seulement les sessions en cours apres la premiere minute.",
     "label.difficultyLabel": "Facteur de temps d??cran (1-10)",
       "label.difficultyDescription":
         "Le facteur de temps d??cran multiplie la dur?e, les r?p?titions ou le poids et d?termine le temps d??cran gagn? par unit?.",
