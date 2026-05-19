@@ -207,7 +207,7 @@ const en = {
     "label.incrementalTime": "Incremental",
     "label.incrementalTimeFactor": "Increment factor",
     "label.incrementalTimeHint":
-      "1 = linear. Lower values slightly taper only running sessions after the first minute.",
+      "1 = linear. For incremental time, seconds above 60 are weighted more. Example: 90s with factor 1.5 ≈ 110 effective seconds; 120s with factor 2.0 ≈ 240 effective seconds.",
     "label.difficultyLabel": "Screen Time Factor (1-10)",
       "label.difficultyDescription":
         "The screen time factor multiplies time, reps, or weight and sets how much screen time each unit grants.",

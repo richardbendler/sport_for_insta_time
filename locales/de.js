@@ -210,7 +210,7 @@
     "label.incrementalTime": "Inkrementell",
     "label.incrementalTimeFactor": "Inkrement-Faktor",
     "label.incrementalTimeHint":
-      "1 = linear. Kleinere Werte bremsen nur laufende Sessions nach der ersten Minute leicht ab.",
+      "1 = linear. Bei inkrementell werden Zeiten über 60 s stärker gewichtet. Beispiel: 90 s mit Faktor 1,5 ≈ 110 effektive Sekunden; 120 s mit Faktor 2,0 ≈ 240 effektive Sekunden.",
     "label.difficultyLabel": "Screen Time Faktor (1-10)",
       "label.difficultyDescription":
         "Der Screen Time Faktor multipliziert Dauer, Wiederholungen oder Gewicht und legt fest, wie viel Screen Time jede Einheit bringt.",
