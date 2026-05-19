@@ -183,10 +183,10 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const USAGE_SNAPSHOT_INTERVAL_MS = 60 * 1000;
 const USAGE_SNAPSHOT_RETENTION_MS = DAY_MS * 3;
 const INCREMENTAL_TIME_FACTOR_OPTIONS = Array.from(
-  { length: 11 },
-  (_, index) => Math.round((0.5 + index * 0.05) * 100) / 100
+  { length: 21 },
+  (_, index) => Math.round((1 + index * 0.1) * 100) / 100
 );
-const DEFAULT_INCREMENTAL_TIME_FACTOR = 0.9;
+const DEFAULT_INCREMENTAL_TIME_FACTOR = 1.0;
 const SICK_MODE_SPORT_ID = "sick_mode";
 const SICK_MODE_SPORT_LABELS = {
   de: "Krankheitsmodus",
