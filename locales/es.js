@@ -208,7 +208,6 @@ const es = {
     "label.incrementalTimeFactor": "Factor incremental",
     "label.incrementalTimeHint":
       "1 = lineal. Con incremental, los segundos por encima de 60 se ponderan más. Ejemplo: 90 s con factor 1,5 ≈ 110 segundos efectivos; 120 s con factor 2,0 ≈ 240 segundos efectivos.",
-      "1 = lineal. Los valores menores reducen ligeramente solo las sesiones en curso despues del primer minuto.",
     "label.difficultyLabel": "Factor de tiempo de pantalla (1-10)",
       "label.difficultyDescription":
         "El factor de tiempo de pantalla multiplica duraci?n, repeticiones o peso y define cu?nta pantalla aporta cada unidad.",
