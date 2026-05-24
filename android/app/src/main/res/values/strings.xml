@@ -20,10 +20,14 @@
   <string name="preface_countdown_label">Start in</string>
   <string name="preface_button">App \u00f6ffnen</string>
   <string name="preface_credit_title">Kredit</string>
-  <string name="preface_credit_label">Kredit: +10 Minuten sofort, dafür steigen deine Userfaktoren kurzzeitig.</string>
+  <string name="preface_credit_label">Kredit: +10 Minuten sofort, danach werden deine Userfaktoren 24 Stunden strenger.</string>
   <string name="preface_credit_button">Kredit nehmen</string>
-  <string name="preface_credit_penalty">Userfaktoren +%1$d%% — so bleibt der Kredit fair.</string>
-  <string name="preface_credit_success">Kredit eingelöst: %1$d Minuten gutgeschrieben · Userfaktoren +%2$d%%</string>
+  <string name="preface_credit_penalty">Userfaktoren werden 24 Stunden um %1$d%% strenger.</string>
+  <string name="preface_credit_warning_title">Achtung</string>
+  <string name="preface_credit_warning_body">Du hast nur einen Kredit pro Tag. Wenn du ihn nimmst, werden deine Userfaktoren 24 Stunden lang strenger und sind in dieser Zeit nicht verstellbar. Danach werden deine vorherigen Werte automatisch wiederhergestellt.</string>
+  <string name="preface_credit_warning_cancel">Abbrechen</string>
+  <string name="preface_credit_warning_confirm">Kredit nehmen</string>
+  <string name="preface_credit_success">Kredit eingelöst: %1$d Minuten gutgeschrieben - Userfaktoren 24h um %2$d%% strenger</string>
   <string name="preface_credit_locked">Kredit bis %1$s gesperrt</string>
   <string name="blocker_sick_title">Krankheitsausgleich</string>
   <string name="blocker_sick_label">Einmaliger Tausch: dein eingestellter Krankenzeit-Limit (z. B. 30 Minuten) wird frei, danach greifen die Beschränkungen wieder automatisch.</string>

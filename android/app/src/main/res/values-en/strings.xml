@@ -19,10 +19,14 @@
   <string name="preface_countdown_label">Starts in</string>
   <string name="preface_button">Open app</string>
   <string name="preface_credit_title">Credit</string>
-  <string name="preface_credit_label">Credit: 10 minutes now, while your user factors briefly increase.</string>
+  <string name="preface_credit_label">Credit: 10 minutes now, then your user factors become stricter for 24 hours.</string>
   <string name="preface_credit_button">Take a credit</string>
-  <string name="preface_credit_penalty">User factors rise by %1$d%% so the credit stays fair.</string>
-  <string name="preface_credit_success">Credit redeemed: %1$d extra minutes · factors +%2$d%%</string>
+  <string name="preface_credit_penalty">User factors become %1$d%% stricter for 24 hours.</string>
+  <string name="preface_credit_warning_title">Warning</string>
+  <string name="preface_credit_warning_body">You only get one credit per day. If you take it, your user factors become stricter for 24 hours and cannot be changed during that time. Your previous values will be restored automatically afterwards.</string>
+  <string name="preface_credit_warning_cancel">Cancel</string>
+  <string name="preface_credit_warning_confirm">Take credit</string>
+  <string name="preface_credit_success">Credit redeemed: %1$d extra minutes - user factors %2$d%% stricter for 24h</string>
   <string name="preface_credit_locked">Credit locked until %1$s</string>
   <string name="blocker_sick_title">Sick trade-in</string>
   <string name="blocker_sick_label">One-time swap: free your daily sick quota (e.g. 30 minutes) when you really can’t do sport, then the restrictions return.</string>

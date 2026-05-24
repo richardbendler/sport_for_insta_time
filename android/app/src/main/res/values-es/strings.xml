@@ -20,10 +20,14 @@
   <string name="preface_countdown_label">Empieza en</string>
   <string name="preface_button">Abrir app</string>
   <string name="preface_credit_title">Crédito</string>
-  <string name="preface_credit_label">Crédito: 10 minutos ahora, pero tus factores de usuario suben momentáneamente.</string>
+  <string name="preface_credit_label">Credito: 10 minutos ahora; despues tus factores de usuario seran mas estrictos durante 24 horas.</string>
   <string name="preface_credit_button">Tomar crédito</string>
-  <string name="preface_credit_penalty">Los factores de usuario suben %1$d%% para equilibrar el crédito.</string>
-  <string name="preface_credit_success">%1$d minutos extra agregados · factores +%2$d%%</string>
+  <string name="preface_credit_penalty">Los factores de usuario seran un %1$d%% mas estrictos durante 24 horas.</string>
+  <string name="preface_credit_warning_title">Atencion</string>
+  <string name="preface_credit_warning_body">Solo tienes un credito por dia. Si lo tomas, tus factores de usuario seran mas estrictos durante 24 horas y no se podran cambiar. Despues se restauraran automaticamente los valores anteriores.</string>
+  <string name="preface_credit_warning_cancel">Cancelar</string>
+  <string name="preface_credit_warning_confirm">Tomar credito</string>
+  <string name="preface_credit_success">%1$d minutos extra agregados - factores un %2$d%% mas estrictos durante 24h</string>
   <string name="preface_credit_locked">Crédito bloqueado hasta %1$s</string>
   <string name="blocker_sick_title">Intercambio por enfermedad</string>
   <string name="blocker_sick_label">Intercambio único: recupera tu límite diario de enfermedad cuando no puedas hacer deporte y luego las restricciones vuelven.</string>
