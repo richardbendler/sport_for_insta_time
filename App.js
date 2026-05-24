@@ -152,15 +152,16 @@ const extractWidgetSportIdFromUrl = (rawUrl) => {
   }
 };
 const USER_FACTOR_OPTIONS = (() => {
+  const maxUserFactor = 3000;
   const options = [];
   let value = 1;
-  while (value <= 1000) {
+  while (value <= maxUserFactor) {
     options.push(Math.round(value));
     const step = Math.max(1, Math.round(Math.pow(value, 0.25)));
     value += step;
   }
-  if (options[options.length - 1] !== 1000) {
-    options.push(1000);
+  if (options[options.length - 1] !== maxUserFactor) {
+    options.push(maxUserFactor);
   }
   return Array.from(new Set(options));
 })();
@@ -211,7 +212,7 @@ const SICK_MODE_SPORT_TEMPLATE = {
 };
 const ADMIN_FACTOR_TIME = 0.0025; // "Fix Factor" in UI; global base multiplier for time-based sports
 const ADMIN_FACTOR_REPS = 0.055; // "Fix Factor" in UI; base multiplier for reps-based sports
-const ADMIN_FACTOR_WEIGHTED = 0.0005; // "Fix Factor" in UI; base multiplier for weighted reps entries
+const ADMIN_FACTOR_WEIGHTED = 0.0025; // "Fix Factor" in UI; base multiplier for weighted reps entries
 const DEFAULT_WEIGHT_RATE = 0.04;
 const SICK_MODE_MINUTES_MIN = 1;
 const SICK_MODE_MINUTES_MAX = 240;

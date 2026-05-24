@@ -208,7 +208,7 @@ const es = {
     "label.incrementalTimeFactor": "Factor de usuario",
     "label.incrementalTimeHint":
       "El tiempo de pantalla incremental recompensa las sesiones de ejercicio más largas e ininterrumpidas con tiempo de pantalla extra. Cuanto más tiempo sigas en una sola sesión, más valiosa es cada segundo adicional.\n\nEl Factor de Usuario controla qué tan fuerte es este efecto de bonus:\n- Valores más bajos se sienten equilibrados y predecibles\n- Valores más altos recompensan más las sesiones largas y continuas",
-    "label.difficultyLabel": "Factor de tiempo de pantalla (1-10)",
+    "label.difficultyLabel": "Factor de tiempo de pantalla (1-3000)",
       "label.difficultyDescription":
         "El factor de tiempo de pantalla multiplica duraci?n, repeticiones o peso y define cu?nta pantalla aporta cada unidad.",
       "label.difficultyFormula":

@@ -211,7 +211,7 @@
     "label.incrementalTimeFactor": "Benutzerfaktor",
     "label.incrementalTimeHint":
       "Inkrementelle Bildschirmzeit belohnt längere, ununterbrochene Trainingseinheiten mit zusätzlicher Bildschirmzeit. Je länger du in einer Sitzung durchhältst, desto wertvoller wird jede zusätzliche Sekunde.\n\nDer Benutzerfaktor steuert, wie stark dieser Bonus wirkt:\n- Niedrigere Werte fühlen sich ausgewogen und vorhersehbar an\n- Höhere Werte belohnen lange, durchgehende Einheiten stärker",
-    "label.difficultyLabel": "Screen Time Faktor (1-10)",
+    "label.difficultyLabel": "Screen Time Faktor (1-3000)",
       "label.difficultyDescription":
         "Der Screen Time Faktor multipliziert Dauer, Wiederholungen oder Gewicht und legt fest, wie viel Screen Time jede Einheit bringt.",
       "label.difficultyFormula":

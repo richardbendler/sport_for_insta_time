@@ -203,7 +203,7 @@
     "label.incrementalTimeFactor": "Facteur utilisateur",
     "label.incrementalTimeHint":
       "Le temps d'écran incrémental récompense les séances d'entraînement longues et ininterrompues par du temps d'écran bonus. Plus tu tiens longtemps dans une séance, plus chaque seconde supplémentaire devient précieuse.\n\nLe facteur utilisateur contrôle l'intensité de ce bonus :\n- Les valeurs basses sont plus équilibrées et prévisibles\n- Les valeurs hautes renforcent les récompenses pour les séances longues et continues",
-    "label.difficultyLabel": "Facteur de temps d'écran (1-10)",
+    "label.difficultyLabel": "Facteur de temps d'écran (1-3000)",
       "label.difficultyDescription":
         "Le facteur de temps d??cran multiplie la dur?e, les r?p?titions ou le poids et d?termine le temps d??cran gagn? par unit?.",
       "label.difficultyFormula":
