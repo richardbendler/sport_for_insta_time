@@ -344,11 +344,11 @@
     "label.sickModeLimitDescription":
       "Lege fest, wie viele Minuten der Krankheitsmodus pro Tag freischaltet.",
     "label.sickModeLimitRequired": "Bitte gib vor dem Speichern einen Wert ein.",
-    "label.creditLockTitle": "Userfaktor-Mindestwert aktiv",
+    "label.creditLockTitle": "Kredit-Strafe aktiv",
     "label.creditLockBody":
-      "Bis {{date}} kannst du den Userfaktor nicht unter {{min}} senken.",
+      "Bis {{date}} sind die Userfaktoren strenger und nicht verstellbar. Danach werden die vorherigen Werte automatisch wiederhergestellt.",
     "label.creditLockNotice":
-      "Bis {{date}} kannst du den Userfaktor nur bis mindestens {{min}} senken.",
+      "Bis {{date}} sind die Userfaktoren gesperrt und werden danach wiederhergestellt.",
     "label.tapAnywhere": "Tippe irgendwo",
     "label.voiceOn": "Mikrofon an",
     "label.voiceOff": "Mikrofon aus",

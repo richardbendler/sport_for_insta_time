@@ -87,6 +87,7 @@ const STORAGE_KEYS = {
   workouts: "@workouts_v1",
   sportColors: "@sport_color_links_v1",
   creditLockMinimums: "@credit_lock_minimums_v1",
+  creditFactorRestore: "@credit_factor_restore_v1",
 };
 
 
@@ -217,6 +218,7 @@ const DEFAULT_WEIGHT_RATE = 0.04;
 const SICK_MODE_MINUTES_MIN = 1;
 const SICK_MODE_MINUTES_MAX = 240;
 let globalCreditPenaltyMultiplier = 1;
+const CREDIT_FACTOR_STRICT_MULTIPLIER = 0.8;
 const setGlobalCreditPenaltyMultiplier = (value) => {
   const numeric = Number(value);
   globalCreditPenaltyMultiplier = Number.isFinite(numeric)
@@ -2425,6 +2427,11 @@ const clampDifficultyIndex = (index) =>
 const clampDifficultyLevel = (value) =>
   USER_FACTOR_OPTIONS[getDifficultyOptionIndex(value)];
 
+const stricterCreditDifficultyLevel = (value) =>
+  clampDifficultyLevel(
+    Math.max(USER_FACTOR_OPTIONS[0], Number(value) * CREDIT_FACTOR_STRICT_MULTIPLIER)
+  );
+
 const getIncrementalTimeFactorIndex = (value) => {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) {
@@ -3064,6 +3071,7 @@ function AppContent() {
   const [selectedStandardSportId, setSelectedStandardSportId] = useState(null);
   const [isCustomSportMode, setIsCustomSportMode] = useState(true);
   const [creditLockMinimums, setCreditLockMinimums] = useState({});
+  const [creditFactorRestore, setCreditFactorRestore] = useState(null);
   const creditLockSnapshotExpiresAtRef = useRef(0);
   const creditLockExpiresAtValue = Number(usageState?.creditLockExpiresAt || 0);
   const difficultyLockActive = creditLockExpiresAtValue > Date.now();
@@ -3077,6 +3085,22 @@ function AppContent() {
             USER_FACTOR_OPTIONS[0]
         )
       : null;
+  const showCreditLockAlert = useCallback(() => {
+    const formatted = formatLockExpiryLabel(creditLockExpiresAtValue, language);
+    Alert.alert(
+      t("label.creditLockTitle"),
+      t("label.creditLockBody", {
+        date: formatted,
+        min: editingDifficultyMinimum ?? newDifficultyLevel,
+      })
+    );
+  }, [
+    creditLockExpiresAtValue,
+    editingDifficultyMinimum,
+    language,
+    newDifficultyLevel,
+    t,
+  ]);
   const adjustDifficultyLevel = useCallback((delta) => {
     setNewDifficultyLevel((current) => {
       const currentIndex = getDifficultyOptionIndex(current);
@@ -3099,6 +3123,10 @@ function AppContent() {
   }, []);
   const handleDifficultyButtonPress = useCallback(
     (delta) => {
+      if (difficultyLockActive) {
+        showCreditLockAlert();
+        return;
+      }
       if (
         delta < 0 &&
         editingSportId &&
@@ -3140,6 +3168,7 @@ function AppContent() {
       editingSportId,
       language,
       newDifficultyLevel,
+      showCreditLockAlert,
       t,
     ]
   );
@@ -3156,11 +3185,13 @@ function AppContent() {
   const canIncreaseIncrementalTimeFactor =
     newIncrementalTimeFactorIndex <
     INCREMENTAL_TIME_FACTOR_OPTIONS.length - 1;
+  const canAdjustDifficulty = !difficultyLockActive;
   const canDecreaseDifficulty =
-    !editingSportId ||
-    !difficultyLockActive ||
-    !Number.isFinite(editingDifficultyMinimum) ||
-    newDifficultyLevel > editingDifficultyMinimum;
+    canAdjustDifficulty &&
+    (!editingSportId ||
+      !Number.isFinite(editingDifficultyMinimum) ||
+      newDifficultyLevel > editingDifficultyMinimum);
+  const canIncreaseDifficulty = canAdjustDifficulty;
   const [showIconInput, setShowIconInput] = useState(false);
   const [customSuggestionUsed, setCustomSuggestionUsed] = useState(false);
   const [infoModalKey, setInfoModalKey] = useState(null);
@@ -3210,6 +3241,34 @@ function AppContent() {
         const canClearSnapshot =
           creditLockExpiresAtValue <= now &&
           creditLockSnapshotExpiresAtRef.current <= now;
+        if (
+          creditFactorRestore?.bySport &&
+          (!creditFactorRestore.expiresAt || creditFactorRestore.expiresAt <= now)
+        ) {
+          const restoredSports = sports.map((sport) => {
+            const original = creditFactorRestore.bySport?.[sport.id];
+            if (!Number.isFinite(Number(original))) {
+              return sport;
+            }
+            return {
+              ...sport,
+              difficultyLevel: clampDifficultyLevel(original),
+            };
+          });
+          await saveSports(restoredSports);
+          setCreditFactorRestore(null);
+          setCreditLockMinimums({});
+          creditLockSnapshotExpiresAtRef.current = 0;
+          try {
+            await AsyncStorage.multiRemove([
+              STORAGE_KEYS.creditFactorRestore,
+              STORAGE_KEYS.creditLockMinimums,
+            ]);
+          } catch (error) {
+            console.warn("Failed to clear credit factor restore", error);
+          }
+          return;
+        }
         if (!canClearSnapshot) {
           return;
         }
@@ -3220,34 +3279,73 @@ function AppContent() {
           setCreditLockMinimums({});
           creditLockSnapshotExpiresAtRef.current = 0;
           try {
-            await AsyncStorage.removeItem(STORAGE_KEYS.creditLockMinimums);
+            await AsyncStorage.multiRemove([
+              STORAGE_KEYS.creditFactorRestore,
+              STORAGE_KEYS.creditLockMinimums,
+            ]);
           } catch (error) {
             console.warn("Failed to clear credit lock minimums", error);
           }
         }
         return;
       }
-      if (
+      const hasRestoreForCurrentLock =
+        creditFactorRestore?.expiresAt === creditLockExpiresAtValue &&
+        creditFactorRestore?.bySport &&
+        typeof creditFactorRestore.bySport === "object";
+      const originalBySport = hasRestoreForCurrentLock
+        ? { ...creditFactorRestore.bySport }
+        : {};
+      const strictBySport = {};
+      let needsSportUpdate = false;
+      sports.forEach((sport) => {
+        const currentDifficulty = difficultyLevelForSport(sport);
+        if (!Number.isFinite(Number(originalBySport[sport.id]))) {
+          originalBySport[sport.id] = currentDifficulty;
+        }
+        const strictDifficulty = stricterCreditDifficultyLevel(
+          originalBySport[sport.id]
+        );
+        strictBySport[sport.id] = strictDifficulty;
+        if (currentDifficulty !== strictDifficulty) {
+          needsSportUpdate = true;
+        }
+      });
+      const nextRestore = {
+        expiresAt: creditLockExpiresAtValue,
+        bySport: originalBySport,
+      };
+      const hasStrictSnapshot =
         creditLockExpiresAtValue === creditLockSnapshotExpiresAtRef.current &&
-        sports.length > 0 &&
-        sports.every((sport) =>
-          Number.isFinite(Number(creditLockMinimums?.[sport.id]))
-        )
-      ) {
+        sports.every(
+          (sport) =>
+            Number(creditLockMinimums?.[sport.id]) ===
+            Number(strictBySport[sport.id])
+        );
+      if (!needsSportUpdate && hasRestoreForCurrentLock && hasStrictSnapshot) {
         return;
       }
-      const snapshotBySport = {};
-      sports.forEach((sport) => {
-        snapshotBySport[sport.id] = difficultyLevelForSport(sport);
-      });
-      setCreditLockMinimums(snapshotBySport);
+      if (needsSportUpdate) {
+        await saveSports(
+          sports.map((sport) => ({
+            ...sport,
+            difficultyLevel: strictBySport[sport.id] ?? sport.difficultyLevel,
+          }))
+        );
+      }
+      setCreditFactorRestore(nextRestore);
+      setCreditLockMinimums(strictBySport);
       creditLockSnapshotExpiresAtRef.current = creditLockExpiresAtValue;
       try {
+        await AsyncStorage.setItem(
+          STORAGE_KEYS.creditFactorRestore,
+          JSON.stringify(nextRestore)
+        );
         await AsyncStorage.setItem(
           STORAGE_KEYS.creditLockMinimums,
           JSON.stringify({
             expiresAt: creditLockExpiresAtValue,
-            bySport: snapshotBySport,
+            bySport: strictBySport,
           })
         );
       } catch (error) {
@@ -3257,6 +3355,7 @@ function AppContent() {
     persistOrClear();
   }, [
     creditLockExpiresAtValue,
+    creditFactorRestore,
     creditLockMinimums,
     difficultyLockActive,
     sports,
@@ -3752,6 +3851,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       const creditLockMinimumsRaw = await AsyncStorage.getItem(
         STORAGE_KEYS.creditLockMinimums
       );
+      const creditFactorRestoreRaw = await AsyncStorage.getItem(
+        STORAGE_KEYS.creditFactorRestore
+      );
       const parsedSports = sportsRaw ? JSON.parse(sportsRaw) : [];
       const cleanedSports = parsedSports.length
         ? pruneNonPushupPresets(parsedSports)
@@ -3901,6 +4003,46 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       } else {
         setCreditLockMinimums({});
         creditLockSnapshotExpiresAtRef.current = 0;
+      }
+      if (creditFactorRestoreRaw) {
+        try {
+          const parsed = JSON.parse(creditFactorRestoreRaw) || {};
+          const expiresAt = Number(parsed.expiresAt || 0);
+          const now = Date.now();
+          if (parsed.bySport && typeof parsed.bySport === "object") {
+            const bySport = {};
+            Object.entries(parsed.bySport).forEach(([sportId, value]) => {
+              if (typeof sportId !== "string" || !sportId) {
+                return;
+              }
+              const numeric = Number(value);
+              if (Number.isFinite(numeric)) {
+                bySport[sportId] = clampDifficultyLevel(numeric);
+              }
+            });
+            if (Object.keys(bySport).length > 0) {
+              setCreditFactorRestore({ expiresAt, bySport });
+              if (expiresAt > now) {
+                creditLockSnapshotExpiresAtRef.current = Math.max(
+                  creditLockSnapshotExpiresAtRef.current,
+                  expiresAt
+                );
+              }
+            } else {
+              await AsyncStorage.removeItem(STORAGE_KEYS.creditFactorRestore);
+              setCreditFactorRestore(null);
+            }
+          } else {
+            await AsyncStorage.removeItem(STORAGE_KEYS.creditFactorRestore);
+            setCreditFactorRestore(null);
+          }
+        } catch (error) {
+          console.warn("Failed to parse credit factor restore", error);
+          await AsyncStorage.removeItem(STORAGE_KEYS.creditFactorRestore);
+          setCreditFactorRestore(null);
+        }
+      } else {
+        setCreditFactorRestore(null);
       }
       const motivationActionsRaw = await AsyncStorage.getItem(
         STORAGE_KEYS.motivationActions
@@ -4741,6 +4883,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       STORAGE_KEYS.tutorialSeen,
       STORAGE_KEYS.workouts,
       STORAGE_KEYS.creditLockMinimums,
+      STORAGE_KEYS.creditFactorRestore,
     ]);
     screenTimeSyncedEntryIdsRef.current = new Set();
     await saveSports(normalizedSports);
@@ -4793,6 +4936,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setUsageSnapshots([]);
     usageSnapshotsRef.current = [];
     setCreditLockMinimums({});
+    setCreditFactorRestore(null);
     creditLockSnapshotExpiresAtRef.current = 0;
     if (InstaControl?.setControlledApps) {
       InstaControl.setControlledApps([]);
@@ -4885,12 +5029,20 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         ? clampIncrementalTimeFactor(newIncrementalTimeFactor)
         : DEFAULT_INCREMENTAL_TIME_FACTOR;
     const parsedDifficulty = clampDifficultyLevel(newDifficultyLevel);
+    const lockedCurrentDifficulty =
+      editingSportId && difficultyLockActive
+        ? difficultyLevelForSport(
+            sports.find((entry) => entry.id === editingSportId)
+          )
+        : null;
     const minimumDifficulty =
       editingSportId && difficultyLockActive && Number.isFinite(editingDifficultyMinimum)
         ? editingDifficultyMinimum
         : null;
     const safeDifficulty =
-      minimumDifficulty == null
+      Number.isFinite(lockedCurrentDifficulty)
+        ? lockedCurrentDifficulty
+        : minimumDifficulty == null
         ? parsedDifficulty
         : Math.max(parsedDifficulty, minimumDifficulty);
     if (editingSportId) {
@@ -6486,10 +6638,19 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 </Text>
               </Pressable>
               <Pressable
-                style={styles.difficultyButton}
+                style={[
+                  styles.difficultyButton,
+                  !canIncreaseDifficulty && styles.difficultyButtonDisabled,
+                ]}
+                disabled={!canIncreaseDifficulty}
                 onPress={() => handleDifficultyButtonPress(1)}
               >
-                <Text style={styles.difficultyButtonText}>
+                <Text
+                  style={[
+                    styles.difficultyButtonText,
+                    !canIncreaseDifficulty && styles.difficultyButtonTextDisabled,
+                  ]}
+                >
                   +
                 </Text>
               </Pressable>

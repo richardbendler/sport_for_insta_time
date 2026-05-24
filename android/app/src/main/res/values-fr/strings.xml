@@ -20,10 +20,14 @@
   <string name="preface_countdown_label">D&#x00E9;marre dans</string>
   <string name="preface_button">Ouvrir l&#x2019;app</string>
   <string name="preface_credit_title">Cr&#x00E9;dit</string>
-  <string name="preface_credit_label">Cr&#x00E9;dit : 10 minutes maintenant, mais les facteurs utilisateur augmentent bri&#x00E8;vement.</string>
+  <string name="preface_credit_label">Cr&#x00E9;dit : 10 minutes maintenant, puis les facteurs utilisateur deviennent plus stricts pendant 24 heures.</string>
   <string name="preface_credit_button">Utiliser le cr&#x00E9;dit</string>
-  <string name="preface_credit_penalty">Les facteurs utilisateur montent de %1$d%% pour compenser le cr&#x00E9;dit.</string>
-  <string name="preface_credit_success">%1$d minutes suppl&#x00E9;mentaires accord&#x00E9;es &#x00B7; facteurs +%2$d%%</string>
+  <string name="preface_credit_penalty">Les facteurs utilisateur deviennent %1$d%% plus stricts pendant 24 heures.</string>
+  <string name="preface_credit_warning_title">Attention</string>
+  <string name="preface_credit_warning_body">Tu n'as qu'un credit par jour. Si tu l'utilises, tes facteurs utilisateur deviennent plus stricts pendant 24 heures et ne peuvent pas etre modifies. Les valeurs precedentes seront restaurees automatiquement ensuite.</string>
+  <string name="preface_credit_warning_cancel">Annuler</string>
+  <string name="preface_credit_warning_confirm">Utiliser le credit</string>
+  <string name="preface_credit_success">%1$d minutes supplementaires accordees - facteurs %2$d%% plus stricts pendant 24h</string>
   <string name="preface_credit_locked">Cr&#x00E9;dit bloqu&#x00E9; jusqu&#x2019;&#x00E0; %1$s</string>
   <string name="blocker_sick_title">&#x00C9;change maladie</string>
   <string name="blocker_sick_label">&#x00C9;change unique : r&#x00E9;cup&#x00E8;re ton quota maladie quand tu ne peux vraiment pas faire de sport, puis les limites reviennent.</string>
