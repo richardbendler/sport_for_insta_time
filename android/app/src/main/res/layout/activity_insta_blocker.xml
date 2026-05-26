@@ -92,6 +92,56 @@
   </LinearLayout>
 
   <LinearLayout
+    android:id="@+id/blocker_brain_section"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="4dp"
+    android:layout_marginHorizontal="12dp"
+    android:orientation="vertical"
+    android:padding="10dp"
+    android:gravity="center_horizontal"
+    android:background="@drawable/blocker_section_card_brain">
+
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/blocker_brain_title"
+      android:textColor="#f8fafc"
+      android:textSize="14sp"
+      android:textStyle="bold" />
+
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="3dp"
+      android:text="@string/blocker_brain_label"
+      android:textColor="#dbeafe"
+      android:textSize="11sp"
+      android:gravity="center" />
+
+    <Button
+      android:id="@+id/blocker_brain_button"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="6dp"
+      android:paddingTop="6dp"
+      android:paddingBottom="6dp"
+      android:text="@string/blocker_brain_button"
+      android:backgroundTint="#38bdf8"
+      android:textColor="#0b1020"
+      android:textSize="14sp" />
+
+    <TextView
+      android:id="@+id/blocker_brain_status"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="4dp"
+      android:textColor="#bae6fd"
+      android:textSize="10sp" />
+  </LinearLayout>
+
+  <LinearLayout
     android:id="@+id/blocker_credit_section"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="#082f49"
+  android:gravity="center"
+  android:orientation="vertical"
+  android:padding="24dp">
+
+  <TextView
+    android:id="@+id/brain_title"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:text="@string/brain_title"
+    android:textColor="#f8fafc"
+    android:textSize="24sp"
+    android:textStyle="bold" />
+
+  <TextView
+    android:id="@+id/brain_status"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="10dp"
+    android:gravity="center"
+    android:textColor="#bae6fd"
+    android:textSize="13sp" />
+
+  <TextView
+    android:id="@+id/brain_range"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="28dp"
+    android:textColor="#7dd3fc"
+    android:textSize="13sp"
+    android:textStyle="bold" />
+
+  <TextView
+    android:id="@+id/brain_question"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="10dp"
+    android:gravity="center"
+    android:textColor="#f8fafc"
+    android:textSize="40sp"
+    android:textStyle="bold" />
+
+  <EditText
+    android:id="@+id/brain_answer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="22dp"
+    android:backgroundTint="#38bdf8"
+    android:gravity="center"
+    android:hint="@string/brain_answer_hint"
+    android:imeOptions="actionDone"
+    android:inputType="numberSigned"
+    android:singleLine="true"
+    android:textColor="#f8fafc"
+    android:textColorHint="#94a3b8"
+    android:textSize="24sp" />
+
+  <Button
+    android:id="@+id/brain_submit"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="16dp"
+    android:backgroundTint="#38bdf8"
+    android:text="@string/brain_submit"
+    android:textColor="#0b1020" />
+
+  <TextView
+    android:id="@+id/brain_feedback"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="12dp"
+    android:gravity="center"
+    android:minHeight="36dp"
+    android:textColor="#bae6fd"
+    android:textSize="14sp" />
+
+  <Button
+    android:id="@+id/brain_continue_button"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:backgroundTint="#f59e0b"
+    android:text="@string/brain_continue"
+    android:textColor="#0b1020"
+    android:visibility="gone" />
+
+  <Button
+    android:id="@+id/brain_back_button"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:backgroundTint="#1f2937"
+    android:text="@string/blocker_back"
+    android:textColor="#f8fafc" />
+</LinearLayout>

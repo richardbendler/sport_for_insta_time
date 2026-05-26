@@ -46,6 +46,12 @@
       android:taskAffinity=""
       android:theme="@style/Theme.App.Blocker" />
     <activity
+      android:name=".BrainMathActivity"
+      android:exported="false"
+      android:excludeFromRecents="true"
+      android:taskAffinity=""
+      android:theme="@style/Theme.App.Blocker" />
+    <activity
       android:name=".InstaPrefaceActivity"
       android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|uiMode"
       android:exported="false"

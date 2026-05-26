@@ -211,6 +211,26 @@ const SICK_MODE_SPORT_TEMPLATE = {
   hidden: true,
   system: true,
 };
+const BRAIN_MATH_SPORT_ID = "brain_math";
+const BRAIN_MATH_SPORT_LABELS = {
+  de: "Gehirnsport",
+  en: "Brain sport",
+  es: "Deporte mental",
+  fr: "Sport mental",
+};
+const BRAIN_MATH_SPORT_TEMPLATE = {
+  id: BRAIN_MATH_SPORT_ID,
+  name: BRAIN_MATH_SPORT_LABELS.en,
+  labels: BRAIN_MATH_SPORT_LABELS,
+  type: "time",
+  difficultyLevel: DEFAULT_DIFFICULTY,
+  icon: "🧠",
+  category: "Mind",
+  screenSecondsPerUnit: DEFAULT_TIME_RATE,
+  nonDeletable: true,
+  hidden: true,
+  system: true,
+};
 const ADMIN_FACTOR_TIME = 0.0025; // "Fix Factor" in UI; global base multiplier for time-based sports
 const ADMIN_FACTOR_REPS = 0.055; // "Fix Factor" in UI; base multiplier for reps-based sports
 const ADMIN_FACTOR_WEIGHTED = 0.0025; // "Fix Factor" in UI; base multiplier for weighted reps entries
@@ -1590,13 +1610,18 @@ const ensurePushupPreset = (sportsList) => {
 };
 
 const ensureSickSport = (sportsList) => {
-  if (sportsList.some((sport) => sport.id === SICK_MODE_SPORT_ID)) {
-    return sportsList;
+  let nextSports = sportsList;
+  if (!nextSports.some((sport) => sport.id === SICK_MODE_SPORT_ID)) {
+    nextSports = [...nextSports, { ...SICK_MODE_SPORT_TEMPLATE }];
   }
-  return [...sportsList, { ...SICK_MODE_SPORT_TEMPLATE }];
+  if (!nextSports.some((sport) => sport.id === BRAIN_MATH_SPORT_ID)) {
+    nextSports = [...nextSports, { ...BRAIN_MATH_SPORT_TEMPLATE }];
+  }
+  return nextSports;
 };
 
-const isSystemSportId = (sportId) => sportId === SICK_MODE_SPORT_ID;
+const isSystemSportId = (sportId) =>
+  sportId === SICK_MODE_SPORT_ID || sportId === BRAIN_MATH_SPORT_ID;
 const isSystemSport = (sport) => !!sport && isSystemSportId(sport.id);
 
 const COLORS = {
@@ -7010,6 +7035,30 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     if (!isManualTimeModalOpen || !selectedSport || selectedSport.type !== "time") {
       return null;
     }
+    const manualTimeHoursValue = Math.max(
+      0,
+      Number.parseInt(manualTimeHours, 10) || 0
+    );
+    const manualTimeMinutesValue = Math.max(
+      0,
+      Number.parseInt(manualTimeMinutes, 10) || 0
+    );
+    const manualTimeSecondsValue = Math.max(
+      0,
+      Number.parseInt(manualTimeSeconds, 10) || 0
+    );
+    const manualTimeInputSeconds =
+      manualTimeHoursValue * 3600 +
+      manualTimeMinutesValue * 60 +
+      manualTimeSecondsValue;
+    const manualTimeKmValue = parsePositiveNumber(manualTimeKm);
+    const manualTimePreviewSeconds =
+      manualTimeInputSeconds > 0
+        ? screenSecondsForEntry(selectedSport, {
+            seconds: manualTimeInputSeconds,
+            km: manualTimeKmValue,
+          })
+        : 0;
     return (
       <Modal
         visible={isManualTimeModalOpen}

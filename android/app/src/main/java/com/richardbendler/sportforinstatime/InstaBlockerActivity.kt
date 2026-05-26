@@ -29,6 +29,9 @@ class InstaBlockerActivity : AppCompatActivity() {
   private lateinit var successTitle: TextView
   private lateinit var successMessage: TextView
   private lateinit var successContinueButton: Button
+  private lateinit var brainSection: View
+  private lateinit var brainButton: Button
+  private lateinit var brainStatus: TextView
   private lateinit var creditSection: View
   private lateinit var creditButton: Button
   private lateinit var creditPenalty: TextView
@@ -69,6 +72,10 @@ class InstaBlockerActivity : AppCompatActivity() {
     successMessage = findViewById(R.id.blocker_success_message)
     successContinueButton = findViewById(R.id.blocker_success_continue_button)
     successContinueButton.setOnClickListener { continueToBlockedApp() }
+    brainSection = findViewById(R.id.blocker_brain_section)
+    brainButton = findViewById(R.id.blocker_brain_button)
+    brainStatus = findViewById(R.id.blocker_brain_status)
+    brainButton.setOnClickListener { openBrainSport() }
     creditSection = findViewById(R.id.blocker_credit_section)
     creditButton = findViewById(R.id.blocker_credit_button)
     creditPenalty = findViewById(R.id.blocker_credit_penalty)
@@ -78,6 +85,7 @@ class InstaBlockerActivity : AppCompatActivity() {
     sickButton = findViewById(R.id.blocker_sick_button)
     sickStatus = findViewById(R.id.blocker_sick_status)
     sickButton.setOnClickListener { showSickQuestionDialog() }
+    updateBrainSection()
     updateCreditSection(true)
     updateSickSection()
   }
@@ -182,6 +190,7 @@ class InstaBlockerActivity : AppCompatActivity() {
 
   override fun onResume() {
     super.onResume()
+    updateBrainSection()
     updateSickSection()
     if (canContinueToBlockedApp()) {
       continueToBlockedApp()
@@ -225,6 +234,25 @@ class InstaBlockerActivity : AppCompatActivity() {
       else -> View.GONE
     }
     sickButton.isEnabled = !active && !locked
+  }
+
+  private fun updateBrainSection() {
+    val prefs = getSharedPreferences("insta_control", MODE_PRIVATE)
+    val now = System.currentTimeMillis()
+    val usedSeconds = BrainMathActivity.getUsedSecondsToday(prefs, now)
+    val remainingSeconds = BrainMathActivity.DAILY_CAP_SECONDS - usedSeconds
+    brainStatus.text = if (remainingSeconds > 0) {
+      getString(R.string.blocker_brain_status, (remainingSeconds + 59) / 60)
+    } else {
+      getString(R.string.blocker_brain_limit_reached)
+    }
+    brainButton.isEnabled = remainingSeconds > 0
+  }
+
+  private fun openBrainSport() {
+    val intent = Intent(this, BrainMathActivity::class.java)
+    intent.putExtra("target_package", targetPackage)
+    startActivity(intent)
   }
 
   private fun activateSickMode() {
@@ -352,6 +380,7 @@ class InstaBlockerActivity : AppCompatActivity() {
     successTitle.text = title
     successMessage.text = message
     mainContent.visibility = View.GONE
+    brainSection.visibility = View.GONE
     creditSection.visibility = View.GONE
     sickSection.visibility = View.GONE
     sickStatus.visibility = View.GONE
