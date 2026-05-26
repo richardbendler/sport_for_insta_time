@@ -71,6 +71,7 @@ class InstaBlockerService : AccessibilityService() {
   private val appActivities = setOf(
     "com.richardbendler.sportforinstatime.MainActivity",
     "com.richardbendler.sportforinstatime.InstaBlockerActivity",
+    "com.richardbendler.sportforinstatime.BrainMathActivity",
     "com.richardbendler.sportforinstatime.InstaPrefaceActivity",
     "com.richardbendler.sportforinstatime.SportWidgetConfigActivity"
   )
