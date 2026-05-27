@@ -346,6 +346,8 @@
     "label.voiceListening": "Ecoute...",
     "label.voiceIdle": "DÃ©marrer le comptage micro",
     "label.voiceHint": "Dis les numeros a voix haute pour compter (micro requis, beta).",
+    "label.voiceCountInstruction":
+      "Compte a voix haute : un, deux, trois ... Chaque nombre reconnu ajoute 1 repetition.",
     "label.voicePermissionMissing": "Acces micro manquant",
     "label.voiceError": "Echec de reconnaissance vocale",
     "label.voiceServiceMissing": "Aucun service de reconnaissance vocale installe",

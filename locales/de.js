@@ -355,6 +355,8 @@
     "label.voiceListening": "HÃ¶rt zu...",
     "label.voiceIdle": "MikrofonzÃ¤hlung starten",
     "label.voiceHint": "ZÃ¤hle laut, die App zÃ¤hlt mit (Mikrofonzugriff nÃ¶tig, Beta).",
+    "label.voiceCountInstruction":
+      "Zaehle laut weiter: eins, zwei, drei ... Jede erkannte Zahl zaehlt als 1 Wiederholung.",
     "label.voicePermissionMissing": "Mikrofon-Zugriff fehlt",
     "label.voiceError": "Spracherkennung fehlgeschlagen",
     "label.voiceServiceMissing": "Kein Spracherkennungsdienst installiert",
