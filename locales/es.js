@@ -351,6 +351,8 @@ const es = {
     "label.voiceListening": "Escuchando...",
     "label.voiceIdle": "Iniciar conteo por micrófono",
     "label.voiceHint": "Di numeros en voz alta para contar (requiere microfono, beta).",
+    "label.voiceCountInstruction":
+      "Cuenta en voz alta: uno, dos, tres ... Cada numero reconocido suma 1 repeticion.",
     "label.voicePermissionMissing": "Falta acceso al microfono",
     "label.voiceError": "Fallo de reconocimiento de voz",
     "label.voiceServiceMissing": "No hay servicio de reconocimiento de voz instalado",

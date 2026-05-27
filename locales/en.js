@@ -350,6 +350,8 @@ const en = {
     "label.voiceListening": "Listening...",
     "label.voiceIdle": "Start mic counting",
     "label.voiceHint": "Say numbers out loud to count (microphone access required, beta).",
+    "label.voiceCountInstruction":
+      "Count out loud: one, two, three ... Each recognized number adds 1 repetition.",
     "label.voicePermissionMissing": "Microphone access missing",
     "label.voiceError": "Speech recognition failed",
     "label.voiceServiceMissing": "No speech recognition service installed",

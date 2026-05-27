@@ -3437,7 +3437,7 @@ function AppContent() {
   const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [voiceListening, setVoiceListening] = useState(false);
   const [voiceError, setVoiceError] = useState(null);
-  const isTestMode = __DEV__ === true;
+  const [voiceInstructionVisible, setVoiceInstructionVisible] = useState(false);
   const [manualTimeMinutes, setManualTimeMinutes] = useState("");
   const [manualTimeSeconds, setManualTimeSeconds] = useState("");
   const [manualTimeHours, setManualTimeHours] = useState("");
@@ -3469,6 +3469,8 @@ function AppContent() {
   const lastVoiceAtRef = useRef(0);
   const voiceEnabledRef = useRef(false);
   const voiceListeningRef = useRef(false);
+  const voiceSportIdRef = useRef(null);
+  const voiceInstructionTimeoutRef = useRef(null);
   const languageRef = useRef(language);
   const selectedSportRef = useRef(null);
   const lastTutorialTargetRef = useRef(null);
@@ -5935,6 +5937,14 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   };
 
   const handleBackFromSport = () => {
+    if (voiceEnabledRef.current || voiceListeningRef.current) {
+      voiceEnabledRef.current = false;
+      voiceSportIdRef.current = null;
+      setVoiceEnabled(false);
+      setVoiceError(null);
+      hideVoiceInstruction();
+      stopVoice();
+    }
     setSelectedSportId(null);
     // setWorkoutSessionCount(0);
     maybeAdvanceTutorial("backHome");
@@ -7777,6 +7787,25 @@ const getSpeechLocale = () => {
     setVoiceListening(value);
   };
 
+  const hideVoiceInstruction = () => {
+    if (voiceInstructionTimeoutRef.current) {
+      clearTimeout(voiceInstructionTimeoutRef.current);
+      voiceInstructionTimeoutRef.current = null;
+    }
+    setVoiceInstructionVisible(false);
+  };
+
+  const showVoiceInstructionBriefly = () => {
+    if (voiceInstructionTimeoutRef.current) {
+      clearTimeout(voiceInstructionTimeoutRef.current);
+    }
+    setVoiceInstructionVisible(true);
+    voiceInstructionTimeoutRef.current = setTimeout(() => {
+      voiceInstructionTimeoutRef.current = null;
+      setVoiceInstructionVisible(false);
+    }, 6500);
+  };
+
   const getAndroidSpeechServices = async () => {
     if (!isAndroid) {
       return null;
@@ -7794,18 +7823,32 @@ const getSpeechLocale = () => {
       return;
     }
     setVoiceError(null);
-    const hasPermission = await ensureAudioPermission();
-    if (!hasPermission) {
-      setVoiceError(t("label.voicePermissionMissing"));
+    const currentSport = selectedSportRef.current;
+    if (!currentSport || currentSport.type !== "reps") {
       setVoiceEnabled(false);
+      voiceEnabledRef.current = false;
+      voiceSportIdRef.current = null;
+      hideVoiceInstruction();
       return;
     }
     try {
+      const hasPermission = await ensureAudioPermission();
+      if (!hasPermission) {
+        setVoiceError(t("label.voicePermissionMissing"));
+        setVoiceEnabled(false);
+        voiceEnabledRef.current = false;
+        voiceSportIdRef.current = null;
+        hideVoiceInstruction();
+        return;
+      }
       if (isIos) {
         const available = await Voice.isAvailable();
         if (!available) {
           setVoiceError(t("label.voiceUnavailable"));
           setVoiceEnabled(false);
+          voiceEnabledRef.current = false;
+          voiceSportIdRef.current = null;
+          hideVoiceInstruction();
           return;
         }
       } else {
@@ -7815,6 +7858,9 @@ const getSpeechLocale = () => {
           if (!services || services.length === 0) {
             setVoiceError(t("label.voiceServiceMissing"));
             setVoiceEnabled(false);
+            voiceEnabledRef.current = false;
+            voiceSportIdRef.current = null;
+            hideVoiceInstruction();
             return;
           }
         }
@@ -7834,6 +7880,10 @@ const getSpeechLocale = () => {
           ? error.message
           : t("label.voiceError");
       setVoiceError(message);
+      setVoiceEnabled(false);
+      voiceEnabledRef.current = false;
+      voiceSportIdRef.current = null;
+      hideVoiceInstruction();
     }
   };
 
@@ -7881,6 +7931,9 @@ const getSpeechLocale = () => {
     if (languageUnsupported) {
       setVoiceError(t("label.voiceUnavailable"));
       setVoiceEnabled(false);
+      voiceEnabledRef.current = false;
+      voiceSportIdRef.current = null;
+      hideVoiceInstruction();
       return;
     }
     const message =
@@ -7890,13 +7943,26 @@ const getSpeechLocale = () => {
 
   const handleVoiceEnd = () => {
     setListeningState(false);
-    if (voiceEnabledRef.current) {
+    const currentSport = selectedSportRef.current;
+    if (voiceEnabledRef.current && currentSport?.type === "reps") {
       startVoice();
     }
   };
 
   const toggleVoice = () => {
-    setVoiceEnabled((current) => !current);
+    const nextEnabled = !voiceEnabledRef.current;
+    voiceEnabledRef.current = nextEnabled;
+    voiceSportIdRef.current = nextEnabled
+      ? selectedSportRef.current?.id || null
+      : null;
+    setVoiceEnabled(nextEnabled);
+    if (!nextEnabled) {
+      setVoiceError(null);
+      hideVoiceInstruction();
+      stopVoice();
+    } else {
+      showVoiceInstructionBriefly();
+    }
   };
 
   const userSports = useMemo(
@@ -9957,19 +10023,48 @@ const getSpeechLocale = () => {
 
   useEffect(() => {
     if (!voiceEnabled) {
+      voiceSportIdRef.current = null;
+      hideVoiceInstruction();
       stopVoice();
       return;
     }
+    voiceSportIdRef.current = selectedSportRef.current?.id || null;
     startVoice();
   }, [voiceEnabled, language]);
 
   useEffect(() => {
+    if (
+      voiceEnabled &&
+      voiceSportIdRef.current &&
+      selectedSport?.id !== voiceSportIdRef.current
+    ) {
+      voiceEnabledRef.current = false;
+      voiceSportIdRef.current = null;
+      setVoiceEnabled(false);
+      setVoiceError(null);
+      hideVoiceInstruction();
+      stopVoice();
+      return;
+    }
     if (!selectedSport || selectedSport.type !== "reps") {
       if (voiceEnabled) {
+        voiceEnabledRef.current = false;
+        voiceSportIdRef.current = null;
         setVoiceEnabled(false);
+        hideVoiceInstruction();
       }
     }
   }, [selectedSport, voiceEnabled]);
+
+  useEffect(() => {
+    if (!isAppActive && voiceEnabledRef.current) {
+      voiceEnabledRef.current = false;
+      setVoiceEnabled(false);
+      setVoiceError(null);
+      hideVoiceInstruction();
+      stopVoice();
+    }
+  }, [isAppActive]);
 
   useEffect(() => {
     if (selectedSportId === null) {
@@ -9980,7 +10075,15 @@ const getSpeechLocale = () => {
 
   useEffect(() => {
     return () => {
-      Voice.destroy().then(Voice.removeAllListeners);
+      if (voiceInstructionTimeoutRef.current) {
+        clearTimeout(voiceInstructionTimeoutRef.current);
+        voiceInstructionTimeoutRef.current = null;
+      }
+      Voice.destroy()
+        .then(Voice.removeAllListeners)
+        .catch((error) => {
+          console.warn("Voice cleanup failed", error);
+        });
     };
   }, []);
 
@@ -10920,35 +11023,79 @@ const getSpeechLocale = () => {
               </View>
             </Pressable>
             {isSimpleReps ? (
-              <Pressable
+              <View
                 style={styles.trackingArea}
                 ref={tutorialTrackingAreaRef}
-                onPress={incrementReps}
               >
-            <Text style={styles.counterValue}>{workoutDisplayReps}</Text>
-            <Text style={styles.plusSign}>+</Text>
-            <Text style={styles.helperText}>{t("label.tapAnywhere")}</Text>
-            {isTestMode ? (
-              <View style={styles.voiceRow}>
                 <Pressable
-                  style={[
-                    styles.voiceButton,
-                    voiceEnabled && styles.voiceButtonActive,
-                  ]}
-                  onPress={toggleVoice}
+                  style={styles.tapTrackingArea}
+                  onPress={incrementReps}
                 >
-                  <View style={styles.voiceButtonContent}>
-                    <Text style={styles.voiceButtonIcon}>{micIcon}</Text>
-                    <Text
+                  <Text style={styles.counterValue}>{workoutDisplayReps}</Text>
+                  <Text style={styles.plusSign}>+</Text>
+                  <Text style={styles.helperText}>{t("label.tapAnywhere")}</Text>
+                </Pressable>
+                <View style={styles.manualEntryContainer}>
+                  <Text style={styles.manualEntryLabel}>
+                    {t("label.manualRepsEntryTitle")}
+                  </Text>
+                  <TextInput
+                    style={[styles.input, styles.manualRepsInput]}
+                    ref={manualRepsInputRef}
+                    value={manualRepsInput}
+                    onChangeText={setManualRepsInput}
+                    onFocus={() => scrollToInput(manualRepsInputRef)}
+                    placeholder={t("label.manualRepsEntryPlaceholder")}
+                    placeholderTextColor="#7a7a7a"
+                    keyboardType="number-pad"
+                  />
+                  <View style={styles.manualEntryActions}>
+                    <Pressable
                       style={[
-                        styles.voiceButtonLabel,
-                        voiceEnabled && styles.voiceButtonLabelActive,
+                        styles.primaryButton,
+                        styles.detailPrimaryButton,
+                        styles.manualEntryButton,
+                        styles.manualEntryActionButton,
                       ]}
+                      onPress={(event) => {
+                        event?.stopPropagation?.();
+                        handleManualRepsLog();
+                      }}
                     >
-                      {voiceEnabled
-                        ? t("label.voiceListening")
-                        : t("label.voiceIdle")}
-                    </Text>
+                      <Text
+                        style={[
+                          styles.primaryButtonText,
+                          styles.detailPrimaryButtonText,
+                        ]}
+                      >
+                        {t("label.manualRepsEntryButton")}
+                      </Text>
+                    </Pressable>
+                    <Pressable
+                      style={[
+                        styles.voiceButton,
+                        styles.manualEntryActionButton,
+                        voiceEnabled && styles.voiceButtonActive,
+                      ]}
+                      onPress={(event) => {
+                        event?.stopPropagation?.();
+                        toggleVoice();
+                      }}
+                    >
+                      <View style={styles.voiceButtonContent}>
+                        <Text style={styles.voiceButtonIcon}>{micIcon}</Text>
+                        <Text
+                          style={[
+                            styles.voiceButtonLabel,
+                            voiceEnabled && styles.voiceButtonLabelActive,
+                          ]}
+                        >
+                          {voiceEnabled
+                            ? t("label.voiceOn")
+                            : t("label.voiceOff")}
+                        </Text>
+                      </View>
+                    </Pressable>
                   </View>
                   {voiceStatusText ? (
                     <Text
@@ -10960,46 +11107,16 @@ const getSpeechLocale = () => {
                       {voiceStatusText}
                     </Text>
                   ) : null}
-                </Pressable>
-                <Text style={styles.voiceHint}>{t("label.voiceHint")}</Text>
+                  <Text style={styles.manualEntryHelper}>
+                    {t("label.manualRepsEntryHint")}
+                  </Text>
+                  {voiceEnabled && voiceInstructionVisible ? (
+                    <Text style={styles.voiceHint}>
+                      {t("label.voiceCountInstruction")}
+                    </Text>
+                  ) : null}
+                </View>
               </View>
-            ) : null}
-              <View style={styles.manualEntryContainer}>
-                <Text style={styles.manualEntryLabel}>
-                  {t("label.manualRepsEntryTitle")}
-                </Text>
-                <TextInput
-                  style={[styles.input, styles.manualRepsInput]}
-                  ref={manualRepsInputRef}
-                  value={manualRepsInput}
-                  onChangeText={setManualRepsInput}
-                  onFocus={() => scrollToInput(manualRepsInputRef)}
-                  placeholder={t("label.manualRepsEntryPlaceholder")}
-                  placeholderTextColor="#7a7a7a"
-                  keyboardType="number-pad"
-                />
-              <Pressable
-                style={[
-                  styles.primaryButton,
-                  styles.detailPrimaryButton,
-                  styles.manualEntryButton,
-                ]}
-                onPress={handleManualRepsLog}
-              >
-                <Text
-                  style={[
-                    styles.primaryButtonText,
-                    styles.detailPrimaryButtonText,
-                  ]}
-                >
-                  {t("label.manualRepsEntryButton")}
-                </Text>
-              </Pressable>
-              <Text style={styles.manualEntryHelper}>
-                {t("label.manualRepsEntryHint")}
-              </Text>
-            </View>
-              </Pressable>
             ) : isWeightMode ? (
               <View style={styles.weightEntryArea} ref={tutorialTrackingAreaRef}>
                 <View style={styles.weightTopCounter}>
@@ -13661,6 +13778,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 24,
   },
+  tapTrackingArea: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   timeSessionHighlight: {
     width: "100%",
     marginBottom: 18,
@@ -13872,6 +13994,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 13,
     maxWidth: "70%",
+    alignSelf: "center",
   },
   manualEntryContainer: {
     marginTop: 18,
@@ -13894,6 +14017,17 @@ const styles = StyleSheet.create({
   manualEntryButton: {
     alignSelf: "stretch",
     marginTop: 6,
+  },
+  manualEntryActions: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 6,
+    alignItems: "stretch",
+  },
+  manualEntryActionButton: {
+    flex: 1,
+    width: "auto",
+    marginTop: 0,
   },
   manualTimeOpenButton: {
     marginTop: 18,
