@@ -3503,6 +3503,8 @@ function AppContent() {
   const tutorialStatsSummaryRef = useRef(null);
   const tutorialOverlayRef = useRef(null);
   const tutorialHeaderButtonRef = useRef(null);
+  const tutorialAccessibilityPermissionRef = useRef(null);
+  const tutorialUsagePermissionRef = useRef(null);
   const tutorialAppsBackRef = useRef(null);
   const [overlayOffset, setOverlayOffset] = useState({ x: 0, y: 0 });
   const tutorialAppsButtonRef = useRef(null);
@@ -4907,6 +4909,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       STORAGE_KEYS.logs,
       STORAGE_KEYS.tutorialSeen,
       STORAGE_KEYS.workouts,
+      STORAGE_KEYS.permissions,
+      STORAGE_KEYS.accessibilityDisclosure,
+      STORAGE_KEYS.usagePermissions,
+      STORAGE_KEYS.notificationsPermissions,
+      STORAGE_KEYS.grayscalePermissions,
       STORAGE_KEYS.creditLockMinimums,
       STORAGE_KEYS.creditFactorRestore,
     ]);
@@ -4935,10 +4942,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setOverallStatsOpen(false);
     setOverallDayKey(null);
     setStatsEditMode(false);
-    setPermissionsPrompted(true);
-    setUsagePermissionsPrompted(true);
-    setAccessibilityDisclosureAccepted(true);
-    setNotificationsPrompted(true);
+    setPermissionsPrompted(false);
+    setUsagePermissionsPrompted(false);
+    setAccessibilityDisclosureAccepted(false);
+    setNotificationsPrompted(false);
+    setGrayscalePermissionsPrompted(false);
     setPrefaceDelayInput(String(DEFAULT_SETTINGS.prefaceDelaySeconds));
     setShowLanguageMenu(false);
     setInstalledApps([]);
@@ -5390,6 +5398,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     await openAccessibilitySettingsDirect();
     await AsyncStorage.setItem(STORAGE_KEYS.permissions, "true");
     setPermissionsPrompted(true);
+    maybeAdvanceTutorial("openAccessibility");
   };
 
   const requestAccessibilityAccess = () => {
@@ -5432,6 +5441,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
     await AsyncStorage.setItem(STORAGE_KEYS.usagePermissions, "true");
     setUsagePermissionsPrompted(true);
+    maybeAdvanceTutorial("openUsageAccess");
   };
 
   useEffect(() => {
@@ -8366,6 +8376,8 @@ const getSpeechLocale = () => {
     selectedSport && selectedSport.type === "time"
       ? "tutorial.step.track.body.time"
       : "tutorial.step.track.body.reps";
+  const tutorialAccessibilityMissing = isAndroid && needsAccessibility !== false;
+  const tutorialUsageAccessMissing = isAndroid && usageAccessGranted !== true;
   const tutorialSteps = useMemo(() => {
     const steps = [
       {
@@ -8532,6 +8544,26 @@ const getSpeechLocale = () => {
       requiresAction: true,
     });
     if (isAndroid) {
+      if (tutorialAccessibilityMissing) {
+        steps.push({
+          id: "openAccessibility",
+          titleKey: "label.accessibilityTitle",
+          bodyKey: "label.accessibilityReason",
+          targetRef: tutorialAccessibilityPermissionRef,
+          actionId: "openAccessibility",
+          requiresAction: true,
+        });
+      }
+      if (tutorialUsageAccessMissing) {
+        steps.push({
+          id: "openUsageAccess",
+          titleKey: "label.usageAccessTitle",
+          bodyKey: "label.usageAccessReason",
+          targetRef: tutorialUsagePermissionRef,
+          actionId: "openUsageAccess",
+          requiresAction: true,
+        });
+      }
       steps.push({
         id: "openApps",
         titleKey: "tutorial.step.openApps.title",
@@ -8573,7 +8605,12 @@ const getSpeechLocale = () => {
       targetRef: tutorialHeaderButtonRef,
     });
     return steps;
-  }, [activeSports.length, trackBodyKey]);
+  }, [
+    activeSports.length,
+    trackBodyKey,
+    tutorialAccessibilityMissing,
+    tutorialUsageAccessMissing,
+  ]);
   const tutorialActive = tutorialStepIndex !== null;
   const tutorialStep = tutorialActive ? tutorialSteps[tutorialStepIndex] : null;
   const isTutorialLastStep =
@@ -12144,6 +12181,7 @@ const getSpeechLocale = () => {
                 </Text>
                 {accessibilityMissing ? (
                   <Pressable
+                    ref={tutorialAccessibilityPermissionRef}
                     style={styles.permissionActionButton}
                     onPress={requestAccessibilityAccess}
                   >
@@ -12154,6 +12192,7 @@ const getSpeechLocale = () => {
                 ) : null}
                 {usageAccessMissing ? (
                   <Pressable
+                    ref={tutorialUsagePermissionRef}
                     style={styles.permissionActionButton}
                     onPress={openUsageAccessSettings}
                   >
