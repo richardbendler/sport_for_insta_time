@@ -24,7 +24,7 @@
   <string name="preface_credit_button">Utiliser le cr&#x00E9;dit</string>
   <string name="preface_credit_penalty">Les facteurs utilisateur deviennent %1$d%% plus stricts pendant 24 heures.</string>
   <string name="preface_credit_warning_title">Attention</string>
-  <string name="preface_credit_warning_body">Tu n'as qu'un credit par jour. Si tu l'utilises, tes facteurs utilisateur deviennent plus stricts pendant 24 heures et ne peuvent pas etre modifies. Les valeurs precedentes seront restaurees automatiquement ensuite.</string>
+  <string name="preface_credit_warning_body">Un seul credit est disponible par jour. Si tu l utilises, tes facteurs utilisateur deviennent plus stricts pendant 24 heures et ne peuvent pas etre modifies. Les valeurs precedentes seront restaurees automatiquement ensuite.</string>
   <string name="preface_credit_warning_cancel">Annuler</string>
   <string name="preface_credit_warning_confirm">Utiliser le credit</string>
   <string name="preface_credit_success">%1$d minutes supplementaires accordees - facteurs %2$d%% plus stricts pendant 24h</string>
