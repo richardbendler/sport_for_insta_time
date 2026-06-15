@@ -3625,6 +3625,8 @@ function AppContent() {
     [persistStorageValue]
   );
   const repsShort = t("label.repsShort");
+  const experimentalFeaturesEnabled = !!settings.experimentalFeaturesEnabled;
+  const voiceCountingAvailable = experimentalFeaturesEnabled;
   const voiceStatusText = voiceError
     ? voiceError
     : voiceEnabled
@@ -7824,7 +7826,11 @@ const getSpeechLocale = () => {
     }
     setVoiceError(null);
     const currentSport = selectedSportRef.current;
-    if (!currentSport || currentSport.type !== "reps") {
+    if (
+      !voiceCountingAvailable ||
+      !currentSport ||
+      currentSport.type !== "reps"
+    ) {
       setVoiceEnabled(false);
       voiceEnabledRef.current = false;
       voiceSportIdRef.current = null;
@@ -7898,7 +7904,11 @@ const getSpeechLocale = () => {
 
   const handleVoiceResults = (event) => {
     const currentSport = selectedSportRef.current;
-    if (!currentSport || currentSport.type !== "reps") {
+    if (
+      !voiceCountingAvailable ||
+      !currentSport ||
+      currentSport.type !== "reps"
+    ) {
       return;
     }
     const transcript = (event?.value || []).join(" ");
@@ -7944,12 +7954,19 @@ const getSpeechLocale = () => {
   const handleVoiceEnd = () => {
     setListeningState(false);
     const currentSport = selectedSportRef.current;
-    if (voiceEnabledRef.current && currentSport?.type === "reps") {
+    if (
+      voiceCountingAvailable &&
+      voiceEnabledRef.current &&
+      currentSport?.type === "reps"
+    ) {
       startVoice();
     }
   };
 
   const toggleVoice = () => {
+    if (!voiceCountingAvailable) {
+      return;
+    }
     const nextEnabled = !voiceEnabledRef.current;
     voiceEnabledRef.current = nextEnabled;
     voiceSportIdRef.current = nextEnabled
@@ -9013,8 +9030,6 @@ const getSpeechLocale = () => {
     motivationActions,
   ]);
 
-  const experimentalFeaturesEnabled = !!settings.experimentalFeaturesEnabled;
-
   useEffect(() => {
     if (
       dismissedMotivationActionId &&
@@ -9122,6 +9137,18 @@ const getSpeechLocale = () => {
       console.warn("Motivation action failed", actionItem?.id, error);
     }
   };
+
+  useEffect(() => {
+    if (voiceCountingAvailable || !voiceEnabledRef.current) {
+      return;
+    }
+    voiceEnabledRef.current = false;
+    voiceSportIdRef.current = null;
+    setVoiceEnabled(false);
+    setVoiceError(null);
+    hideVoiceInstruction();
+    stopVoice();
+  }, [voiceCountingAvailable]);
 
   useEffect(() => {
     if (usageState.entryCount > 0) {
@@ -11071,33 +11098,35 @@ const getSpeechLocale = () => {
                         {t("label.manualRepsEntryButton")}
                       </Text>
                     </Pressable>
-                    <Pressable
-                      style={[
-                        styles.voiceButton,
-                        styles.manualEntryActionButton,
-                        voiceEnabled && styles.voiceButtonActive,
-                      ]}
-                      onPress={(event) => {
-                        event?.stopPropagation?.();
-                        toggleVoice();
-                      }}
-                    >
-                      <View style={styles.voiceButtonContent}>
-                        <Text style={styles.voiceButtonIcon}>{micIcon}</Text>
-                        <Text
-                          style={[
-                            styles.voiceButtonLabel,
-                            voiceEnabled && styles.voiceButtonLabelActive,
-                          ]}
-                        >
-                          {voiceEnabled
-                            ? t("label.voiceOn")
-                            : t("label.voiceOff")}
-                        </Text>
-                      </View>
-                    </Pressable>
+                    {voiceCountingAvailable ? (
+                      <Pressable
+                        style={[
+                          styles.voiceButton,
+                          styles.manualEntryActionButton,
+                          voiceEnabled && styles.voiceButtonActive,
+                        ]}
+                        onPress={(event) => {
+                          event?.stopPropagation?.();
+                          toggleVoice();
+                        }}
+                      >
+                        <View style={styles.voiceButtonContent}>
+                          <Text style={styles.voiceButtonIcon}>{micIcon}</Text>
+                          <Text
+                            style={[
+                              styles.voiceButtonLabel,
+                              voiceEnabled && styles.voiceButtonLabelActive,
+                            ]}
+                          >
+                            {voiceEnabled
+                              ? t("label.voiceOn")
+                              : t("label.voiceOff")}
+                          </Text>
+                        </View>
+                      </Pressable>
+                    ) : null}
                   </View>
-                  {voiceStatusText ? (
+                  {voiceCountingAvailable && voiceStatusText ? (
                     <Text
                       style={[
                         styles.voiceButtonStatus,
@@ -11110,7 +11139,9 @@ const getSpeechLocale = () => {
                   <Text style={styles.manualEntryHelper}>
                     {t("label.manualRepsEntryHint")}
                   </Text>
-                  {voiceEnabled && voiceInstructionVisible ? (
+                  {voiceCountingAvailable &&
+                  voiceEnabled &&
+                  voiceInstructionVisible ? (
                     <Text style={styles.voiceHint}>
                       {t("label.voiceCountInstruction")}
                     </Text>
