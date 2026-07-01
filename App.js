@@ -560,7 +560,7 @@ const RAW_STANDARD_SPORTS = [
       es: "Peck deck / Aperturas en m?quina",
       fr: "Pec deck / ?cart? ? la machine",
     },
-    aliases: ["Pec Deck", "Brust-Fly Maschine"],
+    aliases: ["Pec Deck", "Brust-Fly Maschine", "Machine Fly", "Brustfliegen", "Butterfly Maschine", "Butterfly", "Fliegende", "Pec Deck Machine Fly"],
     icon: "???",
     type: "reps",
     weightExercise: true,
@@ -645,7 +645,7 @@ const RAW_STANDARD_SPORTS = [
       es: "M?quina de extensi?n lumbar",
       fr: "Machine d?extension lombaire",
     },
-    aliases: ["Back Extension Machine"],
+    aliases: ["Back Extension Machine", "R?ckenstrecker", "R?ckenstrecker Maschine", "Hyperextension Maschine", "R?ckenstrecken Maschine"],
     icon: "???",
     type: "reps",
     weightExercise: true,
@@ -852,7 +852,7 @@ const RAW_STANDARD_SPORTS = [
       es: "Elevaciones laterales",
       fr: "?l?vations lat?rales",
     },
-    aliases: ["Lateral Raises"],
+    aliases: ["Lateral Raises", "Seitenheben", "Schulter Seitheben", "Schulterseitenheben", "Seith?ben", "Seitliches Schulterh?ben"],
     icon: "??",
     type: "reps",
     weightExercise: true,
@@ -869,7 +869,7 @@ const RAW_STANDARD_SPORTS = [
       es: "Remo (mancuerna/barra)",
       fr: "Rowing (halt?re/barre)",
     },
-    aliases: ["Row", "Bent-Over Row"],
+    aliases: ["Row", "Bent-Over Row", "Rudern", "Rudern Hanteln", "Hanteln Rudern", "Bent Over Row", "Barbell Row", "Dumbbell Row"],
     icon: "???",
     type: "reps",
     weightExercise: true,
@@ -986,7 +986,7 @@ const RAW_STANDARD_SPORTS = [
       es: "Abdominales",
       fr: "Abdos",
     },
-    aliases: ["Sit-Ups", "Sit Ups", "Crunches", "Bauchpresse"],
+    aliases: ["Sit-Ups", "Sit Ups", "Sit-Up", "Situp", "Crunches", "Bauchpresse", "Crunch", "Bauchmuskeltraining"],
     icon: "??",
     type: "reps",
     defaultRateMinutes: 1,
@@ -1002,7 +1002,7 @@ const RAW_STANDARD_SPORTS = [
       es: "Dominadas",
       fr: "Tractions",
     },
-    aliases: ["Pull-Ups", "Chin-Ups"],
+    aliases: ["Pull-Ups", "Chin-Ups", "Klimmz?ge", "Pull Up", "Pullup", "Chinup", "Chin Up"],
     icon: "???",
     type: "reps",
     defaultRateMinutes: 1,
@@ -1018,7 +1018,7 @@ const RAW_STANDARD_SPORTS = [
       es: "Fondos",
       fr: "Dips",
     },
-    aliases: ["Trizeps-Dips"],
+    aliases: ["Trizeps-Dips", "Trizeps Dips", "Tricep Dips", "Triceps Dips", "Bench Dips"],
     icon: "???",
     type: "reps",
     defaultRateMinutes: 1,
@@ -1151,6 +1151,158 @@ const RAW_STANDARD_SPORTS = [
     difficultyLevel: 4,
     category: "Weitere Sportarten",
     muscleGroups: ["Beine", "Ges??", "Herz-Kreislauf"],
+  },
+  {
+    id: "incline_bench_press",
+    labels: {
+      de: "Schr?gbankdr?cken",
+      en: "Incline Bench Press",
+      es: "Press de banca inclinado",
+      fr: "D?velopp? inclin?",
+    },
+    aliases: ["Incline Press", "Schr?gbank", "Schr?gbankdr?cken", "Incline Bankdr?cken", "Upper Chest Press"],
+    icon: "???",
+    type: "reps",
+    weightExercise: true,
+    defaultRateMinutes: 1,
+    difficultyLevel: 5,
+    category: "Freihanteln",
+    muscleGroups: ["obere Brust", "Schultern", "Trizeps"],
+  },
+  {
+    id: "rear_delt_fly",
+    labels: {
+      de: "Seitenheben gebeugt",
+      en: "Rear Delt Fly",
+      es: "P?jaro / Elevaciones posteriores",
+      fr: "Oiseau / ?cart? arri?re",
+    },
+    aliases: ["Seitenheben gebeugt", "Bent-over Lateral Raise", "Rear Delt Raise", "Hintere Schulter Seitheben", "Reverse Fly", "Reverse Dumbbell Fly", "Hinteres Seitheben", "Hintere Schulter"],
+    icon: "??",
+    type: "reps",
+    weightExercise: true,
+    defaultRateMinutes: 1,
+    difficultyLevel: 3,
+    category: "Freihanteln",
+    muscleGroups: ["hintere Schulter", "oberer R?cken"],
+  },
+  {
+    id: "inverted_row",
+    labels: {
+      de: "Reverse Pullup",
+      en: "Inverted Row",
+      es: "Remo invertido",
+      fr: "Tirage horizontal",
+    },
+    aliases: ["Reverse Pullup", "Reverse Pull-Up", "Australian Pull-Up", "Inverted Row", "Horizontal Pull-Up", "Body Row", "Unterst?tzter Klimmzug"],
+    icon: "???",
+    type: "reps",
+    defaultRateMinutes: 1,
+    difficultyLevel: 4,
+    category: "Eigengewicht",
+    muscleGroups: ["R?cken", "Bizeps", "hintere Schulter"],
+  },
+  {
+    id: "bouldering",
+    labels: {
+      de: "Bouldern",
+      en: "Bouldering",
+      es: "Escalada de bloques",
+      fr: "Bloc / Escalade bloc",
+    },
+    aliases: ["Bouldering", "Klettern", "Indoor Klettern", "Kletterhalle", "Rock Climbing", "Klettern (Indoor)"],
+    icon: "??",
+    type: "time",
+    defaultRateMinutes: 1,
+    difficultyLevel: 6,
+    category: "Weitere Sportarten",
+    muscleGroups: ["Unterarme", "R?cken", "Schultern", "Core", "Beine"],
+  },
+  {
+    id: "dead_hang",
+    labels: {
+      de: "Aktives H?ngen",
+      en: "Active / Dead Hang",
+      es: "Colgado activo",
+      fr: "Suspension active",
+    },
+    aliases: ["Aktives H?ngen", "Dead Hang", "Passives H?ngen", "H?ngen", "Bar Hang", "H?ngetraining", "Active Hang", "Scapular Hang"],
+    icon: "??",
+    type: "time",
+    defaultRateMinutes: 1,
+    incrementalTimeEnabled: true,
+    incrementalTimeFactor: 0.5,
+    difficultyLevel: 4,
+    category: "Eigengewicht",
+    muscleGroups: ["Unterarme", "Schultern", "R?cken (Lat)", "Core"],
+  },
+  {
+    id: "physiotherapy",
+    labels: {
+      de: "Physiotherapie",
+      en: "Physiotherapy",
+      es: "Fisioterapia",
+      fr: "Kin?sith?rapie",
+    },
+    aliases: ["Physio", "Physiotherapie", "Rehab", "Rehabilitation", "PT", "Physical Therapy", "Krankengymnastik"],
+    icon: "??",
+    type: "time",
+    defaultRateMinutes: 1,
+    difficultyLevel: 100,
+    useRawDifficulty: true,
+    category: "Weitere Sportarten",
+    muscleGroups: ["variabel"],
+  },
+  {
+    id: "plank_shoulder_taps",
+    labels: {
+      de: "Plank Shoulder Taps",
+      en: "Plank Shoulder Taps",
+      es: "Plancha con toques de hombro",
+      fr: "Gainage avec touches d??paule",
+    },
+    aliases: ["Shoulder Taps", "Schulter Taps", "Schulter-Taps im Plank", "Plank Taps", "Shoulder Tap Plank"],
+    icon: "??",
+    type: "reps",
+    defaultRateMinutes: 1,
+    difficultyLevel: 4,
+    category: "Eigengewicht",
+    muscleGroups: ["Core", "Schultern", "Stabilisierung"],
+  },
+  {
+    id: "side_plank",
+    labels: {
+      de: "Seitstütz",
+      en: "Side Plank",
+      es: "Plancha lateral",
+      fr: "Gainage lat?ral",
+    },
+    aliases: ["Side Plank", "Seitlicher Plank", "Seitstütz", "Lateral Plank", "Seitplank"],
+    icon: "??",
+    type: "time",
+    defaultRateMinutes: 1,
+    incrementalTimeEnabled: true,
+    incrementalTimeFactor: 0.5,
+    difficultyLevel: 4,
+    category: "Eigengewicht",
+    muscleGroups: ["seitlicher Core", "H?fte", "Schultern"],
+  },
+  {
+    id: "sick_day",
+    labels: {
+      de: "Krank sein",
+      en: "Sick Day",
+      es: "D?a de enfermedad",
+      fr: "Journ?e maladie",
+    },
+    aliases: ["Krank", "Krank zu Hause", "Krankheit", "Illness", "Sick", "Erkrankt", "Zu Hause krank"],
+    icon: "??",
+    type: "time",
+    defaultRateMinutes: 1,
+    difficultyLevel: 100,
+    useRawDifficulty: true,
+    category: "Weitere Sportarten",
+    muscleGroups: [],
   },
 ];
 
@@ -1441,6 +1593,22 @@ const normalizeTextForSearch = (value) =>
 
 const stripNonAlphanumeric = (value) => value.replace(/[^a-z0-9]+/g, "");
 
+const STANDARD_SPORT_LABEL_MAP = (() => {
+  const map = new Map();
+  STANDARD_SPORTS.forEach((sport) => {
+    const add = (text) => {
+      if (!text || typeof text !== "string") return;
+      const key = normalizeTextForSearch(text);
+      if (key && !map.has(key)) {
+        map.set(key, sport.id);
+      }
+    };
+    Object.values(sport.labels || {}).forEach(add);
+    (sport.aliases || []).forEach(add);
+  });
+  return map;
+})();
+
 const splitSearchTokens = (value) =>
   (value || "").split(/\s+/).filter((token) => token.length > 0);
 
@@ -1482,6 +1650,22 @@ const getLabelCandidates = (entry, language = "en") => {
   addAliases(entry.aliases);
   addLabel(entry.name);
   addLabel(entry.id);
+  const stdSportId =
+    typeof entry.standardSportId === "string" && entry.standardSportId
+      ? entry.standardSportId
+      : typeof entry.id === "string" && STANDARD_SPORT_BY_ID.has(entry.id)
+      ? entry.id
+      : null;
+  if (stdSportId) {
+    const stdSport = STANDARD_SPORT_BY_ID.get(stdSportId);
+    if (stdSport) {
+      const stdLabels = stdSport.labels || {};
+      addLabel(stdLabels?.[language]);
+      addLabel(stdLabels?.en);
+      Object.values(stdLabels).forEach(addLabel);
+      addAliases(stdSport.aliases);
+    }
+  }
   return candidates;
 };
 
@@ -2640,6 +2824,61 @@ const screenSecondsForEntry = (sport, entry, options = {}) => {
   return Math.max(0, Math.round(applyCreditPenaltyMultiplier(value)));
 };
 
+const BALANCE_WINDOW_MS = 30 * 60 * 1000;
+const BALANCE_RATIO_THRESHOLD = 2.5;
+const BALANCE_COOLDOWN_MS = 10 * 60 * 1000;
+const BALANCE_MIN_REPS = 3;
+const BALANCE_MIN_SECONDS = 30;
+
+const detectBalanceSuggestion = (logs, sports, now = Date.now()) => {
+  const today = dateKeyFromDate(now);
+  const yesterday = dateKeyFromDate(now - 86400000);
+
+  const repsCandidates = [];
+  const timeCandidates = [];
+
+  sports
+    .filter((s) => !isSystemSport(s) && !s.hidden)
+    .forEach((sport) => {
+      const entries = [
+        ...(logs[sport.id]?.[today] || []),
+        ...(logs[sport.id]?.[yesterday] || []),
+      ].filter(
+        (e) =>
+          e.ts &&
+          now - e.ts <= BALANCE_WINDOW_MS &&
+          (e.screenSeconds || 0) > 0
+      );
+      if (entries.length === 0) return;
+      if (sport.type === "reps" && !sport.weightExercise) {
+        const totalReps = entries.reduce((s, e) => s + (e.reps || 0), 0);
+        if (totalReps < BALANCE_MIN_REPS) return;
+        const totalSS = entries.reduce((s, e) => s + (e.screenSeconds || 0), 0);
+        repsCandidates.push({ sport, rate: totalSS / totalReps });
+      } else if (sport.type === "time") {
+        const totalSeconds = entries.reduce((s, e) => s + (e.seconds || 0), 0);
+        if (totalSeconds < BALANCE_MIN_SECONDS) return;
+        const totalSS = entries.reduce((s, e) => s + (e.screenSeconds || 0), 0);
+        timeCandidates.push({ sport, rate: totalSS / totalSeconds });
+      }
+    });
+
+  const findPair = (candidates) => {
+    if (candidates.length < 2) return null;
+    candidates.sort((a, b) => b.rate - a.rate);
+    const high = candidates[0];
+    const low = candidates[candidates.length - 1];
+    if (high.rate / low.rate < BALANCE_RATIO_THRESHOLD) return null;
+    const currentIndex = getDifficultyOptionIndex(low.sport.difficultyLevel);
+    const suggestedIndex = clampDifficultyIndex(currentIndex + 2);
+    const suggestedFactor = USER_FACTOR_OPTIONS[suggestedIndex];
+    if (suggestedFactor <= (low.sport.difficultyLevel || 0)) return null;
+    return { sportHigh: high.sport, sportLow: low.sport, rateHigh: high.rate, rateLow: low.rate, suggestedFactor };
+  };
+
+  return findPair(repsCandidates) || findPair(timeCandidates) || null;
+};
+
 const resolveEntryScreenSeconds = (sport, entry) => {
   if (!entry) {
     return 0;
@@ -2943,6 +3182,14 @@ const normalizeSports = (sportList) => {
       Number(sport.incrementalTimeFactor) !== incrementalTimeFactor
     ) {
       changed = true;
+    }
+    if (!next.standardSportId && next.name && !STANDARD_SPORT_BY_ID.has(next.id)) {
+      const key = normalizeTextForSearch(next.name);
+      const matchedId = STANDARD_SPORT_LABEL_MAP.get(key);
+      if (matchedId) {
+        next.standardSportId = matchedId;
+        changed = true;
+      }
     }
     return next;
   });
@@ -3452,6 +3699,7 @@ function AppContent() {
   const sessionStartRef = useRef(null);
   const runningRef = useRef(false);
   const resumeEntryRef = useRef(null);
+  const lastBalanceSuggestionRef = useRef(0);
   const workoutStartRef = useRef(null);
   const workoutIntervalRef = useRef(null);
   const sportDetailScrollRef = useRef(null);
@@ -3769,6 +4017,10 @@ function AppContent() {
     if (sport.standardSportId) {
       const standardSport = STANDARD_SPORT_BY_ID.get(sport.standardSportId);
       if (standardSport) {
+        const officialLabels = Object.values(standardSport.labels || {});
+        if (sport.name && !officialLabels.includes(sport.name)) {
+          return sport.name;
+        }
         return getStandardSportLabel(standardSport, language);
       }
     }
@@ -4590,6 +4842,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         ? entry.screenSeconds
         : screenSecondsForEntry(sport, nextEntry);
     const day = dateKeyFromDate(nextEntry.ts);
+    let capturedNextLogs = null;
     setLogs((prev) => {
       const nextLogs = { ...prev };
       const sportLogs = { ...(nextLogs[sport.id] || {}) };
@@ -4598,10 +4851,47 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       sportLogs[day] = dayLogs;
       nextLogs[sport.id] = sportLogs;
       AsyncStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(nextLogs));
+      capturedNextLogs = nextLogs;
       return nextLogs;
     });
     syncScreenTimeEntry(sport, nextEntry);
     refreshUsageState();
+    if (capturedNextLogs && !difficultyLockActive) {
+      const now = Date.now();
+      if (now - lastBalanceSuggestionRef.current > BALANCE_COOLDOWN_MS) {
+        const suggestion = detectBalanceSuggestion(capturedNextLogs, sports, now);
+        if (suggestion) {
+          lastBalanceSuggestionRef.current = now;
+          const labelHigh = getSportLabel(suggestion.sportHigh);
+          const labelLow = getSportLabel(suggestion.sportLow);
+          const ssPerUnit = (r) => formatSeconds(Math.round(r));
+          Alert.alert(
+            t("label.balanceSuggestTitle"),
+            t("label.balanceSuggestBody", {
+              high: labelHigh,
+              low: labelLow,
+              rateHigh: ssPerUnit(suggestion.rateHigh),
+              rateLow: ssPerUnit(suggestion.rateLow),
+              factor: suggestion.suggestedFactor,
+            }),
+            [
+              { text: t("label.cancel"), style: "cancel" },
+              {
+                text: t("label.balanceSuggestApply"),
+                onPress: async () => {
+                  const nextSports = sports.map((s) =>
+                    s.id === suggestion.sportLow.id
+                      ? { ...s, difficultyLevel: suggestion.suggestedFactor }
+                      : s
+                  );
+                  await saveSports(nextSports);
+                },
+              },
+            ]
+          );
+        }
+      }
+    }
     return nextEntry;
   };
 
@@ -10895,7 +11185,7 @@ const getSpeechLocale = () => {
       hasLastTimeEntry &&
       Date.now() - latestTimeEntry.ts <= RESUME_WINDOW_MS &&
       !isIncrementalTimeMode;
-    const timePrimaryActionLabel = hasLastTimeEntry
+    const timePrimaryActionLabel = canResumeLatestTimeEntry
       ? startNewLabel
       : t("label.start");
     const userFactor = difficultyLevelForSport(selectedSport); // Screen Time Faktor (userFactor)
