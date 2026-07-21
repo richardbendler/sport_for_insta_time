@@ -59,6 +59,7 @@ import Voice from "@react-native-voice/voice";
 import { I18nextProvider, useTranslation } from "react-i18next";
 import i18n from "./i18n";
 import { getFunFactsForLanguage } from "./funFacts";
+import CameraRepCounter from "./CameraRepCounter";
 import {
   DEFAULT_WEEKDAY_LABELS,
   MONTH_LABELS,
@@ -3681,6 +3682,7 @@ function AppContent() {
   const [runningSportLabel, setRunningSportLabel] = useState("");
   const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [voiceListening, setVoiceListening] = useState(false);
+  const [cameraCounterOpen, setCameraCounterOpen] = useState(false);
   const [voiceError, setVoiceError] = useState(null);
   const [voiceInstructionVisible, setVoiceInstructionVisible] = useState(false);
   const [manualTimeMinutes, setManualTimeMinutes] = useState("");
@@ -3873,6 +3875,7 @@ function AppContent() {
   const repsShort = t("label.repsShort");
   const experimentalFeaturesEnabled = !!settings.experimentalFeaturesEnabled;
   const voiceCountingAvailable = experimentalFeaturesEnabled;
+  const cameraCountingAvailable = experimentalFeaturesEnabled && isAndroid;
   const voiceStatusText = voiceError
     ? voiceError
     : voiceEnabled
@@ -11407,6 +11410,25 @@ const getSpeechLocale = () => {
                         </View>
                       </Pressable>
                     ) : null}
+                    {cameraCountingAvailable ? (
+                      <Pressable
+                        style={[
+                          styles.voiceButton,
+                          styles.manualEntryActionButton,
+                        ]}
+                        onPress={(event) => {
+                          event?.stopPropagation?.();
+                          setCameraCounterOpen(true);
+                        }}
+                      >
+                        <View style={styles.voiceButtonContent}>
+                          <Text style={styles.voiceButtonIcon}>{"\u{1F4F7}"}</Text>
+                          <Text style={styles.voiceButtonLabel}>
+                            {t("label.cameraCountButton")}
+                          </Text>
+                        </View>
+                      </Pressable>
+                    ) : null}
                   </View>
                   {voiceCountingAvailable && voiceStatusText ? (
                     <Text
@@ -11429,6 +11451,23 @@ const getSpeechLocale = () => {
                     </Text>
                   ) : null}
                 </View>
+                {cameraCountingAvailable ? (
+                  <CameraRepCounter
+                    visible={cameraCounterOpen}
+                    onClose={() => setCameraCounterOpen(false)}
+                    onRep={incrementReps}
+                    colors={COLORS}
+                    labels={{
+                      reps: t("label.reps"),
+                      hint: t("label.cameraCountHint"),
+                      done: t("label.cameraCountDone"),
+                      close: t("label.cancel"),
+                      permissionHint: t("label.cameraPermissionHint"),
+                      grantPermission: t("label.cameraGrantPermission"),
+                      noDevice: t("label.cameraNoDevice"),
+                    }}
+                  />
+                ) : null}
               </View>
             ) : isWeightMode ? (
               <View style={styles.weightEntryArea} ref={tutorialTrackingAreaRef}>

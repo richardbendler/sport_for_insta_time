@@ -4,10 +4,73 @@ Eine einfache React Native App, die Sport gegen Social-Media-Zeit tauscht.
 Workouts erzeugen erspielte Zeit, alles wird lokal gespeichert, und auf Android
 koennen ausgewaehlte Apps blockiert werden, sobald die erspielte Zeit verbraucht ist.
 
+## Erstes Setup (Windows, nativ – lokaler Dev-Build)
+
+Diese Variante baut die App direkt in Windows (kein WSL noetig) und installiert sie auf
+einem laufenden Android-Emulator oder einem per USB verbundenen Geraet. Einmalig noetig:
+
+1. **Node.js** installieren (Version passend zu `eas.json`, aktuell 20.x) und pruefen:
+   ```powershell
+   node -v
+   ```
+2. **PowerShell-Skriptausfuehrung erlauben** (Windows blockiert `npm`/`npx` standardmaessig,
+   da sie als `.ps1`-Skripte laufen):
+   ```powershell
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+   ```
+3. **Android Studio** installieren (bringt SDK, Emulator und eine passende Java-Runtime mit)
+   und darin mindestens ein virtuelles Geraet (AVD) anlegen, z.B. "Pixel ...".
+4. **Abhaengigkeiten installieren:**
+   ```powershell
+   npm install
+   ```
+5. **Umgebungsvariablen setzen** (einmalig pro Windows-Account; Pfade ggf. an die eigene
+   Installation anpassen):
+   ```powershell
+   [System.Environment]::SetEnvironmentVariable("JAVA_HOME", "C:\Program Files\Android\Android Studio\jbr", "User")
+   [System.Environment]::SetEnvironmentVariable("ANDROID_HOME", "$env:LOCALAPPDATA\Android\Sdk", "User")
+   [System.Environment]::SetEnvironmentVariable("ANDROID_SDK_ROOT", "$env:LOCALAPPDATA\Android\Sdk", "User")
+   ```
+   Terminal danach einmal neu starten, damit die Variablen greifen. `JAVA_HOME` zeigt hier
+   bewusst auf die von Android Studio mitgelieferte Java-Runtime (JBR) statt auf eine separate
+   JDK-Installation - Java 21 daraus funktioniert mit dem aktuellen Gradle 8.14.3 Setup dieses
+   Projekts.
+6. **`android/local.properties` anlegen** (lokal, nicht eingecheckt, zeigt Gradle auf das SDK):
+   ```powershell
+   "sdk.dir=$($env:LOCALAPPDATA -replace '\\','/')/Android/Sdk" | Set-Content android/local.properties
+   ```
+   Falls das Projekt schonmal in Android Studio geoeffnet wurde, existiert diese Datei meist
+   schon automatisch.
+
+### Taeglich: Emulator starten und App bauen
+```powershell
+# Emulator ueber Android Studio (Device Manager) oder per Kommandozeile starten:
+emulator -avd <AVD-Name>
+
+# Bauen + installieren:
+npx expo run:android
+```
+
+**Bekannte Falle:** Laeuft Android Studio gleichzeitig geoeffnet (z.B. mit offenem Device
+Manager), kann `adb devices` gelegentlich einen "Geister"-Eintrag wie `emulator-5562 offline`
+zeigen, der keinen echten Prozess dahinter hat und den Build mit einem ADB-Verbindungsfehler
+abbrechen laesst. Fix: ADB-Server kurz neu starten und direkt danach erneut bauen:
+```powershell
+adb kill-server
+adb start-server
+npx expo run:android
+```
+
 ## Expo Befehle (wichtig)
 ```bash
 npx expo run:android
 npx expo start --dev-client
+```
+
+Fuer lokale EAS-Builds (`eas build --local`) braucht es Linux oder macOS (auch via WSL) -
+unter nativem Windows funktioniert nur die Expo-Cloud-Variante weiter unten oder der oben
+beschriebene `expo run:android`-Weg:
+```bash
 eas build --platform android --local
 npx eas build -p android --profile production --local
 ```
@@ -155,7 +218,7 @@ cp /pfad/zur/app-release.apk /mnt/c/Users/<DEIN_USER>/Desktop/
 - Widgets: pro Sport und ein Gesamtwidget fuer erspielte Zeit
 - Tutorial mit Highlighting, jederzeit in den Einstellungen startbar
 - Mehrsprachig (DE/EN/ES/FR)
-- Optional: Benachrichtigungen (Android 13+), Mikrofon (Sprachzaehlung), Kamera
+- Optional: Benachrichtigungen (Android 13+), Mikrofon (Sprachzaehlung), Kamera (Liegestuetz-Zaehlung per Pose Detection)
 
 ## Zeit-Logik
 - Wiederholungen: je Sport frei definierbare Umrechnung in Sekunden erspielter Zeit

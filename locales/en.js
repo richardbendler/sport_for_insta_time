@@ -357,6 +357,14 @@ const en = {
     "label.voiceError": "Speech recognition failed",
     "label.voiceServiceMissing": "No speech recognition service installed",
     "label.voiceUnavailable": "Speech recognition unavailable",
+    "label.cameraCountButton": "Camera",
+    "label.cameraCountHint":
+      "Frame the camera so your shoulder, elbow, and wrist are visible.",
+    "label.cameraCountDone": "Done",
+    "label.cameraPermissionHint":
+      "Counting push-ups with the camera needs camera access.",
+    "label.cameraGrantPermission": "Allow camera access",
+    "label.cameraNoDevice": "No camera found.",
     "label.back": "Back",
     "label.start": "Start",
     "label.startNew": "New",

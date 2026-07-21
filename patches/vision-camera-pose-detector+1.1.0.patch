@@ -1,0 +1,171 @@
+diff --git a/node_modules/vision-camera-pose-detector/android/src/main/java/com/visioncameraposedetector/VisionCameraPoseDetectorModule.java b/node_modules/vision-camera-pose-detector/android/src/main/java/com/visioncameraposedetector/VisionCameraPoseDetectorModule.java
+index ec367f3..7b3dc5a 100644
+--- a/node_modules/vision-camera-pose-detector/android/src/main/java/com/visioncameraposedetector/VisionCameraPoseDetectorModule.java
++++ b/node_modules/vision-camera-pose-detector/android/src/main/java/com/visioncameraposedetector/VisionCameraPoseDetectorModule.java
+@@ -15,9 +15,9 @@ import com.google.mlkit.vision.pose.PoseDetection;
+ import com.google.mlkit.vision.pose.PoseDetector;
+ import com.google.mlkit.vision.pose.PoseLandmark;
+ import com.google.mlkit.vision.pose.accurate.AccuratePoseDetectorOptions;
+-import com.mrousavy.camera.frameprocessor.Frame;
+-import com.mrousavy.camera.frameprocessor.FrameProcessorPlugin;
+-import com.mrousavy.camera.parsers.Orientation;
++import com.mrousavy.camera.frameprocessors.Frame;
++import com.mrousavy.camera.frameprocessors.FrameProcessorPlugin;
++import com.mrousavy.camera.core.types.Orientation;
+ 
+ import java.util.HashMap;
+ import java.util.Map;
+@@ -35,9 +35,9 @@ public class VisionCameraPoseDetectorModule extends FrameProcessorPlugin {
+   public Object callback(@NonNull Frame frame, @Nullable Map<String, Object> arguments) {
+     try {
+       Image mediaImage = frame.getImage();
+-      Log.e("Log", frame.getPixelFormat());
+       if (mediaImage != null) {
+-        InputImage image = InputImage.fromMediaImage(mediaImage, Orientation.Companion.fromUnionValue(frame.getOrientation()).toDegrees());
++        int rotationDegrees = toRotationDegrees(frame.getOrientation().reversed());
++        InputImage image = InputImage.fromMediaImage(mediaImage, rotationDegrees);
+         Task<Pose> result = detector.process(image);
+         Pose pose = Tasks.await(result);
+ 
+@@ -109,9 +109,24 @@ public class VisionCameraPoseDetectorModule extends FrameProcessorPlugin {
+ 
+         return landmarks;
+       }
+-    } catch (Exception e) {
++    } catch (Throwable e) {
+       e.printStackTrace();
+     }
+     return null;
+   }
++
++  private int toRotationDegrees(@NonNull Orientation orientation) {
++    switch (orientation) {
++      case PORTRAIT:
++        return 0;
++      case LANDSCAPE_LEFT:
++        return 90;
++      case PORTRAIT_UPSIDE_DOWN:
++        return 180;
++      case LANDSCAPE_RIGHT:
++        return 270;
++      default:
++        return 0;
++    }
++  }
+ }
+diff --git a/node_modules/vision-camera-pose-detector/android/src/main/java/com/visioncameraposedetector/VisionCameraPoseDetectorPackage.java b/node_modules/vision-camera-pose-detector/android/src/main/java/com/visioncameraposedetector/VisionCameraPoseDetectorPackage.java
+index 405c1cd..e7c0e00 100644
+--- a/node_modules/vision-camera-pose-detector/android/src/main/java/com/visioncameraposedetector/VisionCameraPoseDetectorPackage.java
++++ b/node_modules/vision-camera-pose-detector/android/src/main/java/com/visioncameraposedetector/VisionCameraPoseDetectorPackage.java
+@@ -6,8 +6,8 @@ import com.facebook.react.ReactPackage;
+ import com.facebook.react.bridge.NativeModule;
+ import com.facebook.react.bridge.ReactApplicationContext;
+ import com.facebook.react.uimanager.ViewManager;
+-import com.mrousavy.camera.frameprocessor.FrameProcessorPlugin;
+-import com.mrousavy.camera.frameprocessor.FrameProcessorPluginRegistry;
++import com.mrousavy.camera.frameprocessors.FrameProcessorPlugin;
++import com.mrousavy.camera.frameprocessors.FrameProcessorPluginRegistry;
+ 
+ import java.util.Collections;
+ import java.util.List;
+@@ -16,7 +16,7 @@ public class VisionCameraPoseDetectorPackage implements ReactPackage {
+   @NonNull
+   @Override
+   public List<NativeModule> createNativeModules(@NonNull ReactApplicationContext reactContext) {
+-    FrameProcessorPluginRegistry.addFrameProcessorPlugin("detectPose", options -> new VisionCameraPoseDetectorModule());
++    FrameProcessorPluginRegistry.addFrameProcessorPlugin("detectPose", (proxy, options) -> new VisionCameraPoseDetectorModule());
+     return Collections.emptyList();
+   }
+ 
+diff --git a/node_modules/vision-camera-pose-detector/lib/commonjs/index.js b/node_modules/vision-camera-pose-detector/lib/commonjs/index.js
+index c0e97ce..30ee93e 100644
+--- a/node_modules/vision-camera-pose-detector/lib/commonjs/index.js
++++ b/node_modules/vision-camera-pose-detector/lib/commonjs/index.js
+@@ -5,7 +5,9 @@ Object.defineProperty(exports, "__esModule", {
+ });
+ exports.detectPose = detectPose;
+ var _reactNativeVisionCamera = require("react-native-vision-camera");
+-const _detectPose = _reactNativeVisionCamera.VisionCameraProxy.getFrameProcessorPlugin('detectPose');
++const _detectPose = typeof _reactNativeVisionCamera.VisionCameraProxy.initFrameProcessorPlugin === 'function'
++  ? _reactNativeVisionCamera.VisionCameraProxy.initFrameProcessorPlugin('detectPose', {})
++  : _reactNativeVisionCamera.VisionCameraProxy.getFrameProcessorPlugin?.('detectPose');
+ function detectPose(frame) {
+   'worklet';
+ 
+diff --git a/node_modules/vision-camera-pose-detector/lib/module/index.js b/node_modules/vision-camera-pose-detector/lib/module/index.js
+index 934030c..6eabfc2 100644
+--- a/node_modules/vision-camera-pose-detector/lib/module/index.js
++++ b/node_modules/vision-camera-pose-detector/lib/module/index.js
+@@ -1,5 +1,7 @@
+ import { VisionCameraProxy } from 'react-native-vision-camera';
+-const _detectPose = VisionCameraProxy.getFrameProcessorPlugin('detectPose');
++const _detectPose = typeof VisionCameraProxy.initFrameProcessorPlugin === 'function'
++  ? VisionCameraProxy.initFrameProcessorPlugin('detectPose', {})
++  : VisionCameraProxy.getFrameProcessorPlugin?.('detectPose');
+ export function detectPose(frame) {
+   'worklet';
+ 
+diff --git a/node_modules/vision-camera-pose-detector/src/index.tsx b/node_modules/vision-camera-pose-detector/src/index.tsx
+index 921f353..90e2a34 100644
+--- a/node_modules/vision-camera-pose-detector/src/index.tsx
++++ b/node_modules/vision-camera-pose-detector/src/index.tsx
+@@ -1,6 +1,9 @@
+ import { VisionCameraProxy, type Frame } from 'react-native-vision-camera';
+ 
+-const _detectPose = VisionCameraProxy.getFrameProcessorPlugin('detectPose');
++const _detectPose =
++  typeof VisionCameraProxy.initFrameProcessorPlugin === 'function'
++    ? VisionCameraProxy.initFrameProcessorPlugin('detectPose', {})
++    : VisionCameraProxy.getFrameProcessorPlugin?.('detectPose');
+ 
+ type Landmark = {
+   x: number;
+diff --git a/node_modules/vision-camera-pose-detector/ios/VisionCameraPoseDetector.m b/node_modules/vision-camera-pose-detector/ios/VisionCameraPoseDetector.m
+index d459077..c282f39 100644
+--- a/node_modules/vision-camera-pose-detector/ios/VisionCameraPoseDetector.m
++++ b/node_modules/vision-camera-pose-detector/ios/VisionCameraPoseDetector.m
+@@ -1,18 +1,23 @@
+ #import <VisionCamera/FrameProcessorPlugin.h>
+ #import <VisionCamera/FrameProcessorPluginRegistry.h>
++#import <VisionCamera/VisionCameraProxyHolder.h>
+ #import <VisionCamera/Frame.h>
+ #import <MLKit.h>
+ 
+ @interface PoseDetectorPlugin : FrameProcessorPlugin
+ 
+-+ (MLKPoseDetector*) detector;
++- (instancetype)initWithProxy:(VisionCameraProxyHolder*)proxy
++                   withOptions:(NSDictionary* _Nullable)options;
++
++- (MLKPoseDetector*) detector;
+ 
+ @end
+ 
+ @implementation PoseDetectorPlugin
+ 
+-- (instancetype) initWithOptions:(NSDictionary*)options; {
+-  self = [super init];
++- (instancetype)initWithProxy:(VisionCameraProxyHolder*)proxy
++                   withOptions:(NSDictionary* _Nullable)options {
++  self = [super initWithProxy:proxy withOptions:options];
+   return self;
+ }
+ 
+@@ -94,11 +99,11 @@
+   return nil;
+ }
+  
+-+ (void) load {
+-  [FrameProcessorPluginRegistry addFrameProcessorPlugin:@"detectPose"
+-                                        withInitializer:^FrameProcessorPlugin*(NSDictionary* options) {
+-    return [[PoseDetectorPlugin alloc] initWithOptions:options];
+-  }];
+-}
++ + (void)load {
++   [FrameProcessorPluginRegistry addFrameProcessorPlugin:@"detectPose"
++                                         withInitializer:^FrameProcessorPlugin*(VisionCameraProxyHolder* proxy, NSDictionary* options) {
++     return [[PoseDetectorPlugin alloc] initWithProxy:proxy withOptions:options];
++   }];
++ }
+ 
+ @end

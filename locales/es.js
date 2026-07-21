@@ -358,6 +358,14 @@ const es = {
     "label.voiceError": "Fallo de reconocimiento de voz",
     "label.voiceServiceMissing": "No hay servicio de reconocimiento de voz instalado",
     "label.voiceUnavailable": "Reconocimiento de voz no disponible",
+    "label.cameraCountButton": "Cámara",
+    "label.cameraCountHint":
+      "Encuadra la cámara para que se vean el hombro, el codo y la muñeca.",
+    "label.cameraCountDone": "Listo",
+    "label.cameraPermissionHint":
+      "Contar flexiones con la cámara necesita acceso a la cámara.",
+    "label.cameraGrantPermission": "Permitir acceso a la cámara",
+    "label.cameraNoDevice": "No se encontró ninguna cámara.",
     "label.back": "Atrás",
     "label.start": "Iniciar",
     "label.startNew": "Nuevo",
