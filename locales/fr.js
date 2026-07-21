@@ -358,6 +358,14 @@ const fr = {
     "label.voiceError": "Échec de reconnaissance vocale",
     "label.voiceServiceMissing": "Aucun service de reconnaissance vocale installé",
     "label.voiceUnavailable": "Reconnaissance vocale indisponible",
+    "label.cameraCountButton": "Caméra",
+    "label.cameraCountHint":
+      "Cadre la caméra pour voir ton épaule, ton coude et ton poignet.",
+    "label.cameraCountDone": "Terminé",
+    "label.cameraPermissionHint":
+      "Compter les pompes avec la caméra nécessite l'accès à la caméra.",
+    "label.cameraGrantPermission": "Autoriser l'accès à la caméra",
+    "label.cameraNoDevice": "Aucune caméra trouvée.",
     "label.back": "Retour",
     "label.start": "Démarrer",
     "label.startNew": "Nouveau",

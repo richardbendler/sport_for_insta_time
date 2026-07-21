@@ -360,6 +360,14 @@ const de = {
     "label.voiceError": "Spracherkennung fehlgeschlagen",
     "label.voiceServiceMissing": "Kein Spracherkennungsdienst installiert",
     "label.voiceUnavailable": "Spracherkennung nicht verfügbar",
+    "label.cameraCountButton": "Kamera",
+    "label.cameraCountHint":
+      "Richte die Kamera so aus, dass Schulter, Ellbogen und Handgelenk sichtbar sind.",
+    "label.cameraCountDone": "Fertig",
+    "label.cameraPermissionHint":
+      "Für die Liegestütz-Zählung per Kamera wird Kamerazugriff benötigt.",
+    "label.cameraGrantPermission": "Kamerazugriff erlauben",
+    "label.cameraNoDevice": "Keine Kamera gefunden.",
     "label.back": "Zurück",
     "label.start": "Start",
     "label.startNew": "Neu starten",
