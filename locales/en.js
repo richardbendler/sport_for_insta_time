@@ -146,16 +146,17 @@ const en = {
     "label.openUsageAccess": "Allow access",
     "label.usageAccessMissing": "Usage access missing",
     "label.usageAccessActive": "Usage access active",
-    "label.later": "Later",
+    "label.batteryOptimizationTitle": "Battery optimization",
+    "label.batteryOptimizationMissing": "Restricted",
+    "label.batteryOptimizationActive": "Exempted",
+    "label.openBatteryOptimization": "Disable battery optimization",
+    "label.batteryOptimizationHint":
+      "Some manufacturers (e.g. Xiaomi, Samsung, Huawei) kill the app in the background while battery optimization is active. When that happens, blocking restricted apps stops working reliably.",
     "label.apps": "Choose apps",
     "label.openApps": "Manage apps",
     "label.grayscaleRestrictedApps": "Show restricted apps in monochrome",
     "label.grayscaleRestrictedAppsHint":
-      "Render restricted apps in the list with a black-and-white style.",
-    "label.grayscalePermissionTitle": "Allow monochrome control",
-    "label.grayscalePermissionBody":
-      "To switch restricted apps to grayscale, the app needs the system permission \"Secure settings\". If you do not grant it, enable Android Accessibility > Color correction > Grayscale manually.",
-    "label.openAccessibilitySettings": "Open accessibility settings",
+      "Dims restricted apps while they're in use and renders them in the list with a black-and-white style.",
     "label.closeApps": "Close apps",
     "label.searchApps": "Search apps",
     "label.searchSports": "Search sports",

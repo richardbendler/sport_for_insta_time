@@ -2,7 +2,6 @@ package com.richardbendler.sportforinstatime
 
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.app.AppOpsManager
-import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.usage.UsageStatsManager
@@ -13,6 +12,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.PowerManager
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
 import androidx.core.app.NotificationCompat
@@ -121,6 +121,31 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
+  fun isIgnoringBatteryOptimizations(promise: Promise) {
+    try {
+      val powerManager = reactContext.getSystemService(Context.POWER_SERVICE) as PowerManager
+      promise.resolve(powerManager.isIgnoringBatteryOptimizations(reactContext.packageName))
+    } catch (e: Exception) {
+      promise.reject("BATTERY_OPTIMIZATION_CHECK_ERROR", e)
+    }
+  }
+
+  @ReactMethod
+  fun requestIgnoreBatteryOptimizations() {
+    try {
+      val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+      intent.data = android.net.Uri.parse("package:${reactContext.packageName}")
+      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      reactContext.startActivity(intent)
+    } catch (e: Exception) {
+      val fallback = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+      fallback.data = android.net.Uri.parse("package:${reactContext.packageName}")
+      fallback.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      reactContext.startActivity(fallback)
+    }
+  }
+
+  @ReactMethod
   fun hasUsageAccess(promise: Promise) {
     try {
       val appOps = reactContext.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
@@ -216,15 +241,6 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
   fun setGrayscaleRestrictedApps(enabled: Boolean) {
     val prefs = getPrefs()
     prefs.edit().putBoolean("grayscale_restricted_apps", enabled).apply()
-  }
-
-  @ReactMethod
-  fun canWriteSecureSettings(promise: Promise) {
-    val status = ContextCompat.checkSelfPermission(
-      reactContext,
-      Manifest.permission.WRITE_SECURE_SETTINGS
-    )
-    promise.resolve(status == PackageManager.PERMISSION_GRANTED)
   }
 
   @ReactMethod
