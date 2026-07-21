@@ -12,7 +12,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.provider.Settings
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -54,13 +53,9 @@ class InstaBlockerService : AccessibilityService() {
   private var pendingHomeClear: Runnable? = null
   private val homeClearDelayMillis = 600L
   private val grayscalePrefKey = "grayscale_restricted_apps"
-  private val daltonizerMonochromacy = 0
-  private val daltonizerEnabledKey = "accessibility_display_daltonizer_enabled"
-  private val daltonizerModeKey = "accessibility_display_daltonizer"
 
-  private var grayscaleApplied = false
-  private var previousDaltonizerEnabled: Int? = null
-  private var previousDaltonizerMode: Int? = null
+  private var grayscaleOverlayView: View? = null
+  private var grayscaleOverlayShown = false
 
   private val ignoredPackagePrefixes = setOf(
     "com.android.systemui",
@@ -95,6 +90,7 @@ class InstaBlockerService : AccessibilityService() {
     super.onServiceConnected()
     setupOverlay()
     setupWorkoutOverlay()
+    setupGrayscaleOverlay()
     setupNotificationChannel()
     registerScreenReceiver()
     handler.post(ticker)
@@ -192,9 +188,9 @@ class InstaBlockerService : AccessibilityService() {
   override fun onDestroy() {
     super.onDestroy()
     teardownOverlay()
+    teardownGrayscaleOverlay()
     teardownWorkoutOverlay()
     updateCountdownNotification(0, false, null)
-    restoreGrayscale()
     unregisterScreenReceiver()
   }
 
@@ -663,10 +659,10 @@ class InstaBlockerService : AccessibilityService() {
 
   private fun syncGrayscaleState(isControlled: Boolean) {
     if (!shouldUseGrayscale() || !isControlled) {
-      restoreGrayscale()
+      hideGrayscaleOverlay()
       return
     }
-    applyGrayscale()
+    showGrayscaleOverlay()
   }
 
   private fun shouldUseGrayscale(): Boolean {
@@ -674,46 +670,52 @@ class InstaBlockerService : AccessibilityService() {
     return prefs.getBoolean(grayscalePrefKey, false)
   }
 
-  private fun canWriteSecureSettings(): Boolean {
-    return ContextCompat.checkSelfPermission(
-      this,
-      android.Manifest.permission.WRITE_SECURE_SETTINGS
-    ) == PackageManager.PERMISSION_GRANTED
+  private fun setupGrayscaleOverlay() {
+    if (windowManager == null) {
+      windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    }
+    if (grayscaleOverlayView != null) {
+      return
+    }
+    val view = View(this)
+    view.setBackgroundColor(android.graphics.Color.argb(150, 60, 60, 60))
+    view.visibility = View.GONE
+    val params = WindowManager.LayoutParams(
+      WindowManager.LayoutParams.MATCH_PARENT,
+      WindowManager.LayoutParams.MATCH_PARENT,
+      WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
+      WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
+        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+      PixelFormat.TRANSLUCENT
+    )
+    params.gravity = Gravity.TOP or Gravity.START
+    windowManager?.addView(view, params)
+    grayscaleOverlayView = view
   }
 
-  private fun applyGrayscale() {
-    if (grayscaleApplied) {
+  private fun teardownGrayscaleOverlay() {
+    val view = grayscaleOverlayView ?: return
+    windowManager?.removeView(view)
+    grayscaleOverlayView = null
+    grayscaleOverlayShown = false
+  }
+
+  private fun showGrayscaleOverlay() {
+    if (grayscaleOverlayShown) {
       return
     }
-    if (!canWriteSecureSettings()) {
+    grayscaleOverlayView?.visibility = View.VISIBLE
+    grayscaleOverlayShown = true
+  }
+
+  private fun hideGrayscaleOverlay() {
+    if (!grayscaleOverlayShown) {
       return
     }
-    try {
-      val resolver = contentResolver
-      previousDaltonizerEnabled = Settings.Secure.getInt(
-        resolver,
-        daltonizerEnabledKey,
-        0
-      )
-      previousDaltonizerMode = Settings.Secure.getInt(
-        resolver,
-        daltonizerModeKey,
-        -1
-      )
-      Settings.Secure.putInt(
-        resolver,
-        daltonizerEnabledKey,
-        1
-      )
-      Settings.Secure.putInt(
-        resolver,
-        daltonizerModeKey,
-        daltonizerMonochromacy
-      )
-      grayscaleApplied = true
-    } catch (e: SecurityException) {
-      // Permission missing; leave grayscale unchanged.
-    }
+    grayscaleOverlayView?.visibility = View.GONE
+    grayscaleOverlayShown = false
   }
 
   private fun createWorkoutOverlayDragListener(): View.OnTouchListener {
@@ -756,39 +758,6 @@ class InstaBlockerService : AccessibilityService() {
         }
         else -> false
       }
-    }
-  }
-
-  private fun restoreGrayscale() {
-    if (!grayscaleApplied) {
-      return
-    }
-    if (!canWriteSecureSettings()) {
-      grayscaleApplied = false
-      previousDaltonizerEnabled = null
-      previousDaltonizerMode = null
-      return
-    }
-    try {
-      val resolver = contentResolver
-      val enabledValue = previousDaltonizerEnabled ?: 0
-      val modeValue = previousDaltonizerMode ?: -1
-      Settings.Secure.putInt(
-        resolver,
-        daltonizerEnabledKey,
-        enabledValue
-      )
-      Settings.Secure.putInt(
-        resolver,
-        daltonizerModeKey,
-        modeValue
-      )
-    } catch (e: SecurityException) {
-      // Ignore restore failures.
-    } finally {
-      grayscaleApplied = false
-      previousDaltonizerEnabled = null
-      previousDaltonizerMode = null
     }
   }
 

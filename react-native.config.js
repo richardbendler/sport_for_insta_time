@@ -19,20 +19,5 @@ module.exports = {
         },
       },
     },
-    "react-native-vision-camera": {
-      platforms: {
-        android: null,
-      },
-    },
-    "vision-camera-pose-detector": {
-      platforms: {
-        android: null,
-      },
-    },
-    "react-native-worklets-core": {
-      platforms: {
-        android: null,
-      },
-    },
   },
 };

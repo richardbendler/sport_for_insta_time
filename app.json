@@ -15,9 +15,6 @@
         "CFBundleDisplayName": "Sport Habit Coach",
         "NSMicrophoneUsageDescription": "Allow microphone access to count reps by voice.",
         "NSSpeechRecognitionUsageDescription": "Allow speech recognition to count reps by voice.",
-        "NSCameraUsageDescription": "Allow camera access to count push-ups.",
-        "NSPhotoLibraryUsageDescription": "Let users select or celebrate workout photos so they can share progress snapshots and highlight training wins.",
-        "NSLocationWhenInUseUsageDescription": "Use location data during outdoor workouts so nearby routes, pace stats, and guidance stay relevant to the user.",
         "ITSAppUsesNonExemptEncryption": false
       },
       "bundleIdentifier": "com.richardbendler.sportforscreentime"
@@ -28,7 +25,6 @@
       "icon": "./assets/icon.png",
       "permissions": [
         "RECORD_AUDIO",
-        "CAMERA",
         "POST_NOTIFICATIONS"
       ],
       "adaptiveIcon": {

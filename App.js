@@ -54,6 +54,7 @@ try {
     error
   );
 }
+import * as Localization from "expo-localization";
 import Voice from "@react-native-voice/voice";
 import { I18nextProvider, useTranslation } from "react-i18next";
 import i18n from "./i18n";
@@ -75,7 +76,6 @@ const STORAGE_KEYS = {
   accessibilityDisclosure: "@accessibility_disclosure_v1",
   usagePermissions: "@usage_permissions_prompted_v1",
   notificationsPermissions: "@notifications_permissions_prompted_v1",
-  grayscalePermissions: "@grayscale_permissions_prompted_v1",
   motivationActions: "@motivation_actions_v1",
   motivationFunFactsUsed: "@motivation_fun_facts_used_v1",
   carryover: "@carryover_seconds_v1",
@@ -3643,12 +3643,10 @@ function AppContent() {
     useState(false);
   const [usagePermissionsPrompted, setUsagePermissionsPrompted] = useState(false);
   const [usageAccessGranted, setUsageAccessGranted] = useState(false);
+  const [batteryOptimizationIgnored, setBatteryOptimizationIgnored] =
+    useState(true);
   const [notificationsPrompted, setNotificationsPrompted] = useState(false);
   const [notificationsGranted, setNotificationsGranted] = useState(false);
-  const [grayscalePermissionsPrompted, setGrayscalePermissionsPrompted] =
-    useState(false);
-  const [grayscalePermissionGranted, setGrayscalePermissionGranted] =
-    useState(true);
   const [gettingStartedOpen, setGettingStartedOpen] = useState(false);
   const [gettingStartedTouched, setGettingStartedTouched] = useState(false);
   const [motivationOpen, setMotivationOpen] = useState(false);
@@ -4115,9 +4113,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       const notificationsPermissionsRaw = await AsyncStorage.getItem(
         STORAGE_KEYS.notificationsPermissions
       );
-      const grayscalePermissionsRaw = await AsyncStorage.getItem(
-        STORAGE_KEYS.grayscalePermissions
-      );
       const sportColorsRaw = await AsyncStorage.getItem(
         STORAGE_KEYS.sportColors
       );
@@ -4137,7 +4132,15 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       const creditFactorRestoreRaw = await AsyncStorage.getItem(
         STORAGE_KEYS.creditFactorRestore
       );
-      const parsedSports = sportsRaw ? JSON.parse(sportsRaw) : [];
+      let parsedSports = [];
+      if (sportsRaw) {
+        try {
+          const parsed = JSON.parse(sportsRaw);
+          parsedSports = Array.isArray(parsed) ? parsed : [];
+        } catch (error) {
+          console.warn("Failed to parse sports", error);
+        }
+      }
       const cleanedSports = parsedSports.length
         ? pruneNonPushupPresets(parsedSports)
         : parsedSports;
@@ -4172,7 +4175,15 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           JSON.stringify(normalizedSportColors)
         );
       }
-      const parsedLogs = logsRaw ? JSON.parse(logsRaw) : {};
+      let parsedLogs = {};
+      if (logsRaw) {
+        try {
+          const parsed = JSON.parse(logsRaw);
+          parsedLogs = parsed && typeof parsed === "object" ? parsed : {};
+        } catch (error) {
+          console.warn("Failed to parse logs", error);
+        }
+      }
       const { logs: migratedLogs, changed: logsMigrated } =
         migrateLogsForSportIds(parsedLogs, SPORT_ID_MIGRATIONS);
       const { normalized: normalizedLogs, changed: logsChanged } = normalizeLogs(
@@ -4221,9 +4232,15 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           JSON.stringify(normalizedLogs)
         );
       }
-      const parsedSettings = settingsRaw
-        ? { ...DEFAULT_SETTINGS, ...JSON.parse(settingsRaw) }
-        : DEFAULT_SETTINGS;
+      let parsedSettings = DEFAULT_SETTINGS;
+      if (settingsRaw) {
+        try {
+          const parsed = JSON.parse(settingsRaw);
+          parsedSettings = { ...DEFAULT_SETTINGS, ...(parsed || {}) };
+        } catch (error) {
+          console.warn("Failed to parse settings", error);
+        }
+      }
       setSettings(parsedSettings);
       setLanguage(parsedSettings.language || DEFAULT_SETTINGS.language);
       setSportSortMode(
@@ -4245,10 +4262,18 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       );
       setUsagePermissionsPrompted(usagePermissionsRaw === "true");
       setNotificationsPrompted(!!notificationsPermissionsRaw);
-      setGrayscalePermissionsPrompted(grayscalePermissionsRaw === "true");
       setNotificationsGranted(false);
       setTutorialSeen(tutorialSeenRaw === "true");
-      setWorkoutHistory(workoutsRaw ? JSON.parse(workoutsRaw) : []);
+      let parsedWorkoutHistory = [];
+      if (workoutsRaw) {
+        try {
+          const parsed = JSON.parse(workoutsRaw);
+          parsedWorkoutHistory = Array.isArray(parsed) ? parsed : [];
+        } catch (error) {
+          console.warn("Failed to parse workout history", error);
+        }
+      }
+      setWorkoutHistory(parsedWorkoutHistory);
       if (creditLockMinimumsRaw) {
         try {
           const parsed = JSON.parse(creditLockMinimumsRaw) || {};
@@ -4362,7 +4387,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       setUsedFunFactIds(parsedUsedFunFacts);
       setHasLoaded(true);
     };
-    load();
+    load().catch((error) => {
+      console.warn("Failed to load app data", error);
+      setHasLoaded(true);
+    });
   }, []);
 
   const consumeWorkoutOverlayOpen = async () => {
@@ -5207,7 +5235,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       STORAGE_KEYS.accessibilityDisclosure,
       STORAGE_KEYS.usagePermissions,
       STORAGE_KEYS.notificationsPermissions,
-      STORAGE_KEYS.grayscalePermissions,
       STORAGE_KEYS.creditLockMinimums,
       STORAGE_KEYS.creditFactorRestore,
     ]);
@@ -5496,6 +5523,26 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     return !!hasAccess;
   };
 
+  const checkBatteryOptimization = async () => {
+    if (!InstaControl?.isIgnoringBatteryOptimizations) {
+      return true;
+    }
+    try {
+      const ignored = await InstaControl.isIgnoringBatteryOptimizations();
+      setBatteryOptimizationIgnored(!!ignored);
+      return !!ignored;
+    } catch (error) {
+      console.warn("isIgnoringBatteryOptimizations failed", error);
+      return true;
+    }
+  };
+
+  const openBatteryOptimizationSettings = () => {
+    if (InstaControl?.requestIgnoreBatteryOptimizations) {
+      InstaControl.requestIgnoreBatteryOptimizations();
+    }
+  };
+
   const refreshMainPermissions = useCallback(async () => {
     try {
       await checkAccessibility();
@@ -5507,21 +5554,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     } catch (error) {
       console.warn("checkUsageAccess failed", error);
     }
-  }, []);
-
-  const checkGrayscalePermission = useCallback(async () => {
-    if (!isAndroid || !InstaControl?.canWriteSecureSettings) {
-      setGrayscalePermissionGranted(true);
-      return true;
-    }
     try {
-      const canWrite = await InstaControl.canWriteSecureSettings();
-      setGrayscalePermissionGranted(!!canWrite);
-      return !!canWrite;
+      await checkBatteryOptimization();
     } catch (error) {
-      console.warn("canWriteSecureSettings failed", error);
-      setGrayscalePermissionGranted(false);
-      return false;
+      console.warn("checkBatteryOptimization failed", error);
     }
   }, []);
 
@@ -5760,11 +5796,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   useEffect(() => {
     checkAccessibility();
     checkUsageAccess();
+    checkBatteryOptimization();
     refreshNotificationPermission();
-    if (settings.grayscaleRestrictedApps) {
-      checkGrayscalePermission();
-    }
-  }, [isSettingsOpen, statsSportId, settings.grayscaleRestrictedApps, checkGrayscalePermission]);
+  }, [isSettingsOpen, statsSportId]);
 
   useEffect(() => {
     if (!InstaControl?.setSickModeLimitMinutes) {
@@ -5787,17 +5821,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     if (gettingStartedOpen || motivationOpen) {
       checkAccessibility();
       checkUsageAccess();
+      checkBatteryOptimization();
       refreshNotificationPermission();
     }
   }, [gettingStartedOpen, motivationOpen]);
-
-  useEffect(() => {
-    if (!settings.grayscaleRestrictedApps) {
-      setGrayscalePermissionGranted(true);
-      return;
-    }
-    checkGrayscalePermission();
-  }, [settings.grayscaleRestrictedApps, checkGrayscalePermission]);
 
   useEffect(() => {
     if (needsAccessibility === false && accessibilityDisclosureVisible) {
@@ -5982,45 +6009,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       ...settings,
       grayscaleRestrictedApps: nextEnabled,
     };
-    if (!nextEnabled) {
-      if (InstaControl?.setGrayscaleRestrictedApps) {
-        InstaControl.setGrayscaleRestrictedApps(false);
-      }
-      setGrayscalePermissionGranted(true);
-      await saveSettings(nextSettings);
-      return;
-    }
-    if (isAndroid && InstaControl?.canWriteSecureSettings) {
-      let canWrite = false;
-      try {
-        canWrite = await InstaControl.canWriteSecureSettings();
-      } catch (error) {
-        console.warn("canWriteSecureSettings failed", error);
-      }
-      setGrayscalePermissionGranted(!!canWrite);
-      if (!canWrite) {
-        if (!grayscalePermissionsPrompted) {
-          Alert.alert(
-            t("label.grayscalePermissionTitle"),
-            t("label.grayscalePermissionBody"),
-            [
-              { text: t("label.later"), style: "cancel" },
-              {
-                text: t("label.openAccessibilitySettings"),
-                onPress: openAccessibilitySettingsDirect,
-              },
-            ]
-          );
-          await AsyncStorage.setItem(
-            STORAGE_KEYS.grayscalePermissions,
-            "true"
-          );
-          setGrayscalePermissionsPrompted(true);
-        }
-      }
-    }
     if (InstaControl?.setGrayscaleRestrictedApps) {
-      InstaControl.setGrayscaleRestrictedApps(true);
+      InstaControl.setGrayscaleRestrictedApps(nextEnabled);
     }
     await saveSettings(nextSettings);
   };
@@ -9371,6 +9361,8 @@ const getSpeechLocale = () => {
   const showGettingStartedSection = isAndroid;
   const accessibilityMissing = isAndroid && needsAccessibility !== false;
   const usageAccessMissing = isAndroid && usageAccessGranted !== true;
+  const batteryOptimizationMissing =
+    isAndroid && batteryOptimizationIgnored !== true;
   const missingPermissions = isAndroid
     ? accessibilityMissing || usageAccessMissing
     : !(permissionsPrompted && usagePermissionsPrompted && accessibilityDisclosureAccepted);
@@ -12488,22 +12480,6 @@ const getSpeechLocale = () => {
                 <Text style={styles.helperText}>
                   {t("label.grayscaleRestrictedAppsHint")}
                 </Text>
-                {settings.grayscaleRestrictedApps &&
-                !grayscalePermissionGranted ? (
-                  <View style={styles.grayscalePermissionNotice}>
-                    <Text style={styles.helperText}>
-                      {t("label.grayscalePermissionBody")}
-                    </Text>
-                    <Pressable
-                      style={styles.secondaryButton}
-                      onPress={openAccessibilitySettingsDirect}
-                    >
-                      <Text style={styles.secondaryButtonText}>
-                        {t("label.openAccessibilitySettings")}
-                      </Text>
-                    </Pressable>
-                  </View>
-                ) : null}
               </View>
             </>
           ) : null}
@@ -12617,6 +12593,12 @@ const getSpeechLocale = () => {
                     ? t("label.usageAccessMissing")
                     : t("label.usageAccessActive")}
                 </Text>
+                <Text style={styles.helperText}>
+                  {t("label.batteryOptimizationTitle")}:{" "}
+                  {batteryOptimizationMissing
+                    ? t("label.batteryOptimizationMissing")
+                    : t("label.batteryOptimizationActive")}
+                </Text>
                 {accessibilityMissing ? (
                   <Pressable
                     ref={tutorialAccessibilityPermissionRef}
@@ -12639,6 +12621,19 @@ const getSpeechLocale = () => {
                     </Text>
                   </Pressable>
                 ) : null}
+                {batteryOptimizationMissing ? (
+                  <Pressable
+                    style={styles.permissionActionButton}
+                    onPress={openBatteryOptimizationSettings}
+                  >
+                    <Text style={styles.permissionActionButtonText}>
+                      {t("label.openBatteryOptimization")}
+                    </Text>
+                  </Pressable>
+                ) : null}
+                <Text style={styles.helperText}>
+                  {t("label.batteryOptimizationHint")}
+                </Text>
               </>
             ) : (
               <>
@@ -16252,10 +16247,6 @@ const styles = StyleSheet.create({
   grayscaleText: {
     color: COLORS.muted,
   },
-  grayscalePermissionNotice: {
-    marginTop: 10,
-    gap: 8,
-  },
   appLabel: {
     color: COLORS.text,
     fontWeight: "600",
@@ -16557,12 +16548,36 @@ const errorStyles = StyleSheet.create({
     color: COLORS.text,
     textAlign: "center",
   },
+  retryButton: {
+    marginTop: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 10,
+    backgroundColor: COLORS.ember,
+  },
+  retryButtonText: {
+    color: COLORS.ink,
+    fontWeight: "700",
+  },
 });
+
+const ERROR_BOUNDARY_STRINGS = {
+  de: { title: "App konnte nicht geladen werden", retry: "Erneut versuchen" },
+  en: { title: "The app failed to load", retry: "Try again" },
+  es: { title: "La app no se pudo cargar", retry: "Reintentar" },
+  fr: { title: "L'app n'a pas pu se charger", retry: "Réessayer" },
+};
+
+const getErrorBoundaryStrings = () => {
+  const locale = Localization.locale?.toLowerCase().split("-")[0];
+  return ERROR_BOUNDARY_STRINGS[locale] || ERROR_BOUNDARY_STRINGS.en;
+};
 
 class AppErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
     this.state = { error: null };
+    this.handleRetry = this.handleRetry.bind(this);
   }
 
   static getDerivedStateFromError(error) {
@@ -16573,13 +16588,21 @@ class AppErrorBoundary extends React.Component {
     console.error("App initialization failed", error, info?.componentStack);
   }
 
+  handleRetry() {
+    this.setState({ error: null });
+  }
+
   render() {
     const { error } = this.state;
     if (error) {
+      const strings = getErrorBoundaryStrings();
       return (
         <SafeAreaView style={errorStyles.container}>
-          <Text style={errorStyles.title}>App konnte nicht geladen werden</Text>
+          <Text style={errorStyles.title}>{strings.title}</Text>
           <Text style={errorStyles.message}>{error.message}</Text>
+          <Pressable style={errorStyles.retryButton} onPress={this.handleRetry}>
+            <Text style={errorStyles.retryButtonText}>{strings.retry}</Text>
+          </Pressable>
         </SafeAreaView>
       );
     }
