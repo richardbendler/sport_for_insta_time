@@ -176,6 +176,32 @@ sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" "ndk;27.
 yes | sdkmanager --licenses
 ```
 
+**Bekanntes Problem (WSL2-Netzwerkbug bei großen Downloads):** Der `sdkmanager`- oder
+Gradle-Download der NDK (~1 GB) kann in WSL2 mit einem Fehler wie
+`javax.crypto.AEADBadTagException: Tag mismatch!` oder `Failed to install the following
+SDK components: ndk;...` abbrechen. Das liegt nicht am Projekt, sondern an einem bekannten
+WSL2-Bug: Der virtuelle Netzwerkadapter macht "TCP Checksum Offloading" bei großen
+Downloads manchmal falsch, wodurch Pakete bei der TLS-Entschlüsselung als beschädigt
+erkannt werden.
+
+Fix (einmalig, in einer **PowerShell als Administrator** unter Windows, nicht in WSL):
+```powershell
+Get-NetAdapter | Where-Object { $_.InterfaceDescription -match "Hyper-V" }
+# Namen aus der Ausgabe uebernehmen, z.B. "vEthernet (WSL (Hyper-V firewall))"
+Set-NetAdapterChecksumOffload -Name "vEthernet (WSL (Hyper-V firewall))" -TcpIPv4 Disabled -UdpIPv4 Disabled -IpIPv4 Disabled -TcpIPv6 Disabled -UdpIPv6 Disabled
+wsl --shutdown
+```
+Danach WSL neu starten und den Download erneut versuchen.
+
+Alternativ (schneller, aber nur wenn auf demselben Rechner schon eine Windows-Android-SDK
+mit derselben NDK-Version existiert, z.B. von `npx expo run:android`): die NDK-Ordner
+direkt kopieren statt neu herunterzuladen:
+```bash
+cp -r "/mnt/c/Users/<DEIN_USER>/AppData/Local/Android/Sdk/ndk/27.1.12297006" ~/Android/Sdk/ndk/
+```
+Das ist aber nur ein Workaround für diese eine Maschine - der Netzwerk-Fix oben behebt die
+Ursache dauerhaft für jeden Download.
+
 #### 5) EAS CLI
 Option A (empfohlen): npm-global in dein Home legen (ohne sudo)
 
