@@ -165,6 +165,7 @@ const en = {
     "label.closeApps": "Close apps",
     "label.searchApps": "Search apps",
     "label.searchSports": "Search sports",
+    "label.clearSearch": "Clear search",
     "label.sortAlpha": "Alphabetical",
     "label.sortRecent": "Last used",
     "label.sortManual": "Manual",

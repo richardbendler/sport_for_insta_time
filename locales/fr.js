@@ -168,6 +168,7 @@ const fr = {
     "label.closeApps": "Fermer les apps",
     "label.searchApps": "Rechercher des apps",
     "label.searchSports": "Rechercher des sports",
+    "label.clearSearch": "Effacer la recherche",
     "label.sortAlpha": "Alphabétique",
     "label.sortRecent": "Dernière utilisation",
     "label.sortManual": "Manuel",
