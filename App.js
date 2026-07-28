@@ -3741,6 +3741,8 @@ function AppContent() {
   const [gettingStartedTouched, setGettingStartedTouched] = useState(false);
   const [motivationOpen, setMotivationOpen] = useState(false);
   const [motivationTouched, setMotivationTouched] = useState(false);
+  const [motivationHiddenThisSession, setMotivationHiddenThisSession] =
+    useState(false);
   const [permissionsCheckTick, setPermissionsCheckTick] = useState(0);
   const [dismissedMotivationActionId, setDismissedMotivationActionId] =
     useState(null);
@@ -9762,7 +9764,16 @@ const getSpeechLocale = () => {
     const cleanedUsedIds = usedFunFactIds.filter((id) => validIds.has(id));
     const usedSet = new Set(cleanedUsedIds);
     const availableFacts = funFacts.filter((fact) => !usedSet.has(fact.id));
-    const pool = availableFacts.length ? availableFacts : funFacts;
+    // Prefer a fact tagged to match the currently recommended tip so the
+    // quote and the tip feel related instead of picked independently.
+    const taggedPool = recommendedActionId
+      ? availableFacts.filter((fact) => fact.tag === recommendedActionId)
+      : [];
+    const pool = taggedPool.length
+      ? taggedPool
+      : availableFacts.length
+      ? availableFacts
+      : funFacts;
     const selected = pool[Math.floor(Math.random() * pool.length)];
     if (!selected) {
       setActiveFunFactId(null);
@@ -9777,7 +9788,7 @@ const getSpeechLocale = () => {
     } else if (!usedSet.has(selected.id)) {
       markFunFactUsed(nextUsedIds);
     }
-  }, [funFacts, markFunFactUsed, usedFunFactIds]);
+  }, [funFacts, markFunFactUsed, usedFunFactIds, recommendedActionId]);
 
   const screenTimeFeaturesEnabled = isAndroid;
 
@@ -9820,6 +9831,14 @@ const getSpeechLocale = () => {
         bodyKey: "label.motivationNewSportBody",
         actionLabelKey: "label.motivationActionNewSport",
         action: () => openSportModal(),
+      },
+      {
+        id: "createCategory",
+        icon: "Cat",
+        titleKey: "label.motivationCreateCategoryTitle",
+        bodyKey: "label.motivationCreateCategoryBody",
+        actionLabelKey: "label.motivationActionCreateCategory",
+        action: () => setCategoriesModalOpen(true),
       },
       {
         id: "widget",
@@ -10100,7 +10119,7 @@ const getSpeechLocale = () => {
     showGettingStartedSection && missingPermissions;
   const showMotivationBlock =
     !missingPermissions &&
-    experimentalFeaturesEnabled &&
+    !motivationHiddenThisSession &&
     shouldShowMotivationAction;
 
   const handleMotivationAction = (actionItem) => {
@@ -10111,11 +10130,21 @@ const getSpeechLocale = () => {
       setDismissedMotivationActionId(actionItem.id);
     }
     markMotivationActionCompleted(actionItem.id);
+    setMotivationHiddenThisSession(true);
     try {
       actionItem.action();
     } catch (error) {
       console.warn("Motivation action failed", actionItem?.id, error);
     }
+  };
+
+  const handleMotivationDismiss = (actionItem) => {
+    if (!actionItem) {
+      return;
+    }
+    setDismissedMotivationActionId(actionItem.id);
+    markMotivationActionCompleted(actionItem.id);
+    setMotivationHiddenThisSession(true);
   };
 
   useEffect(() => {
@@ -10141,6 +10170,9 @@ const getSpeechLocale = () => {
     */
     if (overallStatsOpen) {
       markMotivationActionCompleted("stats");
+    }
+    if (categoriesModalOpen) {
+      markMotivationActionCompleted("createCategory");
     }
     if (isSettingsOpen) {
       markMotivationActionCompleted("settings");
@@ -10168,6 +10200,7 @@ const getSpeechLocale = () => {
     isWorkoutOpen,
     workoutRunning,
     overallStatsOpen,
+    categoriesModalOpen,
     isSettingsOpen,
     isPrefaceSettingsOpen,
     isAppsSettingsOpen,
@@ -13642,21 +13675,26 @@ const getSpeechLocale = () => {
                 setMotivationOpen((prev) => !prev);
               }}
             >
-              <View>
-                {motivationOpen ? (
-                  <>
-                    <Text style={styles.motivationQuoteTitle}>
-                      {activeQuoteTitle}
+              <View style={styles.motivationHeaderContent}>
+                <Text style={styles.motivationBadge}>{"\u{1F4A1}"}</Text>
+                <View style={styles.motivationHeaderText}>
+                  {motivationOpen ? (
+                    <>
+                      <Text style={styles.motivationQuoteTitle}>
+                        {activeQuoteTitle}
+                      </Text>
+                      <Text style={styles.motivationQuoteBody}>
+                        {"“"}
+                        {activeQuoteBody}
+                        {"”"}
+                      </Text>
+                    </>
+                  ) : (
+                    <Text style={styles.permissionCollapsedText}>
+                      {t("label.motivationCollapsedHint")}
                     </Text>
-                    <Text style={styles.motivationQuoteBody}>
-                      {activeQuoteBody}
-                    </Text>
-                  </>
-                ) : (
-                  <Text style={styles.permissionCollapsedText}>
-                    {t("label.motivationCollapsedHint")}
-                  </Text>
-                )}
+                  )}
+                </View>
               </View>
               <Text style={styles.permissionToggle}>
                 {motivationOpen ? "-" : "+"}
@@ -13670,19 +13708,29 @@ const getSpeechLocale = () => {
                 <Text style={styles.motivationCardBody}>
                   {activeActionBody}
                 </Text>
-                <Pressable
-                  style={[
-                    styles.motivationActionButton,
-                    activeAction?.disabled &&
-                      styles.motivationActionButtonDisabled,
-                  ]}
-                  onPress={() => handleMotivationAction(activeAction)}
-                  disabled={activeAction?.disabled}
-                >
-                  <Text style={styles.motivationActionText}>
-                    {activeActionLabel}
-                  </Text>
-                </Pressable>
+                <View style={styles.motivationActionRow}>
+                  <Pressable
+                    style={[
+                      styles.motivationActionButton,
+                      activeAction?.disabled &&
+                        styles.motivationActionButtonDisabled,
+                    ]}
+                    onPress={() => handleMotivationAction(activeAction)}
+                    disabled={activeAction?.disabled}
+                  >
+                    <Text style={styles.motivationActionText}>
+                      {activeActionLabel}
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    style={styles.motivationDismissButton}
+                    onPress={() => handleMotivationDismiss(activeAction)}
+                  >
+                    <Text style={styles.motivationDismissText}>
+                      {t("label.motivationNotInterested")}
+                    </Text>
+                  </Pressable>
+                </View>
               </View>
             ) : null}
           </View>
@@ -15791,12 +15839,17 @@ const styles = StyleSheet.create({
     lineHeight: 14,
     marginBottom: 2,
   },
+  motivationActionRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 6,
+  },
   motivationActionButton: {
+    flex: 1,
     backgroundColor: COLORS.accent,
     borderRadius: 10,
     paddingVertical: 8,
     alignItems: "center",
-    marginTop: 6,
   },
   motivationActionButtonDisabled: {
     opacity: 0.5,
@@ -15804,6 +15857,32 @@ const styles = StyleSheet.create({
   motivationActionText: {
     color: COLORS.background,
     fontWeight: "700",
+  },
+  motivationDismissButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(148, 163, 184, 0.3)",
+  },
+  motivationDismissText: {
+    color: COLORS.muted,
+    fontWeight: "600",
+    fontSize: 12,
+  },
+  motivationHeaderContent: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+    flex: 1,
+  },
+  motivationBadge: {
+    fontSize: 20,
+  },
+  motivationHeaderText: {
+    flex: 1,
   },
   aiInfoWrapper: {
     marginTop: 12,

@@ -304,6 +304,7 @@ const fr = {
     "label.motivationActionWorkout": "Ouvre Workout",
     "label.motivationActionStats": "Voir les stats",
     "label.motivationActionNewSport": "Teste un nouveau sport",
+    "label.motivationActionCreateCategory": "Créer une catégorie",
     "label.motivationActionWidget": "Ajoute un widget",
     "label.motivationActionNotifications": "Active les rappels",
     "label.motivationActionApps": "Choisis des apps",
@@ -325,6 +326,10 @@ const fr = {
     "label.motivationNewSportTitle": "Ajoute un autre sport",
     "label.motivationNewSportBody":
       "Diversifie ton entraînement avec une nouvelle activité.",
+    "label.motivationCreateCategoryTitle": "Crée ta propre catégorie",
+    "label.motivationCreateCategoryBody":
+      "Range tes sports dans des catégories comme «Force» ou «Endurance» - ou invente les tiennes.",
+    "label.motivationNotInterested": "Pas intéressé",
     "label.motivationWidgetTitle": "Ajoute un widget",
     "label.motivationWidgetBody":
       "Ajoute le widget pour suivre ton Screen Time rapidement.",
