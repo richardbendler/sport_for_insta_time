@@ -472,7 +472,10 @@ const es = {
       "Toca Iniciar para comenzar el temporizador; deténlo cuando termines para que duración y dificultad sumen el tiempo de pantalla.",
     "tutorial.step.samplePushupInfo.title": "¡Bien hecho!",
     "tutorial.step.samplePushupInfo.body":
-      "Para que lo sepas: esta flexión de prueba se eliminará porque solo era para el tutorial.",
+      "Para que lo sepas: este registro de prueba se eliminará porque solo era para el tutorial.",
+    "tutorial.step.categories.title": "Usa las categorías",
+    "tutorial.step.categories.body":
+      "Aquí puedes crear, renombrar o eliminar tus propias categorías como \"Fuerza\" o \"Resistencia\" y clasificar tus deportes en ellas.",
     "tutorial.step.back.title": "Volver al inicio",
     "tutorial.step.back.body":
       "Toca Atrás para regresar a la lista y revisar otras tarjetas.",

@@ -470,7 +470,10 @@ const en = {
       "Tap Start to begin a timer; stop it when you finish so duration and difficulty produce Screen Time.",
     "tutorial.step.samplePushupInfo.title": "Nice work!",
     "tutorial.step.samplePushupInfo.body":
-      "Quick note: this sample push-up will be deleted again since it’s only for the tutorial.",
+      "Quick note: this test entry will be deleted again since it’s only for the tutorial.",
+    "tutorial.step.categories.title": "Use categories",
+    "tutorial.step.categories.body":
+      "Here you can create, rename, or delete your own categories like \"Strength\" or \"Endurance\" and sort your sports into them.",
     "tutorial.step.back.title": "Back to overview",
     "tutorial.step.back.body":
       "Tap Back to return to your sports list and review other cards.",

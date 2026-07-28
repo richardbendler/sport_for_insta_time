@@ -472,7 +472,10 @@ const fr = {
       "Touche Démarrer pour lancer le minuteur; arrête-le quand tu as fini afin que durée et difficulté s'additionnent.",
     "tutorial.step.samplePushupInfo.title": "Bien joué !",
     "tutorial.step.samplePushupInfo.body":
-      "Juste pour info : cette pompe de démonstration va être supprimée, elle n’était utilisée que pour le tutoriel.",
+      "Juste pour info : cette entrée de démonstration va être supprimée, elle n’était utilisée que pour le tutoriel.",
+    "tutorial.step.categories.title": "Utiliser les catégories",
+    "tutorial.step.categories.body":
+      "Ici, tu peux créer, renommer ou supprimer tes propres catégories comme «Force» ou «Endurance» et y ranger tes sports.",
     "tutorial.step.back.title": "Retour à la liste",
     "tutorial.step.back.body":
       "Touche Retour pour revenir à la liste et consulter d'autres sports.",

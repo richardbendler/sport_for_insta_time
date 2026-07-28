@@ -474,7 +474,10 @@ const de = {
       "Tippe auf Start, um den Timer zu starten; Dauer und Schwierigkeit ergeben deine Screen Time.",
     "tutorial.step.samplePushupInfo.title": "Toll gemacht!",
     "tutorial.step.samplePushupInfo.body":
-      "Nur zur Info: Der Probestütz wird gleich wieder entfernt, er war nur fürs Tutorial gedacht.",
+      "Nur zur Info: Dieser Test-Eintrag wird gleich wieder entfernt, er war nur fürs Tutorial gedacht.",
+    "tutorial.step.categories.title": "Kategorien nutzen",
+    "tutorial.step.categories.body":
+      "Hier kannst du eigene Kategorien wie \"Kraft\" oder \"Ausdauer\" anlegen, umbenennen oder l\u00f6schen und deine Sportarten dort einsortieren.",
     "tutorial.step.back.title": "Zur\u00fcck zur \u00dcbersicht",
     "tutorial.step.back.body":
       "Tippe auf Zurück, um zur Sportübersicht zurückzukehren und andere Sportarten zu prüfen.",

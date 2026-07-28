@@ -3834,6 +3834,7 @@ function AppContent() {
   const tutorialStatsNavRef = useRef(null);
   const tutorialWorkoutTimerRef = useRef(null);
   const tutorialAddSportRef = useRef(null);
+  const tutorialCategoriesLinkRef = useRef(null);
   const tutorialSportNameRef = useRef(null);
   const tutorialSportIconRef = useRef(null);
   const tutorialSportTypeRef = useRef(null);
@@ -9584,6 +9585,12 @@ const getSpeechLocale = () => {
     });
     */
     steps.push({
+      id: "categories",
+      titleKey: "tutorial.step.categories.title",
+      bodyKey: "tutorial.step.categories.body",
+      targetRef: tutorialCategoriesLinkRef,
+    });
+    steps.push({
       id: "statsNav",
       titleKey: "tutorial.step.stats.title",
       bodyKey: "tutorial.step.stats.body",
@@ -13825,6 +13832,7 @@ const getSpeechLocale = () => {
         <View style={styles.sportsHeaderRow}>
           <Text style={styles.sectionTitle}>{t("menu.sports")}</Text>
           <Pressable
+            ref={tutorialCategoriesLinkRef}
             style={styles.manageCategoriesLink}
             onPress={() => setCategoriesModalOpen(true)}
           >
