@@ -305,6 +305,7 @@ const de = {
     "label.motivationActionWorkout": "Workout öffnen",
     "label.motivationActionStats": "Statistiken ansehen",
     "label.motivationActionNewSport": "Neuen Sport starten",
+    "label.motivationActionCreateCategory": "Kategorie anlegen",
     "label.motivationActionWidget": "Widget hinzufügen",
     "label.motivationActionNotifications": "Erinnerungen aktivieren",
     "label.motivationActionApps": "Apps einstellen",
@@ -326,6 +327,10 @@ const de = {
     "label.motivationNewSportTitle": "Weitere Sportart ausprobieren",
     "label.motivationNewSportBody":
       "Füge etwas Neues hinzu, damit der Tag abwechslungsreich bleibt.",
+    "label.motivationCreateCategoryTitle": "Eigene Kategorie anlegen",
+    "label.motivationCreateCategoryBody":
+      "Sortiere deine Sportarten in Kategorien wie \"Kraft\" oder \"Ausdauer\" – oder erfinde eigene.",
+    "label.motivationNotInterested": "Kein Interesse",
     "label.motivationWidgetTitle": "Widget hinzufügen",
     "label.motivationWidgetBody":
       "Leg ein Habit Coach-Widget an, um deine Fortschritte sofort zu sehen.",

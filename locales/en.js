@@ -303,6 +303,7 @@ const en = {
     "label.motivationActionWorkout": "Open workout",
     "label.motivationActionStats": "View stats",
     "label.motivationActionNewSport": "Try a new sport",
+    "label.motivationActionCreateCategory": "Create a category",
     "label.motivationActionWidget": "Add a widget",
     "label.motivationActionNotifications": "Enable reminders",
     "label.motivationActionApps": "Pick apps",
@@ -324,6 +325,10 @@ const en = {
     "label.motivationNewSportTitle": "Add a new sport",
     "label.motivationNewSportBody":
       "Bring variety into your training by creating another sport.",
+    "label.motivationCreateCategoryTitle": "Create your own category",
+    "label.motivationCreateCategoryBody":
+      "Sort your sports into categories like \"Strength\" or \"Endurance\" - or invent your own.",
+    "label.motivationNotInterested": "Not interested",
     "label.motivationWidgetTitle": "Add a widget",
     "label.motivationWidgetBody":
       "Pin the widget to track your screen time at a glance.",
