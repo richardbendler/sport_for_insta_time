@@ -517,119 +517,549 @@ const funFacts = [
   {
     id: "funfact-001",
     text: "Wusstest du schon? Schon 10 Minuten Bewegung k\u00f6nnen deine Stimmung messbar verbessern.",
+    tag: "general",
   },
   {
     id: "funfact-002",
     text: "Wusstest du schon? Regelm\u00e4\u00dfiger Sport erh\u00f6ht deine Lebenserwartung \u2013 unabh\u00e4ngig vom Tempo.",
+    tag: "general",
   },
   {
     id: "funfact-003",
     text: "Wusstest du schon? Dein K\u00f6rper wird st\u00e4rker, noch bevor du es siehst.",
+    tag: "general",
   },
   {
     id: "funfact-004",
     text: "Wusstest du schon? Bewegung senkt Stress effektiver als viele Entspannungstechniken.",
+    tag: "general",
   },
   {
     id: "funfact-005",
     text: "Wusstest du schon? Konsistenz schl\u00e4gt Intensit\u00e4t \u2013 jeder kleine Schritt z\u00e4hlt.",
+    tag: "general",
   },
   {
     id: "funfact-006",
     text: "Wusstest du schon? Sport verbessert deinen Schlaf bereits nach wenigen Tagen.",
+    tag: "general",
   },
   {
     id: "funfact-007",
     text: "Wusstest du schon? Dein Gehirn liebt Bewegung \u2013 sie steigert Konzentration und Fokus.",
+    tag: "general",
   },
   {
     id: "funfact-008",
     text: "Wusstest du schon? Nach dem Training f\u00fchlst du dich fast immer besser als davor.",
+    tag: "general",
   },
   {
     id: "funfact-009",
     text: "Wusstest du schon? Muskeln wachsen in der Pause \u2013 Regeneration ist Teil des Erfolgs.",
+    tag: "general",
   },
   {
     id: "funfact-010",
     text: "Wusstest du schon? Bewegung st\u00e4rkt dein Immunsystem langfristig.",
+    tag: "general",
   },
   {
     id: "funfact-011",
     text: "Wusstest du schon? Du musst nicht motiviert sein, um anzufangen \u2013 Bewegung erzeugt Motivation.",
+    tag: "general",
   },
   {
     id: "funfact-012",
     text: "Wusstest du schon? Jeder Trainingsreiz ist ein Signal an deinen K\u00f6rper: Werde st\u00e4rker.",
+    tag: "general",
   },
   {
     id: "funfact-013",
     text: "Wusstest du schon? Sport hilft nachweislich gegen Angst und innere Unruhe.",
+    tag: "general",
   },
   {
     id: "funfact-014",
     text: "Wusstest du schon? Heute aktiv sein macht morgen leichter.",
+    tag: "general",
   },
   {
     id: "funfact-015",
     text: "Wusstest du schon? Schon leichte Bewegung reduziert das Risiko vieler Krankheiten.",
+    tag: "general",
   },
   {
     id: "funfact-016",
     text: "Wusstest du schon? Dein K\u00f6rper passt sich an \u2013 egal, auf welchem Level du startest.",
+    tag: "general",
   },
   {
     id: "funfact-017",
     text: "Wusstest du schon? Training verbessert dein Selbstvertrauen, nicht nur deine Fitness.",
+    tag: "general",
   },
   {
     id: "funfact-018",
     text: "Wusstest du schon? Du verbrennst Kalorien auch nach dem Training weiter.",
+    tag: "general",
   },
   {
     id: "funfact-019",
     text: "Wusstest du schon? Bewegung macht dich belastbarer \u2013 k\u00f6rperlich und mental.",
+    tag: "general",
   },
   {
     id: "funfact-020",
     text: "Wusstest du schon? Jeder Trainingsstart ist ein Sieg \u00fcber Ausreden.",
+    tag: "general",
   },
   {
     id: "funfact-021",
     text: "Wusstest du schon? Dein Herz wird st\u00e4rker mit jedem aktiven Tag.",
+    tag: "general",
   },
   {
     id: "funfact-022",
     text: "Wusstest du schon? Fortschritt ist nicht linear \u2013 Dranbleiben ist der Schl\u00fcssel.",
+    tag: "general",
   },
   {
     id: "funfact-023",
     text: "Wusstest du schon? Sport setzt Gl\u00fcckshormone frei \u2013 ganz ohne Nebenwirkungen.",
+    tag: "general",
   },
   {
     id: "funfact-024",
     text: "Wusstest du schon? Mehr Bewegung = mehr Energie im Alltag.",
+    tag: "general",
   },
   {
     id: "funfact-025",
     text: "Wusstest du schon? Dein K\u00f6rper ist f\u00fcr Bewegung gemacht \u2013 nicht f\u00fcr Stillstand.",
+    tag: "general",
   },
   {
     id: "funfact-026",
     text: "Wusstest du schon? Training formt Gewohnheiten, Gewohnheiten formen dein Leben.",
+    tag: "general",
   },
   {
     id: "funfact-027",
     text: "Wusstest du schon? Du trainierst nicht nur f\u00fcr heute, sondern f\u00fcr dein zuk\u00fcnftiges Ich.",
+    tag: "general",
   },
   {
     id: "funfact-028",
     text: "Wusstest du schon? Jeder Schritt z\u00e4hlt \u2013 auch der langsame.",
+    tag: "general",
   },
   {
     id: "funfact-029",
     text: "Wusstest du schon? Bewegung ist eine Investition mit 100 % Rendite.",
+    tag: "general",
   },
+  {
+    id: "funfact-030",
+    text: "Der erste Eintrag ist immer der schwerste – und du hast ihn gerade hinter dir gelassen.",
+    tag: "startSport",
+  },
+  {
+    id: "funfact-031",
+    text: "Trag deine erste Sportart ein – der Rest ergibt sich von selbst.",
+    tag: "startSport",
+  },
+  {
+    id: "funfact-032",
+    text: "Du musst nicht motiviert sein, um anzufangen. Du wirst motiviert, weil du angefangen hast.",
+    tag: "startSport",
+  },
+  {
+    id: "funfact-033",
+    text: "Ein Tracking-Eintrag ist mehr wert als zehn gute Vorsätze.",
+    tag: "startSport",
+  },
+  {
+    id: "funfact-034",
+    text: "Starte jetzt deine erste Sportart – in ein paar Minuten hast du schon etwas geschafft.",
+    tag: "startSport",
+  },
+  {
+    id: "funfact-035",
+    text: "Wusstest du schon? Du kannst jede Sportart, die dir fehlt, einfach selbst anlegen.",
+    tag: "newSport",
+  },
+  {
+    id: "funfact-036",
+    text: "Deine Lieblingssportart steht nicht in der Liste? Leg sie dir einfach selbst an.",
+    tag: "newSport",
+  },
+  {
+    id: "funfact-037",
+    text: "Eigene Sportarten machen die App zu deiner App – probier's aus.",
+    tag: "newSport",
+  },
+  {
+    id: "funfact-038",
+    text: "Vom Hula-Hoop bis zum Bouldern: Wenn du dich bewegst, kannst du es tracken.",
+    tag: "newSport",
+  },
+  {
+    id: "funfact-039",
+    text: "Je genauer deine Sportarten zu dir passen, desto motivierender wird das Tracking.",
+    tag: "newSport",
+  },
+  {
+    id: "funfact-040",
+    text: "Wusstest du schon? Du kannst eigene Kategorien wie \"Kraft\" oder \"Ausdauer\" anlegen und deine Sportarten sortieren.",
+    tag: "createCategory",
+  },
+  {
+    id: "funfact-041",
+    text: "Ordnung motiviert: Gruppiere deine Sportarten in eigene Kategorien.",
+    tag: "createCategory",
+  },
+  {
+    id: "funfact-042",
+    text: "Kraft, Ausdauer, Beweglichkeit – leg dir Kategorien an, die zu deinem Trainingsplan passen.",
+    tag: "createCategory",
+  },
+  {
+    id: "funfact-043",
+    text: "Mit eigenen Kategorien behältst du auch bei vielen Sportarten den Überblick.",
+    tag: "createCategory",
+  },
+  {
+    id: "funfact-044",
+    text: "Kategorien lassen sich jederzeit umbenennen oder löschen – probier ruhig etwas aus.",
+    tag: "createCategory",
+  },
+  {
+    id: "funfact-045",
+    text: "Ein Blick in die Statistik zeigt oft mehr Fortschritt, als du denkst.",
+    tag: "stats",
+  },
+  {
+    id: "funfact-046",
+    text: "Zahlen lügen nicht: Deine Statistik ist der ehrlichste Trainingspartner, den du hast.",
+    tag: "stats",
+  },
+  {
+    id: "funfact-047",
+    text: "Wusstest du schon? In den Stats siehst du Chart und Kalender für jede einzelne Sportart.",
+    tag: "stats",
+  },
+  {
+    id: "funfact-048",
+    text: "Fortschritt fühlt sich langsam an, sieht aber in der Statistik oft beeindruckend aus.",
+    tag: "stats",
+  },
+  {
+    id: "funfact-049",
+    text: "Schau dir regelmäßig deine Statistik an – das hält die Motivation hoch.",
+    tag: "stats",
+  },
+  {
+    id: "funfact-050",
+    text: "Wusstest du schon? Du kannst den Schwierigkeitsfaktor jeder Sportart individuell anpassen.",
+    tag: "difficulty",
+  },
+  {
+    id: "funfact-051",
+    text: "Wird eine Übung zu leicht? Erhöhe einfach ihren Faktor.",
+    tag: "difficulty",
+  },
+  {
+    id: "funfact-052",
+    text: "Der Nutzerfaktor sorgt dafür, dass sich dein Training fair in Bildschirmzeit übersetzt.",
+    tag: "difficulty",
+  },
+  {
+    id: "funfact-053",
+    text: "Halte + oder - gedrückt, um den Faktor schneller anzupassen.",
+    tag: "difficulty",
+  },
+  {
+    id: "funfact-054",
+    text: "Passe den Schwierigkeitsgrad an dein aktuelles Fitnesslevel an – er darf mitwachsen.",
+    tag: "difficulty",
+  },
+  {
+    id: "funfact-055",
+    text: "Wusstest du schon? Du kannst ein Widget auf deinem Homescreen anheften.",
+    tag: "widget",
+  },
+  {
+    id: "funfact-056",
+    text: "Mit einem Widget siehst du deine verbleibende Zeit, ohne die App zu öffnen.",
+    tag: "widget",
+  },
+  {
+    id: "funfact-057",
+    text: "Ein Homescreen-Widget hält dein Ziel immer im Blick.",
+    tag: "widget",
+  },
+  {
+    id: "funfact-058",
+    text: "Pinne dir ein Widget für deine Lieblingssportart an.",
+    tag: "widget",
+  },
+  {
+    id: "funfact-059",
+    text: "Widgets sind der schnellste Weg, live zu sehen, wie viel Zeit du dir schon verdient hast.",
+    tag: "widget",
+  },
+  {
+    id: "funfact-060",
+    text: "Wusstest du schon? Benachrichtigungen erinnern dich, wenn deine Zeit knapp wird.",
+    tag: "notifications",
+  },
+  {
+    id: "funfact-061",
+    text: "Aktiviere Benachrichtigungen, damit du nie überrascht wirst, wenn die Zeit ausgeht.",
+    tag: "notifications",
+  },
+  {
+    id: "funfact-062",
+    text: "Eine kurze Erinnerung reicht oft, um dich nochmal kurz zu bewegen.",
+    tag: "notifications",
+  },
+  {
+    id: "funfact-063",
+    text: "Mit aktivierten Benachrichtigungen verpasst du keinen wichtigen Hinweis der App.",
+    tag: "notifications",
+  },
+  {
+    id: "funfact-064",
+    text: "Lass dich rechtzeitig erinnern, statt mitten im Feed abrupt gestoppt zu werden.",
+    tag: "notifications",
+  },
+  {
+    id: "funfact-065",
+    text: "Wusstest du schon? Du kannst selbst festlegen, welche Apps eingeschränkt werden.",
+    tag: "apps",
+  },
+  {
+    id: "funfact-066",
+    text: "Je genauer du deine Apps auswählst, desto zielgerichteter wirkt die App.",
+    tag: "apps",
+  },
+  {
+    id: "funfact-067",
+    text: "Schau dir an, welche App gerade am meisten Zeit frisst – und schränke gezielt ein.",
+    tag: "apps",
+  },
+  {
+    id: "funfact-068",
+    text: "Eingeschränkte Apps lassen sich jederzeit wieder anpassen.",
+    tag: "apps",
+  },
+  {
+    id: "funfact-069",
+    text: "Du bestimmst die Regeln: Wähle die Apps, bei denen Bewegung sich lohnen soll.",
+    tag: "apps",
+  },
+  {
+    id: "funfact-070",
+    text: "Wusstest du schon? In den Einstellungen kannst du die App komplett auf dich zuschneiden.",
+    tag: "settings",
+  },
+  {
+    id: "funfact-071",
+    text: "Ein kurzer Blick in die Einstellungen lohnt sich – da steckt mehr drin, als du denkst.",
+    tag: "settings",
+  },
+  {
+    id: "funfact-072",
+    text: "Von Sprache bis Graustufen-Filter: Die Einstellungen geben dir die Kontrolle.",
+    tag: "settings",
+  },
+  {
+    id: "funfact-073",
+    text: "Mach die App zu deiner App – über die Einstellungen geht das in wenigen Sekunden.",
+    tag: "settings",
+  },
+  {
+    id: "funfact-074",
+    text: "Nimm dir kurz Zeit, deine Einstellungen zu prüfen und anzupassen.",
+    tag: "settings",
+  },
+  {
+    id: "funfact-075",
+    text: "Wusstest du schon? Die Vorschaltseite gibt dir kurz Bedenkzeit, bevor eine App öffnet.",
+    tag: "preface",
+  },
+  {
+    id: "funfact-076",
+    text: "Ein kleiner Moment Innehalten kann große Wirkung haben.",
+    tag: "preface",
+  },
+  {
+    id: "funfact-077",
+    text: "Die Vorschaltseite hilft dir, bewusster zu entscheiden statt aus Gewohnheit zu tippen.",
+    tag: "preface",
+  },
+  {
+    id: "funfact-078",
+    text: "Stell die Verzögerung so ein, wie sie für dich am besten passt.",
+    tag: "preface",
+  },
+  {
+    id: "funfact-079",
+    text: "Manchmal reicht eine kurze Pause, um eine Gewohnheit zu durchbrechen.",
+    tag: "preface",
+  },
+  {
+    id: "funfact-080",
+    text: "Wusstest du schon? Du kannst Wiederholungen per Stimme zählen lassen.",
+    tag: "voice",
+  },
+  {
+    id: "funfact-081",
+    text: "Beide Hände frei beim Training? Die Sprachzählung macht's möglich.",
+    tag: "voice",
+  },
+  {
+    id: "funfact-082",
+    text: "Sag einfach laut deine Zahl – die App zählt mit.",
+    tag: "voice",
+  },
+  {
+    id: "funfact-083",
+    text: "Die Sprachsteuerung ist praktisch, wenn du während der Übung nicht tippen willst.",
+    tag: "voice",
+  },
+  {
+    id: "funfact-084",
+    text: "Probier die Sprachzählung mal bei deiner nächsten Trainingseinheit aus.",
+    tag: "voice",
+  },
+  {
+    id: "funfact-085",
+    text: "Wusstest du schon? Du kannst die Sprache der App jederzeit wechseln.",
+    tag: "language",
+  },
+  {
+    id: "funfact-086",
+    text: "Die App spricht Deutsch, Englisch, Spanisch und Französisch.",
+    tag: "language",
+  },
+  {
+    id: "funfact-087",
+    text: "Falsche Sprache eingestellt? Ein Fingertipp genügt zum Wechseln.",
+    tag: "language",
+  },
+  {
+    id: "funfact-088",
+    text: "Egal welche Sprache du bevorzugst – die App passt sich an.",
+    tag: "language",
+  },
+  {
+    id: "funfact-089",
+    text: "Sprachwechsel ohne Neustart: einfach in den Einstellungen ausprobieren.",
+    tag: "language",
+  },
+  {
+    id: "funfact-090",
+    text: "Wusstest du schon? Das Tutorial zeigt dir alle wichtigen Funktionen in wenigen Minuten.",
+    tag: "tutorial",
+  },
+  {
+    id: "funfact-091",
+    text: "Neu hier oder etwas übersehen? Das Tutorial hilft weiter.",
+    tag: "tutorial",
+  },
+  {
+    id: "funfact-092",
+    text: "Ein zweiter Blick ins Tutorial deckt oft Funktionen auf, die du noch nicht kanntest.",
+    tag: "tutorial",
+  },
+  {
+    id: "funfact-093",
+    text: "Das Tutorial lässt sich jederzeit erneut starten.",
+    tag: "tutorial",
+  },
+  {
+    id: "funfact-094",
+    text: "Nimm dir ein paar Minuten für das Tutorial – es zahlt sich aus.",
+    tag: "tutorial",
+  },
+  {
+    id: "funfact-095",
+    text: "Wusstest du schon? Deine komplette Trainingshistorie bleibt gespeichert.",
+    tag: "history",
+  },
+  {
+    id: "funfact-096",
+    text: "Ein Blick zurück zeigt oft, wie weit du schon gekommen bist.",
+    tag: "history",
+  },
+  {
+    id: "funfact-097",
+    text: "Deine bisherigen Einträge sind der beste Beweis für deinen Fortschritt.",
+    tag: "history",
+  },
+  {
+    id: "funfact-098",
+    text: "Vergleiche deine Historie über Wochen – Muster werden sichtbar.",
+    tag: "history",
+  },
+  {
+    id: "funfact-099",
+    text: "Jeder Eintrag in deiner Historie ist ein kleiner Beweis für Durchhaltevermögen.",
+    tag: "history",
+  },
+  {
+    id: "funfact-100",
+    text: "Wusstest du schon? Bei Gewichtsübungen kannst du auch Kommazahlen eintragen.",
+    tag: "logWeight",
+  },
+  {
+    id: "funfact-101",
+    text: "Das zuletzt genutzte Gewicht wird automatisch vorausgefüllt.",
+    tag: "logWeight",
+  },
+  {
+    id: "funfact-102",
+    text: "Trage dein Gewicht möglichst genau ein – so bleibt deine Statistik aussagekräftig.",
+    tag: "logWeight",
+  },
+  {
+    id: "funfact-103",
+    text: "Steigere dein Gewicht langsam und trag jede Veränderung ein.",
+    tag: "logWeight",
+  },
+  {
+    id: "funfact-104",
+    text: "Auch kleine Gewichtssteigerungen summieren sich auf lange Sicht.",
+    tag: "logWeight",
+  },
+  {
+    id: "funfact-105",
+    text: "Wusstest du schon? Du kannst dir eigene kleine Challenges setzen, z. B. 7 Tage am Stück.",
+    tag: "challenge",
+  },
+  {
+    id: "funfact-106",
+    text: "Setz dir ein kleines Ziel für diese Woche – große Ziele bestehen aus kleinen Schritten.",
+    tag: "challenge",
+  },
+  {
+    id: "funfact-107",
+    text: "Eine Serie von Trainingstagen fühlt sich am Ende überraschend gut an.",
+    tag: "challenge",
+  },
+  {
+    id: "funfact-108",
+    text: "Challenge dich selbst: Kannst du deinen letzten Bestwert schlagen?",
+    tag: "challenge",
+  },
+  {
+    id: "funfact-109",
+    text: "Der beste Zeitpunkt für eine neue Challenge ist genau jetzt.",
+    tag: "challenge",
+  },
+
 ];
 
 export { weekdayLabels, monthLabels, numberWords, funFacts };

@@ -515,119 +515,549 @@ const funFacts = [
   {
     id: "funfact-001",
     text: "¿Sabías qué? Tan solo 10 minutos de movimiento pueden mejorar tu \u00e1nimo de forma medible.",
+    tag: "general",
   },
   {
     id: "funfact-002",
     text: "¿Sabías qué? El ejercicio regular aumenta tu esperanza de vida, sin importar el ritmo.",
+    tag: "general",
   },
   {
     id: "funfact-003",
     text: "¿Sabías qué? Tu cuerpo se fortalece antes de que lo veas.",
+    tag: "general",
   },
   {
     id: "funfact-004",
     text: "¿Sabías qué? El movimiento reduce el estr\u00e9s m\u00e1s eficazmente que muchas t\u00e9cnicas de relajaci\u00f3n.",
+    tag: "general",
   },
   {
     id: "funfact-005",
     text: "¿Sabías qué? La constancia vence a la intensidad: cada peque\u00f1o paso cuenta.",
+    tag: "general",
   },
   {
     id: "funfact-006",
     text: "¿Sabías qué? El ejercicio mejora tu sue\u00f1o despu\u00e9s de solo unos d\u00edas.",
+    tag: "general",
   },
   {
     id: "funfact-007",
     text: "¿Sabías qué? A tu cerebro le encanta moverse: aumenta la concentraci\u00f3n y el enfoque.",
+    tag: "general",
   },
   {
     id: "funfact-008",
     text: "¿Sabías qué? Despu\u00e9s de entrenar casi siempre te sientes mejor que antes.",
+    tag: "general",
   },
   {
     id: "funfact-009",
     text: "¿Sabías qué? Los m\u00fasculos crecen en el descanso: la recuperaci\u00f3n es parte del \u00e9xito.",
+    tag: "general",
   },
   {
     id: "funfact-010",
     text: "¿Sabías qué? El movimiento fortalece tu sistema inmunol\u00f3gico a largo plazo.",
+    tag: "general",
   },
   {
     id: "funfact-011",
     text: "¿Sabías qué? No necesitas motivaci\u00f3n para empezar: el movimiento crea motivaci\u00f3n.",
+    tag: "general",
   },
   {
     id: "funfact-012",
     text: "¿Sabías qué? Cada est\u00edmulo de entrenamiento es una se\u00f1al a tu cuerpo: hazte m\u00e1s fuerte.",
+    tag: "general",
   },
   {
     id: "funfact-013",
     text: "¿Sabías qué? El ejercicio ayuda de forma comprobada contra la ansiedad y la inquietud interior.",
+    tag: "general",
   },
   {
     id: "funfact-014",
     text: "¿Sabías qué? Estar activo hoy hace que ma\u00f1ana sea m\u00e1s f\u00e1cil.",
+    tag: "general",
   },
   {
     id: "funfact-015",
     text: "¿Sabías qué? Incluso el movimiento ligero reduce el riesgo de muchas enfermedades.",
+    tag: "general",
   },
   {
     id: "funfact-016",
     text: "¿Sabías qué? Tu cuerpo se adapta, sin importar el nivel con el que empieces.",
+    tag: "general",
   },
   {
     id: "funfact-017",
     text: "¿Sabías qué? Entrenar mejora tu confianza en ti mismo, no solo tu condici\u00f3n f\u00edsica.",
+    tag: "general",
   },
   {
     id: "funfact-018",
     text: "¿Sabías qué? Sigues quemando calor\u00edas incluso despu\u00e9s del entrenamiento.",
+    tag: "general",
   },
   {
     id: "funfact-019",
     text: "¿Sabías qué? El movimiento te hace m\u00e1s resistente, f\u00edsica y mentalmente.",
+    tag: "general",
   },
   {
     id: "funfact-020",
     text: "¿Sabías qué? Cada inicio de entrenamiento es una victoria sobre las excusas.",
+    tag: "general",
   },
   {
     id: "funfact-021",
     text: "¿Sabías qué? Tu coraz\u00f3n se fortalece con cada d\u00eda activo.",
+    tag: "general",
   },
   {
     id: "funfact-022",
     text: "¿Sabías qué? El progreso no es lineal: mantenerse es la clave.",
+    tag: "general",
   },
   {
     id: "funfact-023",
     text: "¿Sabías qué? El ejercicio libera hormonas de la felicidad, sin efectos secundarios.",
+    tag: "general",
   },
   {
     id: "funfact-024",
     text: "¿Sabías qué? M\u00e1s movimiento = m\u00e1s energ\u00eda en el d\u00eda a d\u00eda.",
+    tag: "general",
   },
   {
     id: "funfact-025",
     text: "¿Sabías qué? Tu cuerpo est\u00e1 hecho para moverse, no para la quietud.",
+    tag: "general",
   },
   {
     id: "funfact-026",
     text: "¿Sabías qué? El entrenamiento forma h\u00e1bitos, los h\u00e1bitos forman tu vida.",
+    tag: "general",
   },
   {
     id: "funfact-027",
     text: "¿Sabías qué? No entrenas solo para hoy, sino para tu yo futuro.",
+    tag: "general",
   },
   {
     id: "funfact-028",
     text: "¿Sabías qué? Cada paso cuenta, incluso el lento.",
+    tag: "general",
   },
   {
     id: "funfact-029",
     text: "¿Sabías qué? El movimiento es una inversi\u00f3n con un retorno del 100 %.",
+    tag: "general",
   },
+  {
+    id: "funfact-030",
+    text: "El primer registro siempre es el más difícil, y acabas de superarlo.",
+    tag: "startSport",
+  },
+  {
+    id: "funfact-031",
+    text: "Registra tu primer deporte, el resto vendrá solo.",
+    tag: "startSport",
+  },
+  {
+    id: "funfact-032",
+    text: "No necesitas motivación para empezar. Te motivas porque empezaste.",
+    tag: "startSport",
+  },
+  {
+    id: "funfact-033",
+    text: "Un registro vale más que diez buenas intenciones.",
+    tag: "startSport",
+  },
+  {
+    id: "funfact-034",
+    text: "Empieza ahora tu primer deporte, en pocos minutos ya habrás logrado algo.",
+    tag: "startSport",
+  },
+  {
+    id: "funfact-035",
+    text: "¿Sabías que? Puedes crear tú mismo cualquier deporte que falte.",
+    tag: "newSport",
+  },
+  {
+    id: "funfact-036",
+    text: "¿Tu deporte favorito no está en la lista? Créalo tú mismo.",
+    tag: "newSport",
+  },
+  {
+    id: "funfact-037",
+    text: "Los deportes personalizados hacen que la app sea tuya, pruébalo.",
+    tag: "newSport",
+  },
+  {
+    id: "funfact-038",
+    text: "Desde el hula-hoop hasta la escalada: si te mueves, puedes registrarlo.",
+    tag: "newSport",
+  },
+  {
+    id: "funfact-039",
+    text: "Cuanto mejor se ajusten tus deportes a ti, más motivador será el seguimiento.",
+    tag: "newSport",
+  },
+  {
+    id: "funfact-040",
+    text: "¿Sabías que? Puedes crear tus propias categorías como \"Fuerza\" o \"Resistencia\" para ordenar tus deportes.",
+    tag: "createCategory",
+  },
+  {
+    id: "funfact-041",
+    text: "El orden motiva: agrupa tus deportes en tus propias categorías.",
+    tag: "createCategory",
+  },
+  {
+    id: "funfact-042",
+    text: "Fuerza, resistencia, movilidad: crea categorías que encajen con tu plan de entrenamiento.",
+    tag: "createCategory",
+  },
+  {
+    id: "funfact-043",
+    text: "Con tus propias categorías mantienes la visión de conjunto aunque tengas muchos deportes.",
+    tag: "createCategory",
+  },
+  {
+    id: "funfact-044",
+    text: "Las categorías se pueden renombrar o eliminar en cualquier momento, prueba sin miedo.",
+    tag: "createCategory",
+  },
+  {
+    id: "funfact-045",
+    text: "Un vistazo a tus estadísticas suele mostrar más progreso del que crees.",
+    tag: "stats",
+  },
+  {
+    id: "funfact-046",
+    text: "Los números no mienten: tus estadísticas son el compañero de entrenamiento más honesto que tienes.",
+    tag: "stats",
+  },
+  {
+    id: "funfact-047",
+    text: "¿Sabías que? En las estadísticas ves un gráfico y un calendario para cada deporte.",
+    tag: "stats",
+  },
+  {
+    id: "funfact-048",
+    text: "El progreso se siente lento, pero en las estadísticas suele verse impresionante.",
+    tag: "stats",
+  },
+  {
+    id: "funfact-049",
+    text: "Revisa tus estadísticas con regularidad, mantiene alta la motivación.",
+    tag: "stats",
+  },
+  {
+    id: "funfact-050",
+    text: "¿Sabías que? Puedes ajustar el factor de dificultad de cada deporte individualmente.",
+    tag: "difficulty",
+  },
+  {
+    id: "funfact-051",
+    text: "¿Un ejercicio se te queda fácil? Sube su factor.",
+    tag: "difficulty",
+  },
+  {
+    id: "funfact-052",
+    text: "El factor de usuario garantiza que tu entrenamiento se traduzca de forma justa en tiempo de pantalla.",
+    tag: "difficulty",
+  },
+  {
+    id: "funfact-053",
+    text: "Mantén pulsado + o - para ajustar el factor más rápido.",
+    tag: "difficulty",
+  },
+  {
+    id: "funfact-054",
+    text: "Ajusta la dificultad a tu nivel de forma física actual, puede crecer contigo.",
+    tag: "difficulty",
+  },
+  {
+    id: "funfact-055",
+    text: "¿Sabías que? Puedes anclar un widget en tu pantalla de inicio.",
+    tag: "widget",
+  },
+  {
+    id: "funfact-056",
+    text: "Con un widget ves tu tiempo restante sin abrir la app.",
+    tag: "widget",
+  },
+  {
+    id: "funfact-057",
+    text: "Un widget en la pantalla de inicio mantiene tu objetivo siempre a la vista.",
+    tag: "widget",
+  },
+  {
+    id: "funfact-058",
+    text: "Ancla un widget para tu deporte favorito.",
+    tag: "widget",
+  },
+  {
+    id: "funfact-059",
+    text: "Los widgets son la forma más rápida de ver en vivo cuanto tiempo ya has ganado.",
+    tag: "widget",
+  },
+  {
+    id: "funfact-060",
+    text: "¿Sabías que? Las notificaciones te avisan cuando tu tiempo se agota.",
+    tag: "notifications",
+  },
+  {
+    id: "funfact-061",
+    text: "Activa las notificaciones para que nunca te sorprenda que se acabe el tiempo.",
+    tag: "notifications",
+  },
+  {
+    id: "funfact-062",
+    text: "Un pequeño recordatorio suele bastar para que te muevas un poco más.",
+    tag: "notifications",
+  },
+  {
+    id: "funfact-063",
+    text: "Con las notificaciones activadas no te perderás ningún aviso importante de la app.",
+    tag: "notifications",
+  },
+  {
+    id: "funfact-064",
+    text: "Recibe el aviso a tiempo en vez de que te paren de golpe a mitad del feed.",
+    tag: "notifications",
+  },
+  {
+    id: "funfact-065",
+    text: "¿Sabías que? Tú decides qué apps se restringen.",
+    tag: "apps",
+  },
+  {
+    id: "funfact-066",
+    text: "Cuanto más precisa sea tu selección de apps, más efectiva será la app.",
+    tag: "apps",
+  },
+  {
+    id: "funfact-067",
+    text: "Mira qué app te está quitando más tiempo ahora mismo y restríngela.",
+    tag: "apps",
+  },
+  {
+    id: "funfact-068",
+    text: "Las apps restringidas se pueden ajustar de nuevo en cualquier momento.",
+    tag: "apps",
+  },
+  {
+    id: "funfact-069",
+    text: "Tú pones las reglas: elige las apps donde moverte debe valer la pena.",
+    tag: "apps",
+  },
+  {
+    id: "funfact-070",
+    text: "¿Sabías que? Los ajustes te permiten personalizar la app por completo.",
+    tag: "settings",
+  },
+  {
+    id: "funfact-071",
+    text: "Vale la pena echar un vistazo a los ajustes, hay más de lo que crees.",
+    tag: "settings",
+  },
+  {
+    id: "funfact-072",
+    text: "Desde el idioma hasta el filtro en blanco y negro: los ajustes te dan el control.",
+    tag: "settings",
+  },
+  {
+    id: "funfact-073",
+    text: "Haz que la app sea tuya, con los ajustes lo consigues en segundos.",
+    tag: "settings",
+  },
+  {
+    id: "funfact-074",
+    text: "Tómate un momento para revisar y ajustar tus opciones.",
+    tag: "settings",
+  },
+  {
+    id: "funfact-075",
+    text: "¿Sabías que? La pantalla previa te da un momento para pensar antes de abrir una app.",
+    tag: "preface",
+  },
+  {
+    id: "funfact-076",
+    text: "Un pequeño momento de pausa puede tener un gran efecto.",
+    tag: "preface",
+  },
+  {
+    id: "funfact-077",
+    text: "La pantalla previa te ayuda a decidir con conciencia en vez de tocar por costumbre.",
+    tag: "preface",
+  },
+  {
+    id: "funfact-078",
+    text: "Configura el retraso como mejor te funcione.",
+    tag: "preface",
+  },
+  {
+    id: "funfact-079",
+    text: "A veces basta una pequeña pausa para romper un hábito.",
+    tag: "preface",
+  },
+  {
+    id: "funfact-080",
+    text: "¿Sabías que? Puedes contar repeticiones con tu voz.",
+    tag: "voice",
+  },
+  {
+    id: "funfact-081",
+    text: "¿Quieres tener las manos libres al entrenar? El conteo por voz lo hace posible.",
+    tag: "voice",
+  },
+  {
+    id: "funfact-082",
+    text: "Simplemente di tu número en voz alta, la app cuenta contigo.",
+    tag: "voice",
+  },
+  {
+    id: "funfact-083",
+    text: "El control por voz es práctico cuando no quieres tocar la pantalla durante el ejercicio.",
+    tag: "voice",
+  },
+  {
+    id: "funfact-084",
+    text: "Prueba el conteo por voz en tu próxima sesión de entrenamiento.",
+    tag: "voice",
+  },
+  {
+    id: "funfact-085",
+    text: "¿Sabías que? Puedes cambiar el idioma de la app en cualquier momento.",
+    tag: "language",
+  },
+  {
+    id: "funfact-086",
+    text: "La app habla alemán, inglés, español y francés.",
+    tag: "language",
+  },
+  {
+    id: "funfact-087",
+    text: "¿Idioma equivocado? Un toque basta para cambiarlo.",
+    tag: "language",
+  },
+  {
+    id: "funfact-088",
+    text: "Sea cual sea el idioma que prefieras, la app se adapta.",
+    tag: "language",
+  },
+  {
+    id: "funfact-089",
+    text: "Cambia de idioma sin reiniciar: pruébalo en los ajustes.",
+    tag: "language",
+  },
+  {
+    id: "funfact-090",
+    text: "¿Sabías que? El tutorial te muestra todas las funciones clave en pocos minutos.",
+    tag: "tutorial",
+  },
+  {
+    id: "funfact-091",
+    text: "¿Eres nuevo o se te pasó algo? El tutorial te ayuda.",
+    tag: "tutorial",
+  },
+  {
+    id: "funfact-092",
+    text: "Una segunda mirada al tutorial suele revelar funciones que no conocías.",
+    tag: "tutorial",
+  },
+  {
+    id: "funfact-093",
+    text: "Puedes reiniciar el tutorial en cualquier momento.",
+    tag: "tutorial",
+  },
+  {
+    id: "funfact-094",
+    text: "Dedica unos minutos al tutorial, merece la pena.",
+    tag: "tutorial",
+  },
+  {
+    id: "funfact-095",
+    text: "¿Sabías que? Todo tu historial de entrenamiento queda guardado.",
+    tag: "history",
+  },
+  {
+    id: "funfact-096",
+    text: "Mirar atrás suele mostrar lo lejos que ya has llegado.",
+    tag: "history",
+  },
+  {
+    id: "funfact-097",
+    text: "Tus registros anteriores son la mejor prueba de tu progreso.",
+    tag: "history",
+  },
+  {
+    id: "funfact-098",
+    text: "Compara tu historial a lo largo de semanas, aparecerán patrones.",
+    tag: "history",
+  },
+  {
+    id: "funfact-099",
+    text: "Cada registro en tu historial es una pequeña prueba de constancia.",
+    tag: "history",
+  },
+  {
+    id: "funfact-100",
+    text: "¿Sabías que? En los ejercicios de peso también puedes introducir decimales.",
+    tag: "logWeight",
+  },
+  {
+    id: "funfact-101",
+    text: "El último peso usado se rellena automáticamente.",
+    tag: "logWeight",
+  },
+  {
+    id: "funfact-102",
+    text: "Registra tu peso con la mayor precisión posible, así tus estadísticas serán más fiables.",
+    tag: "logWeight",
+  },
+  {
+    id: "funfact-103",
+    text: "Aumenta tu peso poco a poco y registra cada cambio.",
+    tag: "logWeight",
+  },
+  {
+    id: "funfact-104",
+    text: "Incluso pequeños aumentos de peso se suman a largo plazo.",
+    tag: "logWeight",
+  },
+  {
+    id: "funfact-105",
+    text: "¿Sabías que? Puedes ponerte pequeños retos, como 7 días seguidos.",
+    tag: "challenge",
+  },
+  {
+    id: "funfact-106",
+    text: "Ponte una pequeña meta para esta semana, las grandes metas se hacen de pequeños pasos.",
+    tag: "challenge",
+  },
+  {
+    id: "funfact-107",
+    text: "Una racha de días de entrenamiento acaba sintiéndose sorprendentemente bien.",
+    tag: "challenge",
+  },
+  {
+    id: "funfact-108",
+    text: "Desafíate a ti mismo: ¿puedes superar tu última mejor marca?",
+    tag: "challenge",
+  },
+  {
+    id: "funfact-109",
+    text: "El mejor momento para un nuevo reto es justo ahora.",
+    tag: "challenge",
+  },
+
 ];
 
 export { weekdayLabels, monthLabels, numberWords, funFacts };
