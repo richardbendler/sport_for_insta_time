@@ -380,6 +380,7 @@ const de = {
       "Für die Liegestütz-Zählung per Kamera wird Kamerazugriff benötigt.",
     "label.cameraGrantPermission": "Kamerazugriff erlauben",
     "label.cameraNoDevice": "Keine Kamera gefunden.",
+    "label.cameraSearchingDevice": "Kamera wird gesucht …",
     "label.back": "Zurück",
     "label.start": "Start",
     "label.startNew": "Neu starten",

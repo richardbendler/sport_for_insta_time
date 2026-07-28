@@ -32,3 +32,19 @@ index b1d9973..bcf5b3d 100644
      }
    }
    packagingOptions {
+diff --git a/node_modules/react-native-vision-camera/android/src/main/java/com/mrousavy/camera/react/CameraDevicesManager.kt b/node_modules/react-native-vision-camera/android/src/main/java/com/mrousavy/camera/react/CameraDevicesManager.kt
+index 0386478..6785807 100644
+--- a/node_modules/react-native-vision-camera/android/src/main/java/com/mrousavy/camera/react/CameraDevicesManager.kt
++++ b/node_modules/react-native-vision-camera/android/src/main/java/com/mrousavy/camera/react/CameraDevicesManager.kt
+@@ -68,6 +68,11 @@ class CameraDevicesManager(private val reactContext: ReactApplicationContext) :
+         Log.i(TAG, "Initializing ExtensionsManager...")
+         extensionsManager = ExtensionsManager.getInstanceAsync(reactContext, cameraProvider!!).await(executor)
+         Log.i(TAG, "Successfully initialized!")
++        // getConstants() (and the AvailabilityCallback fired during initialize())
++        // can both run before cameraProvider/extensionsManager are ready above,
++        // so getDevicesJson() returns an empty list and the JS side never learns
++        // about the real devices. Re-emit now that we can actually list them.
++        sendAvailableDevicesChangedEvent()
+       } catch (error: Throwable) {
+         Log.e(TAG, "Failed to initialize ProcessCameraProvider/ExtensionsManager! Error: ${error.message}", error)
+       }
