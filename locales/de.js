@@ -156,7 +156,12 @@ const de = {
     "label.openApps": "Apps verwalten",
     "label.grayscaleRestrictedApps": "Eingeschränkte Apps in Schwarz-Weiß",
     "label.grayscaleRestrictedAppsHint":
-      "Dimmt eingeschränkte Apps während der Nutzung ab und zeigt sie in der Liste mit einem Schwarz-Weiß-Stil an.",
+      "Zeigt eingeschränkte Apps während der Nutzung in Schwarz-Weiß an und markiert sie in der Liste entsprechend.",
+    "label.grayscaleFilterStatusReal": "✓ Echter Schwarz-Weiß-Filter aktiv",
+    "label.grayscaleFilterStatusApprox": "⚠ Aktuell nur Abdunklung (Näherung)",
+    "label.grayscaleFilterEnableHint":
+      "Für einen echten Schwarz-Weiß-Filter (statt nur Abdunklung) einmalig per Computer diesen Befehl ausführen (Entwickleroptionen & USB-Debugging müssen aktiv sein):",
+    "label.grayscaleFilterRecheck": "Erneut prüfen",
     "label.closeApps": "Apps schließen",
     "label.searchApps": "Apps suchen",
     "label.searchSports": "Sportarten durchsuchen",

@@ -12,6 +12,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -56,6 +57,9 @@ class InstaBlockerService : AccessibilityService() {
 
   private var grayscaleOverlayView: View? = null
   private var grayscaleOverlayShown = false
+  private var systemGrayscaleActive = false
+  private var pendingGrayscaleHide: Runnable? = null
+  private val grayscaleHideDelayMillis = 350L
 
   private val ignoredPackagePrefixes = setOf(
     "com.android.systemui",
@@ -659,15 +663,75 @@ class InstaBlockerService : AccessibilityService() {
 
   private fun syncGrayscaleState(isControlled: Boolean) {
     if (!shouldUseGrayscale() || !isControlled) {
-      hideGrayscaleOverlay()
+      scheduleGrayscaleHide()
       return
     }
+    cancelGrayscaleHide()
     showGrayscaleOverlay()
   }
 
   private fun shouldUseGrayscale(): Boolean {
     val prefs = getPrefs()
     return prefs.getBoolean(grayscalePrefKey, false)
+  }
+
+  // Foreground-app accessibility events can briefly report an unrelated
+  // package (ads/webviews/system popups) while the controlled app is still
+  // on screen, which would otherwise flip grayscale off and back on within
+  // the same second and read as a flicker. Debounce the "hide" so a quick
+  // follow-up "show" cancels it instead of visibly toggling.
+  private fun scheduleGrayscaleHide() {
+    if (pendingGrayscaleHide != null) {
+      return
+    }
+    if (!grayscaleOverlayShown && !systemGrayscaleActive) {
+      return
+    }
+    val runnable = Runnable {
+      pendingGrayscaleHide = null
+      hideGrayscaleOverlay()
+    }
+    pendingGrayscaleHide = runnable
+    handler.postDelayed(runnable, grayscaleHideDelayMillis)
+  }
+
+  private fun cancelGrayscaleHide() {
+    pendingGrayscaleHide?.let {
+      handler.removeCallbacks(it)
+      pendingGrayscaleHide = null
+    }
+  }
+
+  private fun hasSecureSettingsPermission(): Boolean {
+    return ContextCompat.checkSelfPermission(
+      this,
+      "android.permission.WRITE_SECURE_SETTINGS"
+    ) == PackageManager.PERMISSION_GRANTED
+  }
+
+  // Real, full desaturation via the system's built-in accessibility color
+  // correction (Daltonizer, mode 0 = monochromacy). Writing these secure
+  // settings needs WRITE_SECURE_SETTINGS, which a normal app can only get
+  // via a one-time `adb shell pm grant ... WRITE_SECURE_SETTINGS`. When that
+  // hasn't been granted, this throws and the caller falls back to the
+  // translucent overlay approximation.
+  private fun applySystemGrayscale(enable: Boolean): Boolean {
+    if (!hasSecureSettingsPermission()) {
+      return false
+    }
+    return try {
+      Settings.Secure.putInt(
+        contentResolver,
+        "accessibility_display_daltonizer_enabled",
+        if (enable) 1 else 0
+      )
+      if (enable) {
+        Settings.Secure.putInt(contentResolver, "accessibility_display_daltonizer", 0)
+      }
+      true
+    } catch (e: SecurityException) {
+      false
+    }
   }
 
   private fun setupGrayscaleOverlay() {
@@ -696,6 +760,11 @@ class InstaBlockerService : AccessibilityService() {
   }
 
   private fun teardownGrayscaleOverlay() {
+    cancelGrayscaleHide()
+    if (systemGrayscaleActive) {
+      applySystemGrayscale(false)
+      systemGrayscaleActive = false
+    }
     val view = grayscaleOverlayView ?: return
     windowManager?.removeView(view)
     grayscaleOverlayView = null
@@ -703,7 +772,11 @@ class InstaBlockerService : AccessibilityService() {
   }
 
   private fun showGrayscaleOverlay() {
-    if (grayscaleOverlayShown) {
+    if (grayscaleOverlayShown || systemGrayscaleActive) {
+      return
+    }
+    if (applySystemGrayscale(true)) {
+      systemGrayscaleActive = true
       return
     }
     grayscaleOverlayView?.visibility = View.VISIBLE
@@ -711,6 +784,10 @@ class InstaBlockerService : AccessibilityService() {
   }
 
   private fun hideGrayscaleOverlay() {
+    if (systemGrayscaleActive) {
+      applySystemGrayscale(false)
+      systemGrayscaleActive = false
+    }
     if (!grayscaleOverlayShown) {
       return
     }

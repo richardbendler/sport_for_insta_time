@@ -118,6 +118,7 @@ const CREDIT_STATS_GROUP_ID = "screen_time_credit";
 const CREDIT_ENTRY_ICON = "💳";
 const WIDGET_BASE_SCHEME = "com.richardbendler.sportforinstatime";
 const WIDGET_ALT_SCHEMES = ["exp+sport-for-insta-time"];
+const ANDROID_PACKAGE_NAME = "com.richardbendler.sportforinstatime";
 
 const normalizeWidgetDeepLink = (rawUrl) => {
   if (!rawUrl) {
@@ -3646,6 +3647,8 @@ function AppContent() {
   const [usageAccessGranted, setUsageAccessGranted] = useState(false);
   const [batteryOptimizationIgnored, setBatteryOptimizationIgnored] =
     useState(true);
+  const [grayscaleFilterPermissionGranted, setGrayscaleFilterPermissionGranted] =
+    useState(false);
   const [notificationsPrompted, setNotificationsPrompted] = useState(false);
   const [notificationsGranted, setNotificationsGranted] = useState(false);
   const [gettingStartedOpen, setGettingStartedOpen] = useState(false);
@@ -5526,6 +5529,20 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     return !!hasAccess;
   };
 
+  const checkGrayscaleFilterPermission = async () => {
+    if (!InstaControl?.hasSecureSettingsPermission) {
+      return false;
+    }
+    try {
+      const granted = await InstaControl.hasSecureSettingsPermission();
+      setGrayscaleFilterPermissionGranted(!!granted);
+      return !!granted;
+    } catch (error) {
+      console.warn("hasSecureSettingsPermission failed", error);
+      return false;
+    }
+  };
+
   const checkBatteryOptimization = async () => {
     if (!InstaControl?.isIgnoringBatteryOptimizations) {
       return true;
@@ -5800,6 +5817,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     checkAccessibility();
     checkUsageAccess();
     checkBatteryOptimization();
+    checkGrayscaleFilterPermission();
     refreshNotificationPermission();
   }, [isSettingsOpen, statsSportId]);
 
@@ -6432,8 +6450,16 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
     if (type === "edit") {
       return (
-        <View style={[styles.actionGlyphBox, { borderColor: color }]}>
-          <View style={[styles.actionGlyphBoxDot, { backgroundColor: color }]} />
+        <View style={styles.actionGlyphPencil}>
+          <View
+            style={[styles.actionGlyphPencilCap, { backgroundColor: color }]}
+          />
+          <View
+            style={[styles.actionGlyphPencilBody, { backgroundColor: color }]}
+          />
+          <View
+            style={[styles.actionGlyphPencilTip, { borderTopColor: color }]}
+          />
         </View>
       );
     }
@@ -11298,12 +11324,11 @@ const getSpeechLocale = () => {
           </View>
           <Pressable
             style={styles.iconButton}
-            onPress={() => setStatsSportId(selectedSport.id)}
+            onPress={() => openSportModal(selectedSport)}
+            accessibilityRole="button"
+            accessibilityLabel={t("label.editSport")}
           >
-            <View style={styles.iconButtonContent}>
-              <ActionGlyph type="stats" color={COLORS.text} />
-              <Text style={styles.iconButtonText}>{t("menu.stats")}</Text>
-            </View>
+            <ActionGlyph type="edit" color={COLORS.text} />
           </Pressable>
         </View>
         <KeyboardAvoidingView
@@ -11325,12 +11350,12 @@ const getSpeechLocale = () => {
           >
             <Pressable
               style={styles.editSportButton}
-              onPress={() => openSportModal(selectedSport)}
+              onPress={() => setStatsSportId(selectedSport.id)}
             >
               <View style={styles.editSportButtonContent}>
-                <ActionGlyph type="edit" color={COLORS.text} />
+                <ActionGlyph type="stats" color={COLORS.text} />
                 <Text style={styles.editSportButtonText}>
-                  {t("label.editSport")}
+                  {t("menu.stats")}
                 </Text>
               </View>
             </Pressable>
@@ -12519,6 +12544,37 @@ const getSpeechLocale = () => {
                 <Text style={styles.helperText}>
                   {t("label.grayscaleRestrictedAppsHint")}
                 </Text>
+                {settings.grayscaleRestrictedApps ? (
+                  grayscaleFilterPermissionGranted ? (
+                    <Text style={styles.grayscaleFilterStatusOk}>
+                      {t("label.grayscaleFilterStatusReal")}
+                    </Text>
+                  ) : (
+                    <View style={styles.grayscaleFilterUpsell}>
+                      <Text style={styles.grayscaleFilterStatusApprox}>
+                        {t("label.grayscaleFilterStatusApprox")}
+                      </Text>
+                      <Text style={styles.helperText}>
+                        {t("label.grayscaleFilterEnableHint")}
+                      </Text>
+                      <Text
+                        style={styles.grayscaleFilterCommand}
+                        selectable
+                      >
+                        adb shell pm grant {ANDROID_PACKAGE_NAME}{" "}
+                        android.permission.WRITE_SECURE_SETTINGS
+                      </Text>
+                      <Pressable
+                        style={styles.secondaryButton}
+                        onPress={checkGrayscaleFilterPermission}
+                      >
+                        <Text style={styles.secondaryButtonText}>
+                          {t("label.grayscaleFilterRecheck")}
+                        </Text>
+                      </Pressable>
+                    </View>
+                  )
+                ) : null}
               </View>
             </>
           ) : null}
@@ -13684,6 +13740,36 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 1,
   },
+  actionGlyphPencil: {
+    width: 16,
+    height: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    transform: [{ rotate: "45deg" }],
+  },
+  actionGlyphPencilCap: {
+    width: 4,
+    height: 3,
+    borderTopLeftRadius: 1,
+    borderTopRightRadius: 1,
+    opacity: 0.55,
+    marginBottom: 1,
+  },
+  actionGlyphPencilBody: {
+    width: 4,
+    height: 9,
+    borderRadius: 1,
+  },
+  actionGlyphPencilTip: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 2,
+    borderRightWidth: 2,
+    borderTopWidth: 4,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    marginTop: -1,
+  },
   actionGlyphEye: {
     width: 16,
     height: 10,
@@ -14111,15 +14197,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 10,
     borderRadius: 8,
-  },
-  iconButtonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  iconButtonText: {
-    color: COLORS.text,
-    fontWeight: "600",
   },
   trackingArea: {
     flex: 1,
@@ -15470,6 +15547,29 @@ const styles = StyleSheet.create({
   },
   lockNotice: {
     marginTop: 6,
+  },
+  grayscaleFilterStatusOk: {
+    marginTop: 8,
+    fontSize: 12,
+    fontWeight: "600",
+    color: COLORS.olive,
+  },
+  grayscaleFilterUpsell: {
+    marginTop: 10,
+    gap: 6,
+  },
+  grayscaleFilterStatusApprox: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: COLORS.amber,
+  },
+  grayscaleFilterCommand: {
+    fontFamily: isAndroid ? "monospace" : "Courier",
+    fontSize: 12,
+    color: COLORS.text,
+    backgroundColor: COLORS.cardDark,
+    borderRadius: 8,
+    padding: 10,
   },
   lockNoticeText: {
     fontSize: 12,

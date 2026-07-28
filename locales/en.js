@@ -156,7 +156,12 @@ const en = {
     "label.openApps": "Manage apps",
     "label.grayscaleRestrictedApps": "Show restricted apps in monochrome",
     "label.grayscaleRestrictedAppsHint":
-      "Dims restricted apps while they're in use and renders them in the list with a black-and-white style.",
+      "Shows restricted apps in black-and-white while they're in use and marks them accordingly in the list.",
+    "label.grayscaleFilterStatusReal": "✓ Real black-and-white filter active",
+    "label.grayscaleFilterStatusApprox": "⚠ Currently only dimming (approximation)",
+    "label.grayscaleFilterEnableHint":
+      "For a real black-and-white filter (instead of just dimming), run this command once from a computer (developer options & USB debugging must be enabled):",
+    "label.grayscaleFilterRecheck": "Check again",
     "label.closeApps": "Close apps",
     "label.searchApps": "Search apps",
     "label.searchSports": "Search sports",

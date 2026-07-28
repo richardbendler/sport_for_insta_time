@@ -161,6 +161,19 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
+  fun hasSecureSettingsPermission(promise: Promise) {
+    try {
+      val granted = ContextCompat.checkSelfPermission(
+        reactContext,
+        "android.permission.WRITE_SECURE_SETTINGS"
+      ) == PackageManager.PERMISSION_GRANTED
+      promise.resolve(granted)
+    } catch (e: Exception) {
+      promise.reject("SECURE_SETTINGS_CHECK_ERROR", e)
+    }
+  }
+
+  @ReactMethod
   fun getAppUsageStats(promise: Promise) {
     try {
       val appOps = reactContext.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
