@@ -1909,7 +1909,7 @@ const formatFactorValue = (value) => {
   return fixed.replace(/\.?0+$/, "");
 };
 
-const SportTitleSlots = ({ sport, sportLabel }) => {
+const SportTitleSlots = ({ sport, sportLabel, matchedLabel }) => {
   const [leftWidth, setLeftWidth] = useState(0);
   const [rightWidth, setRightWidth] = useState(0);
   const slotWidth = Math.max(leftWidth, rightWidth);
@@ -1939,6 +1939,15 @@ const SportTitleSlots = ({ sport, sportLabel }) => {
             {displayLabel}
           </Text>
         </View>
+        {matchedLabel ? (
+          <Text
+            style={styles.sportNameMatchedHint}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {matchedLabel}
+          </Text>
+        ) : null}
       </View>
       <View
         style={[styles.titleSideSlot, slotStyle]}
@@ -2248,11 +2257,14 @@ const formatTime = (timestamp) => {
   return `${hours}:${minutes}`;
 };
 
-const formatWeightValue = (value) => {
+const formatWeightValue = (value, maxDecimals = 2) => {
   if (!Number.isFinite(value)) {
     return "0";
   }
-  return `${Math.round(value)}`;
+  const factor = Math.pow(10, maxDecimals);
+  const rounded = Math.round(value * factor) / factor;
+  const text = rounded.toFixed(maxDecimals);
+  return text.replace(/\.0+$/, "").replace(/(\.\d*[1-9])0+$/, "$1");
 };
 
 const formatDistanceValue = (value, maxDecimals = 2) => {
@@ -3375,6 +3387,30 @@ function AppContent() {
     newDifficultyLevel,
     t,
   ]);
+  const holdRepeatTimersRef = useRef({ timeout: null, interval: null });
+  const stopHoldRepeat = useCallback(() => {
+    const timers = holdRepeatTimersRef.current;
+    if (timers.timeout) {
+      clearTimeout(timers.timeout);
+      timers.timeout = null;
+    }
+    if (timers.interval) {
+      clearInterval(timers.interval);
+      timers.interval = null;
+    }
+  }, []);
+  const startHoldRepeat = useCallback(
+    (action) => {
+      stopHoldRepeat();
+      action();
+      holdRepeatTimersRef.current.timeout = setTimeout(() => {
+        holdRepeatTimersRef.current.interval = setInterval(action, 90);
+      }, 400);
+    },
+    [stopHoldRepeat]
+  );
+  useEffect(() => stopHoldRepeat, [stopHoldRepeat]);
+
   const adjustDifficultyLevel = useCallback((delta) => {
     setNewDifficultyLevel((current) => {
       const currentIndex = getDifficultyOptionIndex(current);
@@ -3890,7 +3926,7 @@ function AppContent() {
   const normalizedSportSearch = normalizeTextForSearch(trimmedSportSearch);
   const standardSportSuggestions = useMemo(() => {
     if (!normalizedSportSearch) {
-      return STANDARD_SPORTS;
+      return STANDARD_SPORTS.map((entry) => ({ entry, matchedLabel: null }));
     }
     const searchCompact = stripNonAlphanumeric(normalizedSportSearch);
     const searchTokens = splitSearchTokens(normalizedSportSearch);
@@ -3922,9 +3958,19 @@ function AppContent() {
     const prefixMatches = singleWordSearch
       ? scoredMatches.filter((item) => item.match.index === 0)
       : scoredMatches;
+    const toSuggestion = (item) => {
+      const defaultLabel = getStandardSportLabel(item.entry, language);
+      const candidate = item.match.candidate;
+      const matchedLabel =
+        candidate &&
+        normalizeTextForSearch(candidate) !== normalizeTextForSearch(defaultLabel)
+          ? candidate
+          : null;
+      return { entry: item.entry, matchedLabel };
+    };
     const shouldDedupRoots = singleWordSearch && normalizedSportSearch.length <= 2;
     if (!shouldDedupRoots) {
-      return prefixMatches.slice(0, 6).map((item) => item.entry);
+      return prefixMatches.slice(0, 6).map(toSuggestion);
     }
     const dedupedMatches = [];
     const seenRoots = new Set();
@@ -3938,7 +3984,7 @@ function AppContent() {
       }
       dedupedMatches.push(item);
     });
-    return dedupedMatches.slice(0, 6).map((item) => item.entry);
+    return dedupedMatches.slice(0, 6).map(toSuggestion);
   }, [language, normalizedSportSearch]);
   const showCustomSuggestionButton =
     trimmedSportSearch.length > 0 && standardSportSuggestions.length === 0;
@@ -5963,7 +6009,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   }, [overallStatsOpen]);
 
   useEffect(() => {
-    setWeightEntryWeight("");
     setWeightEntryReps("");
   }, [selectedSportId]);
 
@@ -6762,13 +6807,25 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               ref={tutorialSportNameRef}
               collapsable={false}
             >
-              <TextInput
-                style={styles.searchInput}
-                value={newName}
-                onChangeText={handleSportNameChange}
-                placeholder={t("label.searchSports")}
-                placeholderTextColor="#7a7a7a"
-              />
+              <View style={styles.searchInputWrapper}>
+                <TextInput
+                  style={[styles.searchInput, styles.searchInputWithClear]}
+                  value={newName}
+                  onChangeText={handleSportNameChange}
+                  placeholder={t("label.searchSports")}
+                  placeholderTextColor="#7a7a7a"
+                />
+                {newName.length > 0 ? (
+                  <Pressable
+                    style={styles.searchInputClearButton}
+                    onPress={() => handleSportNameChange("")}
+                    accessibilityRole="button"
+                    accessibilityLabel={t("label.clearSearch")}
+                  >
+                    <ActionGlyph type="delete" color={COLORS.muted} />
+                  </Pressable>
+                ) : null}
+              </View>
               {!editingSportId ? (
                 <View style={styles.standardSuggestionWindow}>
                   <Text style={styles.suggestionsHeader}>
@@ -6780,8 +6837,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                       showsVerticalScrollIndicator={false}
                     >
                       {standardSportSuggestions.length > 0 ? (
-                        standardSportSuggestions.map((entry) => {
-                          const label = getStandardSportLabel(entry, language);
+                        standardSportSuggestions.map(({ entry, matchedLabel }) => {
+                          const defaultLabel = getStandardSportLabel(entry, language);
+                          const label = matchedLabel || defaultLabel;
                           const isActive = entry.id === selectedStandardSportId;
                           return (
                             <Pressable
@@ -6802,6 +6860,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                                     {entry.type === "reps"
                                       ? t("label.reps")
                                       : t("label.timeBased")}
+                                    {matchedLabel ? ` · ${defaultLabel}` : ""}
                                   </Text>
                                 </View>
                               </View>
@@ -6982,7 +7041,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                   !canDecreaseDifficulty && styles.difficultyButtonDisabled,
                 ]}
                 disabled={!canDecreaseDifficulty}
-                onPress={() => handleDifficultyButtonPress(-1)}
+                onPressIn={() =>
+                  startHoldRepeat(() => handleDifficultyButtonPress(-1))
+                }
+                onPressOut={stopHoldRepeat}
               >
                 <Text
                   style={[
@@ -6999,7 +7061,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                   !canIncreaseDifficulty && styles.difficultyButtonDisabled,
                 ]}
                 disabled={!canIncreaseDifficulty}
-                onPress={() => handleDifficultyButtonPress(1)}
+                onPressIn={() =>
+                  startHoldRepeat(() => handleDifficultyButtonPress(1))
+                }
+                onPressOut={stopHoldRepeat}
               >
                 <Text
                   style={[
@@ -7109,7 +7174,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                         styles.difficultyButtonDisabled,
                     ]}
                     disabled={!canDecreaseIncrementalTimeFactor}
-                    onPress={() => adjustIncrementalTimeFactor(-1)}
+                    onPressIn={() =>
+                      startHoldRepeat(() => adjustIncrementalTimeFactor(-1))
+                    }
+                    onPressOut={stopHoldRepeat}
                   >
                     <Text
                       style={[
@@ -7128,7 +7196,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                         styles.difficultyButtonDisabled,
                     ]}
                     disabled={!canIncreaseIncrementalTimeFactor}
-                    onPress={() => adjustIncrementalTimeFactor(1)}
+                    onPressIn={() =>
+                      startHoldRepeat(() => adjustIncrementalTimeFactor(1))
+                    }
+                    onPressOut={stopHoldRepeat}
                   >
                     <Text
                       style={[
@@ -8355,6 +8426,33 @@ const getSpeechLocale = () => {
     sportSortMode,
     sportLastUsageMap,
   ]);
+  const sportSearchMatchLabels = useMemo(() => {
+    const map = new Map();
+    if (!normalizedSportSearchTerm) {
+      return map;
+    }
+    const searchCompact = stripNonAlphanumeric(normalizedSportSearchTerm);
+    activeSports.forEach((sport) => {
+      const match = getSportMatchScore(
+        sport,
+        normalizedSportSearchTerm,
+        searchCompact,
+        language
+      );
+      if (!match || !match.candidate) {
+        return;
+      }
+      const defaultLabel = getSportLabel(sport);
+      if (
+        normalizeTextForSearch(match.candidate) !==
+        normalizeTextForSearch(defaultLabel)
+      ) {
+        map.set(sport.id, match.candidate);
+      }
+    });
+    return map;
+  }, [activeSports, normalizedSportSearchTerm, language]);
+
   const filteredHiddenSports = useMemo(() => {
     const base = scoreAndSortSportsBySearch(
       hiddenSports,
@@ -8438,6 +8536,17 @@ const getSpeechLocale = () => {
     () => groupEntriesByDay(recentWeightEntries),
     [recentWeightEntries]
   );
+  const lastLoggedWeight = recentWeightEntries[0]?.weight;
+  useEffect(() => {
+    if (!selectedSport || !selectedSport.weightExercise) {
+      return;
+    }
+    setWeightEntryWeight(
+      Number.isFinite(lastLoggedWeight) && lastLoggedWeight > 0
+        ? String(lastLoggedWeight)
+        : ""
+    );
+  }, [selectedSportId, lastLoggedWeight]);
   const recentTimeEntries = useMemo(() => {
     if (!selectedSport || selectedSport.type !== "time") {
       return [];
@@ -11293,7 +11402,6 @@ const getSpeechLocale = () => {
         reps: dayStats.reps + reps,
         screenSeconds: (dayStats.screenSeconds || 0) + addedSeconds,
       }));
-      setWeightEntryWeight("");
       setWeightEntryReps("");
     };
     const sportDetailScrollEnabled = isSimpleReps
@@ -13008,16 +13116,28 @@ const getSpeechLocale = () => {
           </Pressable>
         </View>
         */}
-        <TextInput
-          style={styles.searchInput}
-          autoCorrect={false}
-          autoCapitalize="none"
-          placeholder={t("label.searchSports")}
-          placeholderTextColor="#7a7a7a"
-          value={sportSearch}
-          onChangeText={setSportSearch}
-          clearButtonMode="while-editing"
-        />
+        <View style={styles.searchInputWrapper}>
+          <TextInput
+            style={[styles.searchInput, styles.searchInputWithClear]}
+            autoCorrect={false}
+            autoCapitalize="none"
+            placeholder={t("label.searchSports")}
+            placeholderTextColor="#7a7a7a"
+            value={sportSearch}
+            onChangeText={setSportSearch}
+            clearButtonMode="while-editing"
+          />
+          {sportSearch.length > 0 ? (
+            <Pressable
+              style={styles.searchInputClearButton}
+              onPress={() => setSportSearch("")}
+              accessibilityRole="button"
+              accessibilityLabel={t("label.clearSearch")}
+            >
+              <ActionGlyph type="delete" color={COLORS.muted} />
+            </Pressable>
+          ) : null}
+        </View>
         <Modal
           visible={accessibilityDisclosureVisible}
           transparent
@@ -13157,7 +13277,11 @@ const getSpeechLocale = () => {
                     </Pressable>
                   </View>
                   <View style={[styles.sportTopTitleCenter, { width: titleWidth }]}>
-                    <SportTitleSlots sport={sport} sportLabel={sportLabel} />
+                    <SportTitleSlots
+                      sport={sport}
+                      sportLabel={sportLabel}
+                      matchedLabel={sportSearchMatchLabels.get(sport.id)}
+                    />
                   </View>
                   <View style={styles.sportTopIconsRight}>
                     <Pressable
@@ -14552,6 +14676,12 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     width: "100%",
   },
+  sportNameMatchedHint: {
+    fontSize: 11,
+    color: COLORS.amber,
+    textAlign: "center",
+    marginTop: -2,
+  },
   sportBadges: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -15321,6 +15451,22 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     color: COLORS.text,
     marginBottom: 10,
+  },
+  searchInputWrapper: {
+    position: "relative",
+    justifyContent: "center",
+  },
+  searchInputWithClear: {
+    paddingRight: 40,
+  },
+  searchInputClearButton: {
+    position: "absolute",
+    right: 10,
+    top: 0,
+    bottom: 10,
+    width: 24,
+    alignItems: "center",
+    justifyContent: "center",
   },
   iconRow: {
     flexDirection: "row",

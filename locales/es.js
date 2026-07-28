@@ -165,6 +165,7 @@ const es = {
     "label.closeApps": "Cerrar apps",
     "label.searchApps": "Buscar apps",
     "label.searchSports": "Buscar deportes",
+    "label.clearSearch": "Borrar busqueda",
     "label.sortAlpha": "Alfabetico",
     "label.sortRecent": "Ultimo uso",
     "label.sortManual": "Manual",

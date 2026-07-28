@@ -165,6 +165,7 @@ const de = {
     "label.closeApps": "Apps schließen",
     "label.searchApps": "Apps suchen",
     "label.searchSports": "Sportarten durchsuchen",
+    "label.clearSearch": "Suche löschen",
     "label.sortAlpha": "Alphabetisch",
     "label.sortRecent": "Letzte Nutzung",
     "label.sortManual": "Manuell",
