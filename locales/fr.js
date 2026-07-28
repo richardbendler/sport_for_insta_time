@@ -515,119 +515,549 @@ const funFacts = [
   {
     id: "funfact-001",
     text: "Le savais-tu ? Seulement 10 minutes de mouvement peuvent am\u00e9liorer ton humeur de fa\u00e7on mesurable.",
+    tag: "general",
   },
   {
     id: "funfact-002",
     text: "Le savais-tu ? L'exercice r\u00e9gulier augmente ton esp\u00e9rance de vie, quel que soit le rythme.",
+    tag: "general",
   },
   {
     id: "funfact-003",
     text: "Le savais-tu ? Ton corps devient plus fort avant m\u00eame que tu ne le voies.",
+    tag: "general",
   },
   {
     id: "funfact-004",
     text: "Le savais-tu ? Le mouvement r\u00e9duit le stress plus efficacement que beaucoup de techniques de relaxation.",
+    tag: "general",
   },
   {
     id: "funfact-005",
     text: "Le savais-tu ? La constance bat l'intensit\u00e9 \u2014 chaque petit pas compte.",
+    tag: "general",
   },
   {
     id: "funfact-006",
     text: "Le savais-tu ? Le sport am\u00e9liore ton sommeil apr\u00e8s seulement quelques jours.",
+    tag: "general",
   },
   {
     id: "funfact-007",
     text: "Le savais-tu ? Ton cerveau adore bouger \u2014 cela booste la concentration et le focus.",
+    tag: "general",
   },
   {
     id: "funfact-008",
     text: "Le savais-tu ? Apr\u00e8s l'entra\u00eenement, tu te sens presque toujours mieux qu'avant.",
+    tag: "general",
   },
   {
     id: "funfact-009",
     text: "Le savais-tu ? Les muscles grandissent pendant la pause \u2014 la r\u00e9cup\u00e9ration fait partie du succ\u00e8s.",
+    tag: "general",
   },
   {
     id: "funfact-010",
     text: "Le savais-tu ? Le mouvement renforce ton syst\u00e8me immunitaire sur le long terme.",
+    tag: "general",
   },
   {
     id: "funfact-011",
     text: "Le savais-tu ? Tu n'as pas besoin d'\u00eatre motiv\u00e9 pour commencer \u2014 le mouvement cr\u00e9e la motivation.",
+    tag: "general",
   },
   {
     id: "funfact-012",
     text: "Le savais-tu ? Chaque stimulus d'entra\u00eenement est un signal pour ton corps : deviens plus fort.",
+    tag: "general",
   },
   {
     id: "funfact-013",
     text: "Le savais-tu ? Le sport aide de fa\u00e7on prouv\u00e9e contre l'anxi\u00e9t\u00e9 et l'agitation int\u00e9rieure.",
+    tag: "general",
   },
   {
     id: "funfact-014",
     text: "Le savais-tu ? \u00catre actif aujourd'hui rend demain plus facile.",
+    tag: "general",
   },
   {
     id: "funfact-015",
     text: "Le savais-tu ? M\u00eame un mouvement l\u00e9ger r\u00e9duit le risque de nombreuses maladies.",
+    tag: "general",
   },
   {
     id: "funfact-016",
     text: "Le savais-tu ? Ton corps s'adapte, peu importe le niveau de d\u00e9part.",
+    tag: "general",
   },
   {
     id: "funfact-017",
     text: "Le savais-tu ? L'entra\u00eenement am\u00e9liore ta confiance en toi, pas seulement ta forme.",
+    tag: "general",
   },
   {
     id: "funfact-018",
     text: "Le savais-tu ? Tu continues \u00e0 br\u00fbler des calories m\u00eame apr\u00e8s l'entra\u00eenement.",
+    tag: "general",
   },
   {
     id: "funfact-019",
     text: "Le savais-tu ? Le mouvement te rend plus r\u00e9sistant \u2014 physiquement et mentalement.",
+    tag: "general",
   },
   {
     id: "funfact-020",
     text: "Le savais-tu ? Chaque d\u00e9but d'entra\u00eenement est une victoire sur les excuses.",
+    tag: "general",
   },
   {
     id: "funfact-021",
     text: "Le savais-tu ? Ton c\u0153ur devient plus fort \u00e0 chaque journ\u00e9e active.",
+    tag: "general",
   },
   {
     id: "funfact-022",
     text: "Le savais-tu ? Le progr\u00e8s n'est pas lin\u00e9aire \u2014 pers\u00e9v\u00e9rer est la cl\u00e9.",
+    tag: "general",
   },
   {
     id: "funfact-023",
     text: "Le savais-tu ? Le sport lib\u00e8re des hormones du bonheur \u2014 sans effets secondaires.",
+    tag: "general",
   },
   {
     id: "funfact-024",
     text: "Le savais-tu ? Plus de mouvement = plus d'\u00e9nergie au quotidien.",
+    tag: "general",
   },
   {
     id: "funfact-025",
     text: "Le savais-tu ? Ton corps est fait pour bouger \u2014 pas pour l'immobilit\u00e9.",
+    tag: "general",
   },
   {
     id: "funfact-026",
     text: "Le savais-tu ? L'entra\u00eenement fa\u00e7onne des habitudes, les habitudes fa\u00e7onnent ta vie.",
+    tag: "general",
   },
   {
     id: "funfact-027",
     text: "Le savais-tu ? Tu ne t'entra\u00eenes pas seulement pour aujourd'hui, mais pour ton futur toi.",
+    tag: "general",
   },
   {
     id: "funfact-028",
     text: "Le savais-tu ? Chaque pas compte \u2014 m\u00eame le plus lent.",
+    tag: "general",
   },
   {
     id: "funfact-029",
     text: "Le savais-tu ? Le mouvement est un investissement avec un retour total.",
+    tag: "general",
   },
+  {
+    id: "funfact-030",
+    text: "La première entrée est toujours la plus difficile, et tu viens de la passer.",
+    tag: "startSport",
+  },
+  {
+    id: "funfact-031",
+    text: "Enregistre ton premier sport, le reste suivra naturellement.",
+    tag: "startSport",
+  },
+  {
+    id: "funfact-032",
+    text: "Tu n'as pas besoin d'être motivé pour commencer. Tu deviens motivé parce que tu as commencé.",
+    tag: "startSport",
+  },
+  {
+    id: "funfact-033",
+    text: "Une séance enregistrée vaut plus que dix bonnes résolutions.",
+    tag: "startSport",
+  },
+  {
+    id: "funfact-034",
+    text: "Commence ton premier sport maintenant, dans quelques minutes tu auras déjà accompli quelque chose.",
+    tag: "startSport",
+  },
+  {
+    id: "funfact-035",
+    text: "Le savais-tu ? Tu peux créer toi-même n'importe quel sport manquant.",
+    tag: "newSport",
+  },
+  {
+    id: "funfact-036",
+    text: "Ton sport préféré n'est pas dans la liste ? Crée-le toi-même.",
+    tag: "newSport",
+  },
+  {
+    id: "funfact-037",
+    text: "Les sports personnalisés font de cette appli la tienne, essaie.",
+    tag: "newSport",
+  },
+  {
+    id: "funfact-038",
+    text: "Du hula-hoop à l'escalade de bloc : si tu bouges, tu peux le suivre.",
+    tag: "newSport",
+  },
+  {
+    id: "funfact-039",
+    text: "Plus tes sports te correspondent, plus le suivi devient motivant.",
+    tag: "newSport",
+  },
+  {
+    id: "funfact-040",
+    text: "Le savais-tu ? Tu peux créer tes propres catégories comme «Force» ou «Endurance» pour trier tes sports.",
+    tag: "createCategory",
+  },
+  {
+    id: "funfact-041",
+    text: "L'ordre motive : regroupe tes sports dans tes propres catégories.",
+    tag: "createCategory",
+  },
+  {
+    id: "funfact-042",
+    text: "Force, endurance, mobilité : crée des catégories adaptées à ton plan d'entraînement.",
+    tag: "createCategory",
+  },
+  {
+    id: "funfact-043",
+    text: "Avec tes propres catégories, tu gardes une vue d'ensemble même avec beaucoup de sports.",
+    tag: "createCategory",
+  },
+  {
+    id: "funfact-044",
+    text: "Les catégories peuvent être renommées ou supprimées à tout moment, n'hésite pas à expérimenter.",
+    tag: "createCategory",
+  },
+  {
+    id: "funfact-045",
+    text: "Un coup d'œil aux statistiques montre souvent plus de progrès que tu ne le penses.",
+    tag: "stats",
+  },
+  {
+    id: "funfact-046",
+    text: "Les chiffres ne mentent pas : tes statistiques sont le partenaire d'entraînement le plus honnête que tu aies.",
+    tag: "stats",
+  },
+  {
+    id: "funfact-047",
+    text: "Le savais-tu ? Les statistiques affichent un graphique et un calendrier pour chaque sport.",
+    tag: "stats",
+  },
+  {
+    id: "funfact-048",
+    text: "Le progrès semble lent, mais paraît souvent impressionnant dans les statistiques.",
+    tag: "stats",
+  },
+  {
+    id: "funfact-049",
+    text: "Consulte tes statistiques régulièrement, cela maintient la motivation.",
+    tag: "stats",
+  },
+  {
+    id: "funfact-050",
+    text: "Le savais-tu ? Tu peux ajuster individuellement le facteur de difficulté de chaque sport.",
+    tag: "difficulty",
+  },
+  {
+    id: "funfact-051",
+    text: "Un exercice devient trop facile ? Augmente simplement son facteur.",
+    tag: "difficulty",
+  },
+  {
+    id: "funfact-052",
+    text: "Le facteur utilisateur garantit que ton entraînement se traduit équitablement en temps d'écran.",
+    tag: "difficulty",
+  },
+  {
+    id: "funfact-053",
+    text: "Maintiens + ou - enfoncé pour ajuster le facteur plus vite.",
+    tag: "difficulty",
+  },
+  {
+    id: "funfact-054",
+    text: "Adapte la difficulté à ton niveau de forme actuel, elle peut évoluer avec toi.",
+    tag: "difficulty",
+  },
+  {
+    id: "funfact-055",
+    text: "Le savais-tu ? Tu peux épingler un widget sur ton écran d'accueil.",
+    tag: "widget",
+  },
+  {
+    id: "funfact-056",
+    text: "Un widget affiche ton temps restant sans ouvrir l'appli.",
+    tag: "widget",
+  },
+  {
+    id: "funfact-057",
+    text: "Un widget sur l'écran d'accueil garde ton objectif toujours en vue.",
+    tag: "widget",
+  },
+  {
+    id: "funfact-058",
+    text: "Épingle un widget pour ton sport préféré.",
+    tag: "widget",
+  },
+  {
+    id: "funfact-059",
+    text: "Les widgets sont le moyen le plus rapide de voir en direct combien de temps tu as déjà gagné.",
+    tag: "widget",
+  },
+  {
+    id: "funfact-060",
+    text: "Le savais-tu ? Les notifications te préviennent quand ton temps s'épuise.",
+    tag: "notifications",
+  },
+  {
+    id: "funfact-061",
+    text: "Active les notifications pour ne jamais être pris au dépourvu quand le temps s'écoule.",
+    tag: "notifications",
+  },
+  {
+    id: "funfact-062",
+    text: "Un petit rappel suffit souvent à te faire bouger à nouveau.",
+    tag: "notifications",
+  },
+  {
+    id: "funfact-063",
+    text: "Avec les notifications activées, tu ne rateras aucune indication importante de l'appli.",
+    tag: "notifications",
+  },
+  {
+    id: "funfact-064",
+    text: "Sois prévenu à temps plutôt que d'être arrêté brusquement en plein défilement.",
+    tag: "notifications",
+  },
+  {
+    id: "funfact-065",
+    text: "Le savais-tu ? C'est toi qui décides quelles applis sont restreintes.",
+    tag: "apps",
+  },
+  {
+    id: "funfact-066",
+    text: "Plus tu choisis tes applis avec précision, plus l'appli devient efficace.",
+    tag: "apps",
+  },
+  {
+    id: "funfact-067",
+    text: "Regarde quelle appli te prend le plus de temps en ce moment et restreins-la.",
+    tag: "apps",
+  },
+  {
+    id: "funfact-068",
+    text: "Les applis restreintes peuvent toujours être ajustées plus tard.",
+    tag: "apps",
+  },
+  {
+    id: "funfact-069",
+    text: "C'est toi qui fixes les règles : choisis les applis où bouger doit en valoir la peine.",
+    tag: "apps",
+  },
+  {
+    id: "funfact-070",
+    text: "Le savais-tu ? Les réglages te permettent d'adapter l'appli entièrement à toi.",
+    tag: "settings",
+  },
+  {
+    id: "funfact-071",
+    text: "Un rapide coup d'œil aux réglages en vaut la peine, il y a plus de choses que tu ne le penses.",
+    tag: "settings",
+  },
+  {
+    id: "funfact-072",
+    text: "De la langue au filtre noir et blanc : les réglages te donnent le contrôle.",
+    tag: "settings",
+  },
+  {
+    id: "funfact-073",
+    text: "Fais de cette appli la tienne, les réglages le permettent en quelques secondes.",
+    tag: "settings",
+  },
+  {
+    id: "funfact-074",
+    text: "Prends un instant pour vérifier et ajuster tes réglages.",
+    tag: "settings",
+  },
+  {
+    id: "funfact-075",
+    text: "Le savais-tu ? L'écran préalable te laisse un instant de réflexion avant qu'une appli ne s'ouvre.",
+    tag: "preface",
+  },
+  {
+    id: "funfact-076",
+    text: "Un petit moment de pause peut avoir un grand effet.",
+    tag: "preface",
+  },
+  {
+    id: "funfact-077",
+    text: "L'écran préalable t'aide à décider consciemment plutôt que par habitude.",
+    tag: "preface",
+  },
+  {
+    id: "funfact-078",
+    text: "Règle le délai comme cela te convient le mieux.",
+    tag: "preface",
+  },
+  {
+    id: "funfact-079",
+    text: "Parfois, une courte pause suffit pour briser une habitude.",
+    tag: "preface",
+  },
+  {
+    id: "funfact-080",
+    text: "Le savais-tu ? Tu peux compter tes répétitions à la voix.",
+    tag: "voice",
+  },
+  {
+    id: "funfact-081",
+    text: "Envie d'avoir les deux mains libres pendant l'entraînement ? Le comptage vocal le permet.",
+    tag: "voice",
+  },
+  {
+    id: "funfact-082",
+    text: "Dis simplement ton nombre à voix haute, l'appli compte avec toi.",
+    tag: "voice",
+  },
+  {
+    id: "funfact-083",
+    text: "Le contrôle vocal est pratique quand tu ne veux pas toucher l'écran pendant l'exercice.",
+    tag: "voice",
+  },
+  {
+    id: "funfact-084",
+    text: "Essaie le comptage vocal lors de ta prochaine séance.",
+    tag: "voice",
+  },
+  {
+    id: "funfact-085",
+    text: "Le savais-tu ? Tu peux changer la langue de l'appli à tout moment.",
+    tag: "language",
+  },
+  {
+    id: "funfact-086",
+    text: "L'appli parle allemand, anglais, espagnol et français.",
+    tag: "language",
+  },
+  {
+    id: "funfact-087",
+    text: "Mauvaise langue sélectionnée ? Un seul geste suffit pour changer.",
+    tag: "language",
+  },
+  {
+    id: "funfact-088",
+    text: "Quelle que soit la langue que tu préfères, l'appli s'adapte.",
+    tag: "language",
+  },
+  {
+    id: "funfact-089",
+    text: "Change de langue sans redémarrer : essaie directement dans les réglages.",
+    tag: "language",
+  },
+  {
+    id: "funfact-090",
+    text: "Le savais-tu ? Le tutoriel te montre toutes les fonctions clés en quelques minutes.",
+    tag: "tutorial",
+  },
+  {
+    id: "funfact-091",
+    text: "Nouveau ici ou tu as manqué quelque chose ? Le tutoriel t'aide.",
+    tag: "tutorial",
+  },
+  {
+    id: "funfact-092",
+    text: "Un second passage dans le tutoriel révèle souvent des fonctions que tu ne connaissais pas.",
+    tag: "tutorial",
+  },
+  {
+    id: "funfact-093",
+    text: "Tu peux relancer le tutoriel à tout moment.",
+    tag: "tutorial",
+  },
+  {
+    id: "funfact-094",
+    text: "Prends quelques minutes pour le tutoriel, cela en vaut la peine.",
+    tag: "tutorial",
+  },
+  {
+    id: "funfact-095",
+    text: "Le savais-tu ? Tout ton historique d'entraînement reste enregistré.",
+    tag: "history",
+  },
+  {
+    id: "funfact-096",
+    text: "Regarder en arrière montre souvent le chemin déjà parcouru.",
+    tag: "history",
+  },
+  {
+    id: "funfact-097",
+    text: "Tes entrées passées sont la meilleure preuve de tes progrès.",
+    tag: "history",
+  },
+  {
+    id: "funfact-098",
+    text: "Compare ton historique sur plusieurs semaines, des tendances apparaissent.",
+    tag: "history",
+  },
+  {
+    id: "funfact-099",
+    text: "Chaque entrée de ton historique est une petite preuve de persévérance.",
+    tag: "history",
+  },
+  {
+    id: "funfact-100",
+    text: "Le savais-tu ? Pour les exercices avec poids, tu peux aussi saisir des décimales.",
+    tag: "logWeight",
+  },
+  {
+    id: "funfact-101",
+    text: "Le dernier poids utilisé est déjà pré-rempli automatiquement.",
+    tag: "logWeight",
+  },
+  {
+    id: "funfact-102",
+    text: "Enregistre ton poids le plus précisément possible, tes statistiques restent ainsi pertinentes.",
+    tag: "logWeight",
+  },
+  {
+    id: "funfact-103",
+    text: "Augmente ton poids progressivement et enregistre chaque changement.",
+    tag: "logWeight",
+  },
+  {
+    id: "funfact-104",
+    text: "Même de petites augmentations de poids s'accumulent sur la durée.",
+    tag: "logWeight",
+  },
+  {
+    id: "funfact-105",
+    text: "Le savais-tu ? Tu peux te fixer de petits défis, comme 7 jours d'affilée.",
+    tag: "challenge",
+  },
+  {
+    id: "funfact-106",
+    text: "Fixe-toi un petit objectif pour cette semaine, les grands objectifs sont faits de petits pas.",
+    tag: "challenge",
+  },
+  {
+    id: "funfact-107",
+    text: "Une série de jours d'entraînement finit par procurer une satisfaction surprenante.",
+    tag: "challenge",
+  },
+  {
+    id: "funfact-108",
+    text: "Mets-toi au défi : peux-tu battre ton dernier record personnel ?",
+    tag: "challenge",
+  },
+  {
+    id: "funfact-109",
+    text: "Le meilleur moment pour un nouveau défi, c'est maintenant.",
+    tag: "challenge",
+  },
+
 ];
 
 export { weekdayLabels, monthLabels, numberWords, funFacts };
