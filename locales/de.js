@@ -172,6 +172,23 @@ const de = {
     "label.feedbackEmailUnavailableTitle": "Keine E-Mail-App gefunden",
     "label.feedbackEmailUnavailableBody":
       "Bitte schreib uns direkt an {{email}}.",
+    "label.categories": "Kategorien",
+    "label.categoryLabel": "Kategorie",
+    "label.manageCategories": "Kategorien verwalten",
+    "label.noCategory": "Ohne Kategorie",
+    "label.noCategoriesYet": "Noch keine Kategorien angelegt.",
+    "label.categorySportCount": "{{count}} Sportart(en)",
+    "label.newCategoryPlaceholder": "Neue Kategorie, z. B. \"Mobility\"",
+    "label.categoryDeleteWarningTitle": "Kategorie wirklich löschen?",
+    "label.categoryDeleteWarningBody":
+      "Du bist dabei, die Kategorie \"{{name}}\" zu löschen. Das kann nicht rückgängig gemacht werden.",
+    "label.categoryDeleteSportsCount":
+      "Diese Kategorie enthält {{count}} Sportart(en). Was soll damit passieren?",
+    "label.categoryDeleteSportsToo": "Sportarten auch löschen",
+    "label.categoryDeleteMoveSports": "In andere Kategorie verschieben",
+    "label.categoryDeleteConfirmButton": "Endgültig löschen",
+    "label.categoryDeleteFinalConfirm":
+      "Bist du dir wirklich sicher? Diese Aktion kann nicht rückgängig gemacht werden.",
     "label.sortAlpha": "Alphabetisch",
     "label.sortRecent": "Letzte Nutzung",
     "label.sortManual": "Manuell",

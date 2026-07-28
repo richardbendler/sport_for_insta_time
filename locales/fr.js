@@ -175,6 +175,23 @@ const fr = {
     "label.feedbackEmailUnavailableTitle": "Aucune app e-mail trouvee",
     "label.feedbackEmailUnavailableBody":
       "Ecrivez-nous directement a {{email}}.",
+    "label.categories": "Categories",
+    "label.categoryLabel": "Categorie",
+    "label.manageCategories": "Gerer les categories",
+    "label.noCategory": "Sans categorie",
+    "label.noCategoriesYet": "Aucune categorie pour le moment.",
+    "label.categorySportCount": "{{count}} sport(s)",
+    "label.newCategoryPlaceholder": "Nouvelle categorie, ex. \"Mobilite\"",
+    "label.categoryDeleteWarningTitle": "Vraiment supprimer cette categorie ?",
+    "label.categoryDeleteWarningBody":
+      "Vous etes sur le point de supprimer la categorie \"{{name}}\". Cette action est irreversible.",
+    "label.categoryDeleteSportsCount":
+      "Cette categorie contient {{count}} sport(s). Que doit-il en advenir ?",
+    "label.categoryDeleteSportsToo": "Supprimer aussi les sports",
+    "label.categoryDeleteMoveSports": "Deplacer vers une autre categorie",
+    "label.categoryDeleteConfirmButton": "Supprimer definitivement",
+    "label.categoryDeleteFinalConfirm":
+      "Etes-vous vraiment sur ? Cette action est irreversible.",
     "label.sortAlpha": "Alphabétique",
     "label.sortRecent": "Dernière utilisation",
     "label.sortManual": "Manuel",

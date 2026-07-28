@@ -171,6 +171,23 @@ const en = {
     "label.feedbackEmailSubject": "Feedback: Sport for Screen Time",
     "label.feedbackEmailUnavailableTitle": "No email app found",
     "label.feedbackEmailUnavailableBody": "Please write to us directly at {{email}}.",
+    "label.categories": "Categories",
+    "label.categoryLabel": "Category",
+    "label.manageCategories": "Manage categories",
+    "label.noCategory": "No category",
+    "label.noCategoriesYet": "No categories yet.",
+    "label.categorySportCount": "{{count}} sport(s)",
+    "label.newCategoryPlaceholder": "New category, e.g. \"Mobility\"",
+    "label.categoryDeleteWarningTitle": "Really delete this category?",
+    "label.categoryDeleteWarningBody":
+      "You're about to delete the category \"{{name}}\". This cannot be undone.",
+    "label.categoryDeleteSportsCount":
+      "This category contains {{count}} sport(s). What should happen to them?",
+    "label.categoryDeleteSportsToo": "Delete the sports too",
+    "label.categoryDeleteMoveSports": "Move to another category",
+    "label.categoryDeleteConfirmButton": "Delete permanently",
+    "label.categoryDeleteFinalConfirm":
+      "Are you really sure? This action cannot be undone.",
     "label.sortAlpha": "Alphabetical",
     "label.sortRecent": "Last used",
     "label.sortManual": "Manual",

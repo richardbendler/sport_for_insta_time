@@ -89,6 +89,7 @@ const STORAGE_KEYS = {
   sportColors: "@sport_color_links_v1",
   creditLockMinimums: "@credit_lock_minimums_v1",
   creditFactorRestore: "@credit_factor_restore_v1",
+  categories: "@sport_categories_v1",
 };
 
 
@@ -3251,6 +3252,27 @@ const ensureDefaultSettings = async () => {
 const generateId = () =>
   `sport_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
 
+const generateCategoryId = () =>
+  `category_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+
+const DEFAULT_CATEGORY_NAMES_BY_LANG = {
+  de: ["Kraft", "Ausdauer"],
+  en: ["Strength", "Endurance"],
+  es: ["Fuerza", "Resistencia"],
+  fr: ["Force", "Endurance"],
+};
+
+const createDefaultCategories = (language) => {
+  const names =
+    DEFAULT_CATEGORY_NAMES_BY_LANG[language] ||
+    DEFAULT_CATEGORY_NAMES_BY_LANG.en;
+  return names.map((name) => ({
+    id: generateCategoryId(),
+    name,
+    createdAt: Date.now(),
+  }));
+};
+
 const normalizeSpeechText = (value) =>
   String(value || "")
     .toLowerCase()
@@ -3317,6 +3339,15 @@ function AppContent() {
   const { width, height } = useWindowDimensions();
   const { t } = useTranslation();
   const [sports, setSports] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [categoriesModalOpen, setCategoriesModalOpen] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [categoryRenameId, setCategoryRenameId] = useState(null);
+  const [categoryRenameValue, setCategoryRenameValue] = useState("");
+  const [categoryPendingDeleteId, setCategoryPendingDeleteId] = useState(null);
+  const [categoryDeleteResolution, setCategoryDeleteResolution] =
+    useState("delete");
+  const [categoryDeleteTargetId, setCategoryDeleteTargetId] = useState(null);
   const [sportColorLinks, setSportColorLinks] = useState({});
   const [stats, setStats] = useState({});
   const [logs, setLogs] = useState({});
@@ -3363,6 +3394,8 @@ function AppContent() {
   const [newIcon, setNewIcon] = useState("");
   const [newRateMinutes, setNewRateMinutes] = useState("1");
   const [newWeightExercise, setNewWeightExercise] = useState(false);
+  const [newCategoryId, setNewCategoryId] = useState(null);
+  const [categoryPickerOpen, setCategoryPickerOpen] = useState(false);
   const [newIncrementalTimeEnabled, setNewIncrementalTimeEnabled] =
     useState(false);
   const [newIncrementalTimeFactor, setNewIncrementalTimeFactor] = useState(
@@ -4185,6 +4218,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       const sportColorsRaw = await AsyncStorage.getItem(
         STORAGE_KEYS.sportColors
       );
+      const categoriesRaw = await AsyncStorage.getItem(
+        STORAGE_KEYS.categories
+      );
       const usagePermissionsRaw = await AsyncStorage.getItem(
         STORAGE_KEYS.usagePermissions
       );
@@ -4311,7 +4347,27 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         }
       }
       setSettings(parsedSettings);
-      setLanguage(parsedSettings.language || DEFAULT_SETTINGS.language);
+      const resolvedLanguage = parsedSettings.language || DEFAULT_SETTINGS.language;
+      setLanguage(resolvedLanguage);
+      let parsedCategories = null;
+      if (categoriesRaw) {
+        try {
+          const parsed = JSON.parse(categoriesRaw);
+          parsedCategories = Array.isArray(parsed) ? parsed : null;
+        } catch (error) {
+          console.warn("Failed to parse categories", error);
+        }
+      }
+      if (parsedCategories) {
+        setCategories(parsedCategories);
+      } else {
+        const seededCategories = createDefaultCategories(resolvedLanguage);
+        setCategories(seededCategories);
+        await AsyncStorage.setItem(
+          STORAGE_KEYS.categories,
+          JSON.stringify(seededCategories)
+        );
+      }
       setSportSortMode(
         parsedSettings.sportSortMode || DEFAULT_SETTINGS.sportSortMode
       );
@@ -4741,6 +4797,108 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       JSON.stringify(nextWithSick),
       t("menu.sports")
     );
+  };
+
+  const saveCategories = async (nextCategories) => {
+    setCategories(nextCategories);
+    await persistStorageValue(
+      STORAGE_KEYS.categories,
+      JSON.stringify(nextCategories),
+      t("label.categories")
+    );
+  };
+
+  const createCategory = async (rawName) => {
+    const name = rawName.trim();
+    if (!name) {
+      return;
+    }
+    const nextCategories = [
+      ...categories,
+      { id: generateCategoryId(), name, createdAt: Date.now() },
+    ];
+    await saveCategories(nextCategories);
+    setNewCategoryName("");
+  };
+
+  const renameCategory = async (categoryId, rawName) => {
+    const name = rawName.trim();
+    if (!name) {
+      return;
+    }
+    const nextCategories = categories.map((category) =>
+      category.id === categoryId ? { ...category, name } : category
+    );
+    await saveCategories(nextCategories);
+    setCategoryRenameId(null);
+    setCategoryRenameValue("");
+  };
+
+  const assignSportCategory = async (sportId, categoryId) => {
+    const nextSports = sports.map((sport) =>
+      sport.id === sportId ? { ...sport, categoryId: categoryId || null } : sport
+    );
+    await saveSports(nextSports);
+  };
+
+  const startDeleteCategory = (categoryId) => {
+    setCategoryPendingDeleteId(categoryId);
+    setCategoryDeleteResolution("delete");
+    setCategoryDeleteTargetId(null);
+  };
+
+  const cancelDeleteCategory = () => {
+    setCategoryPendingDeleteId(null);
+    setCategoryDeleteResolution("delete");
+    setCategoryDeleteTargetId(null);
+  };
+
+  const confirmDeleteCategory = () => {
+    const categoryId = categoryPendingDeleteId;
+    if (!categoryId) {
+      return;
+    }
+    const sportsInCategory = sports.filter(
+      (sport) => sport.categoryId === categoryId
+    );
+    const performDelete = async () => {
+      if (sportsInCategory.length > 0) {
+        const nextSports = sports.map((sport) =>
+          sport.categoryId === categoryId
+            ? {
+                ...sport,
+                categoryId:
+                  categoryDeleteResolution === "move"
+                    ? categoryDeleteTargetId || null
+                    : sport.categoryId,
+                hidden:
+                  categoryDeleteResolution === "delete"
+                    ? true
+                    : sport.hidden,
+              }
+            : sport
+        );
+        if (categoryDeleteResolution === "delete") {
+          const deletableIds = new Set(
+            sportsInCategory.filter(canDeleteSport).map((sport) => sport.id)
+          );
+          if (deletableIds.has(selectedSportId)) {
+            setSelectedSportId(null);
+          }
+          await saveSports(
+            nextSports.filter((sport) => !deletableIds.has(sport.id))
+          );
+        } else {
+          await saveSports(nextSports);
+        }
+      }
+      const nextCategories = categories.filter(
+        (category) => category.id !== categoryId
+      );
+      await saveCategories(nextCategories);
+      cancelDeleteCategory();
+    };
+    confirmAction(t("label.categoryDeleteFinalConfirm"), performDelete);
   };
 
   const updateSportColorLink = async (sportId, colorId) => {
@@ -5399,6 +5557,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       setNewDifficultyLevel(difficultyLevelForSport(sport));
       setSelectedStandardSportId(sport.standardSportId ?? null);
       setIsCustomSportMode(!sport.standardSportId);
+      setNewCategoryId(sport.categoryId || null);
     } else {
       setEditingSportId(null);
       setNewName("");
@@ -5411,9 +5570,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       setNewDifficultyLevel(DEFAULT_DIFFICULTY);
       setSelectedStandardSportId(null);
       setIsCustomSportMode(true);
+      setNewCategoryId(null);
       maybeAdvanceTutorial("openAddSport");
     }
     setShowIconInput(false);
+    setCategoryPickerOpen(false);
     setIsSportModalOpen(true);
   };
 
@@ -5489,6 +5650,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           incrementalTimeFactor,
           difficultyLevel: safeDifficulty,
           standardSportId: selectedStandardSportId ?? sport.standardSportId,
+          categoryId: newCategoryId || null,
         };
       });
       await saveSports(nextSports);
@@ -5507,6 +5669,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         incrementalTimeFactor,
         difficultyLevel: safeDifficulty,
         standardSportId: selectedStandardSportId ?? undefined,
+        categoryId: newCategoryId || null,
       };
       await saveSports([newSport, ...sports]);
       await updateSportColorLink(newSport.id, sportModalColorId);
@@ -7038,6 +7201,56 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                 </Pressable>
               </View>
             </View>
+            <View style={styles.createSportField}>
+              <Text style={styles.rateLabel}>{t("label.categoryLabel")}</Text>
+              <View style={styles.quickActionsRow}>
+                <Pressable
+                  style={[
+                    styles.quickActionButton,
+                    !newCategoryId && styles.quickActionButtonActive,
+                  ]}
+                  onPress={() => setNewCategoryId(null)}
+                >
+                  <Text
+                    style={[
+                      styles.quickActionText,
+                      !newCategoryId && styles.quickActionTextActive,
+                    ]}
+                  >
+                    {t("label.noCategory")}
+                  </Text>
+                </Pressable>
+                {categories.map((category) => (
+                  <Pressable
+                    key={category.id}
+                    style={[
+                      styles.quickActionButton,
+                      newCategoryId === category.id &&
+                        styles.quickActionButtonActive,
+                    ]}
+                    onPress={() => setNewCategoryId(category.id)}
+                  >
+                    <Text
+                      style={[
+                        styles.quickActionText,
+                        newCategoryId === category.id &&
+                          styles.quickActionTextActive,
+                      ]}
+                    >
+                      {category.name}
+                    </Text>
+                  </Pressable>
+                ))}
+                <Pressable
+                  style={styles.quickActionButton}
+                  onPress={() => setCategoriesModalOpen(true)}
+                >
+                  <Text style={styles.quickActionText}>
+                    {t("label.manageCategories")}
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
             {screenTimeFeaturesEnabled ? (
               <View
                 style={[styles.sliderSection, styles.createSportField]}
@@ -7276,6 +7489,240 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               {renderTutorialOverlay()}
             </View>
           ) : null}
+        </View>
+      </Modal>
+    );
+  };
+
+  const renderCategoriesModal = () => {
+    if (!categoriesModalOpen) {
+      return null;
+    }
+    return (
+      <Modal
+        visible={categoriesModalOpen}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setCategoriesModalOpen(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>{t("label.manageCategories")}</Text>
+            <ScrollView style={styles.categoryListScroll}>
+              {categories.length === 0 ? (
+                <Text style={styles.helperText}>{t("label.noCategoriesYet")}</Text>
+              ) : (
+                categories.map((category) => {
+                  const count = sports.filter(
+                    (sport) => sport.categoryId === category.id
+                  ).length;
+                  const isRenaming = categoryRenameId === category.id;
+                  return (
+                    <View key={category.id} style={styles.categoryRow}>
+                      {isRenaming ? (
+                        <TextInput
+                          style={[styles.input, styles.categoryRenameInput]}
+                          value={categoryRenameValue}
+                          onChangeText={setCategoryRenameValue}
+                          autoFocus
+                          onSubmitEditing={() =>
+                            renameCategory(category.id, categoryRenameValue)
+                          }
+                        />
+                      ) : (
+                        <Pressable
+                          style={styles.categoryRowNameButton}
+                          onPress={() => {
+                            setCategoryRenameId(category.id);
+                            setCategoryRenameValue(category.name);
+                          }}
+                        >
+                          <Text style={styles.categoryRowName}>
+                            {category.name}
+                          </Text>
+                          <Text style={styles.categoryRowCount}>
+                            {t("label.categorySportCount", { count })}
+                          </Text>
+                        </Pressable>
+                      )}
+                      <View style={styles.categoryRowActions}>
+                        {isRenaming ? (
+                          <Pressable
+                            style={styles.iconAction}
+                            onPress={() =>
+                              renameCategory(category.id, categoryRenameValue)
+                            }
+                          >
+                            <Text style={styles.categoryRowConfirm}>✓</Text>
+                          </Pressable>
+                        ) : null}
+                        <Pressable
+                          style={styles.iconAction}
+                          onPress={() => startDeleteCategory(category.id)}
+                        >
+                          <ActionGlyph type="delete" color={COLORS.text} />
+                        </Pressable>
+                      </View>
+                    </View>
+                  );
+                })
+              )}
+            </ScrollView>
+            <View style={styles.categoryAddRow}>
+              <TextInput
+                style={[styles.input, styles.categoryAddInput]}
+                value={newCategoryName}
+                onChangeText={setNewCategoryName}
+                placeholder={t("label.newCategoryPlaceholder")}
+                placeholderTextColor="#7a7a7a"
+                onSubmitEditing={() => createCategory(newCategoryName)}
+              />
+              <Pressable
+                style={[styles.primaryButton, styles.categoryAddButton]}
+                onPress={() => createCategory(newCategoryName)}
+              >
+                <Text style={styles.primaryButtonText}>+</Text>
+              </Pressable>
+            </View>
+            <Pressable
+              style={styles.secondaryButton}
+              onPress={() => setCategoriesModalOpen(false)}
+            >
+              <Text style={styles.secondaryButtonText}>{t("label.close")}</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+
+  const renderCategoryDeleteModal = () => {
+    if (!categoryPendingDeleteId) {
+      return null;
+    }
+    const pendingCategory = categories.find(
+      (category) => category.id === categoryPendingDeleteId
+    );
+    const sportsInPendingCategory = sports.filter(
+      (sport) => sport.categoryId === categoryPendingDeleteId
+    );
+    const otherCategoriesForMove = categories.filter(
+      (category) => category.id !== categoryPendingDeleteId
+    );
+    const moveBlocked =
+      sportsInPendingCategory.length > 0 &&
+      categoryDeleteResolution === "move" &&
+      !categoryDeleteTargetId;
+    return (
+      <Modal
+        visible={!!categoryPendingDeleteId}
+        animationType="fade"
+        transparent
+        onRequestClose={cancelDeleteCategory}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={[styles.modalTitle, styles.categoryDeleteWarningTitle]}>
+              {t("label.categoryDeleteWarningTitle")}
+            </Text>
+            <Text style={styles.modalSubtitle}>
+              {t("label.categoryDeleteWarningBody", {
+                name: pendingCategory?.name || "",
+              })}
+            </Text>
+            {sportsInPendingCategory.length > 0 ? (
+              <>
+                <Text style={styles.helperText}>
+                  {t("label.categoryDeleteSportsCount", {
+                    count: sportsInPendingCategory.length,
+                  })}
+                </Text>
+                <View style={styles.categoryDeleteChoiceRow}>
+                  <Pressable
+                    style={[
+                      styles.quickActionButton,
+                      categoryDeleteResolution === "delete" &&
+                        styles.quickActionButtonActive,
+                    ]}
+                    onPress={() => setCategoryDeleteResolution("delete")}
+                  >
+                    <Text
+                      style={[
+                        styles.quickActionText,
+                        categoryDeleteResolution === "delete" &&
+                          styles.quickActionTextActive,
+                      ]}
+                    >
+                      {t("label.categoryDeleteSportsToo")}
+                    </Text>
+                  </Pressable>
+                  {otherCategoriesForMove.length > 0 ? (
+                    <Pressable
+                      style={[
+                        styles.quickActionButton,
+                        categoryDeleteResolution === "move" &&
+                          styles.quickActionButtonActive,
+                      ]}
+                      onPress={() => setCategoryDeleteResolution("move")}
+                    >
+                      <Text
+                        style={[
+                          styles.quickActionText,
+                          categoryDeleteResolution === "move" &&
+                            styles.quickActionTextActive,
+                        ]}
+                      >
+                        {t("label.categoryDeleteMoveSports")}
+                      </Text>
+                    </Pressable>
+                  ) : null}
+                </View>
+                {categoryDeleteResolution === "move" ? (
+                  <View style={styles.quickActionsRow}>
+                    {otherCategoriesForMove.map((category) => (
+                      <Pressable
+                        key={category.id}
+                        style={[
+                          styles.quickActionButton,
+                          categoryDeleteTargetId === category.id &&
+                            styles.quickActionButtonActive,
+                        ]}
+                        onPress={() => setCategoryDeleteTargetId(category.id)}
+                      >
+                        <Text
+                          style={[
+                            styles.quickActionText,
+                            categoryDeleteTargetId === category.id &&
+                              styles.quickActionTextActive,
+                          ]}
+                        >
+                          {category.name}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                ) : null}
+              </>
+            ) : null}
+            <View style={styles.modalActions}>
+              <Pressable style={styles.secondaryButton} onPress={cancelDeleteCategory}>
+                <Text style={styles.secondaryButtonText}>{t("label.cancel")}</Text>
+              </Pressable>
+              <Pressable
+                style={[
+                  styles.primaryButton,
+                  styles.detailDangerButton,
+                  moveBlocked && styles.categoryDeleteButtonDisabled,
+                ]}
+                disabled={moveBlocked}
+                onPress={confirmDeleteCategory}
+              >
+                <Text style={styles.primaryButtonText}>
+                  {t("label.categoryDeleteConfirmButton")}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
         </View>
       </Modal>
     );
@@ -8475,6 +8922,56 @@ const getSpeechLocale = () => {
     sportSortMode,
     sportLastUsageMap,
   ]);
+  const groupedActiveSportsDisplay = useMemo(() => {
+    if (sportSortMode === "manual") {
+      return {
+        sportsOrdered: filteredActiveSports,
+        groupStartIds: new Set(),
+        groupHeaderLabel: new Map(),
+        groupCount: 1,
+      };
+    }
+    const byCategory = new Map();
+    filteredActiveSports.forEach((sport) => {
+      const key =
+        sport.categoryId &&
+        categories.some((category) => category.id === sport.categoryId)
+          ? sport.categoryId
+          : "__none__";
+      if (!byCategory.has(key)) {
+        byCategory.set(key, []);
+      }
+      byCategory.get(key).push(sport);
+    });
+    const orderedKeys = [
+      ...categories.map((category) => category.id).filter((id) => byCategory.has(id)),
+      ...(byCategory.has("__none__") ? ["__none__"] : []),
+    ];
+    const groupStartIds = new Set();
+    const groupHeaderLabel = new Map();
+    const sportsOrdered = [];
+    orderedKeys.forEach((key) => {
+      const list = byCategory.get(key) || [];
+      if (list.length === 0) {
+        return;
+      }
+      groupStartIds.add(list[0].id);
+      groupHeaderLabel.set(
+        list[0].id,
+        key === "__none__"
+          ? t("label.noCategory")
+          : categories.find((category) => category.id === key)?.name || ""
+      );
+      sportsOrdered.push(...list);
+    });
+    return {
+      sportsOrdered,
+      groupStartIds,
+      groupHeaderLabel,
+      groupCount: orderedKeys.filter((key) => (byCategory.get(key) || []).length > 0)
+        .length,
+    };
+  }, [filteredActiveSports, categories, sportSortMode, t]);
   const sportSearchMatchLabels = useMemo(() => {
     const map = new Map();
     if (!normalizedSportSearchTerm) {
@@ -13277,7 +13774,17 @@ const getSpeechLocale = () => {
           </View>
         </Modal>
         
-        <Text style={styles.sectionTitle}>{t("menu.sports")}</Text>
+        <View style={styles.sportsHeaderRow}>
+          <Text style={styles.sectionTitle}>{t("menu.sports")}</Text>
+          <Pressable
+            style={styles.manageCategoriesLink}
+            onPress={() => setCategoriesModalOpen(true)}
+          >
+            <Text style={styles.manageCategoriesLinkText}>
+              {t("label.manageCategories")}
+            </Text>
+          </Pressable>
+        </View>
         <View style={styles.sortRow}>
           <Pressable
             style={[
@@ -13335,13 +13842,24 @@ const getSpeechLocale = () => {
           <Text style={styles.helperText}>{t("label.noSportsMatch")}</Text>
         ) : null}
         <View style={styles.sportsGrid}>
-          {filteredActiveSports.map((sport) => {
+          {groupedActiveSportsDisplay.sportsOrdered.map((sport) => {
             const daily = getRollingStats(logs, sport.id, sport);
             const sportLabel = getSportLabel(sport);
             const sportAccentColor = getSportAccentColor(sport.id);
+            const isGroupStart =
+              groupedActiveSportsDisplay.groupCount > 1 &&
+              groupedActiveSportsDisplay.groupStartIds.has(sport.id);
+            const groupHeaderText = isGroupStart
+              ? groupedActiveSportsDisplay.groupHeaderLabel.get(sport.id)
+              : null;
             return (
+              <React.Fragment key={sport.id}>
+                {isGroupStart ? (
+                  <Text style={styles.categorySectionHeader}>
+                    {groupHeaderText}
+                  </Text>
+                ) : null}
               <View
-                key={sport.id}
                 style={[
                   styles.sportCard,
                   { width: cardWidth, borderTopColor: sportAccentColor },
@@ -13477,6 +13995,7 @@ const getSpeechLocale = () => {
                   </View>
                 </Pressable>
               </View>
+              </React.Fragment>
             );
           })}
         </View>
@@ -13809,6 +14328,8 @@ const getSpeechLocale = () => {
         {renderPrefaceSettingsModal()}
         {renderSickLimitSettingsModal()}
         {renderSportModal()}
+        {renderCategoriesModal()}
+        {renderCategoryDeleteModal()}
         {renderColorPickerModal()}
         {renderInfoModal()}
       </View>
@@ -14357,6 +14878,16 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "800",
     marginTop: -2,
+  },
+  categorySectionHeader: {
+    width: "100%",
+    color: COLORS.text,
+    fontSize: 14,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+    marginTop: 8,
+    marginBottom: -4,
   },
   sportsGrid: {
     flexDirection: "row",
@@ -15132,6 +15663,71 @@ const styles = StyleSheet.create({
   modalSubtitle: {
     color: COLORS.muted,
     marginBottom: 10,
+  },
+  categoryListScroll: {
+    maxHeight: 320,
+    marginBottom: 12,
+  },
+  categoryRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(148, 163, 184, 0.15)",
+    gap: 10,
+  },
+  categoryRowNameButton: {
+    flex: 1,
+  },
+  categoryRowName: {
+    color: COLORS.text,
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  categoryRowCount: {
+    color: COLORS.muted,
+    fontSize: 12,
+    marginTop: 2,
+  },
+  categoryRowActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  categoryRowConfirm: {
+    color: COLORS.olive,
+    fontSize: 18,
+    fontWeight: "800",
+  },
+  categoryRenameInput: {
+    flex: 1,
+    marginBottom: 0,
+  },
+  categoryAddRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 12,
+  },
+  categoryAddInput: {
+    flex: 1,
+    marginBottom: 0,
+  },
+  categoryAddButton: {
+    paddingHorizontal: 18,
+  },
+  categoryDeleteWarningTitle: {
+    color: COLORS.ember,
+  },
+  categoryDeleteChoiceRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 8,
+  },
+  categoryDeleteButtonDisabled: {
+    opacity: 0.5,
   },
   difficultyFormulaList: {
     marginTop: 4,
@@ -16599,6 +17195,20 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     marginBottom: 8,
     fontWeight: "600",
+  },
+  sportsHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  manageCategoriesLink: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+  },
+  manageCategoriesLinkText: {
+    color: COLORS.accent,
+    fontSize: 12,
+    fontWeight: "700",
   },
   warningText: {
     marginTop: 10,

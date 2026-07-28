@@ -172,6 +172,23 @@ const es = {
     "label.feedbackEmailUnavailableTitle": "No se encontro ninguna app de correo",
     "label.feedbackEmailUnavailableBody":
       "Escribenos directamente a {{email}}.",
+    "label.categories": "Categorias",
+    "label.categoryLabel": "Categoria",
+    "label.manageCategories": "Gestionar categorias",
+    "label.noCategory": "Sin categoria",
+    "label.noCategoriesYet": "Todavia no hay categorias.",
+    "label.categorySportCount": "{{count}} deporte(s)",
+    "label.newCategoryPlaceholder": "Nueva categoria, p. ej. \"Movilidad\"",
+    "label.categoryDeleteWarningTitle": "¿Eliminar esta categoria?",
+    "label.categoryDeleteWarningBody":
+      "Estas a punto de eliminar la categoria \"{{name}}\". Esto no se puede deshacer.",
+    "label.categoryDeleteSportsCount":
+      "Esta categoria contiene {{count}} deporte(s). ¿Que debe pasar con ellos?",
+    "label.categoryDeleteSportsToo": "Eliminar tambien los deportes",
+    "label.categoryDeleteMoveSports": "Mover a otra categoria",
+    "label.categoryDeleteConfirmButton": "Eliminar definitivamente",
+    "label.categoryDeleteFinalConfirm":
+      "¿Estas realmente seguro? Esta accion no se puede deshacer.",
     "label.sortAlpha": "Alfabetico",
     "label.sortRecent": "Ultimo uso",
     "label.sortManual": "Manual",
