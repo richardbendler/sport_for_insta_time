@@ -119,6 +119,7 @@ const CREDIT_ENTRY_ICON = "💳";
 const WIDGET_BASE_SCHEME = "com.richardbendler.sportforinstatime";
 const WIDGET_ALT_SCHEMES = ["exp+sport-for-insta-time"];
 const ANDROID_PACKAGE_NAME = "com.richardbendler.sportforinstatime";
+const FEEDBACK_EMAIL = "richard.programmiert.apps@gmail.com";
 
 const normalizeWidgetDeepLink = (rawUrl) => {
   if (!rawUrl) {
@@ -2378,6 +2379,22 @@ const getRecentTimeEntriesForSport = (logs, sportId, limit = 5) => {
   const allEntries = flattenSportEntries(logs, sportId);
   return allEntries
     .filter((entry) => entry && entry.seconds > 0)
+    .sort((a, b) => (b.ts || 0) - (a.ts || 0))
+    .slice(0, limit);
+};
+
+const getRecentRepsEntriesForSport = (logs, sportId, limit = 20) => {
+  if (!sportId) {
+    return [];
+  }
+  const allEntries = flattenSportEntries(logs, sportId);
+  return allEntries
+    .filter(
+      (entry) =>
+        entry &&
+        entry.reps > 0 &&
+        !(Number.isFinite(entry.weight) && entry.weight > 0)
+    )
     .sort((a, b) => (b.ts || 0) - (a.ts || 0))
     .slice(0, limit);
 };
@@ -5755,6 +5772,29 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     "App-Prefs:root=General&path=ACCESSIBILITY";
   const IOS_SCREEN_TIME_SETTINGS_URL = "App-Prefs:root=SCREEN_TIME";
 
+  const openFeedbackEmail = useCallback(async () => {
+    const url = `mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent(
+      t("label.feedbackEmailSubject")
+    )}`;
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (!supported) {
+        Alert.alert(
+          t("label.feedbackEmailUnavailableTitle"),
+          t("label.feedbackEmailUnavailableBody", { email: FEEDBACK_EMAIL })
+        );
+        return;
+      }
+      await Linking.openURL(url);
+    } catch (error) {
+      console.warn("Failed to open feedback email", error);
+      Alert.alert(
+        t("label.feedbackEmailUnavailableTitle"),
+        t("label.feedbackEmailUnavailableBody", { email: FEEDBACK_EMAIL })
+      );
+    }
+  }, [t]);
+
   const openIosSettingsUrl = useCallback(async (url) => {
     try {
       await Linking.openURL(url);
@@ -8556,6 +8596,20 @@ const getSpeechLocale = () => {
   const recentTimeEntryGroups = useMemo(
     () => groupEntriesByDay(recentTimeEntries),
     [recentTimeEntries]
+  );
+  const recentRepsEntries = useMemo(() => {
+    if (
+      !selectedSport ||
+      selectedSport.type !== "reps" ||
+      selectedSport.weightExercise
+    ) {
+      return [];
+    }
+    return getRecentRepsEntriesForSport(logs, selectedSport.id);
+  }, [logs, selectedSport?.id, selectedSport?.type, selectedSport?.weightExercise]);
+  const recentRepsEntryGroups = useMemo(
+    () => groupEntriesByDay(recentRepsEntries),
+    [recentRepsEntries]
   );
   const statsSport = sports.find((sport) => sport.id === statsSportId);
   const rollingEarnedSeconds = useMemo(
@@ -11692,30 +11746,6 @@ const getSpeechLocale = () => {
                 {t("label.weightEntryButton")}
               </Text>
             </Pressable>
-            {/*
-            {recentWeightEntries.length > 0 ? (
-              <View style={styles.weightHistoryCard}>
-                <Text style={styles.sectionTitle}>{t("label.weightHistory")}</Text>
-                {recentWeightEntries.map((entry, index) => (
-                  <View
-                    key={entry.id || entry.ts}
-                    style={[
-                      styles.weightHistoryRow,
-                      index === recentWeightEntries.length - 1 &&
-                        styles.weightHistoryRowLast,
-                    ]}
-                  >
-                    <Text style={styles.weightHistoryTime}>
-                      {formatTime(entry.ts || Date.now())}
-                    </Text>
-                    <Text style={styles.weightHistorySet}>
-                      {formatWeightValue(entry.weight)} × {entry.reps}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            ) : null}
-            */}
               </View>
             ) : (
               <View style={styles.trackingArea} ref={tutorialTrackingAreaRef}>
@@ -11873,62 +11903,109 @@ const getSpeechLocale = () => {
             {isWeightMode && recentWeightEntries.length > 0 ? (
               <View style={styles.weightHistoryCard}>
                 <Text style={styles.sectionTitle}>{t("label.weightHistory")}</Text>
-                {recentWeightEntryGroups.map((group) => (
-                  <View key={group.dayKey} style={styles.weightHistoryDayGroup}>
-                    <Text style={styles.weightHistoryDateLabel}>
-                      {formatDateLabel(group.dayKey)}
-                    </Text>
-                    {group.entries.map((entry, index) => (
-                      <View
-                        key={entry.id || entry.ts}
-                        style={[
-                          styles.weightHistoryRow,
-                          index === group.entries.length - 1 &&
-                            styles.weightHistoryRowLast,
-                        ]}
-                      >
-                        <Text style={styles.weightHistoryTime}>
-                          {formatTime(entry.ts || Date.now())}
-                        </Text>
-                        <Text style={styles.weightHistorySet}>
-                          {formatWeightValue(entry.weight)} × {entry.reps}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-                ))}
+                <ScrollView
+                  style={styles.weightHistoryScroll}
+                  nestedScrollEnabled
+                  showsVerticalScrollIndicator
+                >
+                  {recentWeightEntryGroups.map((group) => (
+                    <View key={group.dayKey} style={styles.weightHistoryDayGroup}>
+                      <Text style={styles.weightHistoryDateLabel}>
+                        {formatDateLabel(group.dayKey)}
+                      </Text>
+                      {group.entries.map((entry, index) => (
+                        <View
+                          key={entry.id || entry.ts}
+                          style={[
+                            styles.weightHistoryRow,
+                            index === group.entries.length - 1 &&
+                              styles.weightHistoryRowLast,
+                          ]}
+                        >
+                          <Text style={styles.weightHistoryTime}>
+                            {formatTime(entry.ts || Date.now())}
+                          </Text>
+                          <Text style={styles.weightHistorySet}>
+                            {formatWeightValue(entry.weight)} × {entry.reps}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  ))}
+                </ScrollView>
+              </View>
+            ) : null}
+            {isSimpleReps && recentRepsEntries.length > 0 ? (
+              <View style={styles.weightHistoryCard}>
+                <Text style={styles.sectionTitle}>{t("label.repsHistory")}</Text>
+                <ScrollView
+                  style={styles.weightHistoryScroll}
+                  nestedScrollEnabled
+                  showsVerticalScrollIndicator
+                >
+                  {recentRepsEntryGroups.map((group) => (
+                    <View key={group.dayKey} style={styles.weightHistoryDayGroup}>
+                      <Text style={styles.weightHistoryDateLabel}>
+                        {formatDateLabel(group.dayKey)}
+                      </Text>
+                      {group.entries.map((entry, index) => (
+                        <View
+                          key={entry.id || entry.ts}
+                          style={[
+                            styles.weightHistoryRow,
+                            index === group.entries.length - 1 &&
+                              styles.weightHistoryRowLast,
+                          ]}
+                        >
+                          <Text style={styles.weightHistoryTime}>
+                            {formatTime(entry.ts || Date.now())}
+                          </Text>
+                          <Text style={styles.weightHistorySet}>
+                            {entry.reps} {repsShort}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  ))}
+                </ScrollView>
               </View>
             ) : null}
             {selectedSport.type === "time" && recentTimeEntries.length > 0 ? (
               <View style={styles.weightHistoryCard}>
                 <Text style={styles.sectionTitle}>{t("label.timeHistory")}</Text>
-                {recentTimeEntryGroups.map((group) => (
-                  <View key={group.dayKey} style={styles.weightHistoryDayGroup}>
-                    <Text style={styles.weightHistoryDateLabel}>
-                      {formatDateLabel(group.dayKey)}
-                    </Text>
-                    {group.entries.map((entry, index) => (
-                      <View
-                        key={entry.id || entry.ts}
-                        style={[
-                          styles.weightHistoryRow,
-                          index === group.entries.length - 1 &&
-                            styles.weightHistoryRowLast,
-                        ]}
-                      >
-                        <Text style={styles.weightHistoryTime}>
-                          {formatTime(entry.ts || Date.now())}
-                        </Text>
-                        <Text style={styles.weightHistorySet}>
-                          {formatSeconds(entry.seconds)}
-                          {entry.km > 0
-                            ? ` · ${formatDistanceValue(entry.km)} ${t("label.distanceKm")}`
-                            : ""}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-                ))}
+                <ScrollView
+                  style={styles.weightHistoryScroll}
+                  nestedScrollEnabled
+                  showsVerticalScrollIndicator
+                >
+                  {recentTimeEntryGroups.map((group) => (
+                    <View key={group.dayKey} style={styles.weightHistoryDayGroup}>
+                      <Text style={styles.weightHistoryDateLabel}>
+                        {formatDateLabel(group.dayKey)}
+                      </Text>
+                      {group.entries.map((entry, index) => (
+                        <View
+                          key={entry.id || entry.ts}
+                          style={[
+                            styles.weightHistoryRow,
+                            index === group.entries.length - 1 &&
+                              styles.weightHistoryRowLast,
+                          ]}
+                        >
+                          <Text style={styles.weightHistoryTime}>
+                            {formatTime(entry.ts || Date.now())}
+                          </Text>
+                          <Text style={styles.weightHistorySet}>
+                            {formatSeconds(entry.seconds)}
+                            {entry.km > 0
+                              ? ` · ${formatDistanceValue(entry.km)} ${t("label.distanceKm")}`
+                              : ""}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  ))}
+                </ScrollView>
               </View>
             ) : null}
             <View style={styles.sportDetailBottomSpacer} />
@@ -13565,40 +13642,49 @@ const getSpeechLocale = () => {
           {recentActivityGroups.length === 0 ? (
             <Text style={styles.helperText}>{t("label.recentActivityEmpty")}</Text>
           ) : (
-            recentActivityGroups.map(({ sport, dayKey, groups }) => (
-              <View key={`${sport.id}-${dayKey}`} style={styles.recentGroup}>
-                <Text style={styles.recentGroupTitle}>
-                  {sport.icon || DEFAULT_ICON} {getSportLabel(sport)}
-                </Text>
-                <Text style={styles.cardMeta}>{formatDateLabel(dayKey)}</Text>
-                {groups.length === 0 ? (
-                  <Text style={styles.helperText}>{t("label.noEntries")}</Text>
-                ) : (
-                  [...groups]
-                    .reverse()
-                    .map((group, index) => {
-                    const valueText =
-                      sport.type === "reps"
-                        ? `${group.reps} ${repsShort}`
-                        : formatSeconds(group.seconds);
-                    const range =
-                      group.startTs === group.endTs
-                        ? formatTime(group.startTs)
-                        : `${formatTime(group.startTs)}-${formatTime(group.endTs)}`;
-                    return (
-                      <View key={`${group.startTs}-${index}`} style={styles.statRow}>
-                        <Text style={styles.statLabel}>{range}</Text>
-                        <Text style={styles.statValue}>{valueText}</Text>
-                      </View>
-                    );
-                  })
-                )}
-              </View>
-            ))
+            <ScrollView
+              style={styles.recentActivityScroll}
+              nestedScrollEnabled
+              showsVerticalScrollIndicator
+            >
+              {recentActivityGroups.map(({ sport, dayKey, groups }) => (
+                <View key={`${sport.id}-${dayKey}`} style={styles.recentGroup}>
+                  <Text style={styles.recentGroupTitle}>
+                    {sport.icon || DEFAULT_ICON} {getSportLabel(sport)}
+                  </Text>
+                  <Text style={styles.cardMeta}>{formatDateLabel(dayKey)}</Text>
+                  {groups.length === 0 ? (
+                    <Text style={styles.helperText}>{t("label.noEntries")}</Text>
+                  ) : (
+                    [...groups]
+                      .reverse()
+                      .map((group, index) => {
+                      const valueText =
+                        sport.type === "reps"
+                          ? `${group.reps} ${repsShort}`
+                          : formatSeconds(group.seconds);
+                      const range =
+                        group.startTs === group.endTs
+                          ? formatTime(group.startTs)
+                          : `${formatTime(group.startTs)}-${formatTime(group.endTs)}`;
+                      return (
+                        <View key={`${group.startTs}-${index}`} style={styles.statRow}>
+                          <Text style={styles.statLabel}>{range}</Text>
+                          <Text style={styles.statValue}>{valueText}</Text>
+                        </View>
+                      );
+                    })
+                  )}
+                </View>
+              ))}
+            </ScrollView>
           )}
         </View>
-      
-
+        <Pressable style={styles.feedbackButton} onPress={openFeedbackEmail}>
+          <Text style={styles.feedbackButtonText}>
+            {t("label.sendFeedback")}
+          </Text>
+        </Pressable>
     </ScrollView>
           {isAndroid ? (
             <View style={styles.fixedTimers}>
@@ -14230,6 +14316,9 @@ const styles = StyleSheet.create({
   quickActionTextActive: {
     color: COLORS.ink,
   },
+  recentActivityScroll: {
+    maxHeight: 420,
+  },
   recentGroup: {
     marginTop: 10,
   },
@@ -14446,6 +14535,11 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 14,
     backgroundColor: COLORS.cardAlt,
+    borderWidth: 1,
+    borderColor: "rgba(148, 163, 184, 0.12)",
+  },
+  weightHistoryScroll: {
+    maxHeight: 260,
   },
   weightHistoryDayGroup: {
     marginTop: 10,
@@ -14462,9 +14556,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(148, 163, 184, 0.2)",
+    borderBottomColor: "rgba(148, 163, 184, 0.15)",
   },
   weightHistoryRowLast: {
     borderBottomWidth: 0,
@@ -14475,7 +14570,13 @@ const styles = StyleSheet.create({
   },
   weightHistorySet: {
     color: COLORS.text,
-    fontWeight: "600",
+    fontWeight: "700",
+    fontSize: 13,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 999,
+    backgroundColor: "rgba(148, 163, 184, 0.14)",
+    overflow: "hidden",
   },
   counterValue: {
     fontSize: 54,
@@ -15693,6 +15794,22 @@ const styles = StyleSheet.create({
   },
   lockNotice: {
     marginTop: 6,
+  },
+  feedbackButton: {
+    marginTop: 16,
+    marginBottom: 4,
+    alignSelf: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(148, 163, 184, 0.3)",
+    backgroundColor: "transparent",
+  },
+  feedbackButtonText: {
+    color: COLORS.muted,
+    fontSize: 13,
+    fontWeight: "600",
   },
   grayscaleFilterStatusOk: {
     marginTop: 8,
