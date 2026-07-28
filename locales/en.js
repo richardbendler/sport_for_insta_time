@@ -376,6 +376,7 @@ const en = {
       "Counting push-ups with the camera needs camera access.",
     "label.cameraGrantPermission": "Allow camera access",
     "label.cameraNoDevice": "No camera found.",
+    "label.cameraSearchingDevice": "Looking for a camera…",
     "label.back": "Back",
     "label.start": "Start",
     "label.startNew": "New",

@@ -8336,6 +8336,7 @@ const getSpeechLocale = () => {
     if (!token) {
       return;
     }
+    setVoiceError(null);
     const now = Date.now();
     if (
       token === lastVoiceTokenRef.current &&
@@ -8364,6 +8365,14 @@ const getSpeechLocale = () => {
       voiceEnabledRef.current = false;
       voiceSportIdRef.current = null;
       hideVoiceInstruction();
+      return;
+    }
+    // Android SpeechRecognizer error 7 (no match) and 6 (speech timeout)
+    // fire constantly during normal pauses between reps - onSpeechEnd
+    // already restarts listening right after, so surfacing these as a
+    // user-facing error just makes the status text flash on every pause.
+    const isBenignSilence = errorCode === "7" || errorCode === "6";
+    if (isBenignSilence) {
       return;
     }
     const message =
@@ -11652,6 +11661,7 @@ const getSpeechLocale = () => {
                       permissionHint: t("label.cameraPermissionHint"),
                       grantPermission: t("label.cameraGrantPermission"),
                       noDevice: t("label.cameraNoDevice"),
+                      searchingDevice: t("label.cameraSearchingDevice"),
                     }}
                   />
                 ) : null}

@@ -60,11 +60,20 @@ function pickArmAngle(landmarks) {
   return null;
 }
 
+// The native camera-device list can still be populating (CameraX init runs
+// asynchronously) right after permission is granted, especially on the
+// first open after install. Give it a moment before showing a terminal
+// "no camera found" error instead of flashing it immediately.
+const DEVICE_WAIT_TIMEOUT_MS = 3000;
+
 export default function CameraRepCounter({ visible, onClose, onRep, labels, colors }) {
   const { hasPermission, requestPermission } = useCameraPermission();
-  const device = useCameraDevice("back");
+  const backDevice = useCameraDevice("back");
+  const frontDevice = useCameraDevice("front");
+  const device = backDevice || frontDevice;
   const [reps, setReps] = useState(0);
   const [angleDebug, setAngleDebug] = useState(null);
+  const [deviceWaitElapsed, setDeviceWaitElapsed] = useState(false);
   const phaseRef = useRef("up");
   const repsRef = useRef(0);
   const styles = createStyles(colors);
@@ -74,6 +83,18 @@ export default function CameraRepCounter({ visible, onClose, onRep, labels, colo
       requestPermission();
     }
   }, [visible, hasPermission, requestPermission]);
+
+  useEffect(() => {
+    if (!visible || !hasPermission || device) {
+      return;
+    }
+    setDeviceWaitElapsed(false);
+    const timer = setTimeout(
+      () => setDeviceWaitElapsed(true),
+      DEVICE_WAIT_TIMEOUT_MS
+    );
+    return () => clearTimeout(timer);
+  }, [visible, hasPermission, device]);
 
   useEffect(() => {
     if (visible) {
@@ -132,6 +153,10 @@ export default function CameraRepCounter({ visible, onClose, onRep, labels, colo
             <Pressable style={styles.secondaryButton} onPress={onClose}>
               <Text style={styles.secondaryButtonText}>{labels.close}</Text>
             </Pressable>
+          </View>
+        ) : !device && !deviceWaitElapsed ? (
+          <View style={styles.centerBox}>
+            <Text style={styles.hint}>{labels.searchingDevice || labels.hint}</Text>
           </View>
         ) : !device ? (
           <View style={styles.centerBox}>

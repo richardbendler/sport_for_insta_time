@@ -378,6 +378,7 @@ const es = {
       "Contar flexiones con la cámara necesita acceso a la cámara.",
     "label.cameraGrantPermission": "Permitir acceso a la cámara",
     "label.cameraNoDevice": "No se encontró ninguna cámara.",
+    "label.cameraSearchingDevice": "Buscando camara…",
     "label.back": "Atrás",
     "label.start": "Iniciar",
     "label.startNew": "Nuevo",

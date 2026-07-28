@@ -378,6 +378,7 @@ const fr = {
       "Compter les pompes avec la caméra nécessite l'accès à la caméra.",
     "label.cameraGrantPermission": "Autoriser l'accès à la caméra",
     "label.cameraNoDevice": "Aucune caméra trouvée.",
+    "label.cameraSearchingDevice": "Recherche d'une camera…",
     "label.back": "Retour",
     "label.start": "Démarrer",
     "label.startNew": "Nouveau",
