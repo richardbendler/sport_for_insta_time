@@ -156,7 +156,12 @@ const es = {
     "label.openApps": "Gestionar apps",
     "label.grayscaleRestrictedApps": "Mostrar apps restringidas en escala de grises",
     "label.grayscaleRestrictedAppsHint":
-      "Atenua las apps restringidas mientras se usan y les aplica un estilo en blanco y negro en la lista.",
+      "Muestra las apps restringidas en blanco y negro mientras se usan y las marca asi en la lista.",
+    "label.grayscaleFilterStatusReal": "✓ Filtro real en blanco y negro activo",
+    "label.grayscaleFilterStatusApprox": "⚠ Actualmente solo atenuacion (aproximacion)",
+    "label.grayscaleFilterEnableHint":
+      "Para un filtro real en blanco y negro (en vez de solo atenuacion), ejecuta este comando una vez desde un ordenador (opciones de desarrollador y depuracion USB deben estar activas):",
+    "label.grayscaleFilterRecheck": "Comprobar de nuevo",
     "label.closeApps": "Cerrar apps",
     "label.searchApps": "Buscar apps",
     "label.searchSports": "Buscar deportes",

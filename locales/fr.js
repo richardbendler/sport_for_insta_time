@@ -159,7 +159,12 @@ const fr = {
     "label.openApps": "G\u00e9rer les apps",
     "label.grayscaleRestrictedApps": "Afficher les apps restreintes en niveaux de gris",
     "label.grayscaleRestrictedAppsHint":
-      "Assombrit les apps restreintes pendant leur utilisation et leur applique un style noir et blanc dans la liste.",
+      "Affiche les apps restreintes en noir et blanc pendant leur utilisation et les marque ainsi dans la liste.",
+    "label.grayscaleFilterStatusReal": "✓ Vrai filtre noir et blanc actif",
+    "label.grayscaleFilterStatusApprox": "⚠ Actuellement juste un assombrissement (approximation)",
+    "label.grayscaleFilterEnableHint":
+      "Pour un vrai filtre noir et blanc (au lieu d'un simple assombrissement), executez cette commande une fois depuis un ordinateur (options developpeur et débogage USB doivent etre actives) :",
+    "label.grayscaleFilterRecheck": "Verifier a nouveau",
     "label.closeApps": "Fermer les apps",
     "label.searchApps": "Rechercher des apps",
     "label.searchSports": "Rechercher des sports",
