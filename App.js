@@ -10833,64 +10833,6 @@ const getSpeechLocale = () => {
               )}
             </>
           ) : null}
-          <View style={styles.infoCard} ref={tutorialStatsSummaryRef}>
-            <Text style={styles.sectionTitle}>{t("label.statsBySport")}</Text>
-            <View style={styles.quickActionsRow}>
-              {activeSports.length === 0 ? (
-                <Text style={styles.helperText}>{t("label.noSports")}</Text>
-              ) : (
-                chartFilterOptions.map((option) => {
-                  const isActive =
-                    (option.key === null && chartSportFilter === null) ||
-                    option.key === chartSportFilter;
-                  return (
-                    <Pressable
-                      key={`chart-filter-${option.key ?? "all"}`}
-                      style={[
-                        styles.quickActionButton,
-                        isActive && styles.quickActionButtonActive,
-                      ]}
-                      onPress={() => setChartSportFilter(option.key)}
-                    >
-                      <Text
-                        style={[
-                          styles.quickActionText,
-                          isActive && styles.quickActionTextActive,
-                        ]}
-                      >
-                        {option.label}
-                      </Text>
-                    </Pressable>
-                  );
-                })
-              )}
-            </View>
-          </View>
-          <View style={styles.filterRow}>
-            {[
-              { key: "today", label: t("label.today") },
-              { key: "week", label: t("label.week") },
-              { key: "month", label: t("label.month") },
-            ].map((item) => (
-              <Pressable
-                key={item.key}
-                style={[
-                  styles.filterChip,
-                  statsRange === item.key && styles.filterChipActive,
-                ]}
-                onPress={() => setStatsRange(item.key)}
-              >
-                <Text
-                  style={[
-                    styles.filterChipText,
-                    statsRange === item.key && styles.filterChipTextActive,
-                  ]}
-                >
-                  {item.label}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
           {overallStatsView === "calendar" ? (
             <>
               {statsRange !== "month" ? (
@@ -10960,6 +10902,64 @@ const getSpeechLocale = () => {
                 : null}
             </>
           ) : null}
+          <View style={styles.infoCard} ref={tutorialStatsSummaryRef}>
+            <Text style={styles.sectionTitle}>{t("label.statsBySport")}</Text>
+            <View style={styles.quickActionsRow}>
+              {activeSports.length === 0 ? (
+                <Text style={styles.helperText}>{t("label.noSports")}</Text>
+              ) : (
+                chartFilterOptions.map((option) => {
+                  const isActive =
+                    (option.key === null && chartSportFilter === null) ||
+                    option.key === chartSportFilter;
+                  return (
+                    <Pressable
+                      key={`chart-filter-${option.key ?? "all"}`}
+                      style={[
+                        styles.quickActionButton,
+                        isActive && styles.quickActionButtonActive,
+                      ]}
+                      onPress={() => setChartSportFilter(option.key)}
+                    >
+                      <Text
+                        style={[
+                          styles.quickActionText,
+                          isActive && styles.quickActionTextActive,
+                        ]}
+                      >
+                        {option.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })
+              )}
+            </View>
+          </View>
+          <View style={styles.filterRow}>
+            {[
+              { key: "today", label: t("label.today") },
+              { key: "week", label: t("label.week") },
+              { key: "month", label: t("label.month") },
+            ].map((item) => (
+              <Pressable
+                key={item.key}
+                style={[
+                  styles.filterChip,
+                  statsRange === item.key && styles.filterChipActive,
+                ]}
+                onPress={() => setStatsRange(item.key)}
+              >
+                <Text
+                  style={[
+                    styles.filterChipText,
+                    statsRange === item.key && styles.filterChipTextActive,
+                  ]}
+                >
+                  {item.label}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
         </ScrollView>
         {editEntryKey ? (
           <View style={styles.modalOverlay}>
@@ -11280,9 +11280,6 @@ const getSpeechLocale = () => {
               )}
             </>
           ) : null}
-          <View style={styles.infoCard}>
-            <Text style={styles.sectionTitle}>{getSportLabel(statsSport)}</Text>
-          </View>
           {sportStatsView === "calendar"
             ? months.map((monthDate) => {
                 const monthKey = `${monthDate.getFullYear()}-${String(
@@ -11352,6 +11349,9 @@ const getSpeechLocale = () => {
                 );
               })
             : null}
+          <View style={styles.infoCard}>
+            <Text style={styles.sectionTitle}>{getSportLabel(statsSport)}</Text>
+          </View>
         </ScrollView>
       </SafeAreaView>
     );
