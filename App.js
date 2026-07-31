@@ -9079,7 +9079,7 @@ const getSpeechLocale = () => {
     if (!selectedSport || !selectedSport.weightExercise) {
       return [];
     }
-    return getRecentWeightEntriesForSport(logs, selectedSport.id);
+    return getRecentWeightEntriesForSport(logs, selectedSport.id, Infinity);
   }, [logs, selectedSport?.id]);
   const recentWeightEntryGroups = useMemo(
     () => groupEntriesByDay(recentWeightEntries),
@@ -9100,7 +9100,7 @@ const getSpeechLocale = () => {
     if (!selectedSport || selectedSport.type !== "time") {
       return [];
     }
-    return getRecentTimeEntriesForSport(logs, selectedSport.id);
+    return getRecentTimeEntriesForSport(logs, selectedSport.id, Infinity);
   }, [logs, selectedSport?.id, selectedSport?.type]);
   const recentTimeEntryGroups = useMemo(
     () => groupEntriesByDay(recentTimeEntries),
@@ -9114,7 +9114,7 @@ const getSpeechLocale = () => {
     ) {
       return [];
     }
-    return getRecentRepsEntriesForSport(logs, selectedSport.id);
+    return getRecentRepsEntriesForSport(logs, selectedSport.id, Infinity);
   }, [logs, selectedSport?.id, selectedSport?.type, selectedSport?.weightExercise]);
   const recentRepsEntryGroups = useMemo(
     () => groupEntriesByDay(recentRepsEntries),
@@ -9202,21 +9202,43 @@ const getSpeechLocale = () => {
       const sportSeries = overallLinesChart.series.find(
         (line) => line.sportId === chartSportFilter
       );
-      if (!sportSeries) {
+      if (sportSeries) {
+        return [
+          {
+            ...sportSeries,
+            normalized: normalizeChartSeries(
+              sportSeries.values,
+              CHART_SCALE_MODE.overallLines
+            ),
+          },
+        ];
+      }
+      // Sport has no entries in this range yet - that's not an error, just
+      // show it as a flat empty line instead of hiding the chart entirely.
+      const sport = sports.find((entry) => entry.id === chartSportFilter);
+      if (!sport) {
         return [];
       }
+      const emptyValues = overallChartDayKeys.map(() => 0);
       return [
         {
-          ...sportSeries,
-          normalized: normalizeChartSeries(
-            sportSeries.values,
-            CHART_SCALE_MODE.overallLines
-          ),
+          sportId: sport.id,
+          label: getSportLabel(sport),
+          color: getSportAccentColor(sport.id),
+          values: emptyValues,
+          normalized: normalizeChartSeries(emptyValues, CHART_SCALE_MODE.overallLines),
         },
       ];
     }
     return aggregatedChartSeries ? [aggregatedChartSeries] : [];
-  }, [chartSportFilter, overallLinesChart.series, aggregatedChartSeries]);
+  }, [
+    chartSportFilter,
+    overallLinesChart.series,
+    aggregatedChartSeries,
+    sports,
+    overallChartDayKeys,
+    getSportAccentColor,
+  ]);
   const overallChartYAxisTicks = useMemo(() => {
     if (chartSportFilter) {
       const sport = sports.find((entry) => entry.id === chartSportFilter);
@@ -9245,13 +9267,17 @@ const getSpeechLocale = () => {
     );
   }, [chartSportFilter, chartLinesSeries, sports, repsShort]);
   useEffect(() => {
+    // Only clear the filter if the sport itself is gone (deleted) - a sport
+    // with no chart data yet is a perfectly valid, still-selectable filter,
+    // it should just render an empty chart instead of bouncing the
+    // selection back to "all sports".
     if (
       chartSportFilter &&
-      !overallLinesChart.series.some((line) => line.sportId === chartSportFilter)
+      !sports.some((sport) => sport.id === chartSportFilter)
     ) {
       setChartSportFilter(null);
     }
-  }, [chartSportFilter, overallLinesChart.series]);
+  }, [chartSportFilter, sports]);
   const earnedBySportList = useMemo(() => {
     const cutoff = Date.now() - 24 * 60 * 60 * 1000;
     return sports
@@ -13202,6 +13228,11 @@ const getSpeechLocale = () => {
             </View>
             {renderTutorialHeaderButton()}
           </View>
+          <Pressable style={styles.feedbackButton} onPress={openFeedbackEmail}>
+            <Text style={styles.feedbackButtonText}>
+              {t("label.sendFeedback")}
+            </Text>
+          </Pressable>
           {renderMainNav("settings")}
           <Text style={styles.settingsSectionTitle}>{t("menu.language")}</Text>
             <View style={styles.infoCard} ref={tutorialSettingsCardRef}>
