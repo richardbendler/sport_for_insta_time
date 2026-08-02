@@ -12498,9 +12498,39 @@ const getSpeechLocale = () => {
                           <Text style={styles.weightHistoryTime}>
                             {formatTime(entry.ts || Date.now())}
                           </Text>
-                          <Text style={styles.weightHistorySet}>
-                            {formatWeightValue(entry.weight)} × {entry.reps}
-                          </Text>
+                          <View style={styles.statRowActions}>
+                            <Text style={styles.weightHistorySet}>
+                              {formatWeightValue(entry.weight)} × {entry.reps}
+                            </Text>
+                            <Pressable
+                              style={styles.statMinusButton}
+                              onPress={() =>
+                                decrementLogGroup(selectedSport, group.dayKey, {
+                                  startTs: entry.ts,
+                                  endTs: entry.ts,
+                                })
+                              }
+                            >
+                              <Text style={styles.statMinusText}>-</Text>
+                            </Pressable>
+                            <Pressable
+                              style={styles.statDeleteButton}
+                              onPress={() =>
+                                confirmAction(t("label.confirmDelete"), () =>
+                                  deleteLogGroup(
+                                    selectedSport.id,
+                                    group.dayKey,
+                                    { startTs: entry.ts, endTs: entry.ts },
+                                    selectedSport.type
+                                  )
+                                )
+                              }
+                            >
+                              <Text style={styles.statDeleteText}>
+                                {t("label.delete")}
+                              </Text>
+                            </Pressable>
+                          </View>
                         </View>
                       ))}
                     </View>
@@ -12533,9 +12563,39 @@ const getSpeechLocale = () => {
                           <Text style={styles.weightHistoryTime}>
                             {formatTime(entry.ts || Date.now())}
                           </Text>
-                          <Text style={styles.weightHistorySet}>
-                            {entry.reps} {repsShort}
-                          </Text>
+                          <View style={styles.statRowActions}>
+                            <Text style={styles.weightHistorySet}>
+                              {entry.reps} {repsShort}
+                            </Text>
+                            <Pressable
+                              style={styles.statMinusButton}
+                              onPress={() =>
+                                decrementLogGroup(selectedSport, group.dayKey, {
+                                  startTs: entry.ts,
+                                  endTs: entry.ts,
+                                })
+                              }
+                            >
+                              <Text style={styles.statMinusText}>-</Text>
+                            </Pressable>
+                            <Pressable
+                              style={styles.statDeleteButton}
+                              onPress={() =>
+                                confirmAction(t("label.confirmDelete"), () =>
+                                  deleteLogGroup(
+                                    selectedSport.id,
+                                    group.dayKey,
+                                    { startTs: entry.ts, endTs: entry.ts },
+                                    selectedSport.type
+                                  )
+                                )
+                              }
+                            >
+                              <Text style={styles.statDeleteText}>
+                                {t("label.delete")}
+                              </Text>
+                            </Pressable>
+                          </View>
                         </View>
                       ))}
                     </View>
@@ -12568,12 +12628,42 @@ const getSpeechLocale = () => {
                           <Text style={styles.weightHistoryTime}>
                             {formatTime(entry.ts || Date.now())}
                           </Text>
-                          <Text style={styles.weightHistorySet}>
-                            {formatSeconds(entry.seconds)}
-                            {entry.km > 0
-                              ? ` · ${formatDistanceValue(entry.km)} ${t("label.distanceKm")}`
-                              : ""}
-                          </Text>
+                          <View style={styles.statRowActions}>
+                            <Text style={styles.weightHistorySet}>
+                              {formatSeconds(entry.seconds)}
+                              {entry.km > 0
+                                ? ` · ${formatDistanceValue(entry.km)} ${t("label.distanceKm")}`
+                                : ""}
+                            </Text>
+                            <Pressable
+                              style={styles.statMinusButton}
+                              onPress={() =>
+                                decrementLogGroup(selectedSport, group.dayKey, {
+                                  startTs: entry.ts,
+                                  endTs: entry.ts,
+                                })
+                              }
+                            >
+                              <Text style={styles.statMinusText}>-</Text>
+                            </Pressable>
+                            <Pressable
+                              style={styles.statDeleteButton}
+                              onPress={() =>
+                                confirmAction(t("label.confirmDelete"), () =>
+                                  deleteLogGroup(
+                                    selectedSport.id,
+                                    group.dayKey,
+                                    { startTs: entry.ts, endTs: entry.ts },
+                                    selectedSport.type
+                                  )
+                                )
+                              }
+                            >
+                              <Text style={styles.statDeleteText}>
+                                {t("label.delete")}
+                              </Text>
+                            </Pressable>
+                          </View>
                         </View>
                       ))}
                     </View>
