@@ -35,7 +35,15 @@
         "ascAppId": "6758582177"
       },
       "android": {
-        "serviceAccountKeyPath": "../.keys/play-console-access-504713-dc6c0f3c622b.json"
+        "serviceAccountKeyPath": "../.keys/play-console-access-504713-dc6c0f3c622b.json",
+        "track": "internal"
+      }
+    },
+    "production-release": {
+      "android": {
+        "serviceAccountKeyPath": "../.keys/play-console-access-504713-dc6c0f3c622b.json",
+        "track": "production",
+        "releaseStatus": "draft"
       }
     }
   }
