@@ -71,8 +71,7 @@ Fuer lokale EAS-Builds (`eas build --local`) braucht es Linux oder macOS (auch v
 unter nativem Windows funktioniert nur die Expo-Cloud-Variante weiter unten oder der oben
 beschriebene `expo run:android`-Weg:
 ```bash
-eas build --platform android --local
-npx eas build -p android --profile production --local
+eas build --platform android --profile production --local
 ```
 
 ## Expo Cloud Build (EAS)
@@ -200,11 +199,22 @@ Da die Datei außerhalb des Projektordners liegt, relativer Pfad mit `../`:
 ```
 
 ### 6) Verwenden
+Tatsächlicher Workflow hier: lokal mit `eas build --local` bauen (nicht `./gradlew` direkt),
+danach `eas submit`:
+```bash
+eas build --platform android --profile production --local
+eas submit --platform android --profile production --latest
+```
+`eas submit --latest` nimmt automatisch den zuletzt lokal erzeugten Build - kein manuelles
+Suchen/Angeben des `.aab`-Pfads nötig.
+
+Alternativ (z. B. wenn der Cloud-Build statt des lokalen genutzt werden soll, oder ein
+konkreter `.aab`-Pfad übergeben werden muss):
 ```bash
 # Zuletzt gebauten Cloud-Build hochladen:
 eas submit --platform android --latest --profile production
 
-# Oder einen lokal gebauten AAB hochladen (z.B. nach ./gradlew bundleRelease):
+# Oder einen bestimmten lokal gebauten AAB hochladen (z.B. nach ./gradlew bundleRelease):
 eas submit --platform android --path android/app/build/outputs/bundle/release/app-release.aab --profile production
 ```
 
