@@ -186,6 +186,16 @@ versehentlichem Commit bietet, da er aber außerhalb des Repos liegt, ist er ohn
 von `git add`. Falls eine solche Datei doch mal versehentlich in einen Projektordner
 landet, unbedingt vorher (bevor committed wird) in `.gitignore` eintragen.
 
+**Datei von Windows nach WSL kopieren:** `scp`/SSH funktioniert dafür **nicht** ohne
+Weiteres - WSL hat standardmäßig keinen laufenden SSH-Server, daher schlägt z. B.
+`scp datei.json richard@<wsl-hostname>:~/.keys` mit "Connection refused" fehl. WSL2 hat
+aber direkten Zugriff auf die Windows-Laufwerke unter `/mnt/c/...`, daher reicht ein
+normales `cp` **innerhalb von WSL** (nicht in PowerShell ausführen):
+```bash
+mkdir -p ~/.keys
+cp "/mnt/c/Users/richa/Documents/Programmieren/.keys/play-console-access-504713-dc6c0f3c622b.json" ~/.keys/
+```
+
 ### 5) serviceAccountKeyPath in eas.json
 `eas.json` wird über Git versioniert, der folgende Eintrag ist also bereits committet und
 kommt bei jedem `git pull` automatisch mit - hier muss normalerweise **nichts** eingetragen
