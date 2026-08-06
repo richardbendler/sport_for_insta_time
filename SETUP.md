@@ -216,7 +216,24 @@ wurde (kein einziger Entwurf/Release existiert), verlangt Googles Publishing-API
 allererste Upload manuell passiert – danach funktioniert `eas submit` für alle weiteren
 Versionen.
 
-### 4) JSON-Schlüssel sicher ablegen
+### 4) Google Play Android Developer API aktivieren
+Zusätzlich zu den Play-Console-Berechtigungen (Schritt 3) muss im Google-Cloud-Projekt
+selbst noch die **Google Play Android Developer API** freigeschaltet werden – ohne diesen
+Schritt schlägt `eas submit` mit einem Fehler wie folgendem fehl:
+```
+PERMISSION_DENIED: Google Play Android Developer API has not been used in project
+<PROJEKT-NUMMER> before or it is disabled.
+```
+Fix:
+1. Den Link aus der Fehlermeldung öffnen (Format
+   `https://console.developers.google.com/apis/api/androidpublisher.googleapis.com/overview?project=<PROJEKT-NUMMER>`),
+   oder in der Google Cloud Console manuell zu **APIs & Dienste → Bibliothek** gehen und
+   nach „Google Play Android Developer API" suchen.
+2. Auf **„Aktivieren"** klicken.
+3. Ein paar Minuten warten (die Freischaltung propagiert nicht sofort), dann `eas submit`
+   erneut ausführen.
+
+### 5) JSON-Schlüssel sicher ablegen
 Die heruntergeladene JSON-Datei **niemals ins Git-Repo committen**. Tatsächlich genutzter
 Ort hier: ein verstecktes `.keys`-Verzeichnis **eine Ebene über** beiden Projektordnern
 (also im gemeinsamen übergeordneten Ordner, nicht in `sport_for_insta_time` selbst):
@@ -242,7 +259,7 @@ mkdir -p ~/.keys
 cp "/mnt/c/Users/richa/Documents/Programmieren/.keys/play-console-access-504713-dc6c0f3c622b.json" ~/.keys/
 ```
 
-### 5) serviceAccountKeyPath in eas.json
+### 6) serviceAccountKeyPath in eas.json
 `eas.json` wird über Git versioniert, der folgende Eintrag ist also bereits committet und
 kommt bei jedem `git pull` automatisch mit - hier muss normalerweise **nichts** eingetragen
 werden:
