@@ -145,7 +145,12 @@ betroffen, nicht beide. Für den aktuellen Zweck (privater Nebenprojekte) ist da
    Apps zeigt Google einen kombinierten Berechtigungs-Dialog „Berechtigungen für N Apps" –
    die gewählten Häkchen gelten dann für alle ausgewählten Apps gemeinsam.
 4. Es gibt keine einfache Rollen-Dropdown mehr, sondern einzelne Checkboxen. Für
-   `eas submit` (Upload + Release erstellen) genau diese zwei ankreuzen:
+   `eas submit` (Upload + Release erstellen) genau diese **vier** ankreuzen (die ersten
+   beiden sind oft schon vorausgewählt, bitte trotzdem prüfen):
+   - **„App-Informationen ansehen (schreibgeschützt)"** – Basis-Leserecht, ohne das der
+     Rest nicht richtig funktioniert.
+   - **„Informationen zur App-Qualität ansehen (schreibgeschützt)"** – Leserecht für
+     Android Vitals/Artefakte/Tracks/Releases.
    - **„Produktionsversionen veröffentlichen, Geräte ausschließen und die Play
      App-Signatur verwenden"** – nötig, damit später auch Production-Releases hochgeladen
      werden können.
@@ -156,9 +161,7 @@ betroffen, nicht beide. Für den aktuellen Zweck (privater Nebenprojekte) ist da
    Nicht nötig: „Administrator", „App-Entwürfe bearbeiten und löschen", beide
    „Finanzdaten"-Checkboxen, „Test-Tracks verwalten und Testerlisten bearbeiten",
    „App-Präsenz im Play Store verwalten", „Auf Rezensionen antworten", „Richtlinien",
-   „Deeplinks verwalten". Die beiden schreibgeschützten Lese-Checkboxen
-   („App-Informationen ansehen", „Informationen zur App-Qualität ansehen") sind meist schon
-   vorausgewählt – das ist unproblematisch, so lassen.
+   „Deeplinks verwalten".
 5. Oben bei „Ablaufdatum für den Zugriff" den Toggle **ausgeschaltet lassen** (kein
    Ablaufdatum), sonst funktioniert das Dienstkonto irgendwann nicht mehr.
 6. Unten auf **„Anwenden"** klicken.
