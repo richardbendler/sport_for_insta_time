@@ -172,21 +172,28 @@ allererste Upload manuell passiert – danach funktioniert `eas submit` für all
 Versionen.
 
 ### 4) JSON-Schlüssel sicher ablegen
-Die heruntergeladene JSON-Datei **niemals ins Git-Repo committen**. Außerhalb des
-Projektordners speichern, z. B.:
+Die heruntergeladene JSON-Datei **niemals ins Git-Repo committen**. Tatsächlich genutzter
+Ort hier: ein verstecktes `.keys`-Verzeichnis **eine Ebene über** beiden Projektordnern
+(also im gemeinsamen übergeordneten Ordner, nicht in `sport_for_insta_time` selbst):
 ```
-~/keys/play-console-releases.json
+<übergeordneter Ordner>/
+├── .keys/
+│   └── play-console-access-504713-dc6c0f3c622b.json
+├── sport_for_insta_time/
+└── the-one-trinkspielbar/   (oder wie das andere Projekt heißt)
 ```
-(Bei getrennten Dienstkonten pro App entsprechend mehrere, unterschiedlich benannte Dateien.)
-Falls eine solche Datei doch versehentlich im Projektordner landet, unbedingt vorher (bevor
-committed wird) in `.gitignore` eintragen.
+Der Punkt vor `keys` versteckt den Ordner (z. B. bei `ls`), was zusätzlichen Schutz vor
+versehentlichem Commit bietet, da er aber außerhalb des Repos liegt, ist er ohnehin nie Teil
+von `git add`. Falls eine solche Datei doch mal versehentlich in einen Projektordner
+landet, unbedingt vorher (bevor committed wird) in `.gitignore` eintragen.
 
 ### 5) In eas.json eintragen
+Da die Datei außerhalb des Projektordners liegt, relativer Pfad mit `../`:
 ```json
 "submit": {
   "production": {
     "android": {
-      "serviceAccountKeyPath": "~/keys/play-console-releases.json"
+      "serviceAccountKeyPath": "../.keys/play-console-access-504713-dc6c0f3c622b.json"
     }
   }
 }
