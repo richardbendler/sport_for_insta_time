@@ -6,6 +6,22 @@ WSL/Linux vorbereiten, sowie den Google Play Service Account für automatisierte
 einrichten. Für den normalen Entwickler-Alltag (Emulator starten, bauen, Expo-Befehle) siehe
 [README.md](README.md).
 
+## EAS CLI installieren & einloggen (einmalig)
+```bash
+npm i -g eas-cli
+eas login
+```
+
+Falls `eas` unter nativem Windows nicht gefunden wird:
+```bash
+mkdir %APPDATA%\\npm
+npx eas-cli build --platform android --profile production
+```
+
+Für WSL/Linux braucht es eine eigene, separate Installation (npm-Präfix liegt dort standardmäßig
+woanders) — siehe [WSL/Linux: lokale EAS-Builds einrichten](#wsllinux-lokale-eas-builds-einrichten-einmalig)
+unten.
+
 ## Windows: native Entwicklungsumgebung einrichten (einmalig)
 
 Diese Variante baut die App direkt in Windows (kein WSL noetig) und installiert sie auf
@@ -47,7 +63,7 @@ einem laufenden Android-Emulator oder einem per USB verbundenen Geraet. Einmalig
 ## WSL/Linux: lokale EAS-Builds einrichten (einmalig)
 
 Nur nötig, falls lokal gebaut werden soll (`eas build --local`, siehe
-[README.md](README.md#android-apk-lokal-bauen-windows--wsl--ubuntu)), statt in der Expo-Cloud.
+[README.md](README.md#android-lokaler-build-wsl--linux)), statt in der Expo-Cloud.
 `eas-cli` unterstützt lokale Builds **nicht unter nativem Windows** — es braucht Linux oder
 macOS, z.B. via WSL.
 
@@ -117,7 +133,7 @@ cp -r "/mnt/c/Users/<DEIN_USER>/AppData/Local/Android/Sdk/ndk/27.1.12297006" ~/A
 Das ist aber nur ein Workaround für diese eine Maschine - der Netzwerk-Fix oben behebt die
 Ursache dauerhaft für jeden Download.
 
-### 5) EAS CLI
+### 5) EAS CLI (isoliert fuer WSL)
 Option A (empfohlen): npm-global in dein Home legen (ohne sudo)
 
 ```bash
@@ -135,12 +151,6 @@ eas --version
 eas login
 ```
 Falls `eas` nicht gefunden wird: `source ~/.bash_profile` oder neues WSL-Terminal.
-
-Falls `eas` unter nativem Windows nicht gefunden wird:
-```bash
-mkdir %APPDATA%\\npm
-npx eas-cli build --platform android --profile production
-```
 
 ## Google Play: Service Account & eas submit (Android) — einmalig
 
@@ -216,24 +226,7 @@ wurde (kein einziger Entwurf/Release existiert), verlangt Googles Publishing-API
 allererste Upload manuell passiert – danach funktioniert `eas submit` für alle weiteren
 Versionen.
 
-### 4) Google Play Android Developer API aktivieren
-Zusätzlich zu den Play-Console-Berechtigungen (Schritt 3) muss im Google-Cloud-Projekt
-selbst noch die **Google Play Android Developer API** freigeschaltet werden – ohne diesen
-Schritt schlägt `eas submit` mit einem Fehler wie folgendem fehl:
-```
-PERMISSION_DENIED: Google Play Android Developer API has not been used in project
-<PROJEKT-NUMMER> before or it is disabled.
-```
-Fix:
-1. Den Link aus der Fehlermeldung öffnen (Format
-   `https://console.developers.google.com/apis/api/androidpublisher.googleapis.com/overview?project=<PROJEKT-NUMMER>`),
-   oder in der Google Cloud Console manuell zu **APIs & Dienste → Bibliothek** gehen und
-   nach „Google Play Android Developer API" suchen.
-2. Auf **„Aktivieren"** klicken.
-3. Ein paar Minuten warten (die Freischaltung propagiert nicht sofort), dann `eas submit`
-   erneut ausführen.
-
-### 5) JSON-Schlüssel sicher ablegen
+### 4) JSON-Schlüssel sicher ablegen
 Die heruntergeladene JSON-Datei **niemals ins Git-Repo committen**. Tatsächlich genutzter
 Ort hier: ein verstecktes `.keys`-Verzeichnis **eine Ebene über** beiden Projektordnern
 (also im gemeinsamen übergeordneten Ordner, nicht in `sport_for_insta_time` selbst):
@@ -259,7 +252,7 @@ mkdir -p ~/.keys
 cp "/mnt/c/Users/richa/Documents/Programmieren/.keys/play-console-access-504713-dc6c0f3c622b.json" ~/.keys/
 ```
 
-### 6) serviceAccountKeyPath in eas.json
+### 5) serviceAccountKeyPath in eas.json
 `eas.json` wird über Git versioniert, der folgende Eintrag ist also bereits committet und
 kommt bei jedem `git pull` automatisch mit - hier muss normalerweise **nichts** eingetragen
 werden:
@@ -279,4 +272,4 @@ Maschine an einem anderen Ort liegt (anderer Ordnername, andere Verzeichnistiefe
 muss dieser Pfad dort lokal angepasst werden.
 
 Für die tatsächliche Nutzung von `eas build --local` + `eas submit` im Alltag siehe
-[README.md](README.md#google-play-service-account--eas-submit-android).
+[README.md](README.md#android-google-play).
