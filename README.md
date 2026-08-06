@@ -103,27 +103,34 @@ Damit `eas submit --platform android` Builds automatisch (ohne manuellen Upload 
 Play-Console-Weboberfläche) hochladen kann, braucht EAS ein **Google-Cloud-Dienstkonto** mit
 Freigabe in der Play Console. Einmalig einrichten:
 
+**Wichtig:** Ein Google-Cloud-Projekt reicht für **alle** eigenen Apps zusammen – die
+eigentliche Trennung zwischen Apps passiert in der Play Console (Schritt 3, pro-App-Rolle),
+nicht auf Cloud-Projekt-Ebene. Also nicht pro App ein neues Cloud-Projekt anlegen, sondern
+ein Projekt wiederverwenden und darin pro App nur ein neues Dienstkonto erstellen.
+
 ### 1) Google-Cloud-Projekt wählen
 1. Auf https://console.cloud.google.com gehen.
-2. Oben links im Projekt-Dropdown pruefen, ob schon ein Projekt existiert, das mit dem
-   Play-Console-Konto verknüpft ist (wird beim ersten Mal meist automatisch angelegt).
-   Falls nicht: neues Projekt anlegen (Name ist egal).
+2. Falls es schon ein eigenes Projekt für Play-Console-Zugriffe gibt (z. B. von einer
+   anderen App), dieses wiederverwenden. Falls nicht: neues Projekt anlegen, empfohlener
+   Name **`play-console-access`** (bewusst nicht app-spezifisch benannt, da es für alle
+   Apps gemeinsam genutzt wird).
 
-### 2) Dienstkonto erstellen
-1. **IAM & Verwaltung → Dienstkonten → Dienstkonto erstellen** (z. B. Name
-   `play-console-releases`).
+### 2) Dienstkonto erstellen (pro App eins)
+1. **IAM & Verwaltung → Dienstkonten → Dienstkonto erstellen**. Name app-spezifisch, z. B.
+   für dieses Projekt **`sport-for-screen-time-releases`** (für eine andere App entsprechend
+   z. B. `the-one-trinkspielbar-releases`).
 2. Rollen-Zuweisung im Cloud-Projekt selbst kann übersprungen werden – die eigentliche
    Berechtigung kommt aus der Play Console (Schritt 3).
 3. Auf das neu erstellte Dienstkonto klicken → Tab **„Keys"** → **„Add Key" → „Create new
-   key"** → Typ **JSON** → Datei herunterladen. Diese Datei ist der Schlüssel, den `eas
-   submit` später braucht.
+   key"** → Typ **JSON** (vorausgewählt/empfohlen, nicht P12) → **„Erstellen"**. Der Browser
+   lädt die Datei automatisch herunter.
 
 ### 3) Dienstkonto in der Play Console freischalten
 1. Play Console → **Nutzer und Berechtigungen → Nutzer einladen**.
 2. Als E-Mail-Adresse die Dienstkonto-Adresse eintragen (Format
    `NAME@PROJEKT-ID.iam.gserviceaccount.com`, zu finden in der Cloud Console beim
    Dienstkonto).
-3. Unter **App-Berechtigungen** die App auswählen (z. B. „Sport for Screen Time").
+3. Unter **App-Berechtigungen** die App auswählen (hier: „Sport for Screen Time").
 4. Rolle **„Releases verwalten"** (Release-Manager) zuweisen und einladen.
 
 Hinweis: Falls diese App noch nie manuell über die Play-Console-Weboberfläche hochgeladen
@@ -132,16 +139,21 @@ allererste Upload manuell passiert – danach funktioniert `eas submit` für all
 Versionen.
 
 ### 4) JSON-Schlüssel sicher ablegen
-Die heruntergeladene JSON-Datei **niemals ins Git-Repo committen**. Am besten außerhalb des
-Projektordners speichern, z. B. `~/keys/play-console-service-account.json`. Falls sie doch
-im Projektordner liegen muss, unbedingt vorher in `.gitignore` eintragen.
+Die heruntergeladene JSON-Datei **niemals ins Git-Repo committen**. Außerhalb des
+Projektordners speichern, in einem Ordner, der pro App/Datei benannt ist, z. B.:
+```
+~/keys/sport-for-screen-time-play-console.json
+~/keys/the-one-trinkspielbar-play-console.json
+```
+Falls eine solche Datei doch versehentlich im Projektordner landet, unbedingt vorher (bevor
+committed wird) in `.gitignore` eintragen.
 
 ### 5) In eas.json eintragen
 ```json
 "submit": {
   "production": {
     "android": {
-      "serviceAccountKeyPath": "/pfad/zur/play-console-service-account.json"
+      "serviceAccountKeyPath": "~/keys/sport-for-screen-time-play-console.json"
     }
   }
 }
