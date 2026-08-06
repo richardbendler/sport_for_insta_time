@@ -106,7 +106,17 @@ Freigabe in der Play Console. Einmalig einrichten:
 **Wichtig:** Ein Google-Cloud-Projekt reicht für **alle** eigenen Apps zusammen – die
 eigentliche Trennung zwischen Apps passiert in der Play Console (Schritt 3, pro-App-Rolle),
 nicht auf Cloud-Projekt-Ebene. Also nicht pro App ein neues Cloud-Projekt anlegen, sondern
-ein Projekt wiederverwenden und darin pro App nur ein neues Dienstkonto erstellen.
+ein Projekt wiederverwenden.
+
+**Aktueller Stand hier:** Es wird aktuell **ein gemeinsames Dienstkonto**
+(`play-console-releases@play-console-access-504713.iam.gserviceaccount.com`) für **beide**
+Apps genutzt (Sport for Screen Time **und** The One - Trinkspielbar), im selben Cloud-Projekt
+`play-console-access`. Das ist bewusst so gewählt (weniger Verwaltungsaufwand) und für
+Hobby-/Soloprojekte völlig ausreichend. Theoretisch könnte man das jederzeit auftrennen –
+also pro App ein eigenes Dienstkonto (z. B. `sport-for-screen-time-releases`) im selben
+Projekt anlegen und in der Play Console nur für die jeweils eine App freischalten. Vorteil
+einer Trennung: Falls der Schlüssel einer App mal kompromittiert wird, ist nur diese eine App
+betroffen, nicht beide. Für den aktuellen Zweck (privater Nebenprojekte) ist das nicht nötig.
 
 ### 1) Google-Cloud-Projekt wählen
 1. Auf https://console.cloud.google.com gehen.
@@ -115,10 +125,10 @@ ein Projekt wiederverwenden und darin pro App nur ein neues Dienstkonto erstelle
    Name **`play-console-access`** (bewusst nicht app-spezifisch benannt, da es für alle
    Apps gemeinsam genutzt wird).
 
-### 2) Dienstkonto erstellen (pro App eins)
-1. **IAM & Verwaltung → Dienstkonten → Dienstkonto erstellen**. Name app-spezifisch, z. B.
-   für dieses Projekt **`sport-for-screen-time-releases`** (für eine andere App entsprechend
-   z. B. `the-one-trinkspielbar-releases`).
+### 2) Dienstkonto erstellen
+1. **IAM & Verwaltung → Dienstkonten → Dienstkonto erstellen**. Name z. B.
+   `play-console-releases` (gemeinsam für alle Apps) oder app-spezifisch wie
+   `sport-for-screen-time-releases`, falls man später doch auftrennen möchte.
 2. Rollen-Zuweisung im Cloud-Projekt selbst kann übersprungen werden – die eigentliche
    Berechtigung kommt aus der Play Console (Schritt 3).
 3. Auf das neu erstellte Dienstkonto klicken → Tab **„Keys"** → **„Add Key" → „Create new
@@ -130,21 +140,41 @@ ein Projekt wiederverwenden und darin pro App nur ein neues Dienstkonto erstelle
 2. Als E-Mail-Adresse die Dienstkonto-Adresse eintragen (Format
    `NAME@PROJEKT-ID.iam.gserviceaccount.com`, zu finden in der Cloud Console beim
    Dienstkonto).
-3. Unter **App-Berechtigungen** die App auswählen (hier: „Sport for Screen Time").
-4. Rolle **„Releases verwalten"** (Release-Manager) zuweisen und einladen.
+3. Unter **App-Berechtigungen** die betroffene(n) App(s) auswählen (hier: „Sport for Screen
+   Time", ggf. zusätzlich weitere Apps, falls das Dienstkonto geteilt wird). Bei mehreren
+   Apps zeigt Google einen kombinierten Berechtigungs-Dialog „Berechtigungen für N Apps" –
+   die gewählten Häkchen gelten dann für alle ausgewählten Apps gemeinsam.
+4. Es gibt keine einfache Rollen-Dropdown mehr, sondern einzelne Checkboxen. Für
+   `eas submit` (Upload + Release erstellen) genau diese zwei ankreuzen:
+   - **„Produktionsversionen veröffentlichen, Geräte ausschließen und die Play
+     App-Signatur verwenden"** – nötig, damit später auch Production-Releases hochgeladen
+     werden können.
+   - **„Apps in Test-Tracks veröffentlichen"** – nötig für Uploads in interne/geschlossene/
+     offene Test-Tracks (Standard-Track von `eas submit`, wenn in `eas.json` kein `track`
+     gesetzt ist).
 
-Hinweis: Falls diese App noch nie manuell über die Play-Console-Weboberfläche hochgeladen
+   Nicht nötig: „Administrator", „App-Entwürfe bearbeiten und löschen", beide
+   „Finanzdaten"-Checkboxen, „Test-Tracks verwalten und Testerlisten bearbeiten",
+   „App-Präsenz im Play Store verwalten", „Auf Rezensionen antworten", „Richtlinien",
+   „Deeplinks verwalten". Die beiden schreibgeschützten Lese-Checkboxen
+   („App-Informationen ansehen", „Informationen zur App-Qualität ansehen") sind meist schon
+   vorausgewählt – das ist unproblematisch, so lassen.
+5. Oben bei „Ablaufdatum für den Zugriff" den Toggle **ausgeschaltet lassen** (kein
+   Ablaufdatum), sonst funktioniert das Dienstkonto irgendwann nicht mehr.
+6. Unten auf **„Anwenden"** klicken.
+
+Hinweis: Falls eine App noch nie manuell über die Play-Console-Weboberfläche hochgeladen
 wurde (kein einziger Entwurf/Release existiert), verlangt Googles Publishing-API, dass der
 allererste Upload manuell passiert – danach funktioniert `eas submit` für alle weiteren
 Versionen.
 
 ### 4) JSON-Schlüssel sicher ablegen
 Die heruntergeladene JSON-Datei **niemals ins Git-Repo committen**. Außerhalb des
-Projektordners speichern, in einem Ordner, der pro App/Datei benannt ist, z. B.:
+Projektordners speichern, z. B.:
 ```
-~/keys/sport-for-screen-time-play-console.json
-~/keys/the-one-trinkspielbar-play-console.json
+~/keys/play-console-releases.json
 ```
+(Bei getrennten Dienstkonten pro App entsprechend mehrere, unterschiedlich benannte Dateien.)
 Falls eine solche Datei doch versehentlich im Projektordner landet, unbedingt vorher (bevor
 committed wird) in `.gitignore` eintragen.
 
@@ -153,7 +183,7 @@ committed wird) in `.gitignore` eintragen.
 "submit": {
   "production": {
     "android": {
-      "serviceAccountKeyPath": "~/keys/sport-for-screen-time-play-console.json"
+      "serviceAccountKeyPath": "~/keys/play-console-releases.json"
     }
   }
 }
