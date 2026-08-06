@@ -186,8 +186,10 @@ versehentlichem Commit bietet, da er aber außerhalb des Repos liegt, ist er ohn
 von `git add`. Falls eine solche Datei doch mal versehentlich in einen Projektordner
 landet, unbedingt vorher (bevor committed wird) in `.gitignore` eintragen.
 
-### 5) In eas.json eintragen
-Da die Datei außerhalb des Projektordners liegt, relativer Pfad mit `../`:
+### 5) serviceAccountKeyPath in eas.json
+`eas.json` wird über Git versioniert, der folgende Eintrag ist also bereits committet und
+kommt bei jedem `git pull` automatisch mit - hier muss normalerweise **nichts** eingetragen
+werden:
 ```json
 "submit": {
   "production": {
@@ -197,6 +199,11 @@ Da die Datei außerhalb des Projektordners liegt, relativer Pfad mit `../`:
   }
 }
 ```
+Der relative Pfad (`../.keys/...`) funktioniert auf jeder Maschine automatisch, **solange**
+die JSON-Schlüsseldatei dort genau eine Ebene über dem Projektordner in einem `.keys`-Ordner
+mit demselben Dateinamen liegt (siehe Schritt 4). Nur falls die Datei auf einer bestimmten
+Maschine an einem anderen Ort liegt (anderer Ordnername, andere Verzeichnistiefe, o. Ä.),
+muss dieser Pfad dort lokal angepasst werden.
 
 ### 6) Verwenden
 Tatsächlicher Workflow hier: lokal mit `eas build --local` bauen (nicht `./gradlew` direkt),
