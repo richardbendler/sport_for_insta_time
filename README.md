@@ -4,11 +4,12 @@ Eine einfache React Native App, die Sport gegen Social-Media-Zeit tauscht.
 Workouts erzeugen erspielte Zeit, alles wird lokal gespeichert, und auf Android
 koennen ausgewaehlte Apps blockiert werden, sobald die erspielte Zeit verbraucht ist.
 
-Diese README deckt den laufenden Entwickler-Alltag ab: Emulator starten, bauen, Expo-Befehle,
-Store-Uploads. Einmalige Einrichtung einer neuen Entwicklungsumgebung (native Windows-Umgebung,
-WSL/Linux für lokale EAS-Builds, Google Play Service Account) steht in [SETUP.md](SETUP.md).
+Diese README deckt den laufenden Entwickler-Alltag ab: Emulator starten, Release-Builds
+erstellen, in die Stores hochladen. Einmalige Einrichtung einer neuen Entwicklungsumgebung
+(EAS CLI, native Windows-Umgebung, WSL/Linux für lokale EAS-Builds, Google Play Service
+Account) steht in [SETUP.md](SETUP.md).
 
-## Taeglich: Emulator starten und App bauen
+## Lokal entwickeln (Emulator)
 ```powershell
 # Emulator ueber Android Studio (Device Manager) oder per Kommandozeile starten:
 emulator -avd <AVD-Name>
@@ -16,6 +17,18 @@ emulator -avd <AVD-Name>
 # Bauen + installieren:
 npx expo run:android
 ```
+
+Nur den Metro-Bundler neu starten (App bereits installiert):
+```bash
+npx expo start --dev-client
+```
+
+Falls das Handy nicht im selben Netzwerk ist oder die WLAN-Verbindung blockiert wird (z.B.
+restriktives Firmen-/Uni-Netz):
+```bash
+npx expo start --dev-client --tunnel
+```
+Etwas langsamer, funktioniert aber unabhängig vom lokalen Netzwerk.
 
 **Bekannte Falle:** Laeuft Android Studio gleichzeitig geoeffnet (z.B. mit offenem Device
 Manager), kann `adb devices` gelegentlich einen "Geister"-Eintrag wie `emulator-5562 offline`
@@ -27,39 +40,55 @@ adb start-server
 npx expo run:android
 ```
 
-## Expo Befehle (wichtig)
-```bash
-npx expo run:android
-npx expo start --dev-client
-```
+## Build und Release
+Für eine Store-Version (statt nur lokalem Testen über den Emulator) wird [EAS](https://docs.expo.dev/build/setup/)
+verwendet. Einmalige Einrichtung von EAS CLI/Login siehe [SETUP.md](SETUP.md#eas-cli-installieren--einloggen-einmalig).
 
-Falls das Handy nicht im selben Netzwerk ist oder die WLAN-Verbindung blockiert wird (z.B.
-restriktives Firmen-/Uni-Netz):
-```bash
-npx expo start --dev-client --tunnel
-```
-Etwas langsamer, funktioniert aber unabhängig vom lokalen Netzwerk.
-
-Fuer lokale EAS-Builds (`eas build --local`) braucht es Linux oder macOS (auch via WSL) -
-unter nativem Windows funktioniert nur die Expo-Cloud-Variante weiter unten oder der oben
-beschriebene `expo run:android`-Weg. Einmalige Einrichtung siehe [SETUP.md](SETUP.md#wsllinux-lokale-eas-builds-einrichten-einmalig):
-```bash
-eas build --platform android --profile production --local
-```
-
-## Expo Cloud Build (EAS)
-Falls lokale Builds (WSL) Probleme machen, nutze den Cloud Build. Einmalige Einrichtung
-(`eas-cli` installieren, `eas login`) siehe [SETUP.md](SETUP.md#5-eas-cli).
-
-### Android (Production, Cloud)
+### Android: Cloud-Build
 ```bash
 eas build --platform android --profile production
 ```
+Der Build laeuft in der Expo Cloud. Den Download-Link findest du danach in der Konsole oder im
+Expo Dashboard.
 
-Hinweis: Der Build laeuft in der Expo Cloud. Den Download-Link findest du danach in der Konsole
-oder im Expo Dashboard.
+### Android: Lokaler Build (WSL / Linux)
+Nützlich bei Warteschlangen/Limits im kostenlosen EAS-Tier. Braucht Linux oder macOS (auch via
+WSL) — unter nativem Windows funktioniert nur der Cloud-Build oben oder der `expo run:android`-Weg
+von weiter oben. Einmalige Einrichtung der WSL/Linux-Umgebung (Node, Java, Android SDK, EAS CLI)
+siehe [SETUP.md](SETUP.md#wsllinux-lokale-eas-builds-einrichten-einmalig).
 
-## Google Play: Service Account & eas submit (Android)
+```bash
+cd ~/sport_for_insta_time
+printf "sdk.dir=%s\n" "$HOME/Android/Sdk" > android/local.properties
+npm ci --include=dev || (rm -rf node_modules package-lock.json && npm install)
+eas build --platform android --profile production --local
+```
+
+APK nach Windows kopieren:
+```bash
+cp /pfad/zur/app-release.apk /mnt/c/Users/<DEIN_USER>/Desktop/
+```
+
+### iOS: Cloud-Build
+1. Apple-Zugangsdaten: `eas credentials` hilft beim Hochladen von Zertifikaten/Profilen; beim ersten Build legt Expo das für dich an, wenn du mit deinem Apple Developer Account verknüpft bist.
+2. Stelle sicher, dass die App in App Store Connect angelegt ist (Bundle-ID `com.richardbendler.sportforscreentime`, Sprache Englisch US).
+3. Starte den Cloud Build mit dem iOS-Profil:
+
+```bash
+eas build --platform ios --profile production
+```
+
+Nach Abschluss erhältst du im Expo Dashboard den Download-Link für das `.ipa`; du findest dort
+auch Build-Logs.
+
+#### iOS lokal vorbereiten (nur macOS)
+```bash
+npm install
+npx expo prebuild --platform ios
+npx eas build --platform ios --profile production
+```
+
+## In die Stores hochladen (eas submit)
 Für automatisierte Uploads ohne manuellen Weg über die Play-Console-Weboberfläche braucht EAS
 ein Google-Cloud-Dienstkonto mit Freigabe in der Play Console. Die einmalige Einrichtung
 (Cloud-Projekt, Dienstkonto, Play-Console-Berechtigungen, JSON-Key ablegen,
@@ -72,78 +101,37 @@ tägliche Nutzung.
 genutzt (Sport for Screen Time **und** The One - Trinkspielbar), im selben Cloud-Projekt
 `play-console-access`.
 
-### Verwenden
-Tatsächlicher Workflow hier: lokal mit `eas build --local` bauen (nicht `./gradlew` direkt),
-danach `eas submit`:
+### Android (Google Play)
 ```bash
-eas build --platform android --profile production --local
 eas submit --platform android --profile production --latest
 ```
-`eas submit --latest` nimmt automatisch den zuletzt lokal erzeugten Build - kein manuelles
-Suchen/Angeben des `.aab`-Pfads nötig.
+`--latest` nimmt automatisch den zuletzt erzeugten Build (Cloud oder lokal) - kein manuelles
+Suchen/Angeben des `.aab`-Pfads nötig. Läuft dank `serviceAccountKeyPath` in `eas.json`
+nicht-interaktiv.
 
-Alternativ (z. B. wenn der Cloud-Build statt des lokalen genutzt werden soll, oder ein
-konkreter `.aab`-Pfad übergeben werden muss):
+Alternativ ein bestimmter Build:
 ```bash
-# Zuletzt gebauten Cloud-Build hochladen:
-eas submit --platform android --latest --profile production
-
-# Oder einen bestimmten lokal gebauten AAB hochladen (z.B. nach ./gradlew bundleRelease):
+# Bestimmten lokal gebauten AAB hochladen (z.B. nach ./gradlew bundleRelease):
 eas submit --platform android --path android/app/build/outputs/bundle/release/app-release.aab --profile production
 ```
 
-## Apple (iOS) über Expo Cloud
-1. Apple-Zugangsdaten: `eas credentials` hilft beim Hochladen von Zertifikaten/Profilen; beim ersten Build legt Expo das für dich an, wenn du mit deinem Apple Developer Account verknüpft bist.
-2. Stelle sicher, dass die App in App Store Connect angelegt ist (Bundle-ID `com.richardbendler.sportforscreentime`, Sprache Englisch US).
-3. Starte den Cloud Build mit dem iOS-Profil:
+Hinweis: Falls eine App noch nie manuell über die Play-Console-Weboberfläche hochgeladen wurde
+(kein einziger Entwurf/Release existiert), verlangt Googles Publishing-API, dass der allererste
+Upload manuell passiert – danach funktioniert `eas submit` für alle weiteren Versionen.
 
+### iOS (App Store Connect / TestFlight)
 ```bash
-eas build --platform ios --profile production
+eas submit --platform ios --profile production --latest
 ```
+Fragt beim ersten Mal interaktiv nach den Apple-Zugangsdaten und speichert sie für künftige
+Submits. Apple verlangt pro Version Zertifikate/Provisioning-Profile; `eas credentials` bzw. das
+Expo-Dashboard hilft dabei, diese automatisch zu verwalten.
 
-### iOS (lokal vorbereiten / auf macOS)
-```bash
-# Falls noch nicht installiert:
-npm install
-
-# Auf macOS (oder im Apple-Build-Cloud-Job) vor dem Build:
-npx expo prebuild --platform ios
-
-# Danach generischen iOS-Build (Expo Cloud oder lokal auf macOS):
-npx eas build --platform ios --profile production
-```
-
-4. Nach Abschluss erhältst du im Expo Dashboard den Download-Link für das `.ipa`; du findest dort auch Build-Logs.
-
-## Apple: TestFlight / App Store Distribution
-1. Lade das `.ipa` aus dem Expo Dashboard herunter oder verwende `eas submit --platform ios --profile production`, um den Upload direkt in App Store Connect zu erledigen.
-2. In App Store Connect:
-   - Wähle deine App, öffne den „Build“-Reiter unter „App-Informationen“, und füge den neuen Build hinzu.
-   - Fülle die Metadaten (Screenshots, Beschreibung, Kategorien, Datenschutz, Altersfreigabe) aus, falls noch nicht geschehen.
-   - Veröffentliche den Build für eine interne/beta TestFlight-Runde oder reiche ihn zur Prüfung ein.
-3. TestFlight: Nach Freigabe kannst du Tester:innen via E-Mail oder öffentlichem Link einladen (Einstellungen > TestFlight > Gruppe/Tester).
+Nach dem Upload in App Store Connect:
+1. Wähle deine App, öffne den „Build“-Reiter unter „App-Informationen“, und füge den neuen Build hinzu.
+2. Fülle die Metadaten (Screenshots, Beschreibung, Kategorien, Datenschutz, Altersfreigabe) aus, falls noch nicht geschehen.
+3. Veröffentliche den Build für eine interne/beta TestFlight-Runde oder reiche ihn zur Prüfung ein. Nach Freigabe kannst du Tester:innen via E-Mail oder öffentlichem Link einladen (Einstellungen > TestFlight > Gruppe/Tester).
 4. Für die finale Veröffentlichung: Stelle sicher, dass alle App-Infos, Screenshots und Preisangaben in App Store Connect stehen, und reiche die neue Version zur Prüfung ein („Preparing for Submission“ > „Submit for Review“).
-
-Hinweis: Apple verlangt pro Version Zertifikate/Provisioning-Profile; `eas credentials` bzw. das Expo-Dashboard hilft dabei, diese automatisch zu verwalten.
-
-## Android APK lokal bauen (Windows + WSL / Ubuntu)
-
-Einmalige Einrichtung der WSL/Linux-Umgebung (Node, Java, Android SDK, EAS CLI) siehe
-[SETUP.md](SETUP.md#wsllinux-lokale-eas-builds-einrichten-einmalig).
-
-### Build APK
-```bash
-cd ~/sport_for_insta_time
-printf "sdk.dir=%s\n" "$HOME/Android/Sdk" > android/local.properties
-npm ci --include=dev || (rm -rf node_modules package-lock.json && npm install)
-cd ~/sport_for_insta_time
-eas build --platform android --profile production --local
-```
-
-### APK nach Windows kopieren
-```bash
-cp /pfad/zur/app-release.apk /mnt/c/Users/<DEIN_USER>/Desktop/
-```
 
 ## Features
 - Presets: z.B. Liegestuetze, Klimmzuege, Situps, Joggen (mit Icons)
