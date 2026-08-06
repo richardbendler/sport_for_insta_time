@@ -16,6 +16,8 @@
         "NSMicrophoneUsageDescription": "Allow microphone access to count reps by voice.",
         "NSSpeechRecognitionUsageDescription": "Allow speech recognition to count reps by voice.",
         "NSCameraUsageDescription": "Allow camera access to count push-ups.",
+        "NSPhotoLibraryUsageDescription": "Sport Habit Coach does not access your photo library. This permission is only requested because of an included camera library and is not used by any feature in the app.",
+        "NSLocationWhenInUseUsageDescription": "Sport Habit Coach does not use your location. This permission is only requested because of an included camera library and is not used by any feature in the app.",
         "ITSAppUsesNonExemptEncryption": false
       },
       "bundleIdentifier": "com.richardbendler.sportforscreentime"
