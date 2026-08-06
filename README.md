@@ -98,6 +98,64 @@ eas build --platform android --profile production
 Hinweis: Der Build laeuft in der Expo Cloud. Den Download-Link findest du danach in der Konsole
 oder im Expo Dashboard.
 
+## Google Play: Service Account & eas submit (Android)
+Damit `eas submit --platform android` Builds automatisch (ohne manuellen Upload über die
+Play-Console-Weboberfläche) hochladen kann, braucht EAS ein **Google-Cloud-Dienstkonto** mit
+Freigabe in der Play Console. Einmalig einrichten:
+
+### 1) Google-Cloud-Projekt wählen
+1. Auf https://console.cloud.google.com gehen.
+2. Oben links im Projekt-Dropdown pruefen, ob schon ein Projekt existiert, das mit dem
+   Play-Console-Konto verknüpft ist (wird beim ersten Mal meist automatisch angelegt).
+   Falls nicht: neues Projekt anlegen (Name ist egal).
+
+### 2) Dienstkonto erstellen
+1. **IAM & Verwaltung → Dienstkonten → Dienstkonto erstellen** (z. B. Name
+   `play-console-releases`).
+2. Rollen-Zuweisung im Cloud-Projekt selbst kann übersprungen werden – die eigentliche
+   Berechtigung kommt aus der Play Console (Schritt 3).
+3. Auf das neu erstellte Dienstkonto klicken → Tab **„Keys"** → **„Add Key" → „Create new
+   key"** → Typ **JSON** → Datei herunterladen. Diese Datei ist der Schlüssel, den `eas
+   submit` später braucht.
+
+### 3) Dienstkonto in der Play Console freischalten
+1. Play Console → **Nutzer und Berechtigungen → Nutzer einladen**.
+2. Als E-Mail-Adresse die Dienstkonto-Adresse eintragen (Format
+   `NAME@PROJEKT-ID.iam.gserviceaccount.com`, zu finden in der Cloud Console beim
+   Dienstkonto).
+3. Unter **App-Berechtigungen** die App auswählen (z. B. „Sport for Screen Time").
+4. Rolle **„Releases verwalten"** (Release-Manager) zuweisen und einladen.
+
+Hinweis: Falls diese App noch nie manuell über die Play-Console-Weboberfläche hochgeladen
+wurde (kein einziger Entwurf/Release existiert), verlangt Googles Publishing-API, dass der
+allererste Upload manuell passiert – danach funktioniert `eas submit` für alle weiteren
+Versionen.
+
+### 4) JSON-Schlüssel sicher ablegen
+Die heruntergeladene JSON-Datei **niemals ins Git-Repo committen**. Am besten außerhalb des
+Projektordners speichern, z. B. `~/keys/play-console-service-account.json`. Falls sie doch
+im Projektordner liegen muss, unbedingt vorher in `.gitignore` eintragen.
+
+### 5) In eas.json eintragen
+```json
+"submit": {
+  "production": {
+    "android": {
+      "serviceAccountKeyPath": "/pfad/zur/play-console-service-account.json"
+    }
+  }
+}
+```
+
+### 6) Verwenden
+```bash
+# Zuletzt gebauten Cloud-Build hochladen:
+eas submit --platform android --latest --profile production
+
+# Oder einen lokal gebauten AAB hochladen (z.B. nach ./gradlew bundleRelease):
+eas submit --platform android --path android/app/build/outputs/bundle/release/app-release.aab --profile production
+```
+
 ## Apple (iOS) über Expo Cloud
 1. Apple-Zugangsdaten: `eas credentials` hilft beim Hochladen von Zertifikaten/Profilen; beim ersten Build legt Expo das für dich an, wenn du mit deinem Apple Developer Account verknüpft bist.
 2. Stelle sicher, dass die App in App Store Connect angelegt ist (Bundle-ID `com.richardbendler.sportforscreentime`, Sprache Englisch US).
