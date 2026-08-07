@@ -43,7 +43,7 @@
       "android": {
         "serviceAccountKeyPath": "../.keys/play-console-access-504713-dc6c0f3c622b.json",
         "track": "production",
-        "releaseStatus": "draft"
+        "releaseStatus": "completed"
       }
     }
   }

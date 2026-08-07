@@ -111,11 +111,14 @@ gibt zwei Submit-Profile in `eas.json`, die genau das steuern - je nachdem, welc
 # (aber eben nur für Tester, nicht öffentlich im Play Store):
 eas submit --platform android --profile production --latest
 
-# Production-Track: für alle im Play Store sichtbar/installierbar - wird aber als ENTWURF
-# hochgeladen (releaseStatus: draft) und muss in der Play Console erst manuell geprüft und
-# veröffentlicht werden (Release-Übersicht → Entwurf → "Zur Prüfung freigeben"/"Veröffentlichen"):
+# Production-Track: schaltet direkt fuer alle im Play Store sichtbar/installierbar
+# (releaseStatus: completed) - kein manueller Freigabe-Klick in der Play Console mehr noetig,
+# dafuer auch kein Sicherheitsnetz mehr vor dem Livegang:
 eas submit --platform android --profile production-release --latest
 ```
+**Achtung:** `production-release` macht die neue Version sofort für alle Nutzer live (ggf. mit
+kurzer Google-Prüfzeit dazwischen) — vorher unbedingt mit dem `production`-Profil (Internal
+Track) getestet haben.
 
 `--latest` nimmt in beiden Fällen automatisch den zuletzt erzeugten Build (Cloud oder lokal) -
 kein manuelles Suchen/Angeben des `.aab`-Pfads nötig. Läuft dank `serviceAccountKeyPath` in
