@@ -326,7 +326,7 @@ const RAW_STANDARD_SPORTS = [
     category: "Kardio",
     muscleGroups: [
       "Beine (Quadrizeps, Beinbeuger, Waden)",
-      "Ges??",
+      "Gesäß",
       "Core",
       "Herz-Kreislauf",
     ],
@@ -345,7 +345,7 @@ const RAW_STANDARD_SPORTS = [
     defaultRateMinutes: 1,
     difficultyLevel: 3,
     category: "Kardio",
-    muscleGroups: ["Beine", "Ges??", "Core", "Herz-Kreislauf"],
+    muscleGroups: ["Beine", "Gesäß", "Core", "Herz-Kreislauf"],
   },
   {
     id: "treadmill_walking",
@@ -362,7 +362,7 @@ const RAW_STANDARD_SPORTS = [
     difficultyLevel: 90,
     useRawDifficulty: true,
     category: "Kardio",
-    muscleGroups: ["Beine", "Ges??", "Core", "Herz-Kreislauf"],
+    muscleGroups: ["Beine", "Gesäß", "Core", "Herz-Kreislauf"],
   },
   {
     id: "walking",
@@ -379,7 +379,7 @@ const RAW_STANDARD_SPORTS = [
     difficultyLevel: 90,
     useRawDifficulty: true,
     category: "Kardio",
-    muscleGroups: ["Beine", "Ges??", "Core", "Herz-Kreislauf"],
+    muscleGroups: ["Beine", "Gesäß", "Core", "Herz-Kreislauf"],
   },
   {
     id: "cycling",
@@ -424,15 +424,15 @@ const RAW_STANDARD_SPORTS = [
     defaultRateMinutes: 1,
     difficultyLevel: 4,
     category: "Kardio",
-    muscleGroups: ["Quadrizeps", "Ges??", "Waden", "Herz-Kreislauf"],
+    muscleGroups: ["Quadrizeps", "Gesäß", "Waden", "Herz-Kreislauf"],
   },
   {
     id: "stationary_bike",
     labels: {
       de: "Fahrradergometer",
       en: "Stationary Bike",
-      es: "Bicicleta est?tica",
-      fr: "V?lo d'appartement",
+      es: "Bicicleta estática",
+      fr: "Vélo d'appartement",
     },
     aliases: [
       "Stationary Bike",
@@ -466,15 +466,15 @@ const RAW_STANDARD_SPORTS = [
     defaultRateMinutes: 1,
     difficultyLevel: 3,
     category: "Kardio",
-    muscleGroups: ["Beine", "Ges??", "Herz-Kreislauf"],
+    muscleGroups: ["Beine", "Gesäß", "Herz-Kreislauf"],
   },
   {
     id: "elliptical_trainer",
     labels: {
       de: "Crosstrainer",
       en: "Elliptical Trainer",
-      es: "El?ptica",
-      fr: "V?lo elliptique",
+      es: "Elíptica",
+      fr: "Vélo elliptique",
     },
     aliases: ["Ellipsentrainer"],
     icon: "??",
@@ -487,9 +487,9 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "rowing_machine",
     labels: {
-      de: "Ruderger?t",
+      de: "Rudergerät",
       en: "Rowing Machine",
-      es: "M?quina de remo",
+      es: "Máquina de remo",
       fr: "Rameur",
     },
     aliases: ["Indoor Rudern", "Ergometer Rudern"],
@@ -499,9 +499,9 @@ const RAW_STANDARD_SPORTS = [
     difficultyLevel: 5,
     category: "Kardio",
     muscleGroups: [
-      "R?cken",
+      "Rücken",
       "Beine",
-      "Ges??",
+      "Gesäß",
       "Arme",
       "Core",
       "Herz-Kreislauf",
@@ -513,7 +513,7 @@ const RAW_STANDARD_SPORTS = [
       de: "Seilspringen",
       en: "Jump Rope",
       es: "Saltar la cuerda",
-      fr: "Corde ? sauter",
+      fr: "Corde à sauter",
     },
     aliases: ["Jump Rope"],
     icon: "??",
@@ -531,13 +531,13 @@ const RAW_STANDARD_SPORTS = [
       es: "Escaladora",
       fr: "Stepper escalier",
     },
-    aliases: ["Stepper (Ger?t)", "Stair Climber"],
+    aliases: ["Stepper (Gerät)", "Stair Climber"],
     icon: "??",
     type: "time",
     defaultRateMinutes: 1,
     difficultyLevel: 4,
     category: "Kardio",
-    muscleGroups: ["Quadrizeps", "Ges??", "Waden", "Herz-Kreislauf"],
+    muscleGroups: ["Quadrizeps", "Gesäß", "Waden", "Herz-Kreislauf"],
   },
   {
     id: "chest_press_machine",
@@ -547,13 +547,13 @@ const RAW_STANDARD_SPORTS = [
       es: "Press de pecho",
       fr: "Presse pectorale",
     },
-    aliases: ["Chest Press", "Maschinen-Bankdr?cken"],
+    aliases: ["Chest Press", "Maschinen-Bankdrücken"],
     icon: "???",
     type: "reps",
     weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 4,
-    category: "Ger?te & Maschinen",
+    category: "Geräte & Maschinen",
     muscleGroups: ["Brust", "Trizeps", "Schultern"],
   },
   {
@@ -561,8 +561,8 @@ const RAW_STANDARD_SPORTS = [
     labels: {
       de: "Butterfly",
       en: "Pec Deck / Machine Fly",
-      es: "Peck deck / Aperturas en m?quina",
-      fr: "Pec deck / ?cart? ? la machine",
+      es: "Peck deck / Aperturas en máquina",
+      fr: "Pec deck / Écarté à la machine",
     },
     aliases: ["Pec Deck", "Brust-Fly Maschine", "Machine Fly", "Brustfliegen", "Butterfly Maschine", "Butterfly", "Fliegende", "Pec Deck Machine Fly"],
     icon: "???",
@@ -570,7 +570,7 @@ const RAW_STANDARD_SPORTS = [
     weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 3,
-    category: "Ger?te & Maschinen",
+    category: "Geräte & Maschinen",
     muscleGroups: ["Brust", "vordere Schulter"],
   },
   {
@@ -578,8 +578,8 @@ const RAW_STANDARD_SPORTS = [
     labels: {
       de: "Reverse Butterfly",
       en: "Reverse Pec Deck / Rear Delt Machine",
-      es: "Aperturas inversas en m?quina",
-      fr: "Oiseau invers? machine",
+      es: "Aperturas inversas en máquina",
+      fr: "Oiseau inversé machine",
     },
     aliases: ["Rear Delt Machine"],
     icon: "???",
@@ -587,15 +587,15 @@ const RAW_STANDARD_SPORTS = [
     weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 3,
-    category: "Ger?te & Maschinen",
-    muscleGroups: ["hintere Schulter", "oberer R?cken"],
+    category: "Geräte & Maschinen",
+    muscleGroups: ["hintere Schulter", "oberer Rücken"],
   },
   {
     id: "leg_extension",
     labels: {
       de: "Beinstrecker",
       en: "Leg Extension",
-      es: "Extensi?n de piernas",
+      es: "Extensión de piernas",
       fr: "Extension des jambes",
     },
     aliases: ["Leg Extension"],
@@ -604,7 +604,7 @@ const RAW_STANDARD_SPORTS = [
     weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 3,
-    category: "Ger?te & Maschinen",
+    category: "Geräte & Maschinen",
     muscleGroups: ["Quadrizeps"],
   },
   {
@@ -621,7 +621,7 @@ const RAW_STANDARD_SPORTS = [
     weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 3,
-    category: "Ger?te & Maschinen",
+    category: "Geräte & Maschinen",
     muscleGroups: ["Beinbeuger"],
   },
   {
@@ -629,8 +629,8 @@ const RAW_STANDARD_SPORTS = [
     labels: {
       de: "Bauchmaschine",
       en: "Ab Crunch Machine",
-      es: "M?quina de abdominales",
-      fr: "Machine ? abdominaux",
+      es: "Máquina de abdominales",
+      fr: "Machine à abdominaux",
     },
     aliases: ["Ab Crunch Machine"],
     icon: "???",
@@ -638,32 +638,32 @@ const RAW_STANDARD_SPORTS = [
     weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 3,
-    category: "Ger?te & Maschinen",
+    category: "Geräte & Maschinen",
     muscleGroups: ["Bauch / Core"],
   },
   {
     id: "back_extension_machine",
     labels: {
-      de: "R?ckenstrecker-Maschine",
+      de: "Rückenstrecker-Maschine",
       en: "Back Extension Machine",
-      es: "M?quina de extensi?n lumbar",
-      fr: "Machine d?extension lombaire",
+      es: "Máquina de extensión lumbar",
+      fr: "Machine d'extension lombaire",
     },
-    aliases: ["Back Extension Machine", "R?ckenstrecker", "R?ckenstrecker Maschine", "Hyperextension Maschine", "R?ckenstrecken Maschine"],
+    aliases: ["Back Extension Machine", "Rückenstrecker", "Rückenstrecker Maschine", "Hyperextension Maschine", "Rückenstrecken Maschine"],
     icon: "???",
     type: "reps",
     weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 3,
-    category: "Ger?te & Maschinen",
-    muscleGroups: ["R?ckenstrecker", "Ges?? (sekund?r)"],
+    category: "Geräte & Maschinen",
+    muscleGroups: ["Rückenstrecker", "Gesäß (sekundär)"],
   },
   {
     id: "biceps_curl_machine",
     labels: {
       de: "Bizepsmaschine",
       en: "Biceps Curl Machine",
-      es: "M?quina de curl de b?ceps",
+      es: "Máquina de curl de bíceps",
       fr: "Machine curl biceps",
     },
     aliases: ["Biceps Curl Machine", "Preacher Curl Machine"],
@@ -672,15 +672,15 @@ const RAW_STANDARD_SPORTS = [
     weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 3,
-    category: "Ger?te & Maschinen",
-    muscleGroups: ["Bizeps", "Unterarme (sekund?r)"],
+    category: "Geräte & Maschinen",
+    muscleGroups: ["Bizeps", "Unterarme (sekundär)"],
   },
   {
     id: "triceps_extension_machine",
     labels: {
       de: "Trizepsmaschine",
       en: "Triceps Extension Machine",
-      es: "M?quina de tr?ceps",
+      es: "Máquina de tríceps",
       fr: "Machine triceps",
     },
     aliases: ["Triceps Extension Machine"],
@@ -689,7 +689,7 @@ const RAW_STANDARD_SPORTS = [
     weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 3,
-    category: "Ger?te & Maschinen",
+    category: "Geräte & Maschinen",
     muscleGroups: ["Trizeps"],
   },
   {
@@ -697,7 +697,7 @@ const RAW_STANDARD_SPORTS = [
     labels: {
       de: "Kabelzug (Station)",
       en: "Cable Machine",
-      es: "M?quina de poleas",
+      es: "Máquina de poleas",
       fr: "Poulie",
     },
     aliases: ["Seilzug", "Cable Machine"],
@@ -706,15 +706,15 @@ const RAW_STANDARD_SPORTS = [
     weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 3,
-    category: "Ger?te & Maschinen",
-    muscleGroups: ["variabel (je nach ?bung)"],
+    category: "Geräte & Maschinen",
+    muscleGroups: ["variabel (je nach Übung)"],
   },
   {
     id: "lat_pulldown",
     labels: {
       de: "Latzug",
       en: "Lat Pulldown",
-      es: "Jal?n al pecho",
+      es: "Jalón al pecho",
       fr: "Tirage vertical",
     },
     aliases: ["Lat Pulldown"],
@@ -723,15 +723,15 @@ const RAW_STANDARD_SPORTS = [
     weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 4,
-    category: "Ger?te & Maschinen",
-    muscleGroups: ["R?cken (Lat)", "Bizeps", "hintere Schulter"],
+    category: "Geräte & Maschinen",
+    muscleGroups: ["Rücken (Lat)", "Bizeps", "hintere Schulter"],
   },
   {
     id: "seated_row_machine",
     labels: {
       de: "Rudermaschine (sitzend)",
       en: "Seated Row",
-      es: "Remo sentado (m?quina)",
+      es: "Remo sentado (máquina)",
       fr: "Tirage horizontal (machine)",
     },
     aliases: ["Seated Row Machine"],
@@ -740,16 +740,16 @@ const RAW_STANDARD_SPORTS = [
     weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 4,
-    category: "Ger?te & Maschinen",
-    muscleGroups: ["R?cken", "Bizeps", "hintere Schulter"],
+    category: "Geräte & Maschinen",
+    muscleGroups: ["Rücken", "Bizeps", "hintere Schulter"],
   },
   {
     id: "shoulder_press_machine",
     labels: {
       de: "Schulterpresse (Maschine)",
       en: "Shoulder Press Machine",
-      es: "Press de hombros (m?quina)",
-      fr: "D?velopp? ?paules (machine)",
+      es: "Press de hombros (máquina)",
+      fr: "Développé épaules (machine)",
     },
     aliases: ["Machine Shoulder Press"],
     icon: "???",
@@ -757,7 +757,7 @@ const RAW_STANDARD_SPORTS = [
     weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 4,
-    category: "Ger?te & Maschinen",
+    category: "Geräte & Maschinen",
     muscleGroups: ["Schultern", "Trizeps"],
   },
   {
@@ -766,7 +766,7 @@ const RAW_STANDARD_SPORTS = [
       de: "Beinpresse",
       en: "Leg Press",
       es: "Prensa de piernas",
-      fr: "Presse ? cuisses",
+      fr: "Presse à cuisses",
     },
     aliases: ["Leg Press"],
     icon: "???",
@@ -774,16 +774,16 @@ const RAW_STANDARD_SPORTS = [
     weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 5,
-    category: "Ger?te & Maschinen",
-    muscleGroups: ["Quadrizeps", "Ges??", "Beinbeuger (sekund?r)"],
+    category: "Geräte & Maschinen",
+    muscleGroups: ["Quadrizeps", "Gesäß", "Beinbeuger (sekundär)"],
   },
   {
     id: "calf_raise_machine",
     labels: {
       de: "Wadenmaschine",
       en: "Calf Raise Machine",
-      es: "M?quina de gemelos",
-      fr: "Machine ? mollets",
+      es: "Máquina de gemelos",
+      fr: "Machine à mollets",
     },
     aliases: ["Calf Raise Machine"],
     icon: "???",
@@ -791,7 +791,7 @@ const RAW_STANDARD_SPORTS = [
     weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 3,
-    category: "Ger?te & Maschinen",
+    category: "Geräte & Maschinen",
     muscleGroups: ["Waden"],
   },
   {
@@ -799,7 +799,7 @@ const RAW_STANDARD_SPORTS = [
     labels: {
       de: "Ab-/Adduktorenmaschine",
       en: "Hip Abductor/Adductor Machine",
-      es: "M?quina abductores/aductores",
+      es: "Máquina abductores/aductores",
       fr: "Machine abducteurs/adducteurs",
     },
     aliases: ["Hip Abductor/Adductor Machine"],
@@ -808,9 +808,9 @@ const RAW_STANDARD_SPORTS = [
     weightExercise: true,
     defaultRateMinutes: 1,
     difficultyLevel: 3,
-    category: "Ger?te & Maschinen",
+    category: "Geräte & Maschinen",
     muscleGroups: [
-      "Abduktoren (Ges??/seitliche H?fte)",
+      "Abduktoren (Gesäß/seitliche Hüfte)",
       "Adduktoren (innere Oberschenkel)",
     ],
   },
@@ -819,7 +819,7 @@ const RAW_STANDARD_SPORTS = [
     labels: {
       de: "Bizepscurls",
       en: "Biceps Curl",
-      es: "Curl de b?ceps",
+      es: "Curl de bíceps",
       fr: "Curl biceps",
     },
     aliases: ["Curl", "Kurzhantelcurls", "Langhantelcurls"],
@@ -829,14 +829,14 @@ const RAW_STANDARD_SPORTS = [
     defaultRateMinutes: 1,
     difficultyLevel: 3,
     category: "Freihanteln",
-    muscleGroups: ["Bizeps", "Unterarme (sekund?r)"],
+    muscleGroups: ["Bizeps", "Unterarme (sekundär)"],
   },
   {
     id: "triceps_extension_overhead",
     labels: {
-      de: "Trizepsdr?cken (?ber Kopf / Strecken)",
+      de: "Trizepsdrücken (über Kopf / Strecken)",
       en: "Triceps Extension",
-      es: "Extensi?n de tr?ceps",
+      es: "Extensión de tríceps",
       fr: "Extension triceps",
     },
     aliases: ["Triceps Extension", "French Press"],
@@ -854,9 +854,9 @@ const RAW_STANDARD_SPORTS = [
       de: "Seitheben",
       en: "Lateral Raise",
       es: "Elevaciones laterales",
-      fr: "?l?vations lat?rales",
+      fr: "Élévations latérales",
     },
-    aliases: ["Lateral Raises", "Seitenheben", "Schulter Seitheben", "Schulterseitenheben", "Seith?ben", "Seitliches Schulterh?ben"],
+    aliases: ["Lateral Raises", "Seitenheben", "Schulter Seitheben", "Schulterseitenheben", "Seitheben", "Seitliches Schulterheben"],
     icon: "??",
     type: "reps",
     weightExercise: true,
@@ -871,7 +871,7 @@ const RAW_STANDARD_SPORTS = [
       de: "Rudern (Kurzhantel/Langhantel)",
       en: "Row (Dumbbell/Barbell)",
       es: "Remo (mancuerna/barra)",
-      fr: "Rowing (halt?re/barre)",
+      fr: "Rowing (haltère/barre)",
     },
     aliases: ["Row", "Bent-Over Row", "Rudern", "Rudern Hanteln", "Hanteln Rudern", "Bent Over Row", "Barbell Row", "Dumbbell Row"],
     icon: "???",
@@ -880,7 +880,7 @@ const RAW_STANDARD_SPORTS = [
     defaultRateMinutes: 1,
     difficultyLevel: 5,
     category: "Freihanteln",
-    muscleGroups: ["R?cken", "Bizeps", "hintere Schulter"],
+    muscleGroups: ["Rücken", "Bizeps", "hintere Schulter"],
   },
   {
     id: "bodyweight_squat",
@@ -896,7 +896,7 @@ const RAW_STANDARD_SPORTS = [
     defaultRateMinutes: 1,
     difficultyLevel: 4,
     category: "Eigengewicht",
-    muscleGroups: ["Quadrizeps", "Ges??", "Core"],
+    muscleGroups: ["Quadrizeps", "Gesäß", "Core"],
   },
   {
     id: "squat",
@@ -913,7 +913,7 @@ const RAW_STANDARD_SPORTS = [
     defaultRateMinutes: 1,
     difficultyLevel: 6,
     category: "Freihanteln",
-    muscleGroups: ["Quadrizeps", "Ges??", "Core"],
+    muscleGroups: ["Quadrizeps", "Gesäß", "Core"],
   },
   {
     id: "deadlift",
@@ -921,7 +921,7 @@ const RAW_STANDARD_SPORTS = [
       de: "Kreuzheben",
       en: "Deadlift",
       es: "Peso muerto",
-      fr: "Soulev? de terre",
+      fr: "Soulevé de terre",
     },
     aliases: ["Deadlift"],
     icon: "???",
@@ -930,17 +930,17 @@ const RAW_STANDARD_SPORTS = [
     defaultRateMinutes: 1,
     difficultyLevel: 6,
     category: "Freihanteln",
-    muscleGroups: ["R?ckenstrecker", "Ges??", "Beinbeuger", "Core"],
+    muscleGroups: ["Rückenstrecker", "Gesäß", "Beinbeuger", "Core"],
   },
   {
     id: "bench_press",
     labels: {
-      de: "Bankdr?cken",
+      de: "Bankdrücken",
       en: "Bench Press",
       es: "Press de banca",
-      fr: "D?velopp? couch?",
+      fr: "Développé couché",
     },
-    aliases: ["Bench Press"],
+    aliases: ["Bench Press", "Brustpresse"],
     icon: "???",
     type: "reps",
     weightExercise: true,
@@ -952,10 +952,10 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "overhead_press",
     labels: {
-      de: "Schulterdr?cken",
+      de: "Schulterdrücken",
       en: "Overhead Press",
       es: "Press militar",
-      fr: "D?velopp? militaire",
+      fr: "Développé militaire",
     },
     aliases: ["Overhead Press", "Military Press"],
     icon: "???",
@@ -969,7 +969,7 @@ const RAW_STANDARD_SPORTS = [
   {
     id: "pushups",
     labels: {
-      de: "Liegest?tze",
+      de: "Liegestütze",
       en: "Push-Ups",
       es: "Flexiones",
       fr: "Pompes",
@@ -996,23 +996,23 @@ const RAW_STANDARD_SPORTS = [
     defaultRateMinutes: 1,
     difficultyLevel: 3,
     category: "Eigengewicht",
-    muscleGroups: ["Core", "H?ftbeuger"],
+    muscleGroups: ["Core", "Hüftbeuger"],
   },
   {
     id: "pullups",
     labels: {
-      de: "Klimmz?ge",
+      de: "Klimmzüge",
       en: "Pull-Ups",
       es: "Dominadas",
       fr: "Tractions",
     },
-    aliases: ["Pull-Ups", "Chin-Ups", "Klimmz?ge", "Pull Up", "Pullup", "Chinup", "Chin Up"],
+    aliases: ["Pull-Ups", "Chin-Ups", "Klimmzüge", "Pull Up", "Pullup", "Chinup", "Chin Up"],
     icon: "???",
     type: "reps",
     defaultRateMinutes: 1,
     difficultyLevel: 5,
     category: "Eigengewicht",
-    muscleGroups: ["R?cken", "Bizeps", "Schultern"],
+    muscleGroups: ["Rücken", "Bizeps", "Schultern"],
   },
   {
     id: "dips",
@@ -1038,7 +1038,7 @@ const RAW_STANDARD_SPORTS = [
       es: "Plancha",
       fr: "Gainage",
     },
-    aliases: ["Unterarmst?tz"],
+    aliases: ["Unterarmstütz"],
     icon: "??",
     type: "time",
     defaultRateMinutes: 1,
@@ -1046,23 +1046,23 @@ const RAW_STANDARD_SPORTS = [
     incrementalTimeFactor: DEFAULT_INCREMENTAL_TIME_FACTOR,
     difficultyLevel: 3,
     category: "Eigengewicht",
-    muscleGroups: ["Core", "R?ckenstrecker"],
+    muscleGroups: ["Core", "Rückenstrecker"],
   },
   {
     id: "hyperextensions",
     labels: {
-      de: "Hyperextensions (ohne Maschine m?glich)",
+      de: "Hyperextensions (ohne Maschine möglich)",
       en: "Back Extensions",
       es: "Extensiones lumbares",
       fr: "Extensions lombaires",
     },
-    aliases: ["R?ckenstrecken", "Back Extensions"],
+    aliases: ["Rückenstrecken", "Back Extensions"],
     icon: "??",
     type: "reps",
     defaultRateMinutes: 1,
     difficultyLevel: 3,
     category: "Eigengewicht",
-    muscleGroups: ["R?ckenstrecker", "Ges??", "Beinbeuger (sekund?r)"],
+    muscleGroups: ["Rückenstrecker", "Gesäß", "Beinbeuger (sekundär)"],
   },
   {
     id: "hanging_leg_raises",
@@ -1070,22 +1070,22 @@ const RAW_STANDARD_SPORTS = [
       de: "Hanging Leg Raises",
       en: "Hanging Leg Raises",
       es: "Elevaciones de piernas colgado",
-      fr: "Relev?s de jambes suspendu",
+      fr: "Relevés de jambes suspendu",
     },
-    aliases: ["Beinheben h?ngend"],
+    aliases: ["Beinheben hängend"],
     icon: "??",
     type: "reps",
     defaultRateMinutes: 1,
     difficultyLevel: 4,
     category: "Eigengewicht",
-    muscleGroups: ["Core", "H?ftbeuger"],
+    muscleGroups: ["Core", "Hüftbeuger"],
   },
   {
     id: "swimming",
     labels: {
       de: "Schwimmen",
       en: "Swimming",
-      es: "Nataci?n",
+      es: "Natación",
       fr: "Natation",
     },
     icon: "??",
@@ -1093,7 +1093,7 @@ const RAW_STANDARD_SPORTS = [
     defaultRateMinutes: 1,
     difficultyLevel: 5,
     category: "Weitere Sportarten",
-    muscleGroups: ["Ganzk?rper", "Herz-Kreislauf"],
+    muscleGroups: ["Ganzkörper", "Herz-Kreislauf"],
   },
   {
     id: "yoga",
@@ -1123,7 +1123,7 @@ const RAW_STANDARD_SPORTS = [
     defaultRateMinutes: 1,
     difficultyLevel: 4,
     category: "Weitere Sportarten",
-    muscleGroups: ["Core", "R?cken", "H?fte"],
+    muscleGroups: ["Core", "Rücken", "Hüfte"],
   },
   {
     id: "hiit",
@@ -1139,7 +1139,7 @@ const RAW_STANDARD_SPORTS = [
     defaultRateMinutes: 1,
     difficultyLevel: 6,
     category: "Weitere Sportarten",
-    muscleGroups: ["Ganzk?rper", "Herz-Kreislauf"],
+    muscleGroups: ["Ganzkörper", "Herz-Kreislauf"],
   },
   {
     id: "hiking",
@@ -1147,24 +1147,24 @@ const RAW_STANDARD_SPORTS = [
       de: "Wandern",
       en: "Hiking",
       es: "Senderismo",
-      fr: "Randonn?e",
+      fr: "Randonnée",
     },
     icon: "??",
     type: "time",
     defaultRateMinutes: 1,
     difficultyLevel: 4,
     category: "Weitere Sportarten",
-    muscleGroups: ["Beine", "Ges??", "Herz-Kreislauf"],
+    muscleGroups: ["Beine", "Gesäß", "Herz-Kreislauf"],
   },
   {
     id: "incline_bench_press",
     labels: {
-      de: "Schr?gbankdr?cken",
+      de: "Schrägbankdrücken",
       en: "Incline Bench Press",
       es: "Press de banca inclinado",
-      fr: "D?velopp? inclin?",
+      fr: "Développé incliné",
     },
-    aliases: ["Incline Press", "Schr?gbank", "Schr?gbankdr?cken", "Incline Bankdr?cken", "Upper Chest Press"],
+    aliases: ["Incline Press", "Schrägbank", "Schrägbankdrücken", "Incline Bankdrücken", "Upper Chest Press"],
     icon: "???",
     type: "reps",
     weightExercise: true,
@@ -1178,8 +1178,8 @@ const RAW_STANDARD_SPORTS = [
     labels: {
       de: "Seitenheben gebeugt",
       en: "Rear Delt Fly",
-      es: "P?jaro / Elevaciones posteriores",
-      fr: "Oiseau / ?cart? arri?re",
+      es: "Pájaro / Elevaciones posteriores",
+      fr: "Oiseau / Écarté arrière",
     },
     aliases: ["Seitenheben gebeugt", "Bent-over Lateral Raise", "Rear Delt Raise", "Hintere Schulter Seitheben", "Reverse Fly", "Reverse Dumbbell Fly", "Hinteres Seitheben", "Hintere Schulter"],
     icon: "??",
@@ -1188,7 +1188,7 @@ const RAW_STANDARD_SPORTS = [
     defaultRateMinutes: 1,
     difficultyLevel: 3,
     category: "Freihanteln",
-    muscleGroups: ["hintere Schulter", "oberer R?cken"],
+    muscleGroups: ["hintere Schulter", "oberer Rücken"],
   },
   {
     id: "inverted_row",
@@ -1198,13 +1198,13 @@ const RAW_STANDARD_SPORTS = [
       es: "Remo invertido",
       fr: "Tirage horizontal",
     },
-    aliases: ["Reverse Pullup", "Reverse Pull-Up", "Australian Pull-Up", "Inverted Row", "Horizontal Pull-Up", "Body Row", "Unterst?tzter Klimmzug"],
+    aliases: ["Reverse Pullup", "Reverse Pull-Up", "Australian Pull-Up", "Inverted Row", "Horizontal Pull-Up", "Body Row", "Unterstützter Klimmzug"],
     icon: "???",
     type: "reps",
     defaultRateMinutes: 1,
     difficultyLevel: 4,
     category: "Eigengewicht",
-    muscleGroups: ["R?cken", "Bizeps", "hintere Schulter"],
+    muscleGroups: ["Rücken", "Bizeps", "hintere Schulter"],
   },
   {
     id: "bouldering",
@@ -1220,17 +1220,17 @@ const RAW_STANDARD_SPORTS = [
     defaultRateMinutes: 1,
     difficultyLevel: 6,
     category: "Weitere Sportarten",
-    muscleGroups: ["Unterarme", "R?cken", "Schultern", "Core", "Beine"],
+    muscleGroups: ["Unterarme", "Rücken", "Schultern", "Core", "Beine"],
   },
   {
     id: "dead_hang",
     labels: {
-      de: "Aktives H?ngen",
+      de: "Aktives Hängen",
       en: "Active / Dead Hang",
       es: "Colgado activo",
       fr: "Suspension active",
     },
-    aliases: ["Aktives H?ngen", "Dead Hang", "Passives H?ngen", "H?ngen", "Bar Hang", "H?ngetraining", "Active Hang", "Scapular Hang"],
+    aliases: ["Aktives Hängen", "Dead Hang", "Passives Hängen", "Hängen", "Bar Hang", "Hängetraining", "Active Hang", "Scapular Hang"],
     icon: "??",
     type: "time",
     defaultRateMinutes: 1,
@@ -1238,7 +1238,7 @@ const RAW_STANDARD_SPORTS = [
     incrementalTimeFactor: 0.5,
     difficultyLevel: 4,
     category: "Eigengewicht",
-    muscleGroups: ["Unterarme", "Schultern", "R?cken (Lat)", "Core"],
+    muscleGroups: ["Unterarme", "Schultern", "Rücken (Lat)", "Core"],
   },
   {
     id: "physiotherapy",
@@ -1246,7 +1246,7 @@ const RAW_STANDARD_SPORTS = [
       de: "Physiotherapie",
       en: "Physiotherapy",
       es: "Fisioterapia",
-      fr: "Kin?sith?rapie",
+      fr: "Kinésithérapie",
     },
     aliases: ["Physio", "Physiotherapie", "Rehab", "Rehabilitation", "PT", "Physical Therapy", "Krankengymnastik"],
     icon: "??",
@@ -1263,7 +1263,7 @@ const RAW_STANDARD_SPORTS = [
       de: "Plank Shoulder Taps",
       en: "Plank Shoulder Taps",
       es: "Plancha con toques de hombro",
-      fr: "Gainage avec touches d??paule",
+      fr: "Gainage avec touches d'épaule",
     },
     aliases: ["Shoulder Taps", "Schulter Taps", "Schulter-Taps im Plank", "Plank Taps", "Shoulder Tap Plank"],
     icon: "??",
@@ -1279,7 +1279,7 @@ const RAW_STANDARD_SPORTS = [
       de: "Seitstütz",
       en: "Side Plank",
       es: "Plancha lateral",
-      fr: "Gainage lat?ral",
+      fr: "Gainage latéral",
     },
     aliases: ["Side Plank", "Seitlicher Plank", "Seitstütz", "Lateral Plank", "Seitplank"],
     icon: "??",
@@ -1289,15 +1289,15 @@ const RAW_STANDARD_SPORTS = [
     incrementalTimeFactor: 0.5,
     difficultyLevel: 4,
     category: "Eigengewicht",
-    muscleGroups: ["seitlicher Core", "H?fte", "Schultern"],
+    muscleGroups: ["seitlicher Core", "Hüfte", "Schultern"],
   },
   {
     id: "sick_day",
     labels: {
       de: "Krank sein",
       en: "Sick Day",
-      es: "D?a de enfermedad",
-      fr: "Journ?e maladie",
+      es: "Día de enfermedad",
+      fr: "Journée maladie",
     },
     aliases: ["Krank", "Krank zu Hause", "Krankheit", "Illness", "Sick", "Erkrankt", "Zu Hause krank"],
     icon: "??",
@@ -1491,8 +1491,8 @@ const LEGACY_JOGGING_NAMES = new Set([
   "Joggen",
   "Trotar / Correr",
   "Correr",
-  "Jogging / Course ? pied",
-  "Course ? pied",
+  "Jogging / Course à pied",
+  "Course à pied",
 ]);
 
 const migrateSportsList = (sportsList = []) => {
@@ -3348,6 +3348,7 @@ function AppContent() {
   const [categoryDeleteResolution, setCategoryDeleteResolution] =
     useState("delete");
   const [categoryDeleteTargetId, setCategoryDeleteTargetId] = useState(null);
+  const [homeCategoryFilterId, setHomeCategoryFilterId] = useState(null);
   const [sportColorLinks, setSportColorLinks] = useState({});
   const [stats, setStats] = useState({});
   const [logs, setLogs] = useState({});
@@ -5573,7 +5574,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       setNewDifficultyLevel(DEFAULT_DIFFICULTY);
       setSelectedStandardSportId(null);
       setIsCustomSportMode(true);
-      setNewCategoryId(null);
+      setNewCategoryId(
+        homeCategoryFilterId && homeCategoryFilterId !== "__none__"
+          ? homeCategoryFilterId
+          : null
+      );
       maybeAdvanceTutorial("openAddSport");
     }
     setShowIconInput(false);
@@ -6753,6 +6758,15 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           ]}
         />
       ))}
+    </View>
+  );
+
+  const ScreenTimeBadge = ({ seconds, style }) => (
+    <View style={[styles.screenTimeBadge, style]}>
+      <Text style={styles.screenTimeBadgeText}>
+        {"⏱ +"}
+        {formatScreenTime(seconds || 0)}
+      </Text>
     </View>
   );
 
@@ -8893,9 +8907,59 @@ const getSpeechLocale = () => {
     return map;
   }, [logs, sports]);
 
+  const homeCategoryTiles = useMemo(() => {
+    const counts = new Map();
+    activeSports.forEach((sport) => {
+      const key =
+        sport.categoryId &&
+        categories.some((category) => category.id === sport.categoryId)
+          ? sport.categoryId
+          : "__none__";
+      counts.set(key, (counts.get(key) || 0) + 1);
+    });
+    const tiles = categories.map((category) => ({
+      key: category.id,
+      name: category.name,
+      count: counts.get(category.id) || 0,
+    }));
+    if (counts.has("__none__")) {
+      tiles.push({
+        key: "__none__",
+        name: t("label.noCategory"),
+        count: counts.get("__none__") || 0,
+      });
+    }
+    return tiles;
+  }, [activeSports, categories, t]);
+
+  const homeGridSports = useMemo(() => {
+    if (!homeCategoryFilterId) {
+      return activeSports;
+    }
+    if (homeCategoryFilterId === "__none__") {
+      return activeSports.filter(
+        (sport) =>
+          !sport.categoryId ||
+          !categories.some((category) => category.id === sport.categoryId)
+      );
+    }
+    return activeSports.filter(
+      (sport) => sport.categoryId === homeCategoryFilterId
+    );
+  }, [activeSports, categories, homeCategoryFilterId]);
+
+  useEffect(() => {
+    if (!homeCategoryFilterId || homeCategoryFilterId === "__none__") {
+      return;
+    }
+    if (!categories.some((category) => category.id === homeCategoryFilterId)) {
+      setHomeCategoryFilterId(null);
+    }
+  }, [categories, homeCategoryFilterId]);
+
   const filteredActiveSports = useMemo(() => {
     const base = scoreAndSortSportsBySearch(
-      activeSports,
+      homeGridSports,
       normalizedSportSearchTerm,
       language
     );
@@ -8919,7 +8983,7 @@ const getSpeechLocale = () => {
     }
     return base;
   }, [
-    activeSports,
+    homeGridSports,
     normalizedSportSearchTerm,
     language,
     sportSortMode,
@@ -12298,9 +12362,12 @@ const getSpeechLocale = () => {
               </View>
             </View>
             {screenTimeFeaturesEnabled ? (
-              <Text style={styles.weightPreviewText}>
-                {t("label.weightEntryPreview")}: {formatScreenTime(weightPreviewSeconds)}
-              </Text>
+              <View style={styles.weightPreviewRow}>
+                <Text style={styles.weightPreviewText}>
+                  {t("label.weightEntryPreview")}:
+                </Text>
+                <ScreenTimeBadge seconds={weightPreviewSeconds} />
+              </View>
             ) : null}
             <Pressable
               style={[
@@ -12460,16 +12527,20 @@ const getSpeechLocale = () => {
             (screenTimePerRepSeconds != null || screenTimePerMinuteSeconds != null) ? (
               <View style={styles.formulaRateRow}>
                 {screenTimePerRepSeconds != null ? (
-                  <Text style={styles.formulaRateText}>
-                    {t("label.screenRateReps")}:{" "}
-                    {formatScreenTime(screenTimePerRepSeconds)}
-                  </Text>
+                  <View style={styles.formulaRateItem}>
+                    <Text style={styles.formulaRateText}>
+                      {t("label.screenRateReps")}:
+                    </Text>
+                    <ScreenTimeBadge seconds={screenTimePerRepSeconds} />
+                  </View>
                 ) : null}
                 {screenTimePerMinuteSeconds != null ? (
-                  <Text style={styles.formulaRateText}>
-                    {t("label.screenRateTime")}:{" "}
-                    {formatScreenTime(screenTimePerMinuteSeconds)}
-                  </Text>
+                  <View style={styles.formulaRateItem}>
+                    <Text style={styles.formulaRateText}>
+                      {t("label.screenRateTime")}:
+                    </Text>
+                    <ScreenTimeBadge seconds={screenTimePerMinuteSeconds} />
+                  </View>
                 ) : null}
               </View>
             ) : null}
@@ -12499,9 +12570,14 @@ const getSpeechLocale = () => {
                             {formatTime(entry.ts || Date.now())}
                           </Text>
                           <View style={styles.statRowActions}>
-                            <Text style={styles.weightHistorySet}>
-                              {formatWeightValue(entry.weight)} × {entry.reps}
-                            </Text>
+                            <View style={styles.weightHistorySetColumn}>
+                              <Text style={styles.weightHistorySet}>
+                                {formatWeightValue(entry.weight)}{" "}
+                                {t("label.weightUnit")} × {entry.reps}{" "}
+                                {repsShort}
+                              </Text>
+                              <ScreenTimeBadge seconds={entry.screenSeconds} />
+                            </View>
                             <Pressable
                               style={styles.statMinusButton}
                               onPress={() =>
@@ -12564,9 +12640,12 @@ const getSpeechLocale = () => {
                             {formatTime(entry.ts || Date.now())}
                           </Text>
                           <View style={styles.statRowActions}>
-                            <Text style={styles.weightHistorySet}>
-                              {entry.reps} {repsShort}
-                            </Text>
+                            <View style={styles.weightHistorySetColumn}>
+                              <Text style={styles.weightHistorySet}>
+                                {entry.reps} {repsShort}
+                              </Text>
+                              <ScreenTimeBadge seconds={entry.screenSeconds} />
+                            </View>
                             <Pressable
                               style={styles.statMinusButton}
                               onPress={() =>
@@ -12629,12 +12708,15 @@ const getSpeechLocale = () => {
                             {formatTime(entry.ts || Date.now())}
                           </Text>
                           <View style={styles.statRowActions}>
-                            <Text style={styles.weightHistorySet}>
-                              {formatSeconds(entry.seconds)}
-                              {entry.km > 0
-                                ? ` · ${formatDistanceValue(entry.km)} ${t("label.distanceKm")}`
-                                : ""}
-                            </Text>
+                            <View style={styles.weightHistorySetColumn}>
+                              <Text style={styles.weightHistorySet}>
+                                {formatSeconds(entry.seconds)}
+                                {entry.km > 0
+                                  ? ` · ${formatDistanceValue(entry.km)} ${t("label.distanceKm")}`
+                                  : ""}
+                              </Text>
+                              <ScreenTimeBadge seconds={entry.screenSeconds} />
+                            </View>
                             <Pressable
                               style={styles.statMinusButton}
                               onPress={() =>
@@ -13876,28 +13958,6 @@ const getSpeechLocale = () => {
           </Pressable>
         </View>
         */}
-        <View style={styles.searchInputWrapper}>
-          <TextInput
-            style={[styles.searchInput, styles.searchInputWithClear]}
-            autoCorrect={false}
-            autoCapitalize="none"
-            placeholder={t("label.searchSports")}
-            placeholderTextColor="#7a7a7a"
-            value={sportSearch}
-            onChangeText={setSportSearch}
-            clearButtonMode="while-editing"
-          />
-          {sportSearch.length > 0 ? (
-            <Pressable
-              style={styles.searchInputClearButton}
-              onPress={() => setSportSearch("")}
-              accessibilityRole="button"
-              accessibilityLabel={t("label.clearSearch")}
-            >
-              <ActionGlyph type="delete" color={COLORS.muted} />
-            </Pressable>
-          ) : null}
-        </View>
         <Modal
           visible={accessibilityDisclosureVisible}
           transparent
@@ -13949,19 +14009,91 @@ const getSpeechLocale = () => {
             </View>
           </View>
         </Modal>
-        
-        <View style={styles.sportsHeaderRow}>
-          <Text style={styles.sectionTitle}>{t("menu.sports")}</Text>
-          <Pressable
-            ref={tutorialCategoriesLinkRef}
-            style={styles.manageCategoriesLink}
-            onPress={() => setCategoriesModalOpen(true)}
-          >
-            <Text style={styles.manageCategoriesLinkText}>
-              {t("label.manageCategories")}
-            </Text>
-          </Pressable>
-        </View>
+        {homeCategoryFilterId === null && !tutorialActive ? (
+          <View style={styles.categoryTileSection}>
+            <View style={styles.sportsHeaderRow}>
+              <Text style={styles.sectionTitle}>{t("label.categories")}</Text>
+              <Pressable
+                ref={tutorialCategoriesLinkRef}
+                style={styles.manageCategoriesLink}
+                onPress={() => setCategoriesModalOpen(true)}
+              >
+                <Text style={styles.manageCategoriesLinkText}>
+                  {t("label.manageCategories")}
+                </Text>
+              </Pressable>
+            </View>
+            <View style={styles.categoryTileGrid}>
+              {homeCategoryTiles.map((tile) => (
+                <Pressable
+                  key={tile.key}
+                  style={styles.categoryTile}
+                  onPress={() => setHomeCategoryFilterId(tile.key)}
+                >
+                  <Text style={styles.categoryTileName}>{tile.name}</Text>
+                  <Text style={styles.categoryTileCount}>
+                    {t("label.categorySportCount", { count: tile.count })}
+                  </Text>
+                </Pressable>
+              ))}
+              <Pressable
+                style={[styles.categoryTile, styles.categoryTileAdd]}
+                onPress={() => setCategoriesModalOpen(true)}
+              >
+                <Text style={styles.categoryTileAddText}>
+                  + {t("label.categories")}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        ) : (
+          <>
+            <View style={styles.searchInputWrapper}>
+              <TextInput
+                style={[styles.searchInput, styles.searchInputWithClear]}
+                autoCorrect={false}
+                autoCapitalize="none"
+                placeholder={t("label.searchSports")}
+                placeholderTextColor="#7a7a7a"
+                value={sportSearch}
+                onChangeText={setSportSearch}
+                clearButtonMode="while-editing"
+              />
+              {sportSearch.length > 0 ? (
+                <Pressable
+                  style={styles.searchInputClearButton}
+                  onPress={() => setSportSearch("")}
+                  accessibilityRole="button"
+                  accessibilityLabel={t("label.clearSearch")}
+                >
+                  <ActionGlyph type="delete" color={COLORS.muted} />
+                </Pressable>
+              ) : null}
+            </View>
+            <View style={styles.sportsHeaderRow}>
+              <Pressable
+                style={styles.categoryBackButton}
+                onPress={() => setHomeCategoryFilterId(null)}
+              >
+                <Text style={styles.categoryBackButtonText}>
+                  {"‹ "}
+                  {t("label.back")}
+                </Text>
+              </Pressable>
+              <Text style={styles.sectionTitle}>
+                {homeCategoryTiles.find((tile) => tile.key === homeCategoryFilterId)
+                  ?.name || t("menu.sports")}
+              </Text>
+              <Pressable
+                ref={tutorialCategoriesLinkRef}
+                style={styles.manageCategoriesLink}
+                onPress={() => setCategoriesModalOpen(true)}
+              >
+                <Text style={styles.manageCategoriesLinkText}>
+                  {t("label.manageCategories")}
+                </Text>
+              </Pressable>
+            </View>
         <View style={styles.sortRow}>
           <Pressable
             style={[
@@ -14012,10 +14144,10 @@ const getSpeechLocale = () => {
             </Text>
           </Pressable>
         </View>
-        {activeSports.length === 0 ? (
+        {homeGridSports.length === 0 ? (
           <Text style={styles.helperText}>{t("label.noSports")}</Text>
         ) : null}
-        {activeSports.length > 0 && filteredActiveSports.length === 0 ? (
+        {homeGridSports.length > 0 && filteredActiveSports.length === 0 ? (
           <Text style={styles.helperText}>{t("label.noSportsMatch")}</Text>
         ) : null}
         <View style={styles.sportsGrid}>
@@ -14145,9 +14277,7 @@ const getSpeechLocale = () => {
                         <View style={styles.sportGridColumnRight}>
                           <View style={styles.moveActionsRow}>
                             {screenTimeFeaturesEnabled ? (
-                              <Text style={styles.earnedTimeTextRight}>
-                                {t("label.screenTime")}: {formatScreenTime(daily.screenSeconds || 0)}
-                              </Text>
+                              <ScreenTimeBadge seconds={daily.screenSeconds || 0} />
                             ) : null}
                             {sportSortMode === "manual" ? (
                               <View style={styles.moveButtonColumn}>
@@ -14187,6 +14317,8 @@ const getSpeechLocale = () => {
             </Text>
           </Pressable>
         </View>
+          </>
+        )}
         <View style={styles.hiddenSection}>
           <Pressable
             style={styles.hiddenToggle}
@@ -14312,9 +14444,7 @@ const getSpeechLocale = () => {
                           <View style={styles.sportGridColumnRight}>
                             <View style={styles.moveActionsRow}>
                               {screenTimeFeaturesEnabled ? (
-                                <Text style={styles.earnedTimeTextRight}>
-                                  {t("label.screenTime")}: {formatScreenTime(daily.screenSeconds || 0)}
-                                </Text>
+                                <ScreenTimeBadge seconds={daily.screenSeconds || 0} />
                               ) : null}
                               {sportSortMode === "manual" ? (
                                 <View style={styles.moveButtonColumn}>
@@ -15056,6 +15186,22 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     marginTop: -2,
   },
+  screenTimeBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    backgroundColor: "rgba(34, 197, 94, 0.18)",
+    borderWidth: 1,
+    borderColor: "rgba(34, 197, 94, 0.5)",
+    borderRadius: 999,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+  },
+  screenTimeBadgeText: {
+    color: COLORS.olive,
+    fontSize: 11,
+    fontWeight: "800",
+  },
   categorySectionHeader: {
     width: "100%",
     color: COLORS.text,
@@ -15226,6 +15372,11 @@ const styles = StyleSheet.create({
   },
   weightPreviewText: {
     color: COLORS.muted,
+  },
+  weightPreviewRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
     marginTop: 10,
     marginBottom: 8,
   },
@@ -15295,6 +15446,11 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     backgroundColor: "rgba(148, 163, 184, 0.14)",
     overflow: "hidden",
+  },
+  weightHistorySetColumn: {
+    flexDirection: "column",
+    alignItems: "flex-start",
+    gap: 4,
   },
   counterValue: {
     fontSize: 54,
@@ -17086,6 +17242,11 @@ const styles = StyleSheet.create({
   formulaRateText: {
     color: COLORS.muted,
     fontSize: 12,
+  },
+  formulaRateItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
     marginHorizontal: 4,
   },
   formulaModalOverlay: {
@@ -17408,6 +17569,60 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+  },
+  categoryTileSection: {
+    width: "100%",
+  },
+  categoryTileGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "flex-start",
+    gap: 12,
+    width: "100%",
+    marginTop: 12,
+  },
+  categoryTile: {
+    width: "47%",
+    minHeight: 96,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.cardAlt,
+    backgroundColor: COLORS.sportCard,
+    paddingVertical: 18,
+    paddingHorizontal: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+  },
+  categoryTileName: {
+    color: COLORS.text,
+    fontSize: 18,
+    fontWeight: "800",
+    textAlign: "center",
+  },
+  categoryTileCount: {
+    color: COLORS.muted,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  categoryTileAdd: {
+    borderStyle: "dashed",
+    borderColor: COLORS.accent,
+    backgroundColor: "transparent",
+  },
+  categoryTileAddText: {
+    color: COLORS.accent,
+    fontSize: 16,
+    fontWeight: "800",
+  },
+  categoryBackButton: {
+    paddingVertical: 4,
+    paddingRight: 10,
+  },
+  categoryBackButtonText: {
+    color: COLORS.accent,
+    fontSize: 14,
+    fontWeight: "700",
   },
   manageCategoriesLink: {
     paddingVertical: 4,
