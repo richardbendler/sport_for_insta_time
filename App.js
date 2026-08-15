@@ -1588,6 +1588,136 @@ const STANDARD_SPORT_BY_ID = new Map(
   STANDARD_SPORTS.map((sport) => [sport.id, sport])
 );
 
+// Maps every standard sport to the default category bucket ("strength" ->
+// Kraft, "endurance" -> Ausdauer) it should be auto-assigned to.
+const STANDARD_SPORT_TRAINING_TYPE = {
+  jogging: "endurance",
+  treadmill_running: "endurance",
+  treadmill_walking: "endurance",
+  walking: "endurance",
+  cycling: "endurance",
+  stationary_bike: "endurance",
+  elliptical_trainer: "endurance",
+  rowing_machine: "endurance",
+  jump_rope: "endurance",
+  stair_climber: "endurance",
+  chest_press_machine: "strength",
+  pec_deck: "strength",
+  reverse_pec_deck: "strength",
+  leg_extension: "strength",
+  leg_curl: "strength",
+  ab_crunch_machine: "strength",
+  back_extension_machine: "strength",
+  biceps_curl_machine: "strength",
+  triceps_extension_machine: "strength",
+  cable_machine: "strength",
+  lat_pulldown: "strength",
+  seated_row_machine: "strength",
+  shoulder_press_machine: "strength",
+  leg_press: "strength",
+  calf_raise_machine: "strength",
+  hip_abductor_adductor_machine: "strength",
+  biceps_curl: "strength",
+  triceps_extension_overhead: "strength",
+  lateral_raise: "strength",
+  barbell_row: "strength",
+  bodyweight_squat: "strength",
+  squat: "strength",
+  deadlift: "strength",
+  bench_press: "strength",
+  overhead_press: "strength",
+  pushups: "strength",
+  situps: "strength",
+  pullups: "strength",
+  dips: "strength",
+  plank: "strength",
+  hyperextensions: "strength",
+  hanging_leg_raises: "strength",
+  swimming: "endurance",
+  yoga: "endurance",
+  pilates: "strength",
+  hiit: "endurance",
+  hiking: "endurance",
+  incline_bench_press: "strength",
+  rear_delt_fly: "strength",
+  inverted_row: "strength",
+  bouldering: "strength",
+  dead_hang: "strength",
+  physiotherapy: "endurance",
+  plank_shoulder_taps: "strength",
+  side_plank: "strength",
+  sick_day: "endurance",
+};
+
+const trainingTypeForSport = (sport) => {
+  const template = resolveStandardSportTemplate(sport);
+  if (!template) {
+    return null;
+  }
+  return STANDARD_SPORT_TRAINING_TYPE[template.id] || null;
+};
+
+// Matches a category's (possibly renamed-by-language) name against the known
+// default "Kraft"/"Ausdauer" style names across all supported languages, so
+// standard sports can be auto-filed even if the category was seeded in a
+// different app language than the one currently active.
+let defaultCategoryKindByNameCache = null;
+const getDefaultCategoryKindByName = () => {
+  if (!defaultCategoryKindByNameCache) {
+    defaultCategoryKindByNameCache = new Map();
+    Object.values(DEFAULT_CATEGORY_NAMES_BY_LANG).forEach(
+      ([strengthName, enduranceName]) => {
+        defaultCategoryKindByNameCache.set(
+          strengthName.toLowerCase(),
+          "strength"
+        );
+        defaultCategoryKindByNameCache.set(
+          enduranceName.toLowerCase(),
+          "endurance"
+        );
+      }
+    );
+  }
+  return defaultCategoryKindByNameCache;
+};
+
+const findDefaultCategoryIdForKind = (categoriesList, kind) => {
+  const kindByName = getDefaultCategoryKindByName();
+  const match = (categoriesList || []).find((category) => {
+    const name = String(category?.name || "").trim().toLowerCase();
+    return kindByName.get(name) === kind;
+  });
+  return match ? match.id : null;
+};
+
+const assignDefaultCategoriesToSports = (sportsList, categoriesList) => {
+  let changed = false;
+  const list = (sportsList || []).map((sport) => {
+    if (!sport || isSystemSportId(sport.id)) {
+      return sport;
+    }
+    const hasValidCategory =
+      sport.categoryId &&
+      (categoriesList || []).some(
+        (category) => category.id === sport.categoryId
+      );
+    if (hasValidCategory) {
+      return sport;
+    }
+    const kind = trainingTypeForSport(sport);
+    if (!kind) {
+      return sport;
+    }
+    const categoryId = findDefaultCategoryIdForKind(categoriesList, kind);
+    if (!categoryId || categoryId === sport.categoryId) {
+      return sport;
+    }
+    changed = true;
+    return { ...sport, categoryId };
+  });
+  return { list: changed ? list : sportsList, changed };
+};
+
 const normalizeTextForSearch = (value) =>
   String(value || "")
     .normalize("NFD")
@@ -4241,6 +4371,37 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       const creditFactorRestoreRaw = await AsyncStorage.getItem(
         STORAGE_KEYS.creditFactorRestore
       );
+      let parsedSettings = DEFAULT_SETTINGS;
+      if (settingsRaw) {
+        try {
+          const parsed = JSON.parse(settingsRaw);
+          parsedSettings = { ...DEFAULT_SETTINGS, ...(parsed || {}) };
+        } catch (error) {
+          console.warn("Failed to parse settings", error);
+        }
+      }
+      setSettings(parsedSettings);
+      const resolvedLanguage = parsedSettings.language || DEFAULT_SETTINGS.language;
+      setLanguage(resolvedLanguage);
+
+      let parsedCategories = null;
+      if (categoriesRaw) {
+        try {
+          const parsed = JSON.parse(categoriesRaw);
+          parsedCategories = Array.isArray(parsed) ? parsed : null;
+        } catch (error) {
+          console.warn("Failed to parse categories", error);
+        }
+      }
+      const resolvedCategories = parsedCategories || createDefaultCategories(resolvedLanguage);
+      setCategories(resolvedCategories);
+      if (!parsedCategories) {
+        await AsyncStorage.setItem(
+          STORAGE_KEYS.categories,
+          JSON.stringify(resolvedCategories)
+        );
+      }
+
       let parsedSports = [];
       if (sportsRaw) {
         try {
@@ -4259,9 +4420,17 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       const sportsWithSick = ensureSickSport(baseSports);
       const { list: migratedSports, changed: sportsMigrated } =
         migrateSportsList(sportsWithSick);
-      const { normalized, changed } = normalizeSports(migratedSports);
+      const { normalized: normalizedSportsRaw, changed } =
+        normalizeSports(migratedSports);
+      const { list: normalized, changed: categoriesAssigned } =
+        assignDefaultCategoriesToSports(normalizedSportsRaw, resolvedCategories);
       setSports(normalized);
-      if (changed || sportsMigrated || !parsedSports.length) {
+      if (
+        changed ||
+        sportsMigrated ||
+        categoriesAssigned ||
+        !parsedSports.length
+      ) {
         await AsyncStorage.setItem(
           STORAGE_KEYS.sports,
           JSON.stringify(normalized)
@@ -4339,37 +4508,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         await AsyncStorage.setItem(
           STORAGE_KEYS.logs,
           JSON.stringify(normalizedLogs)
-        );
-      }
-      let parsedSettings = DEFAULT_SETTINGS;
-      if (settingsRaw) {
-        try {
-          const parsed = JSON.parse(settingsRaw);
-          parsedSettings = { ...DEFAULT_SETTINGS, ...(parsed || {}) };
-        } catch (error) {
-          console.warn("Failed to parse settings", error);
-        }
-      }
-      setSettings(parsedSettings);
-      const resolvedLanguage = parsedSettings.language || DEFAULT_SETTINGS.language;
-      setLanguage(resolvedLanguage);
-      let parsedCategories = null;
-      if (categoriesRaw) {
-        try {
-          const parsed = JSON.parse(categoriesRaw);
-          parsedCategories = Array.isArray(parsed) ? parsed : null;
-        } catch (error) {
-          console.warn("Failed to parse categories", error);
-        }
-      }
-      if (parsedCategories) {
-        setCategories(parsedCategories);
-      } else {
-        const seededCategories = createDefaultCategories(resolvedLanguage);
-        setCategories(seededCategories);
-        await AsyncStorage.setItem(
-          STORAGE_KEYS.categories,
-          JSON.stringify(seededCategories)
         );
       }
       setSportSortMode(
@@ -5450,7 +5588,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
 
   const resetAllData = async () => {
     const nextSports = createDefaultPresetSports();
-    const { normalized: normalizedSports } = normalizeSports(nextSports);
+    const { normalized: normalizedSportsRaw } = normalizeSports(nextSports);
+    const { list: normalizedSports } = assignDefaultCategoriesToSports(
+      normalizedSportsRaw,
+      categories
+    );
     await AsyncStorage.multiRemove([
       STORAGE_KEYS.sports,
       STORAGE_KEYS.stats,
@@ -5658,7 +5800,13 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           incrementalTimeFactor,
           difficultyLevel: safeDifficulty,
           standardSportId: selectedStandardSportId ?? sport.standardSportId,
-          categoryId: newCategoryId || null,
+          categoryId:
+            newCategoryId ||
+            findDefaultCategoryIdForKind(
+              categories,
+              trainingTypeForSport({ standardSportId: selectedStandardSportId })
+            ) ||
+            null,
         };
       });
       await saveSports(nextSports);
@@ -5677,7 +5825,13 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         incrementalTimeFactor,
         difficultyLevel: safeDifficulty,
         standardSportId: selectedStandardSportId ?? undefined,
-        categoryId: newCategoryId || null,
+        categoryId:
+          newCategoryId ||
+          findDefaultCategoryIdForKind(
+            categories,
+            trainingTypeForSport({ standardSportId: selectedStandardSportId })
+          ) ||
+          null,
       };
       await saveSports([newSport, ...sports]);
       await updateSportColorLink(newSport.id, sportModalColorId);
