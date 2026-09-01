@@ -14163,91 +14163,74 @@ const getSpeechLocale = () => {
             </View>
           </View>
         </Modal>
-        {homeCategoryFilterId === null && !tutorialActive ? (
-          <View style={styles.categoryTileSection}>
-            <View style={styles.sportsHeaderRow}>
-              <Text style={styles.sectionTitle}>{t("label.categories")}</Text>
+        <View style={styles.searchInputWrapper}>
+          <TextInput
+            style={[styles.searchInput, styles.searchInputWithClear]}
+            autoCorrect={false}
+            autoCapitalize="none"
+            placeholder={t("label.searchSports")}
+            placeholderTextColor="#7a7a7a"
+            value={sportSearch}
+            onChangeText={setSportSearch}
+            clearButtonMode="while-editing"
+          />
+          {sportSearch.length > 0 ? (
+            <Pressable
+              style={styles.searchInputClearButton}
+              onPress={() => setSportSearch("")}
+              accessibilityRole="button"
+              accessibilityLabel={t("label.clearSearch")}
+            >
+              <ActionGlyph type="delete" color={COLORS.muted} />
+            </Pressable>
+          ) : null}
+        </View>
+        <View style={styles.sportsHeaderRow}>
+          <Text style={styles.sectionTitle}>{t("menu.sports")}</Text>
+          <Pressable
+            ref={tutorialCategoriesLinkRef}
+            style={styles.manageCategoriesLink}
+            onPress={() => setCategoriesModalOpen(true)}
+          >
+            <Text style={styles.manageCategoriesLinkText}>
+              {t("label.manageCategories")}
+            </Text>
+          </Pressable>
+        </View>
+        <View style={styles.categoryFilterRow}>
+          {homeCategoryTiles.map((tile) => {
+            const isActive = homeCategoryFilterId === tile.key;
+            return (
               <Pressable
-                ref={tutorialCategoriesLinkRef}
-                style={styles.manageCategoriesLink}
-                onPress={() => setCategoriesModalOpen(true)}
+                key={tile.key}
+                style={[
+                  styles.categoryFilterChip,
+                  isActive && styles.categoryFilterChipActive,
+                ]}
+                onPress={() =>
+                  setHomeCategoryFilterId(isActive ? null : tile.key)
+                }
               >
-                <Text style={styles.manageCategoriesLinkText}>
-                  {t("label.manageCategories")}
-                </Text>
-              </Pressable>
-            </View>
-            <View style={styles.categoryTileGrid}>
-              {homeCategoryTiles.map((tile) => (
-                <Pressable
-                  key={tile.key}
-                  style={styles.categoryTile}
-                  onPress={() => setHomeCategoryFilterId(tile.key)}
+                <Text
+                  style={[
+                    styles.categoryFilterChipText,
+                    isActive && styles.categoryFilterChipTextActive,
+                  ]}
                 >
-                  <Text style={styles.categoryTileName}>{tile.name}</Text>
-                  <Text style={styles.categoryTileCount}>
-                    {t("label.categorySportCount", { count: tile.count })}
-                  </Text>
-                </Pressable>
-              ))}
-              <Pressable
-                style={[styles.categoryTile, styles.categoryTileAdd]}
-                onPress={() => setCategoriesModalOpen(true)}
-              >
-                <Text style={styles.categoryTileAddText}>
-                  + {t("label.categories")}
+                  {tile.name} ({tile.count})
                 </Text>
               </Pressable>
-            </View>
-          </View>
-        ) : (
-          <>
-            <View style={styles.searchInputWrapper}>
-              <TextInput
-                style={[styles.searchInput, styles.searchInputWithClear]}
-                autoCorrect={false}
-                autoCapitalize="none"
-                placeholder={t("label.searchSports")}
-                placeholderTextColor="#7a7a7a"
-                value={sportSearch}
-                onChangeText={setSportSearch}
-                clearButtonMode="while-editing"
-              />
-              {sportSearch.length > 0 ? (
-                <Pressable
-                  style={styles.searchInputClearButton}
-                  onPress={() => setSportSearch("")}
-                  accessibilityRole="button"
-                  accessibilityLabel={t("label.clearSearch")}
-                >
-                  <ActionGlyph type="delete" color={COLORS.muted} />
-                </Pressable>
-              ) : null}
-            </View>
-            <View style={styles.sportsHeaderRow}>
-              <Pressable
-                style={styles.categoryBackButton}
-                onPress={() => setHomeCategoryFilterId(null)}
-              >
-                <Text style={styles.categoryBackButtonText}>
-                  {"‹ "}
-                  {t("label.back")}
-                </Text>
-              </Pressable>
-              <Text style={styles.sectionTitle}>
-                {homeCategoryTiles.find((tile) => tile.key === homeCategoryFilterId)
-                  ?.name || t("menu.sports")}
-              </Text>
-              <Pressable
-                ref={tutorialCategoriesLinkRef}
-                style={styles.manageCategoriesLink}
-                onPress={() => setCategoriesModalOpen(true)}
-              >
-                <Text style={styles.manageCategoriesLinkText}>
-                  {t("label.manageCategories")}
-                </Text>
-              </Pressable>
-            </View>
+            );
+          })}
+          <Pressable
+            style={[styles.categoryFilterChip, styles.categoryFilterChipAdd]}
+            onPress={() => setCategoriesModalOpen(true)}
+          >
+            <Text style={styles.categoryFilterChipAddText}>
+              + {t("label.categories")}
+            </Text>
+          </Pressable>
+        </View>
         <View style={styles.sortRow}>
           <Pressable
             style={[
@@ -14471,8 +14454,6 @@ const getSpeechLocale = () => {
             </Text>
           </Pressable>
         </View>
-          </>
-        )}
         <View style={styles.hiddenSection}>
           <Pressable
             style={styles.hiddenToggle}
@@ -17724,58 +17705,41 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  categoryTileSection: {
-    width: "100%",
-  },
-  categoryTileGrid: {
+  categoryFilterRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "flex-start",
-    gap: 12,
-    width: "100%",
-    marginTop: 12,
+    gap: 8,
+    marginTop: 10,
+    marginBottom: 10,
   },
-  categoryTile: {
-    width: "47%",
-    minHeight: 96,
-    borderRadius: 16,
+  categoryFilterChip: {
+    borderRadius: 999,
     borderWidth: 1,
     borderColor: COLORS.cardAlt,
     backgroundColor: COLORS.sportCard,
-    paddingVertical: 18,
-    paddingHorizontal: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
   },
-  categoryTileName: {
+  categoryFilterChipActive: {
+    borderColor: COLORS.accent,
+    backgroundColor: COLORS.accentDark,
+  },
+  categoryFilterChipText: {
     color: COLORS.text,
-    fontSize: 18,
-    fontWeight: "800",
-    textAlign: "center",
+    fontSize: 13,
+    fontWeight: "700",
   },
-  categoryTileCount: {
-    color: COLORS.muted,
-    fontSize: 12,
-    fontWeight: "600",
+  categoryFilterChipTextActive: {
+    color: COLORS.ink,
   },
-  categoryTileAdd: {
+  categoryFilterChipAdd: {
     borderStyle: "dashed",
     borderColor: COLORS.accent,
     backgroundColor: "transparent",
   },
-  categoryTileAddText: {
+  categoryFilterChipAddText: {
     color: COLORS.accent,
-    fontSize: 16,
-    fontWeight: "800",
-  },
-  categoryBackButton: {
-    paddingVertical: 4,
-    paddingRight: 10,
-  },
-  categoryBackButtonText: {
-    color: COLORS.accent,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "700",
   },
   manageCategoriesLink: {
