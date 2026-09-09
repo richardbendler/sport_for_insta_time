@@ -262,7 +262,7 @@ const en = {
     "label.distanceKmHint": "Optional - used only in stats.",
     "label.manualTimeEntryButton": "Add time",
     "label.manualTimeEntryHint":
-      "Enter how long you trained and tap the button to log it.",
+      "Enter how long you trained and tap the button to log it. Tip: use a comma to add seconds to minutes (or hours), e.g. 6,7 = 6 min 7 sec.",
     "label.manualTimeEntryPreview": "Screen time preview",
     "label.kmUnit": "km",
     "label.kmhUnit": "km/h",

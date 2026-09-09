@@ -264,7 +264,7 @@ const fr = {
     "label.kmUnit": "km",
     "label.kmhUnit": "km/h",
     "label.manualTimeEntryHint":
-      "Indique la durée de ton entraînement et appuie sur le bouton.",
+      "Indique la durée de ton entraînement et appuie sur le bouton. Astuce : utilise une virgule pour ajouter des secondes aux minutes (ou aux heures), ex. 6,7 = 6 min 7 s.",
     "label.manualTimeEntryPreview": "Aperçu du temps d'écran",
     "label.timeBased": "Basé sur le temps",
     "label.typePickerTitle": "Mode de suivi",

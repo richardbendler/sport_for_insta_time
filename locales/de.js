@@ -263,7 +263,7 @@ const de = {
       "Optional - wird nur in der Statistik verwendet.",
     "label.manualTimeEntryButton": "Zeit hinzufügen",
     "label.manualTimeEntryHint":
-      "Gib die Dauer deines Trainings ein und tippe auf den Button.",
+      "Gib die Dauer deines Trainings ein und tippe auf den Button. Tipp: Mit Komma kannst du Sekunden direkt bei Minuten (bzw. Stunden) ergänzen, z. B. 6,7 = 6 Min. 7 Sek.",
     "label.manualTimeEntryPreview": "Vorschau der Screen Time",
     "label.kmUnit": "km",
     "label.kmhUnit": "km/h",

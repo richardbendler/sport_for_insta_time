@@ -2775,6 +2775,32 @@ const parsePositiveInteger = (value) => {
   return Math.max(0, parsed);
 };
 
+const parseTimeUnitWithFraction = (value) => {
+  const raw = String(value ?? "").trim();
+  if (!raw) {
+    return { whole: 0, fraction: 0 };
+  }
+  const [wholePart, fractionPart] = raw.replace(",", ".").split(".");
+  const whole = Math.max(0, Number.parseInt(wholePart, 10) || 0);
+  const fraction = fractionPart
+    ? Math.max(0, Number.parseInt(fractionPart, 10) || 0)
+    : 0;
+  return { whole, fraction };
+};
+
+const manualTimeSecondsFromParts = (hoursValue, minutesValue, secondsValue) => {
+  const hoursParts = parseTimeUnitWithFraction(hoursValue);
+  const minutesParts = parseTimeUnitWithFraction(minutesValue);
+  const secondsParts = parseTimeUnitWithFraction(secondsValue);
+  return (
+    hoursParts.whole * 3600 +
+    hoursParts.fraction * 60 +
+    minutesParts.whole * 60 +
+    minutesParts.fraction +
+    secondsParts.whole
+  );
+};
+
 const getDifficultyOptionIndex = (value) => {
   const parsed = Number.parseFloat(String(value));
   if (!Number.isFinite(parsed)) {
@@ -8095,22 +8121,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     if (!isManualTimeModalOpen || !selectedSport || selectedSport.type !== "time") {
       return null;
     }
-    const manualTimeHoursValue = Math.max(
-      0,
-      Number.parseInt(manualTimeHours, 10) || 0
+    const manualTimeInputSeconds = manualTimeSecondsFromParts(
+      manualTimeHours,
+      manualTimeMinutes,
+      manualTimeSeconds
     );
-    const manualTimeMinutesValue = Math.max(
-      0,
-      Number.parseInt(manualTimeMinutes, 10) || 0
-    );
-    const manualTimeSecondsValue = Math.max(
-      0,
-      Number.parseInt(manualTimeSeconds, 10) || 0
-    );
-    const manualTimeInputSeconds =
-      manualTimeHoursValue * 3600 +
-      manualTimeMinutesValue * 60 +
-      manualTimeSecondsValue;
     const manualTimeKmValue = parsePositiveNumber(manualTimeKm);
     const manualTimePreviewSeconds =
       manualTimeInputSeconds > 0
@@ -8143,8 +8158,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                     onChangeText={setManualTimeHours}
                     placeholder={t("label.manualTimeEntryHours")}
                     placeholderTextColor="#7a7a7a"
-                    keyboardType="number-pad"
-                    maxLength={3}
+                    keyboardType="decimal-pad"
+                    maxLength={5}
                   />
                 </View>
                 <View style={styles.manualTimeInputWrap}>
@@ -8158,8 +8173,8 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
                     onChangeText={setManualTimeMinutes}
                     placeholder={t("label.manualTimeEntryMinutes")}
                     placeholderTextColor="#7a7a7a"
-                    keyboardType="number-pad"
-                    maxLength={3}
+                    keyboardType="decimal-pad"
+                    maxLength={5}
                   />
                 </View>
                 <View style={styles.manualTimeInputWrap}>
@@ -8355,10 +8370,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     if (!currentSport || currentSport.type !== "time") {
       return;
     }
-    const hours = Math.max(0, Number.parseInt(manualTimeHours, 10) || 0);
-    const minutes = Math.max(0, Number.parseInt(manualTimeMinutes, 10) || 0);
-    const seconds = Math.max(0, Number.parseInt(manualTimeSeconds, 10) || 0);
-    const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+    const totalSeconds = manualTimeSecondsFromParts(
+      manualTimeHours,
+      manualTimeMinutes,
+      manualTimeSeconds
+    );
     if (totalSeconds <= 0) {
       return;
     }

@@ -264,7 +264,7 @@ const es = {
     "label.kmUnit": "km",
     "label.kmhUnit": "km/h",
     "label.manualTimeEntryHint":
-      "Indica cuánto tiempo entrenaste y toca el botón.",
+      "Indica cuánto tiempo entrenaste y toca el botón. Consejo: usa una coma para añadir segundos a los minutos (u horas), p. ej. 6,7 = 6 min 7 seg.",
     "label.manualTimeEntryPreview": "Vista previa del tiempo de pantalla",
     "label.timeBased": "Por tiempo",
     "label.typePickerTitle": "Modo de seguimiento",
