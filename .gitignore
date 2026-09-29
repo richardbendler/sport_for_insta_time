@@ -5,3 +5,7 @@ android/app/build
 android/local.properties
 android/.kotlin
 npm-debug.log
+
+# Lokale Tool-Konfiguration
+CLAUDE.md
+.claude/
