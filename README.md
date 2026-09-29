@@ -12,6 +12,10 @@ for app blocking, home-screen widgets and background scheduling.
 ![Kotlin](https://img.shields.io/badge/Kotlin-native%20modules-7F52FF?logo=kotlin&logoColor=white)
 ![Platforms](https://img.shields.io/badge/platforms-Android%20%7C%20iOS-lightgrey)
 
+| Home | Rep counter | Statistics |
+| --- | --- | --- |
+| ![Home screen](docs/screenshots/home.jpg) | ![Rep counter](docs/screenshots/rep-counter.jpg) | ![Statistics](docs/screenshots/stats.jpg) |
+
 ---
 
 ## Features
