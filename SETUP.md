@@ -4,7 +4,7 @@ Diese Datei ist für **einmalige** Einrichtungsschritte gedacht: Projekt auf ein
 komplett neu aufsetzen, native Windows-Entwicklungsumgebung einrichten, lokale EAS-Builds unter
 WSL/Linux vorbereiten, sowie den Google Play Service Account für automatisierte Store-Uploads
 einrichten. Für den normalen Entwickler-Alltag (Emulator starten, bauen, Expo-Befehle) siehe
-[README.md](README.md).
+[DEVELOPMENT.md](DEVELOPMENT.md).
 
 ## EAS CLI installieren & einloggen (einmalig)
 ```bash
@@ -63,7 +63,7 @@ einem laufenden Android-Emulator oder einem per USB verbundenen Geraet. Einmalig
 ## WSL/Linux: lokale EAS-Builds einrichten (einmalig)
 
 Nur nötig, falls lokal gebaut werden soll (`eas build --local`, siehe
-[README.md](README.md#android-lokaler-build-wsl--linux)), statt in der Expo-Cloud.
+[DEVELOPMENT.md](DEVELOPMENT.md#android-lokaler-build-wsl--linux)), statt in der Expo-Cloud.
 `eas-cli` unterstützt lokale Builds **nicht unter nativem Windows** — es braucht Linux oder
 macOS, z.B. via WSL.
 
@@ -272,4 +272,4 @@ Maschine an einem anderen Ort liegt (anderer Ordnername, andere Verzeichnistiefe
 muss dieser Pfad dort lokal angepasst werden.
 
 Für die tatsächliche Nutzung von `eas build --local` + `eas submit` im Alltag siehe
-[README.md](README.md#android-google-play).
+[DEVELOPMENT.md](DEVELOPMENT.md#android-google-play).
