@@ -186,10 +186,30 @@ bei Ablauf der erspielten Zeit eine Sperrseite anzuzeigen.
 - Mikrofon (Sprachzaehlung) optional
 - Kamera optional
 
+## iOS: App-Sperre (Screen Time)
+Auf iOS sperrt die App die ausgewaehlten Apps ueber Apples Screen-Time-APIs
+(FamilyControls, ManagedSettings, DeviceActivity) mit `react-native-device-activity`.
+- Code: `iosScreenTime/` (JS-Port von `ScreenTimeStore.kt`, Steuerung, Einstellungs-Panel).
+  `App.js` nutzt den Controller auf iOS als Ersatz fuer das native `InstaControl`-Modul.
+- Erweiterungen: `targets/ActivityMonitorExtension`, `targets/ShieldAction`,
+  `targets/ShieldConfiguration`. Die Swift-Dateien stammen aus `react-native-device-activity`
+  (Version in `package.json` exakt gepinnt). Bei einem Update der Library die Swift-Dateien
+  und `Shared.swift` aus `node_modules/react-native-device-activity/targets` bzw. `/ios`
+  neu kopieren; `expo-target.config.js` bleibt, weil dort die registrierten Bundle-IDs stehen.
+- Bundle-IDs mit Family Controls (Distribution): `com.richardbendler.sportforscreentime`
+  sowie `.ActivityMonitor`, `.ShieldAction`, `.ShieldConfiguration`;
+  App Group `group.com.richardbendler.sportforscreentime`.
+- Ablauf: kein Guthaben -> Shield aktiv. Mit Guthaben -> Shield aus und DeviceActivity-
+  Monitoring mit Schwellwerten im Minutentakt; beim letzten Schwellwert sperrt die
+  Monitor-Erweiterung selbst wieder. Beim Oeffnen der App wird der Verbrauch aus den
+  Ereignissen verbucht. Um Mitternacht wird gesperrt, bis die App den neuen Tag plant.
+- Tests der Logik (ohne Geraet): `npm run test:ios`.
+- Mindestversion iOS 16.
+
 ## Entwicklung (Android)
 Ein Dev Build ist notwendig (Expo Go auf Android 14 hat Einschraenkungen).
 `npm install`
 
 ## Hinweise
 - Die Blocker-Seite fuehrt zurueck zum Homescreen, sobald die erspielte Zeit aufgebraucht ist.
-- App-Auswahl und Blocker sind aktuell Android-only.
+- Android: Blocker ueber den Accessibility Service; iOS: Screen-Time-Shield (siehe oben).

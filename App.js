@@ -67,8 +67,14 @@ import {
   WEEKDAY_LABELS_BY_LANG,
 } from "./locales";
 import { isAndroid, isIos } from "./platform";
+import iosScreenTime from "./iosScreenTime";
+import IosScreenTimePanel from "./iosScreenTime/IosScreenTimePanel";
 
-const InstaControl = NativeModules.InstaControl;
+const iosScreenTimeEnabled = isIos && !!iosScreenTime?.isSupported();
+// On iOS the Screen Time controller provides the screen-time part of the
+// Android native module interface.
+const InstaControl =
+  NativeModules.InstaControl || (iosScreenTimeEnabled ? iosScreenTime : undefined);
 const SERVICE_HEARTBEAT_STALE_MS = 20000;
 const SERVICE_ERROR_RECENT_MS = 10 * 60 * 1000;
 const SERVICE_HEALTH_POLL_MS = 15000;
@@ -3931,6 +3937,8 @@ function AppContent() {
   const [batteryOptimizationIgnored, setBatteryOptimizationIgnored] =
     useState(true);
   const [serviceHealth, setServiceHealth] = useState(null);
+  const [iosScreenTimeSetupNeeded, setIosScreenTimeSetupNeeded] =
+    useState(false);
   const [grayscaleFilterPermissionGranted, setGrayscaleFilterPermissionGranted] =
     useState(false);
   const [notificationsPrompted, setNotificationsPrompted] = useState(false);
@@ -6012,6 +6020,15 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
   };
 
+  const refreshIosScreenTimeSetup = useCallback(() => {
+    if (!iosScreenTimeEnabled) {
+      return;
+    }
+    const authorized = iosScreenTime.isAuthorized();
+    const selection = iosScreenTime.getSelectionSummary();
+    setIosScreenTimeSetupNeeded(!authorized || selection.total === 0);
+  }, []);
+
   const checkServiceHealth = async () => {
     if (!isAndroid || !InstaControl?.getServiceHealth) {
       return null;
@@ -6049,6 +6066,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       console.warn("checkBatteryOptimization failed", error);
     }
     await checkServiceHealth();
+    refreshIosScreenTimeSetup();
   }, []);
 
   const refreshUsageState = async () => {
@@ -6324,6 +6342,25 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }, SERVICE_HEALTH_POLL_MS);
     return () => clearInterval(interval);
   }, [isAppActive]);
+
+  useEffect(() => {
+    if (!iosScreenTimeEnabled) {
+      return;
+    }
+    iosScreenTime.setShieldTexts({
+      title: t("label.iosShieldTitle"),
+      subtitle: t("label.iosShieldSubtitle"),
+      primaryButtonLabel: t("label.iosShieldPrimary"),
+      secondaryButtonLabel: t("label.iosShieldSecondary"),
+      notificationTitle: t("label.iosShieldNotificationTitle"),
+      notificationBody: t("label.iosShieldNotificationBody"),
+      usedUpTitle: t("label.iosScreenTimeUsedUpTitle"),
+      usedUpBody: t("label.iosScreenTimeUsedUpBody"),
+      warningTitle: t("label.iosScreenTimeWarningTitle"),
+      warningBody: t("label.iosScreenTimeWarningBody"),
+    });
+    refreshIosScreenTimeSetup();
+  }, [language, t]);
 
   useEffect(() => {
     if (!InstaControl?.setSickModeLimitMinutes) {
@@ -10124,7 +10161,7 @@ const getSpeechLocale = () => {
     }
   }, [funFacts, markFunFactUsed, usedFunFactIds, recommendedActionId]);
 
-  const screenTimeFeaturesEnabled = isAndroid;
+  const screenTimeFeaturesEnabled = isAndroid || iosScreenTimeEnabled;
 
   const motivationActions = useMemo(() => {
     const defaultSport = motivationSport ?? activeSports[0];
@@ -10212,7 +10249,7 @@ const getSpeechLocale = () => {
         actionLabelKey: "label.motivationActionSettings",
         action: openSettings,
       },
-      ...(screenTimeFeaturesEnabled
+      ...(isAndroid
         ? [
             {
               id: "preface",
@@ -11355,6 +11392,13 @@ const getSpeechLocale = () => {
               </View>
             ) : null}
           </>
+        ) : iosScreenTimeEnabled ? (
+          <IosScreenTimePanel
+            t={t}
+            colors={COLORS}
+            remainingSeconds={usageState.remainingSeconds}
+            onChanged={refreshIosScreenTimeSetup}
+          />
         ) : (
           <View style={styles.appsHeaderIosFallback}>
             <Text style={styles.helperText}>{t("label.androidOnly")}</Text>
@@ -11379,6 +11423,8 @@ const getSpeechLocale = () => {
       setIsAppsSettingsOpen,
       setAppSearchInput,
       t,
+      usageState.remainingSeconds,
+      refreshIosScreenTimeSetup,
     ]
   );
 
@@ -13776,7 +13822,7 @@ const getSpeechLocale = () => {
               </View>
             </Pressable>
           </View>
-          {screenTimeFeaturesEnabled ? (
+          {screenTimeFeaturesEnabled && isAndroid ? (
             <>
               <View style={styles.settingsDivider} />
               <Text style={styles.settingsSectionTitle}>
@@ -14021,6 +14067,26 @@ const getSpeechLocale = () => {
         </View>
         {renderMainNav("home")}
         {/* {renderWorkoutBanner()} */}
+        {iosScreenTimeEnabled && iosScreenTimeSetupNeeded ? (
+          <View style={[styles.serviceIssueCard, styles.iosSetupCard]}>
+            <Text style={styles.serviceIssueTitle}>
+              {t("label.iosScreenTimeSetupTitle")}
+            </Text>
+            <Text style={styles.serviceIssueText}>
+              {t("label.iosScreenTimeSetupBody")}
+            </Text>
+            <View style={styles.serviceIssueActions}>
+              <Pressable
+                style={styles.permissionActionButton}
+                onPress={() => setIsAppsSettingsOpen(true)}
+              >
+                <Text style={styles.permissionActionButtonText}>
+                  {t("label.iosScreenTimeSetupButton")}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        ) : null}
         {serviceIssue ? (
           <View style={styles.serviceIssueCard}>
             <Text style={styles.serviceIssueTitle}>
@@ -17210,6 +17276,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.danger,
     gap: 8,
+  },
+  iosSetupCard: {
+    backgroundColor: "rgba(245, 158, 11, 0.12)",
+    borderColor: COLORS.accentDark,
   },
   serviceIssueTitle: {
     color: COLORS.text,

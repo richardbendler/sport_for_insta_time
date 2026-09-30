@@ -20,7 +20,8 @@
         "NSLocationWhenInUseUsageDescription": "Sport Habit Coach does not use your location. This permission is only requested because of an included camera library and is not used by any feature in the app.",
         "ITSAppUsesNonExemptEncryption": false
       },
-      "bundleIdentifier": "com.richardbendler.sportforscreentime"
+      "bundleIdentifier": "com.richardbendler.sportforscreentime",
+      "appleTeamId": "5S92G882S9"
     },
     "android": {
       "package": "com.richardbendler.sportforinstatime",
@@ -41,6 +42,24 @@
         "projectId": "32a0b590-ad4f-4ba9-ab84-5bb4b071ba6a"
       }
     },
-    "owner": "felsbend"
+    "owner": "felsbend",
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "16.0"
+          }
+        }
+      ],
+      [
+        "react-native-device-activity",
+        {
+          "appleTeamId": "5S92G882S9",
+          "appGroup": "group.com.richardbendler.sportforscreentime",
+          "copyToTargetFolder": false
+        }
+      ]
+    ]
   }
 }
