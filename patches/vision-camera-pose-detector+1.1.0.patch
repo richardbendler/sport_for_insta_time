@@ -1,3 +1,16 @@
+diff --git a/node_modules/vision-camera-pose-detector/android/build.gradle b/node_modules/vision-camera-pose-detector/android/build.gradle
+index a163367..b143801 100644
+--- a/node_modules/vision-camera-pose-detector/android/build.gradle
++++ b/node_modules/vision-camera-pose-detector/android/build.gradle
+@@ -91,7 +91,7 @@ dependencies {
+   implementation "com.facebook.react:react-native:+"
+   implementation 'androidx.camera:camera-core:1.2.3'
+   implementation project(':react-native-vision-camera')
+-  implementation 'com.google.mlkit:pose-detection-accurate:18.0.0-beta3'
++  implementation 'com.google.mlkit:pose-detection-accurate:18.0.0-beta5'
+ }
+ 
+ if (isNewArchitectureEnabled()) {
 diff --git a/node_modules/vision-camera-pose-detector/android/src/main/java/com/visioncameraposedetector/VisionCameraPoseDetectorModule.java b/node_modules/vision-camera-pose-detector/android/src/main/java/com/visioncameraposedetector/VisionCameraPoseDetectorModule.java
 index ec367f3..7b3dc5a 100644
 --- a/node_modules/vision-camera-pose-detector/android/src/main/java/com/visioncameraposedetector/VisionCameraPoseDetectorModule.java
