@@ -90,6 +90,58 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
+  fun getServiceHealth(promise: Promise) {
+    try {
+      val component = ComponentName(reactContext, InstaBlockerService::class.java)
+      val enabledSetting = Settings.Secure.getString(
+        reactContext.contentResolver,
+        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+      ) ?: ""
+      val enabledInSettings = enabledSetting.split(':').any {
+        ComponentName.unflattenFromString(it) == component
+      }
+      val manager =
+        reactContext.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
+      val serviceId = "${reactContext.packageName}/.InstaBlockerService"
+      val bound = manager
+        .getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
+        .any { it.id == serviceId }
+      val prefs = getPrefs()
+      val controlledCount = try {
+        JSONArray(prefs.getString("controlled_apps", "[]") ?: "[]").length()
+      } catch (e: Exception) {
+        -1
+      }
+      val map = Arguments.createMap()
+      map.putDouble("now", System.currentTimeMillis().toDouble())
+      map.putBoolean("enabledInSettings", enabledInSettings)
+      map.putBoolean("bound", bound)
+      map.putDouble("connectedAt", prefs.getLong(ServiceHealth.KEY_CONNECTED_AT, 0L).toDouble())
+      map.putDouble("destroyedAt", prefs.getLong(ServiceHealth.KEY_DESTROYED_AT, 0L).toDouble())
+      map.putDouble("heartbeatAt", prefs.getLong(ServiceHealth.KEY_HEARTBEAT_AT, 0L).toDouble())
+      map.putString("lastError", prefs.getString(ServiceHealth.KEY_LAST_ERROR, null))
+      map.putDouble("lastErrorAt", prefs.getLong(ServiceHealth.KEY_LAST_ERROR_AT, 0L).toDouble())
+      map.putBoolean("overlayAttached", prefs.getBoolean(ServiceHealth.KEY_OVERLAY_ATTACHED, false))
+      map.putBoolean("overlayVisible", prefs.getBoolean(ServiceHealth.KEY_OVERLAY_VISIBLE, false))
+      map.putString("foregroundPackage", prefs.getString(ServiceHealth.KEY_FOREGROUND_PACKAGE, ""))
+      map.putInt("controlledAppsCount", controlledCount)
+      map.putBoolean("batteryOptimizationIgnored", isIgnoringBatteryOptimizationsInternal())
+      promise.resolve(map)
+    } catch (e: Exception) {
+      promise.reject("SERVICE_HEALTH_ERROR", e)
+    }
+  }
+
+  private fun isIgnoringBatteryOptimizationsInternal(): Boolean {
+    return try {
+      val powerManager = reactContext.getSystemService(Context.POWER_SERVICE) as PowerManager
+      powerManager.isIgnoringBatteryOptimizations(reactContext.packageName)
+    } catch (e: Exception) {
+      true
+    }
+  }
+
+  @ReactMethod
   fun setAppLanguage(language: String?) {
     val prefs = getPrefs()
     if (language.isNullOrBlank()) {

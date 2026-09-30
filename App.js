@@ -69,6 +69,46 @@ import {
 import { isAndroid, isIos } from "./platform";
 
 const InstaControl = NativeModules.InstaControl;
+const SERVICE_HEARTBEAT_STALE_MS = 20000;
+const SERVICE_ERROR_RECENT_MS = 10 * 60 * 1000;
+const SERVICE_HEALTH_POLL_MS = 15000;
+
+// Detects the case where the accessibility service looks enabled but the
+// countdown overlay can't work (service killed, not ticking, overlay dropped).
+const getServiceIssue = (health) => {
+  if (!health) {
+    return null;
+  }
+  const now = health.now || Date.now();
+  if (health.enabledInSettings && !health.bound) {
+    return "notBound";
+  }
+  if (!health.bound) {
+    return null;
+  }
+  const sinceConnect = now - (health.connectedAt || 0);
+  const sinceHeartbeat = now - (health.heartbeatAt || 0);
+  if (
+    sinceHeartbeat > SERVICE_HEARTBEAT_STALE_MS &&
+    sinceConnect > SERVICE_HEARTBEAT_STALE_MS
+  ) {
+    return "stale";
+  }
+  if (!health.overlayAttached && sinceConnect > 5000) {
+    return "overlayDetached";
+  }
+  if (health.lastError && now - (health.lastErrorAt || 0) < SERVICE_ERROR_RECENT_MS) {
+    return "error";
+  }
+  return null;
+};
+
+const SERVICE_ISSUE_TEXT_KEYS = {
+  notBound: "label.serviceIssueNotBound",
+  stale: "label.serviceIssueStale",
+  overlayDetached: "label.serviceIssueOverlay",
+  error: "label.serviceIssueError",
+};
 const STORAGE_KEYS = {
   sports: "@sports_v1",
   stats: "@stats_v1",
@@ -3890,6 +3930,7 @@ function AppContent() {
   const [usageAccessGranted, setUsageAccessGranted] = useState(false);
   const [batteryOptimizationIgnored, setBatteryOptimizationIgnored] =
     useState(true);
+  const [serviceHealth, setServiceHealth] = useState(null);
   const [grayscaleFilterPermissionGranted, setGrayscaleFilterPermissionGranted] =
     useState(false);
   const [notificationsPrompted, setNotificationsPrompted] = useState(false);
@@ -5971,6 +6012,20 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     }
   };
 
+  const checkServiceHealth = async () => {
+    if (!isAndroid || !InstaControl?.getServiceHealth) {
+      return null;
+    }
+    try {
+      const health = await InstaControl.getServiceHealth();
+      setServiceHealth(health || null);
+      return health;
+    } catch (error) {
+      console.warn("getServiceHealth failed", error);
+      return null;
+    }
+  };
+
   const openBatteryOptimizationSettings = () => {
     if (InstaControl?.requestIgnoreBatteryOptimizations) {
       InstaControl.requestIgnoreBatteryOptimizations();
@@ -5993,6 +6048,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     } catch (error) {
       console.warn("checkBatteryOptimization failed", error);
     }
+    await checkServiceHealth();
   }, []);
 
   const refreshUsageState = async () => {
@@ -6256,7 +6312,18 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     checkBatteryOptimization();
     checkGrayscaleFilterPermission();
     refreshNotificationPermission();
+    checkServiceHealth();
   }, [isSettingsOpen, statsSportId]);
+
+  useEffect(() => {
+    if (!isAndroid || !isAppActive) {
+      return undefined;
+    }
+    const interval = setInterval(() => {
+      checkServiceHealth();
+    }, SERVICE_HEALTH_POLL_MS);
+    return () => clearInterval(interval);
+  }, [isAppActive]);
 
   useEffect(() => {
     if (!InstaControl?.setSickModeLimitMinutes) {
@@ -10347,6 +10414,7 @@ const getSpeechLocale = () => {
   const usageAccessMissing = isAndroid && usageAccessGranted !== true;
   const batteryOptimizationMissing =
     isAndroid && batteryOptimizationIgnored !== true;
+  const serviceIssue = isAndroid ? getServiceIssue(serviceHealth) : null;
   const missingPermissions = isAndroid
     ? accessibilityMissing || usageAccessMissing
     : !(permissionsPrompted && usagePermissionsPrompted && accessibilityDisclosureAccepted);
@@ -13799,6 +13867,14 @@ const getSpeechLocale = () => {
                     ? t("label.batteryOptimizationMissing")
                     : t("label.batteryOptimizationActive")}
                 </Text>
+                {serviceHealth && (serviceHealth.bound || serviceIssue) ? (
+                  <Text style={styles.helperText}>
+                    {t("label.serviceStatusTitle")}:{" "}
+                    {serviceIssue
+                      ? t(SERVICE_ISSUE_TEXT_KEYS[serviceIssue])
+                      : t("label.serviceStatusOk")}
+                  </Text>
+                ) : null}
                 {accessibilityMissing ? (
                   <Pressable
                     ref={tutorialAccessibilityPermissionRef}
@@ -13945,6 +14021,52 @@ const getSpeechLocale = () => {
         </View>
         {renderMainNav("home")}
         {/* {renderWorkoutBanner()} */}
+        {serviceIssue ? (
+          <View style={styles.serviceIssueCard}>
+            <Text style={styles.serviceIssueTitle}>
+              {t("label.serviceIssueTitle")}
+            </Text>
+            <Text style={styles.serviceIssueText}>
+              {t(SERVICE_ISSUE_TEXT_KEYS[serviceIssue])}
+            </Text>
+            <Text style={styles.serviceIssueSteps}>
+              {t("label.serviceIssueSteps")}
+            </Text>
+            {serviceHealth?.lastError ? (
+              <Text style={styles.serviceIssueDetail}>
+                {t("label.serviceIssueLastError")}: {serviceHealth.lastError}
+              </Text>
+            ) : null}
+            <View style={styles.serviceIssueActions}>
+              <Pressable
+                style={styles.permissionActionButton}
+                onPress={openAccessibilitySettingsDirect}
+              >
+                <Text style={styles.permissionActionButtonText}>
+                  {t("label.serviceIssueOpenAccessibility")}
+                </Text>
+              </Pressable>
+              {batteryOptimizationMissing ? (
+                <Pressable
+                  style={styles.permissionActionButton}
+                  onPress={openBatteryOptimizationSettings}
+                >
+                  <Text style={styles.permissionActionButtonText}>
+                    {t("label.openBatteryOptimization")}
+                  </Text>
+                </Pressable>
+              ) : null}
+              <Pressable
+                style={styles.secondaryButton}
+                onPress={refreshMainPermissions}
+              >
+                <Text style={styles.secondaryButtonText}>
+                  {t("label.serviceIssueRecheck")}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        ) : null}
         {showGettingStartedBlock ? (
           <View
             style={[
@@ -17079,6 +17201,39 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 8,
     alignItems: "center",
+  },
+  serviceIssueCard: {
+    backgroundColor: "rgba(239, 68, 68, 0.12)",
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: COLORS.danger,
+    gap: 8,
+  },
+  serviceIssueTitle: {
+    color: COLORS.text,
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  serviceIssueText: {
+    color: COLORS.text,
+    fontSize: 14,
+  },
+  serviceIssueSteps: {
+    color: COLORS.muted,
+    fontSize: 13,
+  },
+  serviceIssueDetail: {
+    color: COLORS.muted,
+    fontSize: 11,
+  },
+  serviceIssueActions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 4,
   },
   permissionActionButtonText: {
     color: COLORS.white,

@@ -75,10 +75,20 @@ class InstaBlockerService : AccessibilityService() {
     "com.richardbendler.sportforinstatime.SportWidgetConfigActivity"
   )
 
+  private var lastHeartbeatWriteAt: Long = 0
+  private val heartbeatWriteIntervalMs = 5000L
+
   private val ticker = object : Runnable {
     override fun run() {
-      tickUsage()
-      handler.postDelayed(this, 1000)
+      try {
+        ensureOverlaysAttached()
+        tickUsage()
+        writeHeartbeat(false)
+      } catch (e: Exception) {
+        recordServiceError("tick", e)
+      } finally {
+        handler.postDelayed(this, 1000)
+      }
     }
   }
 
@@ -92,15 +102,32 @@ class InstaBlockerService : AccessibilityService() {
 
   override fun onServiceConnected() {
     super.onServiceConnected()
-    setupOverlay()
-    setupWorkoutOverlay()
-    setupGrayscaleOverlay()
-    setupNotificationChannel()
-    registerScreenReceiver()
+    getPrefs().edit()
+      .putLong(ServiceHealth.KEY_CONNECTED_AT, System.currentTimeMillis())
+      .remove(ServiceHealth.KEY_LAST_ERROR)
+      .remove(ServiceHealth.KEY_LAST_ERROR_AT)
+      .apply()
+    // A failure in one overlay must not prevent the ticker from starting,
+    // otherwise the service looks enabled but silently does nothing.
+    runSafely("setupOverlay") { setupOverlay() }
+    runSafely("setupWorkoutOverlay") { setupWorkoutOverlay() }
+    runSafely("setupGrayscaleOverlay") { setupGrayscaleOverlay() }
+    runSafely("setupNotificationChannel") { setupNotificationChannel() }
+    runSafely("registerScreenReceiver") { registerScreenReceiver() }
+    handler.removeCallbacks(ticker)
     handler.post(ticker)
+    writeHeartbeat(true)
   }
 
   override fun onAccessibilityEvent(event: AccessibilityEvent?) {
+    try {
+      handleAccessibilityEvent(event)
+    } catch (e: Exception) {
+      recordServiceError("event", e)
+    }
+  }
+
+  private fun handleAccessibilityEvent(event: AccessibilityEvent?) {
     val pkg = event?.packageName?.toString() ?: return
     val className = event.className?.toString()
     val eventTime = System.currentTimeMillis()
@@ -191,11 +218,78 @@ class InstaBlockerService : AccessibilityService() {
 
   override fun onDestroy() {
     super.onDestroy()
-    teardownOverlay()
-    teardownGrayscaleOverlay()
-    teardownWorkoutOverlay()
-    updateCountdownNotification(0, false, null)
-    unregisterScreenReceiver()
+    handler.removeCallbacks(ticker)
+    getPrefs().edit()
+      .putLong(ServiceHealth.KEY_DESTROYED_AT, System.currentTimeMillis())
+      .apply()
+    runSafely("teardownOverlay") { teardownOverlay() }
+    runSafely("teardownGrayscaleOverlay") { teardownGrayscaleOverlay() }
+    runSafely("teardownWorkoutOverlay") { teardownWorkoutOverlay() }
+    runSafely("clearNotification") { updateCountdownNotification(0, false, null) }
+    runSafely("unregisterScreenReceiver") { unregisterScreenReceiver() }
+  }
+
+  private inline fun runSafely(where: String, block: () -> Unit) {
+    try {
+      block()
+    } catch (e: Exception) {
+      recordServiceError(where, e)
+    }
+  }
+
+  private fun recordServiceError(where: String, e: Throwable) {
+    try {
+      val message = "$where: ${e.javaClass.simpleName}: ${e.message ?: ""}".take(300)
+      getPrefs().edit()
+        .putString(ServiceHealth.KEY_LAST_ERROR, message)
+        .putLong(ServiceHealth.KEY_LAST_ERROR_AT, System.currentTimeMillis())
+        .apply()
+    } catch (ignored: Exception) {
+    }
+  }
+
+  private fun writeHeartbeat(force: Boolean) {
+    val now = System.currentTimeMillis()
+    if (!force && now - lastHeartbeatWriteAt < heartbeatWriteIntervalMs) {
+      return
+    }
+    lastHeartbeatWriteAt = now
+    val countdownVisible = overlayView?.visibility == View.VISIBLE
+    getPrefs().edit()
+      .putLong(ServiceHealth.KEY_HEARTBEAT_AT, now)
+      .putBoolean(ServiceHealth.KEY_OVERLAY_ATTACHED, isAttached(overlayView))
+      .putBoolean(ServiceHealth.KEY_OVERLAY_VISIBLE, countdownVisible)
+      .putString(ServiceHealth.KEY_FOREGROUND_PACKAGE, currentPackage ?: "")
+      .apply()
+  }
+
+  private fun isAttached(view: View?): Boolean {
+    return view != null && view.parent != null
+  }
+
+  // The system can drop accessibility overlay windows (e.g. after a
+  // SystemUI restart or when the service gets rebound). Re-add them so the
+  // countdown doesn't disappear until the next service restart.
+  private fun ensureOverlaysAttached() {
+    val wm = windowManager ?: return
+    val countdown = overlayView
+    val countdownParams = overlayParams
+    if (countdown == null || countdownParams == null) {
+      overlayView = null
+      overlayText = null
+      windowManager = null
+      runSafely("setupOverlay") { setupOverlay() }
+      if (windowManager == null) {
+        windowManager = wm
+      }
+    } else if (!isAttached(countdown)) {
+      runSafely("reattachOverlay") { wm.addView(countdown, countdownParams) }
+    }
+    val workout = workoutOverlayView
+    val workoutParams = workoutOverlayParams
+    if (workout != null && workoutParams != null && !isAttached(workout)) {
+      runSafely("reattachWorkoutOverlay") { wm.addView(workout, workoutParams) }
+    }
   }
 
   private fun tickUsage() {
