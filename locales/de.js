@@ -1,6 +1,6 @@
 const de = {
     "app.title": "Sport Screen Time",
-    "label.sportTrackerTitle": "Sport Habit Coach",
+    "label.sportTrackerTitle": "Sport for Screen Time",
     "menu.home": "Sport",
     "menu.sports": "Deine Sportarten",
     "menu.apps": "Eingeschränkte Apps bearbeiten",
@@ -317,7 +317,7 @@ const de = {
     "label.iosScreenTimeWarningTitle": "Noch 5 Minuten",
     "label.iosScreenTimeWarningBody": "Deine verdiente Bildschirmzeit ist gleich aufgebraucht.",
     "label.iosWidgetHint":
-      "Widgets fügst du über den Startbildschirm hinzu: lange drücken, auf + tippen und das Sport Habit Coach-Widget wählen.",
+      "Widgets fügst du über den Startbildschirm hinzu: lange drücken, auf + tippen und das Sport for Screen Time-Widget wählen.",
     "label.notificationsStatusIos":
       "iOS-Benachrichtigungen werden über Einstellungen > Mitteilungen gesteuert.",
     "label.iosWorkoutNotificationTitle": "Workout-Erinnerungen",
@@ -371,7 +371,7 @@ const de = {
     "label.motivationNotInterested": "Kein Interesse",
     "label.motivationWidgetTitle": "Widget hinzufügen",
     "label.motivationWidgetBody":
-      "Leg ein Habit Coach-Widget an, um deine Fortschritte sofort zu sehen.",
+      "Leg ein Sport for Screen Time-Widget an, um deine Fortschritte sofort zu sehen.",
     "label.motivationNotificationsTitle": "Erinnerungen aktivieren",
     "label.motivationNotificationsBody":
       "Aktiviere Benachrichtigungen und verpasse keine Timer oder Workouts.",

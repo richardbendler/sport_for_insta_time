@@ -10462,7 +10462,7 @@ const getSpeechLocale = () => {
     (permissionsPrompted ||
       usagePermissionsPrompted ||
       accessibilityDisclosureAccepted);
-  const appTitle = isIos ? t("label.sportTrackerTitle") : t("app.title");
+  const appTitle = t("app.title");
 
   const activeFunFact = funFacts.find((fact) => fact.id === activeFunFactId);
   const activeQuoteTitle = t("label.motivationQuoteStartTitle");

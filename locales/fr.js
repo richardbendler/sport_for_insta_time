@@ -1,6 +1,6 @@
 const fr = {
     "app.title": "Sport pour le temps d’écran",
-    "label.sportTrackerTitle": "Sport Habit Coach",
+    "label.sportTrackerTitle": "Sport for Screen Time",
     "menu.home": "Sport",
     "menu.sports": "Tes sports",
     "menu.apps": "Modifier les apps restreintes",
@@ -316,7 +316,7 @@ const fr = {
     "label.iosScreenTimeWarningTitle": "Encore 5 minutes",
     "label.iosScreenTimeWarningBody": "Ton temps d’écran gagné est presque épuisé.",
     "label.iosWidgetHint":
-      "Ajoute le widget depuis la galerie de widgets iOS (maintien appuyé sur l'écran d'accueil, touche + puis Sport Habit Coach).",
+      "Ajoute le widget depuis la galerie de widgets iOS (maintien appuyé sur l'écran d'accueil, touche + puis Sport for Screen Time).",
     "label.notificationsStatusIos":
       "Les notifications iOS se règlent via Réglages > Notifications.",
     "label.iosWorkoutNotificationTitle": "Rappels d'entraînement",

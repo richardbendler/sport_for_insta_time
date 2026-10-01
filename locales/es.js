@@ -1,6 +1,6 @@
 const es = {
     "app.title": "Deporte por tiempo de pantalla",
-    "label.sportTrackerTitle": "Sport Habit Coach",
+    "label.sportTrackerTitle": "Sport for Screen Time",
     "menu.home": "Deporte",
     "menu.sports": "Tus deportes",
     "menu.apps": "Editar apps restringidas",
