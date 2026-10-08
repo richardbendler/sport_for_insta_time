@@ -1778,6 +1778,48 @@ const normalizeTextForSearch = (value) =>
 
 const stripNonAlphanumeric = (value) => value.replace(/[^a-z0-9]+/g, "");
 
+const levenshteinDistance = (a, b) => {
+  if (a === b) {
+    return 0;
+  }
+  let previous = Array.from({ length: b.length + 1 }, (_, index) => index);
+  for (let i = 1; i <= a.length; i += 1) {
+    const current = [i];
+    for (let j = 1; j <= b.length; j += 1) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      current[j] = Math.min(
+        previous[j] + 1,
+        current[j - 1] + 1,
+        previous[j - 1] + cost
+      );
+    }
+    previous = current;
+  }
+  return previous[b.length];
+};
+
+const areSportNamesSimilar = (first, second) => {
+  const a = stripNonAlphanumeric(normalizeTextForSearch(first));
+  const b = stripNonAlphanumeric(normalizeTextForSearch(second));
+  if (!a || !b) {
+    return false;
+  }
+  if (a === b) {
+    return true;
+  }
+  const shorter = a.length <= b.length ? a : b;
+  const longer = a.length <= b.length ? b : a;
+  if (shorter.length >= 4 && longer.includes(shorter)) {
+    return true;
+  }
+  const allowedDistance = shorter.length >= 8 ? 2 : shorter.length >= 4 ? 1 : 0;
+  return (
+    allowedDistance > 0 &&
+    Math.abs(a.length - b.length) <= allowedDistance &&
+    levenshteinDistance(a, b) <= allowedDistance
+  );
+};
+
 const STANDARD_SPORT_LABEL_MAP = (() => {
   const map = new Map();
   STANDARD_SPORTS.forEach((sport) => {
@@ -5978,6 +6020,58 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     closeSportModal();
   };
 
+  const findSimilarExistingSport = (name, standardSportId) =>
+    sports.find((sport) => {
+      if (!sport || sport.system) {
+        return false;
+      }
+      if (standardSportId && sport.standardSportId === standardSportId) {
+        return true;
+      }
+      return (
+        areSportNamesSimilar(name, getSportLabel(sport)) ||
+        areSportNamesSimilar(name, sport.name)
+      );
+    }) || null;
+
+  const useExistingSport = async (sport) => {
+    closeSportModal();
+    if (sport.hidden) {
+      await handleHideSport(sport.id, false);
+    }
+    handleSelectSport(sport.id);
+  };
+
+  const requestSaveSportModal = () => {
+    const trimmed = newName.trim();
+    if (!trimmed) {
+      return;
+    }
+    const similar =
+      !editingSportId && !tutorialActive
+        ? findSimilarExistingSport(trimmed, selectedStandardSportId)
+        : null;
+    if (!similar) {
+      saveSportModal();
+      return;
+    }
+    Alert.alert(
+      t("label.similarSportTitle"),
+      t("label.similarSportBody", { name: getSportLabel(similar) }),
+      [
+        { text: t("label.cancel"), style: "cancel" },
+        {
+          text: t("label.similarSportUseExisting"),
+          onPress: () => useExistingSport(similar),
+        },
+        {
+          text: t("label.similarSportCreateAnyway"),
+          onPress: () => saveSportModal(),
+        },
+      ]
+    );
+  };
+
   const handleHideSport = async (sportId, hidden) => {
     const nextSports = sports.map((sport) =>
       sport.id === sportId ? { ...sport, hidden } : sport
@@ -7900,7 +7994,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
               </Pressable>
               <Pressable
                 style={styles.primaryButton}
-                onPress={saveSportModal}
+                onPress={requestSaveSportModal}
                 ref={tutorialSportSaveRef}
                 collapsable={false}
               >
@@ -14534,15 +14628,28 @@ const getSpeechLocale = () => {
         </View>
         <View style={styles.sportsHeaderRow}>
           <Text style={styles.sectionTitle}>{t("menu.sports")}</Text>
-          <Pressable
-            ref={tutorialCategoriesLinkRef}
-            style={styles.manageCategoriesLink}
-            onPress={() => setCategoriesModalOpen(true)}
-          >
-            <Text style={styles.manageCategoriesLinkText}>
-              {t("label.manageCategories")}
-            </Text>
-          </Pressable>
+          <View style={styles.sportsHeaderActions}>
+            <Pressable
+              ref={tutorialCategoriesLinkRef}
+              style={styles.manageCategoriesLink}
+              onPress={() => setCategoriesModalOpen(true)}
+            >
+              <Text style={styles.manageCategoriesLinkText}>
+                {t("label.manageCategories")}
+              </Text>
+            </Pressable>
+            <Pressable
+              style={styles.addSportHeaderButton}
+              ref={tutorialAddSportRef}
+              collapsable={false}
+              onPress={() => openSportModal()}
+              accessibilityRole="button"
+            >
+              <Text style={styles.addSportHeaderButtonText}>
+                + {t("label.addSport")}
+              </Text>
+            </Pressable>
+          </View>
         </View>
         <View style={styles.categoryFilterRow}>
           {homeCategoryTiles.map((tile) => {
@@ -14789,17 +14896,6 @@ const getSpeechLocale = () => {
               </React.Fragment>
             );
           })}
-        </View>
-        <View style={styles.addCard}>
-          <Pressable
-            style={[styles.addSportButton, styles.fullWidthButton]}
-            ref={tutorialAddSportRef}
-            onPress={() => openSportModal()}
-          >
-            <Text style={styles.addSportButtonText}>
-              + {t("label.addSport")}
-            </Text>
-          </Pressable>
         </View>
         <View style={styles.hiddenSection}>
           <Pressable
@@ -16898,25 +16994,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 18,
   },
-  addSportButton: {
-    backgroundColor: "rgba(245, 158, 11, 0.18)",
-    borderRadius: 18,
-    paddingVertical: 16,
-    paddingHorizontal: 14,
-    borderWidth: 1,
-    borderColor: COLORS.accent,
-    shadowColor: "#000",
-    shadowOpacity: 0.18,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  addSportButtonText: {
-    color: COLORS.accent,
-    fontWeight: "800",
-    fontSize: 16,
-    textAlign: "center",
-    letterSpacing: 0.4,
-  },
   secondaryButton: {
     backgroundColor: COLORS.cardAlt,
     paddingVertical: 5,
@@ -18077,6 +18154,27 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    gap: 8,
+  },
+  sportsHeaderActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexShrink: 1,
+    gap: 4,
+  },
+  addSportHeaderButton: {
+    backgroundColor: "rgba(245, 158, 11, 0.18)",
+    borderRadius: 12,
+    paddingVertical: 7,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: COLORS.accent,
+  },
+  addSportHeaderButtonText: {
+    color: COLORS.accent,
+    fontWeight: "800",
+    fontSize: 13,
+    letterSpacing: 0.2,
   },
   categoryFilterRow: {
     flexDirection: "row",

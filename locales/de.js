@@ -236,6 +236,11 @@ const de = {
     "label.iconPlaceholder": "Ein Icon",
     "label.sportCategory": "Kategorie",
     "label.sportCategoryPlaceholder": "Cardio, Kraft, Mobilität, …",
+    "label.similarSportTitle": "Ähnliche Sportart vorhanden",
+    "label.similarSportBody":
+      "Es gibt bereits die Sportart „{{name}}“. Möchtest du nicht lieber diese nutzen, statt eine neue anzulegen?",
+    "label.similarSportUseExisting": "Bestehende nutzen",
+    "label.similarSportCreateAnyway": "Trotzdem neu erstellen",
     "label.addSport": "Neue Sportart",
     "label.reps": "Wiederholungen",
     "label.repsShort": "Wdh.",

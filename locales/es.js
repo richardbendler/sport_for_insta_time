@@ -236,6 +236,11 @@ const es = {
     "label.iconPlaceholder": "Un icono",
     "label.sportCategory": "Categoría",
     "label.sportCategoryPlaceholder": "Cardio, Fuerza, Movilidad, …",
+    "label.similarSportTitle": "Ya existe un deporte similar",
+    "label.similarSportBody":
+      "Ya tienes el deporte «{{name}}». ¿No prefieres usarlo en lugar de crear uno nuevo?",
+    "label.similarSportUseExisting": "Usar existente",
+    "label.similarSportCreateAnyway": "Crear de todos modos",
     "label.addSport": "Nuevo deporte",
     "label.reps": "Repeticiones",
     "label.repsShort": "rep.",
