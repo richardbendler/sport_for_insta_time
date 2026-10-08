@@ -2581,21 +2581,55 @@ const getRecentRepsEntriesForSport = (logs, sportId, limit = 20) => {
     .slice(0, limit);
 };
 
+const SESSION_ACROSS_MIDNIGHT_GAP_MS = 20 * 60 * 1000;
+
+// Groups entries (newest first) by day. Sets that continue a session from
+// before midnight (at most 20 minutes apart) stay with the day it started.
+// Each entry keeps its own storage day in logDayKey.
 const groupEntriesByDay = (entries = []) => {
+  const validEntries = entries.filter(Boolean);
+  const groupDayByEntry = new Map();
+  let previous = null;
+  [...validEntries]
+    .sort((a, b) => (a.ts || 0) - (b.ts || 0))
+    .forEach((entry) => {
+      const ownDayKey = dateKeyFromDate(entry.ts || Date.now());
+      let groupDayKey = ownDayKey;
+      if (
+        previous &&
+        previous.groupDayKey !== ownDayKey &&
+        (entry.ts || 0) - (previous.entry.ts || 0) <= SESSION_ACROSS_MIDNIGHT_GAP_MS
+      ) {
+        groupDayKey = previous.groupDayKey;
+      }
+      groupDayByEntry.set(entry, groupDayKey);
+      previous = { entry, groupDayKey };
+    });
   const groups = [];
-  entries.forEach((entry) => {
-    if (!entry) {
-      return;
-    }
-    const dayKey = dateKeyFromDate(entry.ts || Date.now());
+  validEntries.forEach((entry) => {
+    const logDayKey = dateKeyFromDate(entry.ts || Date.now());
+    const dayKey = groupDayByEntry.get(entry) || logDayKey;
+    const item = { ...entry, logDayKey };
     const lastGroup = groups[groups.length - 1];
     if (!lastGroup || lastGroup.dayKey !== dayKey) {
-      groups.push({ dayKey, entries: [entry] });
+      groups.push({ dayKey, entries: [item] });
       return;
     }
-    lastGroup.entries.push(entry);
+    lastGroup.entries.push(item);
   });
-  return groups;
+  return groups.map((group) => ({
+    ...group,
+    totalReps: group.entries.reduce((sum, entry) => sum + (Number(entry.reps) || 0), 0),
+    totalSeconds: group.entries.reduce(
+      (sum, entry) => sum + (Number(entry.seconds) || 0),
+      0
+    ),
+    totalWeight: group.entries.reduce(
+      (sum, entry) => sum + (Number(entry.weight) || 0) * (Number(entry.reps) || 0),
+      0
+    ),
+    totalKm: group.entries.reduce((sum, entry) => sum + (Number(entry.km) || 0), 0),
+  }));
 };
 
 const sumSportEntryMetric = (sport, entries) => {
@@ -12938,9 +12972,15 @@ const getSpeechLocale = () => {
                 >
                   {recentWeightEntryGroups.map((group) => (
                     <View key={group.dayKey} style={styles.weightHistoryDayGroup}>
-                      <Text style={styles.weightHistoryDateLabel}>
-                        {formatDateLabel(group.dayKey)}
-                      </Text>
+                      <View style={styles.weightHistoryDayHeader}>
+                        <Text style={styles.weightHistoryDateLabel}>
+                          {formatDateLabel(group.dayKey)}
+                        </Text>
+                        <Text style={styles.weightHistoryDayTotal}>
+                          {t("label.dayTotal")}: {formatWeightValue(Math.round(group.totalWeight))}{" "}
+                          {t("label.weightUnit")}
+                        </Text>
+                      </View>
                       {group.entries.map((entry, index) => (
                         <View
                           key={entry.id || entry.ts}
@@ -12965,7 +13005,7 @@ const getSpeechLocale = () => {
                             <Pressable
                               style={styles.statMinusButton}
                               onPress={() =>
-                                decrementLogGroup(selectedSport, group.dayKey, {
+                                decrementLogGroup(selectedSport, entry.logDayKey, {
                                   startTs: entry.ts,
                                   endTs: entry.ts,
                                 })
@@ -12979,7 +13019,7 @@ const getSpeechLocale = () => {
                                 confirmAction(t("label.confirmDelete"), () =>
                                   deleteLogGroup(
                                     selectedSport.id,
-                                    group.dayKey,
+                                    entry.logDayKey,
                                     { startTs: entry.ts, endTs: entry.ts },
                                     selectedSport.type
                                   )
@@ -13008,9 +13048,14 @@ const getSpeechLocale = () => {
                 >
                   {recentRepsEntryGroups.map((group) => (
                     <View key={group.dayKey} style={styles.weightHistoryDayGroup}>
-                      <Text style={styles.weightHistoryDateLabel}>
-                        {formatDateLabel(group.dayKey)}
-                      </Text>
+                      <View style={styles.weightHistoryDayHeader}>
+                        <Text style={styles.weightHistoryDateLabel}>
+                          {formatDateLabel(group.dayKey)}
+                        </Text>
+                        <Text style={styles.weightHistoryDayTotal}>
+                          {t("label.dayTotal")}: {group.totalReps} {repsShort}
+                        </Text>
+                      </View>
                       {group.entries.map((entry, index) => (
                         <View
                           key={entry.id || entry.ts}
@@ -13033,7 +13078,7 @@ const getSpeechLocale = () => {
                             <Pressable
                               style={styles.statMinusButton}
                               onPress={() =>
-                                decrementLogGroup(selectedSport, group.dayKey, {
+                                decrementLogGroup(selectedSport, entry.logDayKey, {
                                   startTs: entry.ts,
                                   endTs: entry.ts,
                                 })
@@ -13047,7 +13092,7 @@ const getSpeechLocale = () => {
                                 confirmAction(t("label.confirmDelete"), () =>
                                   deleteLogGroup(
                                     selectedSport.id,
-                                    group.dayKey,
+                                    entry.logDayKey,
                                     { startTs: entry.ts, endTs: entry.ts },
                                     selectedSport.type
                                   )
@@ -13076,9 +13121,17 @@ const getSpeechLocale = () => {
                 >
                   {recentTimeEntryGroups.map((group) => (
                     <View key={group.dayKey} style={styles.weightHistoryDayGroup}>
-                      <Text style={styles.weightHistoryDateLabel}>
-                        {formatDateLabel(group.dayKey)}
-                      </Text>
+                      <View style={styles.weightHistoryDayHeader}>
+                        <Text style={styles.weightHistoryDateLabel}>
+                          {formatDateLabel(group.dayKey)}
+                        </Text>
+                        <Text style={styles.weightHistoryDayTotal}>
+                          {t("label.dayTotal")}: {formatSeconds(group.totalSeconds)}
+                          {group.totalKm > 0
+                            ? ` · ${formatDistanceValue(group.totalKm)} ${t("label.distanceKm")}`
+                            : ""}
+                        </Text>
+                      </View>
                       {group.entries.map((entry, index) => (
                         <View
                           key={entry.id || entry.ts}
@@ -13104,7 +13157,7 @@ const getSpeechLocale = () => {
                             <Pressable
                               style={styles.statMinusButton}
                               onPress={() =>
-                                decrementLogGroup(selectedSport, group.dayKey, {
+                                decrementLogGroup(selectedSport, entry.logDayKey, {
                                   startTs: entry.ts,
                                   endTs: entry.ts,
                                 })
@@ -13118,7 +13171,7 @@ const getSpeechLocale = () => {
                                 confirmAction(t("label.confirmDelete"), () =>
                                   deleteLogGroup(
                                     selectedSport.id,
-                                    group.dayKey,
+                                    entry.logDayKey,
                                     { startTs: entry.ts, endTs: entry.ts },
                                     selectedSport.type
                                   )
@@ -15843,13 +15896,24 @@ const styles = StyleSheet.create({
   weightHistoryDayGroup: {
     marginTop: 10,
   },
+  weightHistoryDayHeader: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    justifyContent: "space-between",
+    gap: 8,
+    marginBottom: 6,
+  },
   weightHistoryDateLabel: {
     color: COLORS.muted,
     fontSize: 11,
     fontWeight: "700",
-    marginBottom: 6,
     textTransform: "uppercase",
     letterSpacing: 0.4,
+  },
+  weightHistoryDayTotal: {
+    color: COLORS.text,
+    fontSize: 12,
+    fontWeight: "700",
   },
   weightHistoryRow: {
     flexDirection: "row",

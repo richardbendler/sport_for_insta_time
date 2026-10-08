@@ -75,6 +75,7 @@ const fr = {
     "label.noEntries": "Aucune entrée",
     "label.weightLastSet": "Dernière série",
     "label.weightWorkoutTotal": "Total de l'entraînement",
+    "label.dayTotal": "Total",
     "label.weightHistory": "Séries récentes",
     "label.timeHistory": "Derniers sets",
     "label.repsHistory": "Derniers sets",

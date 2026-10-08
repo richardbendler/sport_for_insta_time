@@ -75,6 +75,7 @@ const es = {
     "label.noEntries": "Sin entradas",
     "label.weightLastSet": "Última serie",
     "label.weightWorkoutTotal": "Total del entrenamiento",
+    "label.dayTotal": "Total",
     "label.weightHistory": "Series recientes",
     "label.timeHistory": "Últimos sets",
     "label.repsHistory": "Últimos sets",
