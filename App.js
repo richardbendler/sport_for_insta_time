@@ -5815,7 +5815,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     setUsagePermissionsPrompted(false);
     setAccessibilityDisclosureAccepted(false);
     setNotificationsPrompted(false);
-    setGrayscalePermissionsPrompted(false);
     setPrefaceDelayInput(String(DEFAULT_SETTINGS.prefaceDelaySeconds));
     setShowLanguageMenu(false);
     setInstalledApps([]);
@@ -12063,38 +12062,6 @@ const getSpeechLocale = () => {
             ))}
           </View>
         </ScrollView>
-        {editEntryKey ? (
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
-              <Text style={styles.modalTitle}>{t("label.editEntry")}</Text>
-              <Text style={styles.modalSubtitle}>{formatDateLabel(editEntryKey)}</Text>
-              <TextInput
-                style={styles.input}
-                value={editEntryValue}
-                onChangeText={setEditEntryValue}
-                keyboardType="number-pad"
-                placeholder="0"
-                placeholderTextColor="#7a7a7a"
-              />
-              <Text style={styles.modalUnit}>{editUnitLabel}</Text>
-              <Text style={styles.helperText}>{t("label.editHint")}</Text>
-              <View style={styles.modalActions}>
-                <Pressable
-                  style={styles.secondaryButton}
-                  onPress={() => {
-                    setEditEntryKey(null);
-                    setEditEntryValue("");
-                  }}
-                >
-                  <Text style={styles.secondaryButtonText}>{t("label.cancel")}</Text>
-                </Pressable>
-                <Pressable style={styles.primaryButton} onPress={saveEditedEntry}>
-                  <Text style={styles.primaryButtonText}>{t("label.save")}</Text>
-                </Pressable>
-              </View>
-            </View>
-          </View>
-        ) : null}
       </SafeAreaView>
     );
   }
@@ -12455,6 +12422,38 @@ const getSpeechLocale = () => {
             <Text style={styles.sectionTitle}>{getSportLabel(statsSport)}</Text>
           </View>
         </ScrollView>
+        {editEntryKey ? (
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalCard}>
+              <Text style={styles.modalTitle}>{t("label.editEntry")}</Text>
+              <Text style={styles.modalSubtitle}>{formatDateLabel(editEntryKey)}</Text>
+              <TextInput
+                style={styles.input}
+                value={editEntryValue}
+                onChangeText={setEditEntryValue}
+                keyboardType="number-pad"
+                placeholder="0"
+                placeholderTextColor="#7a7a7a"
+              />
+              <Text style={styles.modalUnit}>{editUnitLabel}</Text>
+              <Text style={styles.helperText}>{t("label.editHint")}</Text>
+              <View style={styles.modalActions}>
+                <Pressable
+                  style={styles.secondaryButton}
+                  onPress={() => {
+                    setEditEntryKey(null);
+                    setEditEntryValue("");
+                  }}
+                >
+                  <Text style={styles.secondaryButtonText}>{t("label.cancel")}</Text>
+                </Pressable>
+                <Pressable style={styles.primaryButton} onPress={saveEditedEntry}>
+                  <Text style={styles.primaryButtonText}>{t("label.save")}</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        ) : null}
       </SafeAreaView>
     );
   }
