@@ -456,6 +456,11 @@ const createController = ({ deviceActivity, storage, platformVersion, now = () =
         );
       }),
 
+    setDailyFreeMinutes: (minutes) =>
+      withState(async () => {
+        store.setDailyFreeMinutes(state, minutes, now());
+      }),
+
     removeScreenTimeEntry: (entryId) =>
       withState(async () => {
         store.removeEntry(state, entryId);

@@ -147,6 +147,7 @@ const DEFAULT_SETTINGS = {
   sportSortMode: "recent",
   experimentalFeaturesEnabled: false,
   sickModeDailyMinutes: 30,
+  dailyFreeMinutes: 10,
 };
 
 const SPEECH_LOCALES = {
@@ -163,6 +164,10 @@ const DEFAULT_ICON = "⭐";
 const CREDIT_ENTRY_PREFIX = "credit_";
 const CREDIT_STATS_GROUP_ID = "screen_time_credit";
 const CREDIT_ENTRY_ICON = "💳";
+const DAILY_FREE_ENTRY_PREFIX = "daily_free_";
+const DAILY_FREE_STATS_GROUP_ID = "daily_free";
+const DAILY_FREE_ENTRY_ICON = "🎁";
+const DAILY_FREE_MINUTES_MAX = 240;
 const WIDGET_BASE_SCHEME = "com.richardbendler.sportforinstatime";
 const WIDGET_ALT_SCHEMES = ["exp+sport-for-insta-time"];
 const ANDROID_PACKAGE_NAME = "com.richardbendler.sportforinstatime";
@@ -3555,6 +3560,12 @@ function AppContent() {
   const [stats, setStats] = useState({});
   const [logs, setLogs] = useState({});
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+  const dailyFreeMinutes = Number.isFinite(Number(settings.dailyFreeMinutes))
+    ? Math.max(
+        0,
+        Math.min(DAILY_FREE_MINUTES_MAX, Math.round(Number(settings.dailyFreeMinutes)))
+      )
+    : DEFAULT_SETTINGS.dailyFreeMinutes;
   const [language, setLanguage] = useState(DEFAULT_SETTINGS.language);
   const [selectedSportId, setSelectedSportId] = useState(null);
   const [statsSportId, setStatsSportId] = useState(null);
@@ -3576,6 +3587,8 @@ function AppContent() {
   const [prefaceDelayInput, setPrefaceDelayInput] = useState("");
   const [isSickLimitSettingsOpen, setIsSickLimitSettingsOpen] = useState(false);
   const [sickLimitInput, setSickLimitInput] = useState("");
+  const [isDailyFreeSettingsOpen, setIsDailyFreeSettingsOpen] = useState(false);
+  const [dailyFreeInput, setDailyFreeInput] = useState("");
   const [currentWorkout, setCurrentWorkout] = useState(null);
   const [workoutHistory, setWorkoutHistory] = useState([]);
   const [workoutDetailId, setWorkoutDetailId] = useState(null);
@@ -6387,6 +6400,15 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   }, [settings.sickModeDailyMinutes]);
 
   useEffect(() => {
+    if (!hasLoaded || !InstaControl?.setDailyFreeMinutes) {
+      return;
+    }
+    InstaControl.setDailyFreeMinutes(dailyFreeMinutes);
+    refreshUsageState();
+    refreshScreenTimeEntriesRef.current?.();
+  }, [dailyFreeMinutes, hasLoaded]);
+
+  useEffect(() => {
     if (!isAppsSettingsOpen) {
       return;
     }
@@ -6604,6 +6626,11 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       : DEFAULT_SETTINGS.prefaceDelaySeconds;
     setPrefaceDelayInput(String(delay));
     setIsPrefaceSettingsOpen(true);
+  };
+
+  const openDailyFreeSettings = () => {
+    setDailyFreeInput(String(dailyFreeMinutes));
+    setIsDailyFreeSettingsOpen(true);
   };
 
   const openSickLimitSettings = () => {
@@ -7232,6 +7259,71 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       sickModeDailyMinutes: normalized,
     });
     setIsSickLimitSettingsOpen(false);
+  };
+
+  const saveDailyFreeSettings = async () => {
+    const parsed = Number.parseInt(dailyFreeInput.trim(), 10);
+    if (!Number.isFinite(parsed)) {
+      Alert.alert(t("label.dailyFreeTitle"), t("label.sickModeLimitRequired"));
+      return;
+    }
+    await saveSettings({
+      ...settings,
+      dailyFreeMinutes: Math.max(0, Math.min(DAILY_FREE_MINUTES_MAX, parsed)),
+    });
+    setIsDailyFreeSettingsOpen(false);
+  };
+
+  const renderDailyFreeSettingsModal = () => {
+    if (!isDailyFreeSettingsOpen) {
+      return null;
+    }
+    const isSaveDisabled = !dailyFreeInput.trim();
+    return (
+      <Modal
+        visible={isDailyFreeSettingsOpen}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setIsDailyFreeSettingsOpen(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>{t("label.dailyFreeTitle")}</Text>
+            <Text style={styles.modalSubtitle}>
+              {t("label.dailyFreeDescription", { max: DAILY_FREE_MINUTES_MAX })}
+            </Text>
+            <TextInput
+              style={styles.input}
+              value={dailyFreeInput}
+              onChangeText={setDailyFreeInput}
+              keyboardType="number-pad"
+              placeholder="10"
+              placeholderTextColor="#7a7a7a"
+            />
+            <View style={styles.modalActions}>
+              <Pressable
+                style={styles.secondaryButton}
+                onPress={() => setIsDailyFreeSettingsOpen(false)}
+              >
+                <Text style={styles.secondaryButtonText}>
+                  {t("label.cancel")}
+                </Text>
+              </Pressable>
+              <Pressable
+                style={[
+                  styles.primaryButton,
+                  isSaveDisabled && { opacity: 0.5 },
+                ]}
+                onPress={saveDailyFreeSettings}
+                disabled={isSaveDisabled}
+              >
+                <Text style={styles.primaryButtonText}>{t("label.save")}</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
   };
 
   const renderPrefaceSettingsModal = () => {
@@ -9715,15 +9807,26 @@ const getSpeechLocale = () => {
           ? dateKeyFromDate(new Date(createdAt))
           : todayKey();
         const isCreditEntry = !!entry?.id?.startsWith(CREDIT_ENTRY_PREFIX);
+        const isDailyFreeEntry = !!entry?.id?.startsWith(DAILY_FREE_ENTRY_PREFIX);
         const entryLabel = sport
           ? getSportLabel(sport)
           : isCreditEntry
             ? t("label.creditEntry")
-            : t("label.screenTime");
-        const entryIcon = sport?.icon || (isCreditEntry ? CREDIT_ENTRY_ICON : DEFAULT_ICON);
+            : isDailyFreeEntry
+              ? t("label.dailyFreeEntry")
+              : t("label.screenTime");
+        const entryIcon =
+          sport?.icon ||
+          (isCreditEntry
+            ? CREDIT_ENTRY_ICON
+            : isDailyFreeEntry
+              ? DAILY_FREE_ENTRY_ICON
+              : DEFAULT_ICON);
         const statsGroupId = isCreditEntry
           ? CREDIT_STATS_GROUP_ID
-          : entry.sportId || null;
+          : isDailyFreeEntry
+            ? DAILY_FREE_STATS_GROUP_ID
+            : entry.sportId || null;
         return {
           key: entry.id || `${entry.sportId || "entry"}-${index}`,
           sportId: entry.sportId || null,
@@ -13836,6 +13939,27 @@ const getSpeechLocale = () => {
               </View>
             </Pressable>
           </View>
+          {screenTimeFeaturesEnabled && InstaControl?.setDailyFreeMinutes ? (
+            <>
+              <View style={styles.settingsDivider} />
+              <Text style={styles.settingsSectionTitle}>
+                {t("label.dailyFreeTitle")}
+              </Text>
+              <View style={styles.infoCard}>
+                <Text style={styles.helperText}>
+                  {t("label.dailyFreeSubtitle", { minutes: dailyFreeMinutes })}
+                </Text>
+                <Pressable
+                  style={styles.secondaryButton}
+                  onPress={openDailyFreeSettings}
+                >
+                  <Text style={styles.secondaryButtonText}>
+                    {t("label.sickModeLimitAction")}
+                  </Text>
+                </Pressable>
+              </View>
+            </>
+          ) : null}
           {screenTimeFeaturesEnabled && isAndroid ? (
             <>
               <View style={styles.settingsDivider} />
@@ -14987,6 +15111,7 @@ const getSpeechLocale = () => {
         ) : null}
         {renderPrefaceSettingsModal()}
         {renderSickLimitSettingsModal()}
+        {renderDailyFreeSettingsModal()}
         {renderSportModal()}
         {renderCategoriesModal()}
         {renderCategoryDeleteModal()}

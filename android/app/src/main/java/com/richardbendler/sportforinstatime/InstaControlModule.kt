@@ -290,6 +290,12 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
+  fun setDailyFreeMinutes(minutes: Int) {
+    ScreenTimeStore.setDailyFreeMinutes(getPrefs(), minutes)
+    OverallWidgetProvider.refreshAll(reactContext)
+  }
+
+  @ReactMethod
   fun setPrefaceDelaySeconds(seconds: Int) {
     val prefs = getPrefs()
     val safeSeconds = if (seconds < 0) 0 else seconds

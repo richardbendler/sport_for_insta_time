@@ -24,7 +24,12 @@ const TEXTS = {
 const setup = ({ authorized = true, selection = "token-a", storage } = {}) => {
   let clock = T0;
   const da = createFakeDeviceActivity({ authorized, selection });
-  const store = storage || createMemoryStorage();
+  let store = storage;
+  if (!store) {
+    // Daily free time is covered by the store tests; keep these budgets exact.
+    store = createMemoryStorage();
+    store.data[STORAGE_KEY] = JSON.stringify({ dailyFreeMinutes: 0 });
+  }
   const controller = createController({
     deviceActivity: da,
     storage: store,

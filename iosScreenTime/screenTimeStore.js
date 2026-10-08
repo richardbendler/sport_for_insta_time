@@ -5,11 +5,15 @@
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MAX_DECAY_DAYS = 30;
+const DAILY_FREE_PREFIX = "daily_free_";
+const DEFAULT_DAILY_FREE_MINUTES = 10;
+const DAILY_FREE_MAX_MINUTES = 240;
 
 const createState = () => ({
   entries: [],
   usedSeconds: 0,
   lastDay: "",
+  dailyFreeMinutes: DEFAULT_DAILY_FREE_MINUTES,
 });
 
 const pad = (value) => String(value).padStart(2, "0");
@@ -28,7 +32,63 @@ const ensureToday = (state, now) => {
   return today;
 };
 
+const clampDailyFreeMinutes = (value) => {
+  const numeric = Math.floor(Number(value));
+  if (!Number.isFinite(numeric)) {
+    return DEFAULT_DAILY_FREE_MINUTES;
+  }
+  return Math.max(0, Math.min(DAILY_FREE_MAX_MINUTES, numeric));
+};
+
+const startOfDay = (now) => {
+  const date = new Date(now);
+  date.setHours(0, 0, 0, 0);
+  return date.getTime();
+};
+
+// Free screen time granted every day; it expires at midnight instead of
+// carrying over like earned time.
+const ensureDailyFreeEntry = (state, now) => {
+  const todayId = `${DAILY_FREE_PREFIX}${todayKey(now)}`;
+  state.entries = state.entries.filter(
+    (entry) => !String(entry.id).startsWith(DAILY_FREE_PREFIX) || entry.id === todayId
+  );
+  const minutes = clampDailyFreeMinutes(state.dailyFreeMinutes);
+  if (minutes <= 0 || state.entries.some((entry) => entry.id === todayId)) {
+    return;
+  }
+  const dayStart = startOfDay(now);
+  state.entries.push({
+    id: todayId,
+    sportId: null,
+    createdAt: dayStart,
+    remainingSeconds: minutes * 60,
+    lastDecayAt: dayStart,
+    originalSeconds: minutes * 60,
+    decayCount: 0,
+  });
+};
+
+const setDailyFreeMinutes = (state, minutes, now) => {
+  const safeMinutes = clampDailyFreeMinutes(minutes);
+  state.dailyFreeMinutes = safeMinutes;
+  const todayId = `${DAILY_FREE_PREFIX}${todayKey(now)}`;
+  const existing = state.entries.find((entry) => entry.id === todayId);
+  if (!existing) {
+    ensureDailyFreeEntry(state, now);
+    return;
+  }
+  if (safeMinutes <= 0) {
+    state.entries = state.entries.filter((entry) => entry !== existing);
+    return;
+  }
+  const usedSeconds = Math.max(0, existing.originalSeconds - existing.remainingSeconds);
+  existing.originalSeconds = safeMinutes * 60;
+  existing.remainingSeconds = Math.max(0, existing.originalSeconds - usedSeconds);
+};
+
 const applyDecay = (state, now) => {
+  ensureDailyFreeEntry(state, now);
   let changed = false;
   state.entries = state.entries.filter((entry) => {
     const elapsedDays = Math.max(0, Math.floor((now - entry.createdAt) / DAY_MS));
@@ -174,7 +234,9 @@ const getEntries = (state, now) => {
 
 module.exports = {
   DAY_MS,
+  DAILY_FREE_PREFIX,
   createState,
+  setDailyFreeMinutes,
   todayKey,
   upsertEntry,
   removeEntry,

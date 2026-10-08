@@ -407,6 +407,12 @@ const de = {
     "label.changeLanguage": "Sprache ändern",
     "label.prefaceSettings": "Vorschaltseite",
     "label.prefaceDelay": "Wartezeit (Sekunden)",
+    "label.dailyFreeTitle": "Tägliche Gratis-Zeit",
+    "label.dailyFreeEntry": "Gratis-Zeit",
+    "label.dailyFreeSubtitle":
+      "Jeden Tag gibt es {{minutes}} Min. Bildschirmzeit gratis – unabhängig von Sport und Kredit. Sie verfällt um Mitternacht.",
+    "label.dailyFreeDescription":
+      "Lege fest, wie viele Minuten Bildschirmzeit du jeden Tag gratis bekommst (0–{{max}}).",
     "label.sickModeSection": "Krankheitsmodus",
     "label.sickModeLimitSubtitle":
       "Der Krankheitsmodus erlaubt bis zu {{minutes}} Min. pro Tag.",

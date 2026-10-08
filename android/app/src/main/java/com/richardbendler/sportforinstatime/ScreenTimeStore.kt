@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import org.json.JSONArray
 import org.json.JSONObject
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import kotlin.comparisons.compareBy
@@ -14,6 +15,10 @@ object ScreenTimeStore {
   private const val PREF_KEY_USED_BY_APP = "used_seconds_by_app"
   private const val PREF_KEY_LAST_DAY = "last_day"
   private const val PREF_KEY_LEGACY_ALLOWANCE = "allowance_seconds"
+  private const val PREF_KEY_DAILY_FREE_MINUTES = "daily_free_minutes"
+  private const val DAILY_FREE_PREFIX = "daily_free_"
+  private const val DAILY_FREE_MAX_MINUTES = 240
+  const val DEFAULT_DAILY_FREE_MINUTES = 10
   private const val DAY_MS = 24L * 60L * 60L * 1000L
 
   data class Entry(
@@ -87,6 +92,29 @@ object ScreenTimeStore {
       changed = true
     }
     if (changed) {
+      saveEntries(prefs, entries)
+    }
+  }
+
+  fun setDailyFreeMinutes(prefs: SharedPreferences, minutes: Int) {
+    val safeMinutes = minutes.coerceIn(0, DAILY_FREE_MAX_MINUTES)
+    prefs.edit().putInt(PREF_KEY_DAILY_FREE_MINUTES, safeMinutes).apply()
+    val now = System.currentTimeMillis()
+    val entries = loadEntries(prefs)
+    val todayId = DAILY_FREE_PREFIX + todayKey(now)
+    val existing = entries.find { it.id == todayId }
+    if (existing != null) {
+      if (safeMinutes <= 0) {
+        entries.remove(existing)
+      } else {
+        val usedSeconds = (existing.originalSeconds - existing.remainingSeconds).coerceAtLeast(0)
+        existing.originalSeconds = safeMinutes * 60
+        existing.remainingSeconds = (existing.originalSeconds - usedSeconds).coerceAtLeast(0)
+      }
+      saveEntries(prefs, entries)
+      return
+    }
+    if (ensureDailyFreeEntry(entries, prefs, now)) {
       saveEntries(prefs, entries)
     }
   }
@@ -266,6 +294,57 @@ object ScreenTimeStore {
   }
 
   private fun ensureLegacyMigration(
+    entries: MutableList<Entry>,
+    prefs: SharedPreferences,
+    now: Long
+  ): MutableList<Entry> {
+    migrateLegacyAllowance(entries, prefs, now)
+    if (ensureDailyFreeEntry(entries, prefs, now)) {
+      saveEntries(prefs, entries)
+    }
+    return entries
+  }
+
+  // Free screen time granted every day; it expires at midnight instead of
+  // carrying over like earned time.
+  private fun ensureDailyFreeEntry(
+    entries: MutableList<Entry>,
+    prefs: SharedPreferences,
+    now: Long
+  ): Boolean {
+    val todayId = DAILY_FREE_PREFIX + todayKey(now)
+    val changed = entries.removeAll { it.id.startsWith(DAILY_FREE_PREFIX) && it.id != todayId }
+    val minutes = prefs.getInt(PREF_KEY_DAILY_FREE_MINUTES, DEFAULT_DAILY_FREE_MINUTES)
+      .coerceIn(0, DAILY_FREE_MAX_MINUTES)
+    if (minutes <= 0 || entries.any { it.id == todayId }) {
+      return changed
+    }
+    val dayStart = startOfDay(now)
+    entries.add(
+      Entry(
+        id = todayId,
+        sportId = null,
+        createdAt = dayStart,
+        remainingSeconds = minutes * 60,
+        lastDecayAt = dayStart,
+        originalSeconds = minutes * 60,
+        decayCount = 0
+      )
+    )
+    return true
+  }
+
+  private fun startOfDay(now: Long): Long {
+    val calendar = Calendar.getInstance()
+    calendar.timeInMillis = now
+    calendar.set(Calendar.HOUR_OF_DAY, 0)
+    calendar.set(Calendar.MINUTE, 0)
+    calendar.set(Calendar.SECOND, 0)
+    calendar.set(Calendar.MILLISECOND, 0)
+    return calendar.timeInMillis
+  }
+
+  private fun migrateLegacyAllowance(
     entries: MutableList<Entry>,
     prefs: SharedPreferences,
     now: Long

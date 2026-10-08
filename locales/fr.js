@@ -405,6 +405,12 @@ const fr = {
     "label.changeLanguage": "Changer de langue",
     "label.prefaceSettings": "Écran préface",
     "label.prefaceDelay": "Délai (secondes)",
+    "label.dailyFreeTitle": "Temps gratuit quotidien",
+    "label.dailyFreeEntry": "Temps gratuit",
+    "label.dailyFreeSubtitle":
+      "Chaque jour, tu reçois {{minutes}} min de temps d’écran gratuites, indépendamment du sport et du crédit. Elles expirent à minuit.",
+    "label.dailyFreeDescription":
+      "Définis combien de minutes de temps d’écran tu reçois gratuitement chaque jour (0–{{max}}).",
     "label.sickModeSection": "Mode maladie",
     "label.sickModeLimitSubtitle":
       "Le mode maladie autorise jusqu'à {{minutes}} min par jour.",

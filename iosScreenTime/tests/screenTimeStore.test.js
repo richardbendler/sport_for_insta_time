@@ -6,7 +6,7 @@ const DAY = store.DAY_MS;
 const T0 = new Date(2026, 8, 30, 10, 0, 0).getTime();
 
 const withEntry = (seconds, createdAt = T0, id = "e1", sportId = "pushups") => {
-  const state = store.createState();
+  const state = { ...store.createState(), dailyFreeMinutes: 0 };
   store.upsertEntry(state, { entryId: id, sportId, createdAt, totalSeconds: seconds }, createdAt);
   return state;
 };
@@ -42,7 +42,7 @@ test("remaining time halves once per elapsed day, like on Android", () => {
 });
 
 test("an old entry synced later starts with its decay already applied", () => {
-  const state = store.createState();
+  const state = { ...store.createState(), dailyFreeMinutes: 0 };
   store.upsertEntry(state, { entryId: "old", sportId: "run", createdAt: T0 - 2 * DAY, totalSeconds: 800 }, T0);
   assert.equal(store.getTotals(state, T0).remainingSeconds, 200);
 });
@@ -54,7 +54,7 @@ test("entries older than 30 days are dropped", () => {
 });
 
 test("consumption takes from the oldest entry first and tracks daily usage", () => {
-  const state = store.createState();
+  const state = { ...store.createState(), dailyFreeMinutes: 0 };
   store.upsertEntry(state, { entryId: "a", sportId: "s1", createdAt: T0, totalSeconds: 100 }, T0);
   store.upsertEntry(state, { entryId: "b", sportId: "s2", createdAt: T0 + 1000, totalSeconds: 100 }, T0 + 1000);
   const consumed = store.consumeSeconds(state, T0 + 2000, 150);
@@ -87,7 +87,7 @@ test("breakdown reports carryover from entries older than a day", () => {
 });
 
 test("clear helpers remove the expected entries", () => {
-  const state = store.createState();
+  const state = { ...store.createState(), dailyFreeMinutes: 0 };
   store.upsertEntry(state, { entryId: "a", sportId: "s1", createdAt: T0, totalSeconds: 100 }, T0);
   store.upsertEntry(state, { entryId: "b", sportId: "s2", createdAt: T0, totalSeconds: 100 }, T0);
   store.clearEntriesForSport(state, "s1");
@@ -97,4 +97,26 @@ test("clear helpers remove the expected entries", () => {
   store.upsertEntry(state, { entryId: "c", sportId: "s2", createdAt: T0, totalSeconds: 100 }, T0);
   store.clearAllEntries(state);
   assert.equal(state.entries.length, 0);
+});
+
+test("daily free time is granted each day and does not carry over", () => {
+  const state = store.createState();
+  const dayOne = new Date(2026, 8, 30, 10, 0, 0).getTime();
+  assert.equal(store.getTotals(state, dayOne).remainingSeconds, 600);
+  store.consumeSeconds(state, dayOne, 120);
+  assert.equal(store.getTotals(state, dayOne).remainingSeconds, 480);
+  const dayTwo = new Date(2026, 9, 1, 8, 0, 0).getTime();
+  const entries = store.getEntries(state, dayTwo);
+  assert.deepEqual(entries.map((entry) => entry.id), ["daily_free_2026-10-01"]);
+  assert.equal(store.getTotals(state, dayTwo).remainingSeconds, 600);
+});
+
+test("changing the daily free minutes keeps today's usage", () => {
+  const state = store.createState();
+  const now = new Date(2026, 8, 30, 10, 0, 0).getTime();
+  store.consumeSeconds(state, now, 300);
+  store.setDailyFreeMinutes(state, 20, now);
+  assert.equal(store.getTotals(state, now).remainingSeconds, 900);
+  store.setDailyFreeMinutes(state, 0, now);
+  assert.equal(store.getTotals(state, now).remainingSeconds, 0);
 });

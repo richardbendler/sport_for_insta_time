@@ -404,6 +404,12 @@ const en = {
     "label.changeLanguage": "Change language",
     "label.prefaceSettings": "Preface screen",
     "label.prefaceDelay": "Wait time (seconds)",
+    "label.dailyFreeTitle": "Daily free time",
+    "label.dailyFreeEntry": "Free time",
+    "label.dailyFreeSubtitle":
+      "You get {{minutes}} min of screen time for free every day – independent of workouts and credit. It expires at midnight.",
+    "label.dailyFreeDescription":
+      "Set how many minutes of screen time you get for free every day (0–{{max}}).",
     "label.sickModeSection": "Sick mode",
     "label.sickModeLimitSubtitle": "Sick mode unlocks up to {{minutes}} min per day.",
     "label.sickModeLimitAction": "Adjust limit",
