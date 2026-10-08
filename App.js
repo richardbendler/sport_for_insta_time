@@ -4048,7 +4048,6 @@ function AppContent() {
   const [gettingStartedOpen, setGettingStartedOpen] = useState(false);
   const [gettingStartedTouched, setGettingStartedTouched] = useState(false);
   const [motivationOpen, setMotivationOpen] = useState(false);
-  const [motivationTouched, setMotivationTouched] = useState(false);
   const [motivationHiddenThisSession, setMotivationHiddenThisSession] =
     useState(false);
   const [permissionsCheckTick, setPermissionsCheckTick] = useState(0);
@@ -6527,13 +6526,13 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   }, [isAppsSettingsOpen]);
 
   useEffect(() => {
-    if (gettingStartedOpen || motivationOpen) {
+    if (gettingStartedOpen) {
       checkAccessibility();
       checkUsageAccess();
       checkBatteryOptimization();
       refreshNotificationPermission();
     }
-  }, [gettingStartedOpen, motivationOpen]);
+  }, [gettingStartedOpen]);
 
   useEffect(() => {
     if (needsAccessibility === false && accessibilityDisclosureVisible) {
@@ -10354,22 +10353,22 @@ const getSpeechLocale = () => {
     () => getFunFactsForLanguage(language),
     [language]
   );
-  const selectRandomFunFact = useCallback(() => {
-    if (!funFacts.length) {
+  // Picks the fun fact for the tips card. Called only from the toggle
+  // handler (never from an effect) so it cannot trigger a render loop.
+  const pickTipsFunFact = () => {
+    if (!experimentalFeaturesEnabled || !funFacts.length) {
       setActiveFunFactId(null);
       return;
     }
     const validIds = new Set(funFacts.map((fact) => fact.id));
-    const cleanedUsedIds = usedFunFactIds.filter((id) => validIds.has(id));
-    const usedSet = new Set(cleanedUsedIds);
+    const usedIds = usedFunFactIds.filter((id) => validIds.has(id));
+    const usedSet = new Set(usedIds);
     const availableFacts = funFacts.filter((fact) => !usedSet.has(fact.id));
-    // Prefer a fact tagged to match the currently recommended tip so the
-    // quote and the tip feel related instead of picked independently.
-    const taggedPool = recommendedActionId
+    const taggedFacts = recommendedActionId
       ? availableFacts.filter((fact) => fact.tag === recommendedActionId)
       : [];
-    const pool = taggedPool.length
-      ? taggedPool
+    const pool = taggedFacts.length
+      ? taggedFacts
       : availableFacts.length
       ? availableFacts
       : funFacts;
@@ -10378,16 +10377,13 @@ const getSpeechLocale = () => {
       setActiveFunFactId(null);
       return;
     }
-    const nextUsedIds = availableFacts.length
-      ? Array.from(new Set([...cleanedUsedIds, selected.id]))
-      : [selected.id];
     setActiveFunFactId(selected.id);
-    if (nextUsedIds.length !== usedFunFactIds.length) {
-      markFunFactUsed(nextUsedIds);
-    } else if (!usedSet.has(selected.id)) {
-      markFunFactUsed(nextUsedIds);
-    }
-  }, [funFacts, markFunFactUsed, usedFunFactIds, recommendedActionId]);
+    markFunFactUsed(
+      availableFacts.length
+        ? Array.from(new Set([...usedIds, selected.id]))
+        : [selected.id]
+    );
+  };
 
   const screenTimeFeaturesEnabled = isAndroid || iosScreenTimeEnabled;
 
@@ -10635,45 +10631,6 @@ const getSpeechLocale = () => {
     }
   }, [recommendedActionId, dismissedMotivationActionId]);
 
-  useEffect(() => {
-    if (!hasLoaded || !experimentalFeaturesEnabled) {
-      return;
-    }
-    if (!activeFunFactId) {
-      selectRandomFunFact();
-      return;
-    }
-    if (!funFacts.some((fact) => fact.id === activeFunFactId)) {
-      selectRandomFunFact();
-    }
-  }, [
-    activeFunFactId,
-    funFacts,
-    hasLoaded,
-    selectRandomFunFact,
-    experimentalFeaturesEnabled,
-  ]);
-
-  useEffect(() => {
-    if (
-      !hasLoaded ||
-      !experimentalFeaturesEnabled ||
-      !motivationOpen ||
-      missingPermissions ||
-      !showMotivationBlock
-    ) {
-      return;
-    }
-    selectRandomFunFact();
-  }, [
-    hasLoaded,
-    missingPermissions,
-    motivationOpen,
-    selectRandomFunFact,
-    experimentalFeaturesEnabled,
-    showMotivationBlock,
-  ]);
-
   const showGettingStartedSection = isAndroid;
   const accessibilityMissing = isAndroid && needsAccessibility !== false;
   const usageAccessMissing = isAndroid && usageAccessGranted !== true;
@@ -10692,9 +10649,9 @@ const getSpeechLocale = () => {
       accessibilityDisclosureAccepted);
   const appTitle = t("app.title");
 
-  const activeFunFact = funFacts.find((fact) => fact.id === activeFunFactId);
-  const activeQuoteTitle = t("label.motivationQuoteStartTitle");
-  const activeQuoteBody = activeFunFact ? activeFunFact.text : "";
+  const activeFunFact = activeFunFactId
+    ? funFacts.find((fact) => fact.id === activeFunFactId) || null
+    : null;
 
   const activeAction = recommendedActionId
     ? motivationActionMap.get(recommendedActionId)
@@ -10736,6 +10693,13 @@ const getSpeechLocale = () => {
     } catch (error) {
       console.warn("Motivation action failed", actionItem?.id, error);
     }
+  };
+
+  const toggleTipsCard = () => {
+    if (!motivationOpen) {
+      pickTipsFunFact();
+    }
+    setMotivationOpen((prev) => !prev);
   };
 
   const handleMotivationDismiss = (actionItem) => {
@@ -11423,7 +11387,6 @@ const getSpeechLocale = () => {
   const prevShowMotivationRef = useRef(showMotivationBlock);
   useEffect(() => {
     if (prevShowMotivationRef.current && !showMotivationBlock) {
-      setMotivationTouched(false);
       setMotivationOpen(false);
     }
     prevShowMotivationRef.current = showMotivationBlock;
@@ -14466,72 +14429,63 @@ const getSpeechLocale = () => {
             ) : null}
           </View>
         ) : null}
-        {showMotivationBlock ? (
-          <View
-            style={[
-              styles.permissionCardLarge,
-              !motivationOpen && styles.permissionCardCollapsed,
-            ]}
-          >
+        {showMotivationBlock && activeAction ? (
+          <View style={styles.tipsCard}>
             <Pressable
-              style={styles.permissionHeaderRow}
-              onPress={() => {
-                setMotivationTouched(true);
-                setMotivationOpen((prev) => !prev);
-              }}
+              style={styles.tipsHeader}
+              onPress={toggleTipsCard}
+              accessibilityRole="button"
+              accessibilityState={{ expanded: motivationOpen }}
             >
-              <View style={styles.motivationHeaderContent}>
-                <Text style={styles.motivationBadge}>{"\u{1F4A1}"}</Text>
-                <View style={styles.motivationHeaderText}>
-                  {motivationOpen ? (
-                    <>
-                      <Text style={styles.motivationQuoteTitle}>
-                        {activeQuoteTitle}
-                      </Text>
-                      <Text style={styles.motivationQuoteBody}>
-                        {"“"}
-                        {activeQuoteBody}
-                        {"”"}
-                      </Text>
-                    </>
-                  ) : (
-                    <Text style={styles.permissionCollapsedText}>
-                      {t("label.motivationCollapsedHint")}
-                    </Text>
-                  )}
-                </View>
+              <View style={styles.tipsIconBubble}>
+                <Text style={styles.tipsIcon}>{"\u{1F4A1}"}</Text>
               </View>
-              <Text style={styles.permissionToggle}>
-                {motivationOpen ? "-" : "+"}
-              </Text>
-            </Pressable>
-            {motivationOpen && shouldShowMotivationAction ? (
-              <View style={styles.permissionList}>
-                <Text style={styles.motivationCardTitle}>
+              <View style={styles.tipsHeaderTextColumn}>
+                <Text style={styles.tipsEyebrow}>
+                  {t("label.motivationCollapsedHint")}
+                </Text>
+                <Text
+                  style={styles.tipsHeaderTitle}
+                  numberOfLines={motivationOpen ? 3 : 1}
+                >
                   {activeActionTitle}
                 </Text>
-                <Text style={styles.motivationCardBody}>
-                  {activeActionBody}
-                </Text>
-                <View style={styles.motivationActionRow}>
+              </View>
+              <Text style={styles.tipsChevron}>
+                {motivationOpen ? "\u2013" : "+"}
+              </Text>
+            </Pressable>
+            {motivationOpen ? (
+              <View style={styles.tipsBody}>
+                {activeActionBody ? (
+                  <Text style={styles.tipsText}>{activeActionBody}</Text>
+                ) : null}
+                {activeFunFact?.text ? (
+                  <View style={styles.tipsFact}>
+                    <Text style={styles.tipsFactTitle}>
+                      {t("label.motivationQuoteStartTitle")}
+                    </Text>
+                    <Text style={styles.tipsFactText}>{activeFunFact.text}</Text>
+                  </View>
+                ) : null}
+                <View style={styles.tipsActions}>
                   <Pressable
                     style={[
-                      styles.motivationActionButton,
-                      activeAction?.disabled &&
-                        styles.motivationActionButtonDisabled,
+                      styles.tipsPrimaryButton,
+                      activeAction.disabled && styles.tipsButtonDisabled,
                     ]}
                     onPress={() => handleMotivationAction(activeAction)}
-                    disabled={activeAction?.disabled}
+                    disabled={!!activeAction.disabled}
                   >
-                    <Text style={styles.motivationActionText}>
+                    <Text style={styles.tipsPrimaryButtonText}>
                       {activeActionLabel}
                     </Text>
                   </Pressable>
                   <Pressable
-                    style={styles.motivationDismissButton}
+                    style={styles.tipsSecondaryButton}
                     onPress={() => handleMotivationDismiss(activeAction)}
                   >
-                    <Text style={styles.motivationDismissText}>
+                    <Text style={styles.tipsSecondaryButtonText}>
                       {t("label.motivationNotInterested")}
                     </Text>
                   </Pressable>
@@ -16690,74 +16644,115 @@ const styles = StyleSheet.create({
     gap: 10,
     marginTop: 10,
   },
-  motivationQuoteTitle: {
-    color: COLORS.text,
-    fontWeight: "700",
-    fontSize: 15,
-    marginBottom: 4,
+  tipsCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.accentDark,
+    marginBottom: 20,
+    overflow: "hidden",
   },
-  motivationQuoteBody: {
+  tipsHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+  },
+  tipsIconBubble: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(245, 158, 11, 0.18)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  tipsIcon: {
+    fontSize: 18,
+  },
+  tipsHeaderTextColumn: {
+    flex: 1,
+  },
+  tipsEyebrow: {
+    color: COLORS.accent,
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 0.4,
+    textTransform: "uppercase",
+  },
+  tipsHeaderTitle: {
+    color: COLORS.text,
+    fontSize: 15,
+    fontWeight: "700",
+    marginTop: 2,
+  },
+  tipsChevron: {
+    color: COLORS.text,
+    fontSize: 20,
+    fontWeight: "700",
+    width: 20,
+    textAlign: "center",
+  },
+  tipsBody: {
+    paddingHorizontal: 14,
+    paddingBottom: 14,
+    gap: 10,
+  },
+  tipsText: {
+    color: COLORS.muted,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  tipsFact: {
+    backgroundColor: COLORS.cardAlt,
+    borderRadius: 12,
+    padding: 10,
+    gap: 2,
+  },
+  tipsFactTitle: {
+    color: COLORS.text,
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  tipsFactText: {
     color: COLORS.muted,
     fontSize: 13,
     lineHeight: 18,
-    marginBottom: 8,
   },
-  motivationCardTitle: {
-    color: COLORS.text,
-    fontWeight: "700",
-    fontSize: 15,
-    marginBottom: 4,
-  },
-  motivationCardBody: {
-    color: COLORS.muted,
-    fontSize: 13,
-    lineHeight: 14,
-    marginBottom: 2,
-  },
-  motivationActionRow: {
+  tipsActions: {
     flexDirection: "row",
     gap: 8,
-    marginTop: 6,
   },
-  motivationActionButton: {
+  tipsPrimaryButton: {
     flex: 1,
     backgroundColor: COLORS.accent,
-    borderRadius: 10,
-    paddingVertical: 8,
-    alignItems: "center",
-  },
-  motivationActionButtonDisabled: {
-    opacity: 0.5,
-  },
-  motivationActionText: {
-    color: COLORS.background,
-    fontWeight: "700",
-  },
-  motivationDismissButton: {
-    paddingVertical: 8,
+    borderRadius: 12,
+    paddingVertical: 10,
     paddingHorizontal: 12,
-    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
+  },
+  tipsButtonDisabled: {
+    opacity: 0.5,
+  },
+  tipsPrimaryButtonText: {
+    color: COLORS.background,
+    fontWeight: "700",
+    textAlign: "center",
+  },
+  tipsSecondaryButton: {
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
     borderWidth: 1,
     borderColor: "rgba(148, 163, 184, 0.3)",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  motivationDismissText: {
+  tipsSecondaryButtonText: {
     color: COLORS.muted,
     fontWeight: "600",
     fontSize: 12,
-  },
-  motivationHeaderContent: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 10,
-    flex: 1,
-  },
-  motivationBadge: {
-    fontSize: 20,
-  },
-  motivationHeaderText: {
-    flex: 1,
   },
   aiInfoWrapper: {
     marginTop: 12,
