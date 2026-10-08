@@ -13893,12 +13893,15 @@ const getSpeechLocale = () => {
             </View>
             {renderTutorialHeaderButton()}
           </View>
-          <Pressable style={styles.feedbackButton} onPress={openFeedbackEmail}>
+          {renderMainNav("settings")}
+          <Pressable
+            style={[styles.feedbackButton, styles.feedbackButtonBelowNav]}
+            onPress={openFeedbackEmail}
+          >
             <Text style={styles.feedbackButtonText}>
               {t("label.sendFeedback")}
             </Text>
           </Pressable>
-          {renderMainNav("settings")}
           <Text style={styles.settingsSectionTitle}>{t("menu.language")}</Text>
             <View style={styles.infoCard} ref={tutorialSettingsCardRef}>
               <View style={styles.languageWrap}>
@@ -17329,6 +17332,10 @@ const styles = StyleSheet.create({
   },
   lockNotice: {
     marginTop: 6,
+  },
+  feedbackButtonBelowNav: {
+    marginTop: 0,
+    marginBottom: 12,
   },
   feedbackButton: {
     marginTop: 16,
