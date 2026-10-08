@@ -3609,6 +3609,7 @@ function AppContent() {
   );
   const [selectedStandardSportId, setSelectedStandardSportId] = useState(null);
   const [isCustomSportMode, setIsCustomSportMode] = useState(true);
+  const [hasLoaded, setHasLoaded] = useState(false);
   const [creditLockMinimums, setCreditLockMinimums] = useState({});
   const [creditFactorRestore, setCreditFactorRestore] = useState(null);
   const creditLockSnapshotExpiresAtRef = useRef(0);
@@ -3795,9 +3796,22 @@ function AppContent() {
     creditLockExpiresAt: 0,
   });
   useEffect(() => {
-    setGlobalCreditPenaltyMultiplier(usageState.creditPenaltyMultiplier ?? 1);
-  }, [usageState.creditPenaltyMultiplier]);
+    // The credit penalty is applied only via the visible, lowered user factors.
+    setGlobalCreditPenaltyMultiplier(1);
+  }, []);
   useEffect(() => {
+    if (!editingSportId || !difficultyLockActive) {
+      return;
+    }
+    const editingSport = sports.find((entry) => entry.id === editingSportId);
+    if (editingSport) {
+      setNewDifficultyLevel(difficultyLevelForSport(editingSport));
+    }
+  }, [difficultyLockActive, editingSportId, sports]);
+  useEffect(() => {
+    if (!hasLoaded) {
+      return;
+    }
     const persistOrClear = async () => {
       if (!difficultyLockActive) {
         const now = Date.now();
@@ -3921,6 +3935,7 @@ function AppContent() {
     creditFactorRestore,
     creditLockMinimums,
     difficultyLockActive,
+    hasLoaded,
     sports,
   ]);
   const [screenTimeEntries, setScreenTimeEntries] = useState([]);
@@ -3970,7 +3985,6 @@ function AppContent() {
   const [tutorialSeen, setTutorialSeen] = useState(false);
   const [tutorialWaitingForSportCreation, setTutorialWaitingForSportCreation] =
     useState(false);
-  const [hasLoaded, setHasLoaded] = useState(false);
   const [pendingOverlaySportId, setPendingOverlaySportId] = useState(null);
 
   const [sessionSeconds, setSessionSeconds] = useState(0);
