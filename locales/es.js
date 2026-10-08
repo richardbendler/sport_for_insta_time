@@ -155,14 +155,9 @@ const es = {
       "Algunos fabricantes (p. ej. Xiaomi, Samsung, Huawei) cierran la app en segundo plano si la optimización de batería está activa. Cuando ocurre, el bloqueo de apps restringidas deja de funcionar de forma fiable.",
     "label.apps": "Elegir apps",
     "label.openApps": "Gestionar apps",
-    "label.grayscaleRestrictedApps": "Mostrar apps restringidas en escala de grises",
+    "label.grayscaleRestrictedApps": "Filtro oscuro para apps restringidas",
     "label.grayscaleRestrictedAppsHint":
-      "Muestra las apps restringidas en blanco y negro mientras se usan y las marca asi en la lista.",
-    "label.grayscaleFilterStatusReal": "✓ Filtro real en blanco y negro activo",
-    "label.grayscaleFilterStatusApprox": "⚠ Actualmente solo atenuacion (aproximacion)",
-    "label.grayscaleFilterEnableHint":
-      "Para un filtro real en blanco y negro (en vez de solo atenuacion), ejecuta este comando una vez desde un ordenador (opciones de desarrollador y depuracion USB deben estar activas):",
-    "label.grayscaleFilterRecheck": "Comprobar de nuevo",
+      "Mientras usas apps restringidas (p. ej. Instagram), se coloca un filtro oscuro suave sobre ellas que reduce un poco el brillo, para que resulten menos tentadoras.",
     "label.closeApps": "Cerrar apps",
     "label.searchApps": "Buscar apps",
     "label.searchSports": "Buscar deportes",
@@ -921,7 +916,7 @@ const funFacts = [
   },
   {
     id: "funfact-072",
-    text: "Desde el idioma hasta el filtro en blanco y negro: los ajustes te dan el control.",
+    text: "Desde el idioma hasta el filtro oscuro: los ajustes te dan el control.",
     tag: "settings",
   },
   {

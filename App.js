@@ -3967,8 +3967,6 @@ function AppContent() {
   const [serviceHealth, setServiceHealth] = useState(null);
   const [iosScreenTimeSetupNeeded, setIosScreenTimeSetupNeeded] =
     useState(false);
-  const [grayscaleFilterPermissionGranted, setGrayscaleFilterPermissionGranted] =
-    useState(false);
   const [notificationsPrompted, setNotificationsPrompted] = useState(false);
   const [notificationsGranted, setNotificationsGranted] = useState(false);
   const [gettingStartedOpen, setGettingStartedOpen] = useState(false);
@@ -6019,20 +6017,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     return !!hasAccess;
   };
 
-  const checkGrayscaleFilterPermission = async () => {
-    if (!InstaControl?.hasSecureSettingsPermission) {
-      return false;
-    }
-    try {
-      const granted = await InstaControl.hasSecureSettingsPermission();
-      setGrayscaleFilterPermissionGranted(!!granted);
-      return !!granted;
-    } catch (error) {
-      console.warn("hasSecureSettingsPermission failed", error);
-      return false;
-    }
-  };
-
   const checkBatteryOptimization = async () => {
     if (!InstaControl?.isIgnoringBatteryOptimizations) {
       return true;
@@ -6355,7 +6339,6 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     checkAccessibility();
     checkUsageAccess();
     checkBatteryOptimization();
-    checkGrayscaleFilterPermission();
     refreshNotificationPermission();
     checkServiceHealth();
   }, [isSettingsOpen, statsSportId]);
@@ -13880,37 +13863,6 @@ const getSpeechLocale = () => {
                 <Text style={styles.helperText}>
                   {t("label.grayscaleRestrictedAppsHint")}
                 </Text>
-                {settings.grayscaleRestrictedApps ? (
-                  grayscaleFilterPermissionGranted ? (
-                    <Text style={styles.grayscaleFilterStatusOk}>
-                      {t("label.grayscaleFilterStatusReal")}
-                    </Text>
-                  ) : (
-                    <View style={styles.grayscaleFilterUpsell}>
-                      <Text style={styles.grayscaleFilterStatusApprox}>
-                        {t("label.grayscaleFilterStatusApprox")}
-                      </Text>
-                      <Text style={styles.helperText}>
-                        {t("label.grayscaleFilterEnableHint")}
-                      </Text>
-                      <Text
-                        style={styles.grayscaleFilterCommand}
-                        selectable
-                      >
-                        adb shell pm grant {ANDROID_PACKAGE_NAME}{" "}
-                        android.permission.WRITE_SECURE_SETTINGS
-                      </Text>
-                      <Pressable
-                        style={styles.secondaryButton}
-                        onPress={checkGrayscaleFilterPermission}
-                      >
-                        <Text style={styles.secondaryButtonText}>
-                          {t("label.grayscaleFilterRecheck")}
-                        </Text>
-                      </Pressable>
-                    </View>
-                  )
-                ) : null}
               </View>
             </>
           ) : null}
@@ -17258,29 +17210,6 @@ const styles = StyleSheet.create({
     color: COLORS.muted,
     fontSize: 13,
     fontWeight: "600",
-  },
-  grayscaleFilterStatusOk: {
-    marginTop: 8,
-    fontSize: 12,
-    fontWeight: "600",
-    color: COLORS.olive,
-  },
-  grayscaleFilterUpsell: {
-    marginTop: 10,
-    gap: 6,
-  },
-  grayscaleFilterStatusApprox: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: COLORS.amber,
-  },
-  grayscaleFilterCommand: {
-    fontFamily: isAndroid ? "monospace" : "Courier",
-    fontSize: 12,
-    color: COLORS.text,
-    backgroundColor: COLORS.cardDark,
-    borderRadius: 8,
-    padding: 10,
   },
   lockNoticeText: {
     fontSize: 12,

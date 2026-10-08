@@ -12,7 +12,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.provider.Settings
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -57,7 +56,6 @@ class InstaBlockerService : AccessibilityService() {
 
   private var grayscaleOverlayView: View? = null
   private var grayscaleOverlayShown = false
-  private var systemGrayscaleActive = false
   private var pendingGrayscaleHide: Runnable? = null
   private val grayscaleHideDelayMillis = 350L
 
@@ -134,6 +132,12 @@ class InstaBlockerService : AccessibilityService() {
     if (event.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
       return
     }
+    if (pkg == applicationContext.packageName && !appActivities.contains(className)) {
+      // Our own overlay windows (countdown, dim filter) report window changes
+      // under our package. They are not an app switch; treating them as one
+      // hid the filter right after it was shown and made it flicker.
+      return
+    }
     if (isNotificationShadeEvent(pkg, className)) {
       notificationShadeActive = true
       lastNotificationShadeEventAt = eventTime
@@ -151,14 +155,11 @@ class InstaBlockerService : AccessibilityService() {
       return
     }
     if (!isLaunchablePackage(pkg)) {
+      // Webviews, ads and dialogs inside a controlled app are not an app
+      // switch; the ticker keeps the filter in sync with the foreground app.
       if (isHomePackage(pkg)) {
         scheduleForegroundClear()
       }
-      syncGrayscaleState(false)
-      return
-    }
-    if (pkg == applicationContext.packageName && !appActivities.contains(className)) {
-      syncGrayscaleState(false)
       return
     }
     val now = System.currentTimeMillis()
@@ -778,7 +779,7 @@ class InstaBlockerService : AccessibilityService() {
     if (pendingGrayscaleHide != null) {
       return
     }
-    if (!grayscaleOverlayShown && !systemGrayscaleActive) {
+    if (!grayscaleOverlayShown) {
       return
     }
     val runnable = Runnable {
@@ -793,38 +794,6 @@ class InstaBlockerService : AccessibilityService() {
     pendingGrayscaleHide?.let {
       handler.removeCallbacks(it)
       pendingGrayscaleHide = null
-    }
-  }
-
-  private fun hasSecureSettingsPermission(): Boolean {
-    return ContextCompat.checkSelfPermission(
-      this,
-      "android.permission.WRITE_SECURE_SETTINGS"
-    ) == PackageManager.PERMISSION_GRANTED
-  }
-
-  // Real, full desaturation via the system's built-in accessibility color
-  // correction (Daltonizer, mode 0 = monochromacy). Writing these secure
-  // settings needs WRITE_SECURE_SETTINGS, which a normal app can only get
-  // via a one-time `adb shell pm grant ... WRITE_SECURE_SETTINGS`. When that
-  // hasn't been granted, this throws and the caller falls back to the
-  // translucent overlay approximation.
-  private fun applySystemGrayscale(enable: Boolean): Boolean {
-    if (!hasSecureSettingsPermission()) {
-      return false
-    }
-    return try {
-      Settings.Secure.putInt(
-        contentResolver,
-        "accessibility_display_daltonizer_enabled",
-        if (enable) 1 else 0
-      )
-      if (enable) {
-        Settings.Secure.putInt(contentResolver, "accessibility_display_daltonizer", 0)
-      }
-      true
-    } catch (e: SecurityException) {
-      false
     }
   }
 
@@ -855,10 +824,6 @@ class InstaBlockerService : AccessibilityService() {
 
   private fun teardownGrayscaleOverlay() {
     cancelGrayscaleHide()
-    if (systemGrayscaleActive) {
-      applySystemGrayscale(false)
-      systemGrayscaleActive = false
-    }
     val view = grayscaleOverlayView ?: return
     windowManager?.removeView(view)
     grayscaleOverlayView = null
@@ -866,11 +831,7 @@ class InstaBlockerService : AccessibilityService() {
   }
 
   private fun showGrayscaleOverlay() {
-    if (grayscaleOverlayShown || systemGrayscaleActive) {
-      return
-    }
-    if (applySystemGrayscale(true)) {
-      systemGrayscaleActive = true
+    if (grayscaleOverlayShown) {
       return
     }
     grayscaleOverlayView?.visibility = View.VISIBLE
@@ -878,10 +839,6 @@ class InstaBlockerService : AccessibilityService() {
   }
 
   private fun hideGrayscaleOverlay() {
-    if (systemGrayscaleActive) {
-      applySystemGrayscale(false)
-      systemGrayscaleActive = false
-    }
     if (!grayscaleOverlayShown) {
       return
     }

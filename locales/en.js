@@ -155,14 +155,9 @@ const en = {
       "Some manufacturers (e.g. Xiaomi, Samsung, Huawei) kill the app in the background while battery optimization is active. When that happens, blocking restricted apps stops working reliably.",
     "label.apps": "Choose apps",
     "label.openApps": "Manage apps",
-    "label.grayscaleRestrictedApps": "Show restricted apps in monochrome",
+    "label.grayscaleRestrictedApps": "Dim filter for restricted apps",
     "label.grayscaleRestrictedAppsHint":
-      "Shows restricted apps in black-and-white while they're in use and marks them accordingly in the list.",
-    "label.grayscaleFilterStatusReal": "✓ Real black-and-white filter active",
-    "label.grayscaleFilterStatusApprox": "⚠ Currently only dimming (approximation)",
-    "label.grayscaleFilterEnableHint":
-      "For a real black-and-white filter (instead of just dimming), run this command once from a computer (developer options & USB debugging must be enabled):",
-    "label.grayscaleFilterRecheck": "Check again",
+      "While you use restricted apps (e.g. Instagram), a light dim filter is placed over them and takes away some brightness, so the app feels less tempting.",
     "label.closeApps": "Close apps",
     "label.searchApps": "Search apps",
     "label.searchSports": "Search sports",
@@ -919,7 +914,7 @@ const funFacts = [
   },
   {
     id: "funfact-072",
-    text: "From language to the grayscale filter: settings give you control.",
+    text: "From language to the dim filter: settings give you control.",
     tag: "settings",
   },
   {

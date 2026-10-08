@@ -158,14 +158,9 @@ const fr = {
       "Certains fabricants (Xiaomi, Samsung, Huawei, etc.) ferment l'app en arri\u00e8re-plan quand l'optimisation de la batterie est active. Le blocage des apps restreintes cesse alors de fonctionner de fa\u00e7on fiable.",
     "label.apps": "Choisir les apps",
     "label.openApps": "G\u00e9rer les apps",
-    "label.grayscaleRestrictedApps": "Afficher les apps restreintes en niveaux de gris",
+    "label.grayscaleRestrictedApps": "Filtre sombre pour les apps restreintes",
     "label.grayscaleRestrictedAppsHint":
-      "Affiche les apps restreintes en noir et blanc pendant leur utilisation et les marque ainsi dans la liste.",
-    "label.grayscaleFilterStatusReal": "✓ Vrai filtre noir et blanc actif",
-    "label.grayscaleFilterStatusApprox": "⚠ Actuellement juste un assombrissement (approximation)",
-    "label.grayscaleFilterEnableHint":
-      "Pour un vrai filtre noir et blanc (au lieu d'un simple assombrissement), executez cette commande une fois depuis un ordinateur (options developpeur et débogage USB doivent etre actives) :",
-    "label.grayscaleFilterRecheck": "Verifier a nouveau",
+      "Pendant l’utilisation des apps restreintes (p. ex. Instagram), un léger filtre sombre est appliqué et réduit un peu la luminosité, pour les rendre moins tentantes.",
     "label.closeApps": "Fermer les apps",
     "label.searchApps": "Rechercher des apps",
     "label.searchSports": "Rechercher des sports",

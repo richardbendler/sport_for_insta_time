@@ -155,14 +155,9 @@ const de = {
       "Manche Hersteller (z.B. Xiaomi, Samsung, Huawei) beenden die App im Hintergrund, wenn die Akku-Optimierung aktiv ist. Dann funktioniert das Sperren eingeschränkter Apps nicht mehr zuverlässig.",
     "label.apps": "Apps auswählen",
     "label.openApps": "Apps verwalten",
-    "label.grayscaleRestrictedApps": "Eingeschränkte Apps in Schwarz-Weiß",
+    "label.grayscaleRestrictedApps": "Dunkelfilter für eingeschränkte Apps",
     "label.grayscaleRestrictedAppsHint":
-      "Zeigt eingeschränkte Apps während der Nutzung in Schwarz-Weiß an und markiert sie in der Liste entsprechend.",
-    "label.grayscaleFilterStatusReal": "✓ Echter Schwarz-Weiß-Filter aktiv",
-    "label.grayscaleFilterStatusApprox": "⚠ Aktuell nur Abdunklung (Näherung)",
-    "label.grayscaleFilterEnableHint":
-      "Für einen echten Schwarz-Weiß-Filter (statt nur Abdunklung) einmalig per Computer diesen Befehl ausführen (Entwickleroptionen & USB-Debugging müssen aktiv sein):",
-    "label.grayscaleFilterRecheck": "Erneut prüfen",
+      "Legt während der Nutzung einen leichten Dunkelfilter über eingeschränkte Apps (z. B. Instagram) und nimmt etwas Helligkeit heraus. So wirkt die App weniger verlockend.",
     "label.closeApps": "Apps schließen",
     "label.searchApps": "Apps suchen",
     "label.searchSports": "Sportarten durchsuchen",
@@ -923,7 +918,7 @@ const funFacts = [
   },
   {
     id: "funfact-072",
-    text: "Von Sprache bis Graustufen-Filter: Die Einstellungen geben dir die Kontrolle.",
+    text: "Von Sprache bis Dunkelfilter: Die Einstellungen geben dir die Kontrolle.",
     tag: "settings",
   },
   {
