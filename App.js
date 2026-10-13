@@ -9478,56 +9478,16 @@ const getSpeechLocale = () => {
     sportSortMode,
     sportLastUsageMap,
   ]);
-  const groupedActiveSportsDisplay = useMemo(() => {
-    if (sportSortMode === "manual") {
-      return {
-        sportsOrdered: filteredActiveSports,
-        groupStartIds: new Set(),
-        groupHeaderLabel: new Map(),
-        groupCount: 1,
-      };
-    }
-    const byCategory = new Map();
-    filteredActiveSports.forEach((sport) => {
-      const key =
-        sport.categoryId &&
-        categories.some((category) => category.id === sport.categoryId)
-          ? sport.categoryId
-          : "__none__";
-      if (!byCategory.has(key)) {
-        byCategory.set(key, []);
-      }
-      byCategory.get(key).push(sport);
-    });
-    const orderedKeys = [
-      ...categories.map((category) => category.id).filter((id) => byCategory.has(id)),
-      ...(byCategory.has("__none__") ? ["__none__"] : []),
-    ];
-    const groupStartIds = new Set();
-    const groupHeaderLabel = new Map();
-    const sportsOrdered = [];
-    orderedKeys.forEach((key) => {
-      const list = byCategory.get(key) || [];
-      if (list.length === 0) {
-        return;
-      }
-      groupStartIds.add(list[0].id);
-      groupHeaderLabel.set(
-        list[0].id,
-        key === "__none__"
-          ? t("label.noCategory")
-          : categories.find((category) => category.id === key)?.name || ""
-      );
-      sportsOrdered.push(...list);
-    });
-    return {
-      sportsOrdered,
-      groupStartIds,
-      groupHeaderLabel,
-      groupCount: orderedKeys.filter((key) => (byCategory.get(key) || []).length > 0)
-        .length,
-    };
-  }, [filteredActiveSports, categories, sportSortMode, t]);
+  // All sports in one list; the category filter chips narrow it down.
+  const groupedActiveSportsDisplay = useMemo(
+    () => ({
+      sportsOrdered: filteredActiveSports,
+      groupStartIds: new Set(),
+      groupHeaderLabel: new Map(),
+      groupCount: 1,
+    }),
+    [filteredActiveSports]
+  );
   const sportSearchMatchLabels = useMemo(() => {
     const map = new Map();
     if (!normalizedSportSearchTerm) {
