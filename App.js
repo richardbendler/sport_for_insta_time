@@ -2674,6 +2674,16 @@ const groupEntriesByDay = (entries = []) => {
   }));
 };
 
+// Compares a day's total with the previous (older) day in the list.
+const getDayTotalTrend = (groups, index, metricKey) => {
+  const current = Number(groups[index]?.[metricKey]) || 0;
+  const previous = Number(groups[index + 1]?.[metricKey]) || 0;
+  if (!groups[index + 1] || current === previous) {
+    return null;
+  }
+  return current > previous ? "up" : "down";
+};
+
 const sumSportEntryMetric = (sport, entries) => {
   if (!sport || !entries || entries.length === 0) {
     return 0;
@@ -12986,13 +12996,25 @@ const getSpeechLocale = () => {
                   nestedScrollEnabled
                   showsVerticalScrollIndicator
                 >
-                  {recentWeightEntryGroups.map((group) => (
+                  {recentWeightEntryGroups.map((group, groupIndex) => {
+                    const dayTrend = getDayTotalTrend(
+                      recentWeightEntryGroups,
+                      groupIndex,
+                      "totalWeight"
+                    );
+                    return (
                     <View key={group.dayKey} style={styles.weightHistoryDayGroup}>
                       <View style={styles.weightHistoryDayHeader}>
                         <Text style={styles.weightHistoryDateLabel}>
                           {formatDateLabel(group.dayKey)}
                         </Text>
-                        <Text style={styles.weightHistoryDayTotal}>
+                        <Text
+                          style={[
+                            styles.weightHistoryDayTotal,
+                            dayTrend === "up" && styles.weightHistoryDayTotalUp,
+                            dayTrend === "down" && styles.weightHistoryDayTotalDown,
+                          ]}
+                        >
                           {t("label.dayTotal")}: {formatWeightValue(Math.round(group.totalWeight))}{" "}
                           {t("label.weightUnit")}
                         </Text>
@@ -13050,7 +13072,8 @@ const getSpeechLocale = () => {
                         </View>
                       ))}
                     </View>
-                  ))}
+                    );
+                  })}
                 </ScrollView>
               </View>
             ) : null}
@@ -13062,13 +13085,25 @@ const getSpeechLocale = () => {
                   nestedScrollEnabled
                   showsVerticalScrollIndicator
                 >
-                  {recentRepsEntryGroups.map((group) => (
+                  {recentRepsEntryGroups.map((group, groupIndex) => {
+                    const dayTrend = getDayTotalTrend(
+                      recentRepsEntryGroups,
+                      groupIndex,
+                      "totalReps"
+                    );
+                    return (
                     <View key={group.dayKey} style={styles.weightHistoryDayGroup}>
                       <View style={styles.weightHistoryDayHeader}>
                         <Text style={styles.weightHistoryDateLabel}>
                           {formatDateLabel(group.dayKey)}
                         </Text>
-                        <Text style={styles.weightHistoryDayTotal}>
+                        <Text
+                          style={[
+                            styles.weightHistoryDayTotal,
+                            dayTrend === "up" && styles.weightHistoryDayTotalUp,
+                            dayTrend === "down" && styles.weightHistoryDayTotalDown,
+                          ]}
+                        >
                           {t("label.dayTotal")}: {group.totalReps} {repsShort}
                         </Text>
                       </View>
@@ -13123,7 +13158,8 @@ const getSpeechLocale = () => {
                         </View>
                       ))}
                     </View>
-                  ))}
+                    );
+                  })}
                 </ScrollView>
               </View>
             ) : null}
@@ -13135,13 +13171,25 @@ const getSpeechLocale = () => {
                   nestedScrollEnabled
                   showsVerticalScrollIndicator
                 >
-                  {recentTimeEntryGroups.map((group) => (
+                  {recentTimeEntryGroups.map((group, groupIndex) => {
+                    const dayTrend = getDayTotalTrend(
+                      recentTimeEntryGroups,
+                      groupIndex,
+                      "totalSeconds"
+                    );
+                    return (
                     <View key={group.dayKey} style={styles.weightHistoryDayGroup}>
                       <View style={styles.weightHistoryDayHeader}>
                         <Text style={styles.weightHistoryDateLabel}>
                           {formatDateLabel(group.dayKey)}
                         </Text>
-                        <Text style={styles.weightHistoryDayTotal}>
+                        <Text
+                          style={[
+                            styles.weightHistoryDayTotal,
+                            dayTrend === "up" && styles.weightHistoryDayTotalUp,
+                            dayTrend === "down" && styles.weightHistoryDayTotalDown,
+                          ]}
+                        >
                           {t("label.dayTotal")}: {formatSeconds(group.totalSeconds)}
                           {group.totalKm > 0
                             ? ` · ${formatDistanceValue(group.totalKm)} ${t("label.distanceKm")}`
@@ -13202,7 +13250,8 @@ const getSpeechLocale = () => {
                         </View>
                       ))}
                     </View>
-                  ))}
+                    );
+                  })}
                 </ScrollView>
               </View>
             ) : null}
@@ -15926,6 +15975,16 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     fontSize: 12,
     fontWeight: "700",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  weightHistoryDayTotalUp: {
+    backgroundColor: "rgba(34, 197, 94, 0.28)",
+  },
+  weightHistoryDayTotalDown: {
+    backgroundColor: "rgba(249, 115, 22, 0.22)",
   },
   weightHistoryRow: {
     flexDirection: "row",
