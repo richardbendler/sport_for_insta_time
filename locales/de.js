@@ -460,6 +460,11 @@ const de = {
     "label.add": "Hinzufügen",
     "label.active": "Aktiv",
     "label.off": "Aus",
+    "label.setFactorSuggestTitle": "Userfaktor anpassen?",
+    "label.setFactorSuggestBody":
+      "Deine letzten 3 Sets {{sport}} haben zusammen {{earned}} Bildschirmzeit ergeben. Ziel sind etwa 5 Minuten pro 3 Sets. Soll der Userfaktor von {{current}} auf {{factor}} geändert werden?",
+    "label.setFactorSuggestApply": "Anpassen",
+    "label.setFactorSuggestLater": "Nicht jetzt",
     "label.balanceSuggestTitle": "Faktor anpassen?",
     "label.balanceSuggestBody": "{{high}} ergibt ~{{rateHigh}} pro Einheit, {{low}} nur ~{{rateLow}}. Soll der Userfaktor für {{low}} auf {{factor}} erhöht werden?",
     "label.balanceSuggestApply": "Erhöhen",

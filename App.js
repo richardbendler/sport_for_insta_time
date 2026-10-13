@@ -3149,6 +3149,52 @@ const screenSecondsForEntry = (sport, entry, options = {}) => {
   return Math.max(0, Math.round(applyCreditPenaltyMultiplier(value)));
 };
 
+// About 5 minutes of screen time per 3 sets. When 3 sets in a row all
+// deviate clearly in the same direction, a user factor change is suggested.
+const SET_FACTOR_WINDOW = 3;
+const SET_FACTOR_TARGET_SECONDS = 5 * 60;
+const SET_FACTOR_TOLERANCE = 0.35;
+
+const detectSetFactorSuggestion = (sport, entries, sinceTs) => {
+  if (!sport || sport.system || sport.hidden) {
+    return null;
+  }
+  const lastSets = [...(entries || [])]
+    .filter((entry) => entry && (entry.ts || 0) > sinceTs)
+    .sort((a, b) => (b.ts || 0) - (a.ts || 0))
+    .slice(0, SET_FACTOR_WINDOW);
+  if (lastSets.length < SET_FACTOR_WINDOW) {
+    return null;
+  }
+  const targetPerSet = SET_FACTOR_TARGET_SECONDS / SET_FACTOR_WINDOW;
+  const perSet = lastSets.map((entry) => screenSecondsForEntry(sport, entry));
+  const allLow = perSet.every(
+    (value) => value < targetPerSet * (1 - SET_FACTOR_TOLERANCE)
+  );
+  const allHigh = perSet.every(
+    (value) => value > targetPerSet * (1 + SET_FACTOR_TOLERANCE)
+  );
+  if (!allLow && !allHigh) {
+    return null;
+  }
+  const totalSeconds = perSet.reduce((sum, value) => sum + value, 0);
+  const currentFactor = difficultyLevelForSport(sport);
+  const suggestedFactor = clampDifficultyLevel(
+    totalSeconds > 0
+      ? currentFactor * (SET_FACTOR_TARGET_SECONDS / totalSeconds)
+      : USER_FACTOR_OPTIONS[USER_FACTOR_OPTIONS.length - 1]
+  );
+  if (suggestedFactor === currentFactor) {
+    return null;
+  }
+  return {
+    currentFactor,
+    suggestedFactor,
+    totalSeconds,
+    lastTs: lastSets[0].ts || 0,
+  };
+};
+
 const BALANCE_WINDOW_MS = 30 * 60 * 1000;
 const BALANCE_RATIO_THRESHOLD = 2.5;
 const BALANCE_COOLDOWN_MS = 10 * 60 * 1000;
@@ -4107,6 +4153,8 @@ function AppContent() {
   const runningRef = useRef(false);
   const resumeEntryRef = useRef(null);
   const lastBalanceSuggestionRef = useRef(0);
+  // Per sport: timestamp of the newest set already covered by a suggestion.
+  const setFactorSuggestionTsRef = useRef({});
   const workoutStartRef = useRef(null);
   const workoutIntervalRef = useRef(null);
   const sportDetailScrollRef = useRef(null);
@@ -5399,6 +5447,56 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     return updatedEntry;
   };
 
+  const maybeSuggestSetFactor = (sport, newEntry) => {
+    if (
+      !screenTimeFeaturesEnabled ||
+      difficultyLockActive ||
+      tutorialActive ||
+      !sport
+    ) {
+      return false;
+    }
+    const entries = [
+      ...flattenSportEntries(logs, sport.id).filter(
+        (entry) => entry?.id !== newEntry.id
+      ),
+      newEntry,
+    ];
+    const sinceTs = setFactorSuggestionTsRef.current[sport.id] || 0;
+    const suggestion = detectSetFactorSuggestion(sport, entries, sinceTs);
+    if (!suggestion) {
+      return false;
+    }
+    setFactorSuggestionTsRef.current = {
+      ...setFactorSuggestionTsRef.current,
+      [sport.id]: suggestion.lastTs,
+    };
+    Alert.alert(
+      t("label.setFactorSuggestTitle"),
+      t("label.setFactorSuggestBody", {
+        sport: getSportLabel(sport),
+        earned: formatScreenTime(suggestion.totalSeconds),
+        current: suggestion.currentFactor,
+        factor: suggestion.suggestedFactor,
+      }),
+      [
+        { text: t("label.setFactorSuggestLater"), style: "cancel" },
+        {
+          text: t("label.setFactorSuggestApply"),
+          onPress: async () => {
+            const nextSports = sports.map((item) =>
+              item.id === sport.id
+                ? { ...item, difficultyLevel: suggestion.suggestedFactor }
+                : item
+            );
+            await saveSports(nextSports);
+          },
+        },
+      ]
+    );
+    return true;
+  };
+
   const addLogEntry = (sport, entry) => {
     if (!sport) {
       return;
@@ -5438,6 +5536,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     });
     syncScreenTimeEntry(sport, nextEntry);
     refreshUsageState();
+    if (maybeSuggestSetFactor(sport, nextEntry)) {
+      return nextEntry;
+    }
     if (capturedNextLogs && !difficultyLockActive) {
       const now = Date.now();
       if (now - lastBalanceSuggestionRef.current > BALANCE_COOLDOWN_MS) {

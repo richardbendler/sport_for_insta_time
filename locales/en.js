@@ -456,6 +456,11 @@ const en = {
     "label.add": "Add",
     "label.active": "On",
     "label.off": "Off",
+    "label.setFactorSuggestTitle": "Adjust user factor?",
+    "label.setFactorSuggestBody":
+      "Your last 3 sets of {{sport}} earned {{earned}} of screen time in total. The target is about 5 minutes per 3 sets. Change the user factor from {{current}} to {{factor}}?",
+    "label.setFactorSuggestApply": "Adjust",
+    "label.setFactorSuggestLater": "Not now",
     "label.balanceSuggestTitle": "Adjust factor?",
     "label.balanceSuggestBody": "{{high}} gives ~{{rateHigh}} per unit, {{low}} only ~{{rateLow}}. Increase {{low}}'s user factor to {{factor}}?",
     "label.balanceSuggestApply": "Increase",

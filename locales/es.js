@@ -458,6 +458,11 @@ const es = {
     "label.add": "Añadir",
     "label.active": "Activado",
     "label.off": "Desactivado",
+    "label.setFactorSuggestTitle": "¿Ajustar el factor de usuario?",
+    "label.setFactorSuggestBody":
+      "Tus últimas 3 series de {{sport}} dieron en total {{earned}} de tiempo de pantalla. El objetivo son unos 5 minutos por 3 series. ¿Cambiar el factor de usuario de {{current}} a {{factor}}?",
+    "label.setFactorSuggestApply": "Ajustar",
+    "label.setFactorSuggestLater": "Ahora no",
     "label.balanceSuggestTitle": "¿Ajustar factor?",
     "label.balanceSuggestBody": "{{high}} da ~{{rateHigh}} por unidad, {{low}} solo ~{{rateLow}}. ¿Aumentar el factor de {{low}} a {{factor}}?",
     "label.balanceSuggestApply": "Aumentar",
