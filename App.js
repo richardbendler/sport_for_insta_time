@@ -125,6 +125,7 @@ const STORAGE_KEYS = {
   notificationsPermissions: "@notifications_permissions_prompted_v1",
   motivationActions: "@motivation_actions_v1",
   motivationFunFactsUsed: "@motivation_fun_facts_used_v1",
+  setFactorPrompts: "@set_factor_prompts_v1",
   carryover: "@carryover_seconds_v1",
   carryoverDay: "@carryover_day_v1",
   usageSnapshot: "@usage_snapshot_v1",
@@ -148,6 +149,7 @@ const DEFAULT_SETTINGS = {
   experimentalFeaturesEnabled: false,
   sickModeDailyMinutes: 30,
   dailyFreeMinutes: 10,
+  setTargetSeconds: null,
 };
 
 const SPEECH_LOCALES = {
@@ -3149,39 +3151,77 @@ const screenSecondsForEntry = (sport, entry, options = {}) => {
   return Math.max(0, Math.round(applyCreditPenaltyMultiplier(value)));
 };
 
-// About 5 minutes of screen time per 3 sets. When 3 sets in a row all
-// deviate clearly in the same direction, a user factor change is suggested.
-const SET_FACTOR_WINDOW = 3;
-const SET_FACTOR_TARGET_SECONDS = 5 * 60;
+// Screen time per set: 5 minutes by default. Once there is enough data, the
+// reference is the average per set of the user's other sports (or a custom
+// target from the settings). Every 12 sets a sport is compared with it.
+const SET_FACTOR_DEFAULT_TARGET_SECONDS = 5 * 60;
+const SET_FACTOR_CHECK_SETS = 12;
+const SET_FACTOR_MIN_REFERENCE_SETS = 10;
+const SET_FACTOR_REFERENCE_SETS_PER_SPORT = 20;
 const SET_FACTOR_TOLERANCE = 0.35;
+const PROGRESS_RECENT_MS = 7 * 24 * 60 * 60 * 1000;
+const PROGRESS_PREVIOUS_MS = 35 * 24 * 60 * 60 * 1000;
+const PROGRESS_MIN_SETS = 3;
+const PROGRESS_MIN_CHANGE = 0.1;
 
-const detectSetFactorSuggestion = (sport, entries, sinceTs) => {
-  if (!sport || sport.system || sport.hidden) {
-    return null;
-  }
-  const lastSets = [...(entries || [])]
-    .filter((entry) => entry && (entry.ts || 0) > sinceTs)
+const getRecentSportSets = (logs, sportId, limit = Infinity) =>
+  flattenSportEntries(logs, sportId)
+    .filter((entry) => entry && entry.ts)
     .sort((a, b) => (b.ts || 0) - (a.ts || 0))
-    .slice(0, SET_FACTOR_WINDOW);
-  if (lastSets.length < SET_FACTOR_WINDOW) {
+    .slice(0, limit);
+
+const isFactorRelevantSport = (sport) =>
+  !!sport && !sport.system && !sport.hidden;
+
+const computeSetScreenAverage = (logs, sports, excludeSportId = null) => {
+  let total = 0;
+  let count = 0;
+  (sports || []).forEach((sport) => {
+    if (!isFactorRelevantSport(sport) || sport.id === excludeSportId) {
+      return;
+    }
+    getRecentSportSets(logs, sport.id, SET_FACTOR_REFERENCE_SETS_PER_SPORT).forEach(
+      (entry) => {
+        total += screenSecondsForEntry(sport, entry);
+        count += 1;
+      }
+    );
+  });
+  return { average: count > 0 ? total / count : 0, count };
+};
+
+const resolveSetTargetSeconds = (customTargetSeconds, reference) => {
+  const custom = Number(customTargetSeconds);
+  if (Number.isFinite(custom) && custom > 0) {
+    return custom;
+  }
+  if (reference && reference.count >= SET_FACTOR_MIN_REFERENCE_SETS && reference.average > 0) {
+    return reference.average;
+  }
+  return SET_FACTOR_DEFAULT_TARGET_SECONDS;
+};
+
+// sets: newest first. Returns a suggestion when the average screen time per
+// set deviates significantly from the target.
+const evaluateSetFactor = (sport, sets, targetSeconds) => {
+  if (!isFactorRelevantSport(sport) || !targetSeconds) {
     return null;
   }
-  const targetPerSet = SET_FACTOR_TARGET_SECONDS / SET_FACTOR_WINDOW;
-  const perSet = lastSets.map((entry) => screenSecondsForEntry(sport, entry));
-  const allLow = perSet.every(
-    (value) => value < targetPerSet * (1 - SET_FACTOR_TOLERANCE)
-  );
-  const allHigh = perSet.every(
-    (value) => value > targetPerSet * (1 + SET_FACTOR_TOLERANCE)
-  );
-  if (!allLow && !allHigh) {
+  const window = (sets || []).slice(0, SET_FACTOR_CHECK_SETS);
+  if (window.length < SET_FACTOR_CHECK_SETS) {
     return null;
   }
-  const totalSeconds = perSet.reduce((sum, value) => sum + value, 0);
+  const averageSeconds =
+    window.reduce((sum, entry) => sum + screenSecondsForEntry(sport, entry), 0) /
+    window.length;
+  const deviation = averageSeconds / targetSeconds - 1;
+  if (Math.abs(deviation) < SET_FACTOR_TOLERANCE) {
+    return null;
+  }
   const currentFactor = difficultyLevelForSport(sport);
   const suggestedFactor = clampDifficultyLevel(
-    totalSeconds > 0
-      ? currentFactor * (SET_FACTOR_TARGET_SECONDS / totalSeconds)
+    averageSeconds > 0
+      ? currentFactor * (targetSeconds / averageSeconds)
       : USER_FACTOR_OPTIONS[USER_FACTOR_OPTIONS.length - 1]
   );
   if (suggestedFactor === currentFactor) {
@@ -3190,9 +3230,48 @@ const detectSetFactorSuggestion = (sport, entries, sinceTs) => {
   return {
     currentFactor,
     suggestedFactor,
-    totalSeconds,
-    lastTs: lastSets[0].ts || 0,
+    averageSeconds,
+    targetSeconds,
+    direction: deviation > 0 ? "tooEasy" : "tooHard",
+    lastTs: window[0].ts || 0,
   };
+};
+
+const setProgressMetric = (sport, entry) => {
+  if (sport.type === "time") {
+    return Number(entry.seconds) || 0;
+  }
+  if (sport.weightExercise) {
+    return (Number(entry.weight) || 0) * (Number(entry.reps) || 0);
+  }
+  return Number(entry.reps) || 0;
+};
+
+// Average per set of the last 7 days compared with the 4 weeks before.
+const computeSportProgress = (sport, entries, now) => {
+  const recent = [];
+  const previous = [];
+  (entries || []).forEach((entry) => {
+    const age = now - (entry.ts || 0);
+    const value = setProgressMetric(sport, entry);
+    if (value <= 0 || age < 0) {
+      return;
+    }
+    if (age <= PROGRESS_RECENT_MS) {
+      recent.push(value);
+    } else if (age <= PROGRESS_PREVIOUS_MS) {
+      previous.push(value);
+    }
+  });
+  if (recent.length < PROGRESS_MIN_SETS || previous.length < PROGRESS_MIN_SETS) {
+    return null;
+  }
+  const average = (values) => values.reduce((sum, value) => sum + value, 0) / values.length;
+  const previousAverage = average(previous);
+  if (previousAverage <= 0) {
+    return null;
+  }
+  return average(recent) / previousAverage - 1;
 };
 
 const BALANCE_WINDOW_MS = 30 * 60 * 1000;
@@ -4153,8 +4232,10 @@ function AppContent() {
   const runningRef = useRef(false);
   const resumeEntryRef = useRef(null);
   const lastBalanceSuggestionRef = useRef(0);
-  // Per sport: timestamp of the newest set already covered by a suggestion.
-  const setFactorSuggestionTsRef = useRef({});
+  // Per sport: { lastTs, never } of the last user factor suggestion.
+  const [setFactorPrompts, setSetFactorPrompts] = useState({});
+  const [isSetTargetSettingsOpen, setIsSetTargetSettingsOpen] = useState(false);
+  const [setTargetInput, setSetTargetInput] = useState("");
   const workoutStartRef = useRef(null);
   const workoutIntervalRef = useRef(null);
   const sportDetailScrollRef = useRef(null);
@@ -4885,6 +4966,19 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
         }
       }
       setUsedFunFactIds(parsedUsedFunFacts);
+      const setFactorPromptsRaw = await AsyncStorage.getItem(
+        STORAGE_KEYS.setFactorPrompts
+      );
+      if (setFactorPromptsRaw) {
+        try {
+          const parsed = JSON.parse(setFactorPromptsRaw);
+          if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+            setSetFactorPrompts(parsed);
+          }
+        } catch (error) {
+          console.warn("Failed to parse set factor prompts", error);
+        }
+      }
       setHasLoaded(true);
     };
     load().catch((error) => {
@@ -5447,52 +5541,104 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     return updatedEntry;
   };
 
+  const updateSetFactorPrompt = (sportId, patch) => {
+    setSetFactorPrompts((current) => {
+      const next = {
+        ...current,
+        [sportId]: { ...(current[sportId] || {}), ...patch },
+      };
+      persistStorageValue(
+        STORAGE_KEYS.setFactorPrompts,
+        JSON.stringify(next),
+        "set factor prompts"
+      );
+      return next;
+    });
+  };
+
+  const applySuggestedFactor = async (sportId, factor) => {
+    const nextSports = sports.map((item) =>
+      item.id === sportId ? { ...item, difficultyLevel: factor } : item
+    );
+    await saveSports(nextSports);
+  };
+
+  const getSetTargetForSport = (sportId) =>
+    resolveSetTargetSeconds(
+      settings.setTargetSeconds,
+      computeSetScreenAverage(logs, sports, sportId)
+    );
+
   const maybeSuggestSetFactor = (sport, newEntry) => {
     if (
       !screenTimeFeaturesEnabled ||
       difficultyLockActive ||
       tutorialActive ||
-      !sport
+      !isFactorRelevantSport(sport)
     ) {
       return false;
     }
-    const entries = [
+    const promptState = setFactorPrompts[sport.id] || {};
+    if (promptState.never) {
+      return false;
+    }
+    const sinceTs = Number(promptState.lastTs) || 0;
+    const sets = [
       ...flattenSportEntries(logs, sport.id).filter(
         (entry) => entry?.id !== newEntry.id
       ),
       newEntry,
-    ];
-    const sinceTs = setFactorSuggestionTsRef.current[sport.id] || 0;
-    const suggestion = detectSetFactorSuggestion(sport, entries, sinceTs);
+    ]
+      .filter((entry) => entry && (entry.ts || 0) > sinceTs)
+      .sort((a, b) => (b.ts || 0) - (a.ts || 0));
+    if (sets.length < SET_FACTOR_CHECK_SETS) {
+      return false;
+    }
+    const suggestion = evaluateSetFactor(
+      sport,
+      sets,
+      getSetTargetForSport(sport.id)
+    );
     if (!suggestion) {
       return false;
     }
-    setFactorSuggestionTsRef.current = {
-      ...setFactorSuggestionTsRef.current,
-      [sport.id]: suggestion.lastTs,
-    };
+    const remember = (patch = {}) =>
+      updateSetFactorPrompt(sport.id, { lastTs: suggestion.lastTs, ...patch });
     Alert.alert(
       t("label.setFactorSuggestTitle"),
-      t("label.setFactorSuggestBody", {
-        sport: getSportLabel(sport),
-        earned: formatScreenTime(suggestion.totalSeconds),
-        current: suggestion.currentFactor,
-        factor: suggestion.suggestedFactor,
-      }),
+      t(
+        suggestion.direction === "tooEasy"
+          ? "label.setFactorSuggestBodyEasy"
+          : "label.setFactorSuggestBodyHard",
+        {
+          sport: getSportLabel(sport),
+          sets: SET_FACTOR_CHECK_SETS,
+          earned: formatScreenTime(suggestion.averageSeconds),
+          target: formatScreenTime(suggestion.targetSeconds),
+          current: suggestion.currentFactor,
+          factor: suggestion.suggestedFactor,
+        }
+      ),
       [
-        { text: t("label.setFactorSuggestLater"), style: "cancel" },
+        {
+          text: t("label.setFactorSuggestNever"),
+          style: "destructive",
+          onPress: () => remember({ never: true }),
+        },
+        {
+          text: t("label.setFactorSuggestLater"),
+          style: "cancel",
+          onPress: () => remember(),
+        },
         {
           text: t("label.setFactorSuggestApply"),
           onPress: async () => {
-            const nextSports = sports.map((item) =>
-              item.id === sport.id
-                ? { ...item, difficultyLevel: suggestion.suggestedFactor }
-                : item
-            );
-            await saveSports(nextSports);
+            remember();
+            await applySuggestedFactor(sport.id, suggestion.suggestedFactor);
           },
         },
-      ]
+      ],
+      { cancelable: false }
     );
     return true;
   };
@@ -7492,6 +7638,75 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       dailyFreeMinutes: Math.max(0, Math.min(DAILY_FREE_MINUTES_MAX, parsed)),
     });
     setIsDailyFreeSettingsOpen(false);
+  };
+
+  const openSetTargetSettings = () => {
+    const custom = Number(settings.setTargetSeconds);
+    setSetTargetInput(
+      Number.isFinite(custom) && custom > 0
+        ? String(Math.round((custom / 60) * 10) / 10)
+        : ""
+    );
+    setIsSetTargetSettingsOpen(true);
+  };
+
+  const saveSetTargetSettings = async (useAutomatic = false) => {
+    const parsed = Number.parseFloat(setTargetInput.replace(",", "."));
+    const nextTarget =
+      !useAutomatic && Number.isFinite(parsed) && parsed > 0
+        ? Math.round(Math.min(60, Math.max(0.5, parsed)) * 60)
+        : null;
+    await saveSettings({ ...settings, setTargetSeconds: nextTarget });
+    setIsSetTargetSettingsOpen(false);
+  };
+
+  const renderSetTargetSettingsModal = () => {
+    if (!isSetTargetSettingsOpen) {
+      return null;
+    }
+    return (
+      <Modal
+        visible={isSetTargetSettingsOpen}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setIsSetTargetSettingsOpen(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>{t("label.setTargetTitle")}</Text>
+            <Text style={styles.modalSubtitle}>
+              {t("label.setTargetDescription", {
+                average: formatScreenTime(setScreenReference.average),
+              })}
+            </Text>
+            <TextInput
+              style={styles.input}
+              value={setTargetInput}
+              onChangeText={setSetTargetInput}
+              keyboardType="decimal-pad"
+              placeholder={t("label.setTargetPlaceholder")}
+              placeholderTextColor="#7a7a7a"
+            />
+            <View style={styles.modalActions}>
+              <Pressable
+                style={styles.secondaryButton}
+                onPress={() => saveSetTargetSettings(true)}
+              >
+                <Text style={styles.secondaryButtonText}>
+                  {t("label.setTargetAutomatic")}
+                </Text>
+              </Pressable>
+              <Pressable
+                style={styles.primaryButton}
+                onPress={() => saveSetTargetSettings(false)}
+              >
+                <Text style={styles.primaryButtonText}>{t("label.save")}</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
   };
 
   const renderDailyFreeSettingsModal = () => {
@@ -10749,6 +10964,78 @@ const getSpeechLocale = () => {
     !motivationHiddenThisSession &&
     shouldShowMotivationAction;
 
+  const setScreenReference = useMemo(
+    () => computeSetScreenAverage(logs, sports),
+    [logs, sports]
+  );
+  const progressInsights = useMemo(() => {
+    const now = Date.now();
+    const improvements = [];
+    const factorHints = [];
+    sports.forEach((sport) => {
+      if (!isFactorRelevantSport(sport)) {
+        return;
+      }
+      const entries = getRecentSportSets(logs, sport.id);
+      const change = computeSportProgress(sport, entries, now);
+      if (change !== null && change >= PROGRESS_MIN_CHANGE) {
+        improvements.push({ sport, change });
+      }
+      if (
+        !screenTimeFeaturesEnabled ||
+        difficultyLockActive ||
+        setFactorPrompts[sport.id]?.never
+      ) {
+        return;
+      }
+      const suggestion = evaluateSetFactor(
+        sport,
+        entries,
+        resolveSetTargetSeconds(
+          settings.setTargetSeconds,
+          computeSetScreenAverage(logs, sports, sport.id)
+        )
+      );
+      if (suggestion && suggestion.direction === "tooEasy") {
+        factorHints.push({ sport, suggestion });
+      }
+    });
+    improvements.sort((a, b) => b.change - a.change);
+    return {
+      improvements: improvements.slice(0, 3),
+      factorHints: factorHints.slice(0, 2),
+    };
+  }, [
+    logs,
+    sports,
+    settings.setTargetSeconds,
+    setFactorPrompts,
+    difficultyLockActive,
+    screenTimeFeaturesEnabled,
+  ]);
+  const hasProgressInsights =
+    progressInsights.improvements.length > 0 ||
+    progressInsights.factorHints.length > 0;
+  const showTipsCard =
+    !missingPermissions &&
+    (hasProgressInsights || (showMotivationBlock && !!activeAction));
+  const progressMetricLabelKey = (sport) =>
+    sport.type === "time"
+      ? "label.progressMetricTime"
+      : sport.weightExercise
+      ? "label.progressMetricWeight"
+      : "label.progressMetricReps";
+  const tipsHeaderTitle = progressInsights.factorHints[0]
+    ? t("label.progressFactorHintTitle", {
+        sport: getSportLabel(progressInsights.factorHints[0].sport),
+      })
+    : progressInsights.improvements[0]
+    ? t("label.progressImprovementTitle", {
+        sport: getSportLabel(progressInsights.improvements[0].sport),
+        percent: Math.round(progressInsights.improvements[0].change * 100),
+      })
+    : activeActionTitle;
+
   const handleMotivationAction = (actionItem) => {
     if (!actionItem?.action) {
       return;
@@ -11454,13 +11741,13 @@ const getSpeechLocale = () => {
     prevShowGettingStartedRef.current = showGettingStartedBlock;
   }, [showGettingStartedBlock]);
 
-  const prevShowMotivationRef = useRef(showMotivationBlock);
+  const prevShowTipsCardRef = useRef(showTipsCard);
   useEffect(() => {
-    if (prevShowMotivationRef.current && !showMotivationBlock) {
+    if (prevShowTipsCardRef.current && !showTipsCard) {
       setMotivationOpen(false);
     }
-    prevShowMotivationRef.current = showMotivationBlock;
-  }, [showMotivationBlock]);
+    prevShowTipsCardRef.current = showTipsCard;
+  }, [showTipsCard]);
 
   useEffect(() => {
     if (gettingStartedTouched || !showGettingStartedBlock) {
@@ -14134,6 +14421,41 @@ const getSpeechLocale = () => {
               </View>
             </>
           ) : null}
+          {screenTimeFeaturesEnabled ? (
+            <>
+              <View style={styles.settingsDivider} />
+              <Text style={styles.settingsSectionTitle}>
+                {t("label.setTargetTitle")}
+              </Text>
+              <View style={styles.infoCard}>
+                <Text style={styles.helperText}>
+                  {setScreenReference.count >= SET_FACTOR_MIN_REFERENCE_SETS
+                    ? t("label.setTargetAverage", {
+                        average: formatScreenTime(setScreenReference.average),
+                        count: setScreenReference.count,
+                      })
+                    : t("label.setTargetAverageMissing", {
+                        target: formatScreenTime(SET_FACTOR_DEFAULT_TARGET_SECONDS),
+                      })}
+                </Text>
+                <Text style={styles.helperText}>
+                  {Number(settings.setTargetSeconds) > 0
+                    ? t("label.setTargetCustom", {
+                        target: formatScreenTime(settings.setTargetSeconds),
+                      })
+                    : t("label.setTargetAuto")}
+                </Text>
+                <Pressable
+                  style={styles.secondaryButton}
+                  onPress={openSetTargetSettings}
+                >
+                  <Text style={styles.secondaryButtonText}>
+                    {t("label.setTargetAction")}
+                  </Text>
+                </Pressable>
+              </View>
+            </>
+          ) : null}
           {screenTimeFeaturesEnabled && isAndroid ? (
             <>
               <View style={styles.settingsDivider} />
@@ -14541,7 +14863,7 @@ const getSpeechLocale = () => {
             ) : null}
           </View>
         ) : null}
-        {showMotivationBlock && activeAction ? (
+        {showTipsCard ? (
           <View style={styles.tipsCard}>
             <Pressable
               style={styles.tipsHeader}
@@ -14550,17 +14872,19 @@ const getSpeechLocale = () => {
               accessibilityState={{ expanded: motivationOpen }}
             >
               <View style={styles.tipsIconBubble}>
-                <Text style={styles.tipsIcon}>{"\u{1F4A1}"}</Text>
+                <Text style={styles.tipsIcon}>
+                  {hasProgressInsights ? "\u{1F4C8}" : "\u{1F4A1}"}
+                </Text>
               </View>
               <View style={styles.tipsHeaderTextColumn}>
                 <Text style={styles.tipsEyebrow}>
-                  {t("label.motivationCollapsedHint")}
+                  {t("label.tipsAndProgress")}
                 </Text>
                 <Text
                   style={styles.tipsHeaderTitle}
                   numberOfLines={motivationOpen ? 3 : 1}
                 >
-                  {activeActionTitle}
+                  {tipsHeaderTitle}
                 </Text>
               </View>
               <Text style={styles.tipsChevron}>
@@ -14569,39 +14893,114 @@ const getSpeechLocale = () => {
             </Pressable>
             {motivationOpen ? (
               <View style={styles.tipsBody}>
-                {activeActionBody ? (
-                  <Text style={styles.tipsText}>{activeActionBody}</Text>
-                ) : null}
-                {activeFunFact?.text ? (
-                  <View style={styles.tipsFact}>
-                    <Text style={styles.tipsFactTitle}>
-                      {t("label.motivationQuoteStartTitle")}
+                {progressInsights.improvements.length > 0 ? (
+                  <View style={styles.tipsSection}>
+                    <Text style={styles.tipsSectionTitle}>
+                      {t("label.progressTitle")}
                     </Text>
-                    <Text style={styles.tipsFactText}>{activeFunFact.text}</Text>
+                    {progressInsights.improvements.map(({ sport, change }) => (
+                      <View key={sport.id} style={styles.tipsProgressRow}>
+                        <Text style={styles.tipsProgressLabel} numberOfLines={1}>
+                          {sport.icon || DEFAULT_ICON} {getSportLabel(sport)}
+                        </Text>
+                        <Text style={styles.tipsProgressValue}>
+                          +{Math.round(change * 100)} %{" "}
+                          {t(progressMetricLabelKey(sport))}
+                        </Text>
+                      </View>
+                    ))}
+                    <Text style={styles.tipsHint}>{t("label.progressPeriodHint")}</Text>
                   </View>
                 ) : null}
-                <View style={styles.tipsActions}>
-                  <Pressable
-                    style={[
-                      styles.tipsPrimaryButton,
-                      activeAction.disabled && styles.tipsButtonDisabled,
-                    ]}
-                    onPress={() => handleMotivationAction(activeAction)}
-                    disabled={!!activeAction.disabled}
-                  >
-                    <Text style={styles.tipsPrimaryButtonText}>
-                      {activeActionLabel}
+                {progressInsights.factorHints.map(({ sport, suggestion }) => (
+                  <View key={`factor-${sport.id}`} style={styles.tipsFact}>
+                    <Text style={styles.tipsFactTitle}>
+                      {t("label.progressFactorHintTitle", {
+                        sport: getSportLabel(sport),
+                      })}
                     </Text>
-                  </Pressable>
-                  <Pressable
-                    style={styles.tipsSecondaryButton}
-                    onPress={() => handleMotivationDismiss(activeAction)}
-                  >
-                    <Text style={styles.tipsSecondaryButtonText}>
-                      {t("label.motivationNotInterested")}
+                    <Text style={styles.tipsFactText}>
+                      {t("label.progressFactorHintBody", {
+                        earned: formatScreenTime(suggestion.averageSeconds),
+                        target: formatScreenTime(suggestion.targetSeconds),
+                        current: suggestion.currentFactor,
+                        factor: suggestion.suggestedFactor,
+                      })}
                     </Text>
-                  </Pressable>
-                </View>
+                    <View style={styles.tipsActions}>
+                      <Pressable
+                        style={styles.tipsPrimaryButton}
+                        onPress={async () => {
+                          updateSetFactorPrompt(sport.id, {
+                            lastTs: suggestion.lastTs,
+                          });
+                          await applySuggestedFactor(
+                            sport.id,
+                            suggestion.suggestedFactor
+                          );
+                        }}
+                      >
+                        <Text style={styles.tipsPrimaryButtonText}>
+                          {t("label.setFactorSuggestApply")}
+                        </Text>
+                      </Pressable>
+                      <Pressable
+                        style={styles.tipsSecondaryButton}
+                        onPress={() =>
+                          updateSetFactorPrompt(sport.id, { never: true })
+                        }
+                      >
+                        <Text style={styles.tipsSecondaryButtonText}>
+                          {t("label.setFactorSuggestNever")}
+                        </Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                ))}
+                {showMotivationBlock && activeAction ? (
+                  <View style={styles.tipsSection}>
+                    {hasProgressInsights ? (
+                      <Text style={styles.tipsSectionTitle}>
+                        {activeActionTitle}
+                      </Text>
+                    ) : null}
+                    {activeActionBody ? (
+                      <Text style={styles.tipsText}>{activeActionBody}</Text>
+                    ) : null}
+                    {activeFunFact?.text ? (
+                      <View style={styles.tipsFact}>
+                        <Text style={styles.tipsFactTitle}>
+                          {t("label.motivationQuoteStartTitle")}
+                        </Text>
+                        <Text style={styles.tipsFactText}>
+                          {activeFunFact.text}
+                        </Text>
+                      </View>
+                    ) : null}
+                    <View style={styles.tipsActions}>
+                      <Pressable
+                        style={[
+                          styles.tipsPrimaryButton,
+                          activeAction.disabled && styles.tipsButtonDisabled,
+                        ]}
+                        onPress={() => handleMotivationAction(activeAction)}
+                        disabled={!!activeAction.disabled}
+                      >
+                        <Text style={styles.tipsPrimaryButtonText}>
+                          {activeActionLabel}
+                        </Text>
+                      </Pressable>
+                      <Pressable
+                        style={styles.tipsSecondaryButton}
+                        onPress={() => handleMotivationDismiss(activeAction)}
+                      >
+                        <Text style={styles.tipsSecondaryButtonText}>
+                          {t("label.motivationNotInterested")}
+                        </Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                ) : null}
               </View>
             ) : null}
           </View>
@@ -15279,6 +15678,7 @@ const getSpeechLocale = () => {
         {renderPrefaceSettingsModal()}
         {renderSickLimitSettingsModal()}
         {renderDailyFreeSettingsModal()}
+        {renderSetTargetSettingsModal()}
         {renderSportModal()}
         {renderCategoriesModal()}
         {renderCategoryDeleteModal()}
@@ -16824,6 +17224,34 @@ const styles = StyleSheet.create({
     color: COLORS.muted,
     fontSize: 14,
     lineHeight: 20,
+  },
+  tipsSection: {
+    gap: 8,
+  },
+  tipsSectionTitle: {
+    color: COLORS.text,
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  tipsProgressRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+  tipsProgressLabel: {
+    color: COLORS.text,
+    fontSize: 14,
+    flexShrink: 1,
+  },
+  tipsProgressValue: {
+    color: "#4ade80",
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  tipsHint: {
+    color: COLORS.muted,
+    fontSize: 11,
   },
   tipsFact: {
     backgroundColor: COLORS.cardAlt,

@@ -461,10 +461,52 @@ const de = {
     "label.active": "Aktiv",
     "label.off": "Aus",
     "label.setFactorSuggestTitle": "Userfaktor anpassen?",
-    "label.setFactorSuggestBody":
-      "Deine letzten 3 Sets {{sport}} haben zusammen {{earned}} Bildschirmzeit ergeben. Ziel sind etwa 5 Minuten pro 3 Sets. Soll der Userfaktor von {{current}} auf {{factor}} geändert werden?",
-    "label.setFactorSuggestApply": "Anpassen",
-    "label.setFactorSuggestLater": "Nicht jetzt",
+    "label.setFactorSuggestBodyEasy":
+      "Deine letzten {{sets}} Sets {{sport}} brachten im Schnitt {{earned}} Bildschirmzeit pro Set – deutlich mehr als dein Wert von {{target}} pro Set. Soll der Userfaktor strenger werden ({{current}} → {{factor}})?",
+    "label.setFactorSuggestBodyHard":
+      "Deine letzten {{sets}} Sets {{sport}} brachten im Schnitt nur {{earned}} Bildschirmzeit pro Set – deutlich weniger als dein Wert von {{target}} pro Set. Soll der Userfaktor großzügiger werden ({{current}} → {{factor}})?",
+    "label.setFactorSuggestApply":
+      "Ja, anpassen",
+    "label.setFactorSuggestLater":
+      "Nicht jetzt",
+    "label.setFactorSuggestNever":
+      "Nie",
+    "label.setTargetTitle":
+      "Bildschirmzeit pro Set",
+    "label.setTargetDescription":
+      "Ziel in Minuten pro Set, an dem sich die Vorschläge für den Userfaktor orientieren. Leer lassen oder „Automatisch“ wählen, um deinen Durchschnitt ({{average}}) zu verwenden.",
+    "label.setTargetPlaceholder":
+      "z. B. 5",
+    "label.setTargetAutomatic":
+      "Automatisch",
+    "label.setTargetAverage":
+      "Dein Durchschnitt: {{average}} pro Set (aus {{count}} Sets).",
+    "label.setTargetAverageMissing":
+      "Noch zu wenig Sets für einen Durchschnitt – Standard: {{target}} pro Set.",
+    "label.setTargetCustom":
+      "Ziel: {{target}} pro Set (selbst festgelegt).",
+    "label.setTargetAuto":
+      "Ziel: automatisch (Durchschnitt deiner Übungen).",
+    "label.setTargetAction":
+      "Ziel festlegen",
+    "label.tipsAndProgress":
+      "Tipps & Fortschritt",
+    "label.progressTitle":
+      "Dein Fortschritt",
+    "label.progressMetricReps":
+      "Wdh. pro Set",
+    "label.progressMetricWeight":
+      "Volumen pro Set",
+    "label.progressMetricTime":
+      "Zeit pro Set",
+    "label.progressPeriodHint":
+      "Letzte 7 Tage im Vergleich zu den 4 Wochen davor.",
+    "label.progressImprovementTitle":
+      "{{sport}}: +{{percent}} % pro Set",
+    "label.progressFactorHintTitle":
+      "{{sport}} ist leichter geworden",
+    "label.progressFactorHintBody":
+      "Du bekommst inzwischen im Schnitt {{earned}} pro Set statt etwa {{target}}. Userfaktor strenger machen ({{current}} → {{factor}})?",
     "label.balanceSuggestTitle": "Faktor anpassen?",
     "label.balanceSuggestBody": "{{high}} ergibt ~{{rateHigh}} pro Einheit, {{low}} nur ~{{rateLow}}. Soll der Userfaktor für {{low}} auf {{factor}} erhöht werden?",
     "label.balanceSuggestApply": "Erhöhen",

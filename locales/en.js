@@ -457,10 +457,52 @@ const en = {
     "label.active": "On",
     "label.off": "Off",
     "label.setFactorSuggestTitle": "Adjust user factor?",
-    "label.setFactorSuggestBody":
-      "Your last 3 sets of {{sport}} earned {{earned}} of screen time in total. The target is about 5 minutes per 3 sets. Change the user factor from {{current}} to {{factor}}?",
-    "label.setFactorSuggestApply": "Adjust",
-    "label.setFactorSuggestLater": "Not now",
+    "label.setFactorSuggestBodyEasy":
+      "Your last {{sets}} sets of {{sport}} earned {{earned}} of screen time per set on average – clearly more than your value of {{target}} per set. Make the user factor stricter ({{current}} → {{factor}})?",
+    "label.setFactorSuggestBodyHard":
+      "Your last {{sets}} sets of {{sport}} earned only {{earned}} of screen time per set on average – clearly less than your value of {{target}} per set. Make the user factor more generous ({{current}} → {{factor}})?",
+    "label.setFactorSuggestApply":
+      "Yes, adjust",
+    "label.setFactorSuggestLater":
+      "Not now",
+    "label.setFactorSuggestNever":
+      "Never",
+    "label.setTargetTitle":
+      "Screen time per set",
+    "label.setTargetDescription":
+      "Target in minutes per set that user factor suggestions aim for. Leave empty or choose \"Automatic\" to use your average ({{average}}).",
+    "label.setTargetPlaceholder":
+      "e.g. 5",
+    "label.setTargetAutomatic":
+      "Automatic",
+    "label.setTargetAverage":
+      "Your average: {{average}} per set (from {{count}} sets).",
+    "label.setTargetAverageMissing":
+      "Not enough sets for an average yet – default: {{target}} per set.",
+    "label.setTargetCustom":
+      "Target: {{target}} per set (custom).",
+    "label.setTargetAuto":
+      "Target: automatic (average of your exercises).",
+    "label.setTargetAction":
+      "Set target",
+    "label.tipsAndProgress":
+      "Tips & progress",
+    "label.progressTitle":
+      "Your progress",
+    "label.progressMetricReps":
+      "reps per set",
+    "label.progressMetricWeight":
+      "volume per set",
+    "label.progressMetricTime":
+      "time per set",
+    "label.progressPeriodHint":
+      "Last 7 days compared with the 4 weeks before.",
+    "label.progressImprovementTitle":
+      "{{sport}}: +{{percent}} % per set",
+    "label.progressFactorHintTitle":
+      "{{sport}} got easier",
+    "label.progressFactorHintBody":
+      "You now earn {{earned}} per set on average instead of about {{target}}. Make the user factor stricter ({{current}} → {{factor}})?",
     "label.balanceSuggestTitle": "Adjust factor?",
     "label.balanceSuggestBody": "{{high}} gives ~{{rateHigh}} per unit, {{low}} only ~{{rateLow}}. Increase {{low}}'s user factor to {{factor}}?",
     "label.balanceSuggestApply": "Increase",

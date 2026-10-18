@@ -459,10 +459,52 @@ const es = {
     "label.active": "Activado",
     "label.off": "Desactivado",
     "label.setFactorSuggestTitle": "¿Ajustar el factor de usuario?",
-    "label.setFactorSuggestBody":
-      "Tus últimas 3 series de {{sport}} dieron en total {{earned}} de tiempo de pantalla. El objetivo son unos 5 minutos por 3 series. ¿Cambiar el factor de usuario de {{current}} a {{factor}}?",
-    "label.setFactorSuggestApply": "Ajustar",
-    "label.setFactorSuggestLater": "Ahora no",
+    "label.setFactorSuggestBodyEasy":
+      "Tus últimas {{sets}} series de {{sport}} dieron de media {{earned}} de tiempo de pantalla por serie, bastante más que tu valor de {{target}} por serie. ¿Hacer el factor de usuario más estricto ({{current}} → {{factor}})?",
+    "label.setFactorSuggestBodyHard":
+      "Tus últimas {{sets}} series de {{sport}} dieron de media solo {{earned}} de tiempo de pantalla por serie, bastante menos que tu valor de {{target}} por serie. ¿Hacer el factor de usuario más generoso ({{current}} → {{factor}})?",
+    "label.setFactorSuggestApply":
+      "Sí, ajustar",
+    "label.setFactorSuggestLater":
+      "Ahora no",
+    "label.setFactorSuggestNever":
+      "Nunca",
+    "label.setTargetTitle":
+      "Tiempo de pantalla por serie",
+    "label.setTargetDescription":
+      "Objetivo en minutos por serie que usan las sugerencias del factor de usuario. Déjalo vacío o elige «Automático» para usar tu media ({{average}}).",
+    "label.setTargetPlaceholder":
+      "p. ej. 5",
+    "label.setTargetAutomatic":
+      "Automático",
+    "label.setTargetAverage":
+      "Tu media: {{average}} por serie (de {{count}} series).",
+    "label.setTargetAverageMissing":
+      "Aún no hay series suficientes para una media; estándar: {{target}} por serie.",
+    "label.setTargetCustom":
+      "Objetivo: {{target}} por serie (personalizado).",
+    "label.setTargetAuto":
+      "Objetivo: automático (media de tus ejercicios).",
+    "label.setTargetAction":
+      "Definir objetivo",
+    "label.tipsAndProgress":
+      "Consejos y progreso",
+    "label.progressTitle":
+      "Tu progreso",
+    "label.progressMetricReps":
+      "rep. por serie",
+    "label.progressMetricWeight":
+      "volumen por serie",
+    "label.progressMetricTime":
+      "tiempo por serie",
+    "label.progressPeriodHint":
+      "Últimos 7 días comparados con las 4 semanas anteriores.",
+    "label.progressImprovementTitle":
+      "{{sport}}: +{{percent}} % por serie",
+    "label.progressFactorHintTitle":
+      "{{sport}} te resulta más fácil",
+    "label.progressFactorHintBody":
+      "Ahora obtienes de media {{earned}} por serie en lugar de unos {{target}}. ¿Hacer el factor de usuario más estricto ({{current}} → {{factor}})?",
     "label.balanceSuggestTitle": "¿Ajustar factor?",
     "label.balanceSuggestBody": "{{high}} da ~{{rateHigh}} por unidad, {{low}} solo ~{{rateLow}}. ¿Aumentar el factor de {{low}} a {{factor}}?",
     "label.balanceSuggestApply": "Aumentar",
