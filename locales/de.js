@@ -507,6 +507,48 @@ const de = {
       "{{sport}} ist leichter geworden",
     "label.progressFactorHintBody":
       "Du bekommst inzwischen im Schnitt {{earned}} pro Set statt etwa {{target}}. Userfaktor strenger machen ({{current}} → {{factor}})?",
+    "label.creditSettingsTitle":
+      "Kredit",
+    "label.creditEnabled":
+      "Kredite erlauben",
+    "label.creditMinutesPerCredit":
+      "Minuten pro Kredit",
+    "label.creditMaxPerDay":
+      "Kredite pro Tag",
+    "label.creditUsageSummary":
+      "Letzte 7 Tage: {{count}} Kredite ({{minutes}} Min.). Kredite ändern deine Userfaktoren nicht, sie landen nur in der Statistik.",
+    "label.creditGoalTitle":
+      "Wenn du zu oft Kredit brauchst",
+    "label.creditGoal_moreSport":
+      "Mehr Sport machen",
+    "label.creditGoal_moreSport_hint":
+      "Die App zeigt dir, wie viele Sets die geliehene Zeit ersetzen würden.",
+    "label.creditGoal_adjustFactors":
+      "Userfaktoren angleichen",
+    "label.creditGoal_adjustFactors_hint":
+      "Als Zwischenschritt: Sport bringt etwas mehr Bildschirmzeit, damit du weniger leihen musst.",
+    "label.creditGoal_lessScreenTime":
+      "Weniger Bildschirmzeit",
+    "label.creditGoal_lessScreenTime_hint":
+      "Die App schlägt vor, dein Kredit-Limit Schritt für Schritt zu senken.",
+    "label.creditStatsTitle":
+      "Bildschirmzeit der letzten 7 Tage",
+    "label.creditStatsSport":
+      "Sport: {{time}}",
+    "label.creditStatsCredit":
+      "Kredit: {{time}} ({{count}}×)",
+    "label.creditStatsGood":
+      "Stark! {{percent}} % deiner Bildschirmzeit hast du dir mit Sport verdient.",
+    "label.creditStatsMoreSport":
+      "Ein großer Teil kam aus Krediten. Etwa {{sets}} Sets würden diese Zeit durch Sport ersetzen.",
+    "label.creditStatsAdjust":
+      "Du leihst dir oft Zeit. Mit {{percent}} % höheren Userfaktoren bringt Sport mehr – als Zwischenschritt.",
+    "label.creditStatsAdjustAction":
+      "Userfaktoren um {{percent}} % erhöhen",
+    "label.creditStatsLess":
+      "Du leihst dir oft Zeit. Versuch, mit etwas weniger Bildschirmzeit auszukommen.",
+    "label.creditStatsLessAction":
+      "Kredit-Limit senken",
     "label.balanceSuggestTitle": "Faktor anpassen?",
     "label.balanceSuggestBody": "{{high}} ergibt ~{{rateHigh}} pro Einheit, {{low}} nur ~{{rateLow}}. Soll der Userfaktor für {{low}} auf {{factor}} erhöht werden?",
     "label.balanceSuggestApply": "Erhöhen",

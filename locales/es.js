@@ -505,6 +505,48 @@ const es = {
       "{{sport}} te resulta más fácil",
     "label.progressFactorHintBody":
       "Ahora obtienes de media {{earned}} por serie en lugar de unos {{target}}. ¿Hacer el factor de usuario más estricto ({{current}} → {{factor}})?",
+    "label.creditSettingsTitle":
+      "Crédito",
+    "label.creditEnabled":
+      "Permitir créditos",
+    "label.creditMinutesPerCredit":
+      "Minutos por crédito",
+    "label.creditMaxPerDay":
+      "Créditos por día",
+    "label.creditUsageSummary":
+      "Últimos 7 días: {{count}} créditos ({{minutes}} min). Los créditos no cambian tus factores de usuario, solo aparecen en las estadísticas.",
+    "label.creditGoalTitle":
+      "Si necesitas crédito demasiado a menudo",
+    "label.creditGoal_moreSport":
+      "Hacer más deporte",
+    "label.creditGoal_moreSport_hint":
+      "La app te muestra cuántas series reemplazarían el tiempo prestado.",
+    "label.creditGoal_adjustFactors":
+      "Ajustar factores de usuario",
+    "label.creditGoal_adjustFactors_hint":
+      "Como paso intermedio: el deporte da algo más de tiempo de pantalla para que pidas menos prestado.",
+    "label.creditGoal_lessScreenTime":
+      "Menos tiempo de pantalla",
+    "label.creditGoal_lessScreenTime_hint":
+      "La app propone bajar tu límite de crédito poco a poco.",
+    "label.creditStatsTitle":
+      "Tiempo de pantalla de los últimos 7 días",
+    "label.creditStatsSport":
+      "Deporte: {{time}}",
+    "label.creditStatsCredit":
+      "Crédito: {{time}} ({{count}}×)",
+    "label.creditStatsGood":
+      "¡Genial! Ganaste el {{percent}} % de tu tiempo de pantalla con deporte.",
+    "label.creditStatsMoreSport":
+      "Una gran parte vino de créditos. Unas {{sets}} series reemplazarían ese tiempo con deporte.",
+    "label.creditStatsAdjust":
+      "Pides tiempo prestado a menudo. Con factores de usuario un {{percent}} % más altos, el deporte da más, como paso intermedio.",
+    "label.creditStatsAdjustAction":
+      "Subir factores un {{percent}} %",
+    "label.creditStatsLess":
+      "Pides tiempo prestado a menudo. Intenta arreglártelas con algo menos de tiempo de pantalla.",
+    "label.creditStatsLessAction":
+      "Bajar límite de crédito",
     "label.balanceSuggestTitle": "¿Ajustar factor?",
     "label.balanceSuggestBody": "{{high}} da ~{{rateHigh}} por unidad, {{low}} solo ~{{rateLow}}. ¿Aumentar el factor de {{low}} a {{factor}}?",
     "label.balanceSuggestApply": "Aumentar",

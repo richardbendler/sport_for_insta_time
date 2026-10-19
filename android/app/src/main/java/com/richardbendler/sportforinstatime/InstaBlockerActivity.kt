@@ -33,6 +33,7 @@ class InstaBlockerActivity : AppCompatActivity() {
   private lateinit var brainButton: Button
   private lateinit var brainStatus: TextView
   private lateinit var creditSection: View
+  private lateinit var creditLabel: TextView
   private lateinit var creditButton: Button
   private lateinit var creditPenalty: TextView
   private lateinit var creditLockNotice: TextView
@@ -41,7 +42,6 @@ class InstaBlockerActivity : AppCompatActivity() {
   private lateinit var sickStatus: TextView
   private var targetPackage: String? = null
   private var pendingContinuePackage: String? = null
-  private val CREDIT_MINUTES = 10
   private val SICK_OVERRIDE_DURATION_MS = 24L * 60L * 60L * 1000L
   private val SICK_MODE_ID = "sick_mode"
   private val SICK_QUESTION_HISTORY_KEY = "sick_question_history"
@@ -77,6 +77,7 @@ class InstaBlockerActivity : AppCompatActivity() {
     brainStatus = findViewById(R.id.blocker_brain_status)
     brainButton.setOnClickListener { openBrainSport() }
     creditSection = findViewById(R.id.blocker_credit_section)
+    creditLabel = findViewById(R.id.blocker_credit_label)
     creditButton = findViewById(R.id.blocker_credit_button)
     creditPenalty = findViewById(R.id.blocker_credit_penalty)
     creditLockNotice = findViewById(R.id.blocker_credit_lock_notice)
@@ -96,32 +97,28 @@ class InstaBlockerActivity : AppCompatActivity() {
 
   private fun updateCreditSection(showCredit: Boolean) {
     val prefs = getSharedPreferences("insta_control", MODE_PRIVATE)
-    if (!showCredit) {
+    if (!showCredit || !CreditStore.isEnabled(prefs)) {
       creditSection.visibility = View.GONE
       return
     }
     val now = System.currentTimeMillis()
-    val lockExpiresAt = CreditStore.getCreditLockExpiresAt(prefs, now)
-    if (lockExpiresAt > now) {
-      showCreditLocked(lockExpiresAt)
+    val minutes = CreditStore.getMinutesPerCredit(prefs)
+    val maxPerDay = CreditStore.getMaxPerDay(prefs)
+    val takenToday = CreditStore.getCreditsTakenToday(prefs, now)
+    creditSection.visibility = View.VISIBLE
+    creditLabel.text = getString(R.string.preface_credit_label, minutes)
+    creditButton.visibility = View.VISIBLE
+    if (takenToday >= maxPerDay) {
+      creditButton.isEnabled = false
+      creditPenalty.visibility = View.GONE
+      creditLockNotice.visibility = View.VISIBLE
+      creditLockNotice.text = getString(R.string.preface_credit_locked, takenToday, maxPerDay)
       return
     }
-    creditLockNotice.visibility = View.GONE
-    creditButton.visibility = View.VISIBLE
-    creditPenalty.visibility = View.VISIBLE
-    creditSection.visibility = View.VISIBLE
     creditButton.isEnabled = true
-    updateCreditPenaltyText(CREDIT_MINUTES)
-  }
-
-  private fun showCreditLocked(lockExpiresAt: Long) {
-    creditSection.visibility = View.VISIBLE
-    creditLockNotice.visibility = View.VISIBLE
-    creditButton.visibility = View.VISIBLE
-    creditButton.isEnabled = false
-    creditPenalty.visibility = View.GONE
-    creditLockNotice.text =
-      getString(R.string.preface_credit_locked, formatLockExpiryLabel(lockExpiresAt))
+    creditLockNotice.visibility = View.GONE
+    creditPenalty.visibility = View.VISIBLE
+    creditPenalty.text = getString(R.string.preface_credit_penalty, takenToday, maxPerDay)
   }
 
   private fun formatLockExpiryLabel(timestamp: Long): String {
@@ -150,15 +147,15 @@ class InstaBlockerActivity : AppCompatActivity() {
     OverallWidgetProvider.refreshAll(this)
   }
 
-  private fun updateCreditPenaltyText(minutes: Int) {
-    val penaltyPercent = CreditStore.computePenaltyPercentForMinutes(minutes)
-    creditPenalty.text = getString(R.string.preface_credit_penalty, penaltyPercent)
-  }
-
   private fun showCreditWarningDialog() {
     AlertDialog.Builder(this)
       .setTitle(getString(R.string.preface_credit_warning_title))
-      .setMessage(getString(R.string.preface_credit_warning_body))
+      .setMessage(
+        getString(
+          R.string.preface_credit_warning_body,
+          CreditStore.getMinutesPerCredit(getSharedPreferences("insta_control", MODE_PRIVATE))
+        )
+      )
       .setNegativeButton(getString(R.string.preface_credit_warning_cancel), null)
       .setPositiveButton(getString(R.string.preface_credit_warning_confirm)) { _, _ ->
         grantCredit()
@@ -167,24 +164,26 @@ class InstaBlockerActivity : AppCompatActivity() {
   }
 
   private fun grantCredit() {
-    val safeMinutes = CREDIT_MINUTES
-    val totalSeconds = safeMinutes * 60
-    val entryId = "credit_${System.currentTimeMillis()}"
     val prefs = getSharedPreferences("insta_control", MODE_PRIVATE)
     val now = System.currentTimeMillis()
-    val lockExpiresAt = CreditStore.getCreditLockExpiresAt(prefs, now)
-    if (lockExpiresAt > now) {
-      showCreditLocked(lockExpiresAt)
+    if (!CreditStore.canTakeCredit(prefs, now)) {
+      updateCreditSection(true)
       return
     }
-    ScreenTimeStore.upsertEntry(prefs, entryId, null, now, totalSeconds)
-    val multiplier = CreditStore.computeCreditMultiplier(totalSeconds)
-    CreditStore.setCreditInfo(prefs, entryId, safeMinutes, multiplier)
-    CreditStore.scheduleCreditLock(prefs, now)
-    val penaltyPercent = CreditStore.computePenaltyPercentForMinutes(safeMinutes)
+    val minutes = CreditStore.getMinutesPerCredit(prefs)
+    val entryId = "credit_$now"
+    ScreenTimeStore.upsertEntry(prefs, entryId, null, now, minutes * 60)
+    CreditStore.setCreditInfo(prefs, entryId, minutes)
+    CreditStore.recordCredit(prefs, now, minutes)
+    OverallWidgetProvider.refreshAll(this)
     showSuccessScreen(
       getString(R.string.blocker_success_credit_title),
-      getString(R.string.preface_credit_success, safeMinutes, penaltyPercent)
+      getString(
+        R.string.preface_credit_success,
+        minutes,
+        CreditStore.getCreditsTakenToday(prefs, now),
+        CreditStore.getMaxPerDay(prefs)
+      )
     )
   }
 

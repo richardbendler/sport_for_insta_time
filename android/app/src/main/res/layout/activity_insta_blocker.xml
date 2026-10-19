@@ -163,10 +163,11 @@
       android:textStyle="bold" />
 
     <TextView
+      android:id="@+id/blocker_credit_label"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginTop="3dp"
-      android:text="@string/preface_credit_label"
+      android:text="@string/preface_credit_title"
       android:textColor="#cbd5f5"
       android:textSize="11sp"
       android:gravity="center" />
@@ -188,7 +189,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginTop="4dp"
-      android:text="@string/preface_credit_penalty"
+      android:text=""
       android:textColor="#d1d5ff"
       android:textSize="10sp" />
 
@@ -197,7 +198,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginTop="4dp"
-      android:text="@string/preface_credit_locked"
+      android:text=""
       android:textColor="#94a3b8"
       android:textSize="10sp"
       android:visibility="gone" />

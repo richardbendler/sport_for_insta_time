@@ -283,6 +283,11 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
+  fun setCreditSettings(enabled: Boolean, minutes: Int, maxPerDay: Int) {
+    CreditStore.setSettings(getPrefs(), enabled, minutes, maxPerDay)
+  }
+
+  @ReactMethod
   fun setPrefaceDelaySeconds(seconds: Int) {
     val prefs = getPrefs()
     val safeSeconds = if (seconds < 0) 0 else seconds
@@ -381,6 +386,15 @@ class InstaControlModule(private val reactContext: ReactApplicationContext) :
       map.putDouble("creditPenaltyMultiplier", creditMultiplier.toDouble())
       val lockExpiresAt = CreditStore.getCreditLockExpiresAt(prefs, now)
       map.putDouble("creditLockExpiresAt", lockExpiresAt.toDouble())
+      map.putInt("creditsToday", CreditStore.getCreditsTakenToday(prefs, now))
+      val creditHistory = Arguments.createArray()
+      CreditStore.getHistory(prefs).forEach { record ->
+        val item = Arguments.createMap()
+        item.putDouble("ts", record.ts.toDouble())
+        item.putInt("minutes", record.minutes)
+        creditHistory.pushMap(item)
+      }
+      map.putArray("creditHistory", creditHistory)
       OverallWidgetProvider.refreshAll(reactContext)
       promise.resolve(map)
     } catch (e: Exception) {

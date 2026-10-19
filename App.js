@@ -150,6 +150,11 @@ const DEFAULT_SETTINGS = {
   sickModeDailyMinutes: 30,
   dailyFreeMinutes: 10,
   setTargetSeconds: null,
+  creditEnabled: true,
+  creditMinutes: 10,
+  creditMaxPerDay: 1,
+  creditGoal: "moreSport",
+  creditFactorAdjustedAt: 0,
 };
 
 const SPEECH_LOCALES = {
@@ -170,6 +175,13 @@ const DAILY_FREE_ENTRY_PREFIX = "daily_free_";
 const DAILY_FREE_STATS_GROUP_ID = "daily_free";
 const DAILY_FREE_ENTRY_ICON = "🎁";
 const DAILY_FREE_MINUTES_MAX = 240;
+const CREDIT_MINUTES_OPTIONS = [5, 10, 15, 20, 30];
+const CREDIT_MAX_PER_DAY_MAX = 10;
+const CREDIT_GOALS = ["moreSport", "adjustFactors", "lessScreenTime"];
+const CREDIT_STATS_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+const CREDIT_SHARE_WARNING = 0.25;
+const CREDIT_FACTOR_ADJUST_MAX = 1.25;
+const CREDIT_FACTOR_ADJUST_COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
 const WIDGET_BASE_SCHEME = "com.richardbendler.sportforinstatime";
 const WIDGET_ALT_SCHEMES = ["exp+sport-for-insta-time"];
 const ANDROID_PACKAGE_NAME = "com.richardbendler.sportforinstatime";
@@ -3771,6 +3783,22 @@ function AppContent() {
   const [stats, setStats] = useState({});
   const [logs, setLogs] = useState({});
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+  const creditSettings = {
+    enabled: settings.creditEnabled !== false,
+    minutes: CREDIT_MINUTES_OPTIONS.includes(Number(settings.creditMinutes))
+      ? Number(settings.creditMinutes)
+      : DEFAULT_SETTINGS.creditMinutes,
+    maxPerDay: Math.max(
+      1,
+      Math.min(
+        CREDIT_MAX_PER_DAY_MAX,
+        Math.round(Number(settings.creditMaxPerDay) || DEFAULT_SETTINGS.creditMaxPerDay)
+      )
+    ),
+    goal: CREDIT_GOALS.includes(settings.creditGoal)
+      ? settings.creditGoal
+      : DEFAULT_SETTINGS.creditGoal,
+  };
   const dailyFreeMinutes = Number.isFinite(Number(settings.dailyFreeMinutes))
     ? Math.max(
         0,
@@ -4032,136 +4060,35 @@ function AppContent() {
       setNewDifficultyLevel(difficultyLevelForSport(editingSport));
     }
   }, [difficultyLockActive, editingSportId, sports]);
+  // Credits used to make the user factors stricter for 24 hours. That penalty
+  // was removed; factors lowered by an older version are restored once.
   useEffect(() => {
-    if (!hasLoaded) {
+    if (!hasLoaded || !creditFactorRestore?.bySport) {
       return;
     }
-    const persistOrClear = async () => {
-      if (!difficultyLockActive) {
-        const now = Date.now();
-        const canClearSnapshot =
-          creditLockExpiresAtValue <= now &&
-          creditLockSnapshotExpiresAtRef.current <= now;
-        if (
-          creditFactorRestore?.bySport &&
-          (!creditFactorRestore.expiresAt || creditFactorRestore.expiresAt <= now)
-        ) {
-          const restoredSports = sports.map((sport) => {
-            const original = creditFactorRestore.bySport?.[sport.id];
-            if (!Number.isFinite(Number(original))) {
-              return sport;
-            }
-            return {
-              ...sport,
-              difficultyLevel: clampDifficultyLevel(original),
-            };
-          });
-          await saveSports(restoredSports);
-          setCreditFactorRestore(null);
-          setCreditLockMinimums({});
-          creditLockSnapshotExpiresAtRef.current = 0;
-          try {
-            await AsyncStorage.multiRemove([
-              STORAGE_KEYS.creditFactorRestore,
-              STORAGE_KEYS.creditLockMinimums,
-            ]);
-          } catch (error) {
-            console.warn("Failed to clear credit factor restore", error);
-          }
-          return;
+    const restore = async () => {
+      const restoredSports = sports.map((sport) => {
+        const original = creditFactorRestore.bySport?.[sport.id];
+        if (!Number.isFinite(Number(original))) {
+          return sport;
         }
-        if (!canClearSnapshot) {
-          return;
-        }
-        if (
-          creditLockSnapshotExpiresAtRef.current !== 0 ||
-          Object.keys(creditLockMinimums).length > 0
-        ) {
-          setCreditLockMinimums({});
-          creditLockSnapshotExpiresAtRef.current = 0;
-          try {
-            await AsyncStorage.multiRemove([
-              STORAGE_KEYS.creditFactorRestore,
-              STORAGE_KEYS.creditLockMinimums,
-            ]);
-          } catch (error) {
-            console.warn("Failed to clear credit lock minimums", error);
-          }
-        }
-        return;
-      }
-      const hasRestoreForCurrentLock =
-        creditFactorRestore?.expiresAt === creditLockExpiresAtValue &&
-        creditFactorRestore?.bySport &&
-        typeof creditFactorRestore.bySport === "object";
-      const originalBySport = hasRestoreForCurrentLock
-        ? { ...creditFactorRestore.bySport }
-        : {};
-      const strictBySport = {};
-      let needsSportUpdate = false;
-      sports.forEach((sport) => {
-        const currentDifficulty = difficultyLevelForSport(sport);
-        if (!Number.isFinite(Number(originalBySport[sport.id]))) {
-          originalBySport[sport.id] = currentDifficulty;
-        }
-        const strictDifficulty = stricterCreditDifficultyLevel(
-          originalBySport[sport.id]
-        );
-        strictBySport[sport.id] = strictDifficulty;
-        if (currentDifficulty !== strictDifficulty) {
-          needsSportUpdate = true;
-        }
+        return { ...sport, difficultyLevel: clampDifficultyLevel(original) };
       });
-      const nextRestore = {
-        expiresAt: creditLockExpiresAtValue,
-        bySport: originalBySport,
-      };
-      const hasStrictSnapshot =
-        creditLockExpiresAtValue === creditLockSnapshotExpiresAtRef.current &&
-        sports.every(
-          (sport) =>
-            Number(creditLockMinimums?.[sport.id]) ===
-            Number(strictBySport[sport.id])
-        );
-      if (!needsSportUpdate && hasRestoreForCurrentLock && hasStrictSnapshot) {
-        return;
-      }
-      if (needsSportUpdate) {
-        await saveSports(
-          sports.map((sport) => ({
-            ...sport,
-            difficultyLevel: strictBySport[sport.id] ?? sport.difficultyLevel,
-          }))
-        );
-      }
-      setCreditFactorRestore(nextRestore);
-      setCreditLockMinimums(strictBySport);
-      creditLockSnapshotExpiresAtRef.current = creditLockExpiresAtValue;
+      await saveSports(restoredSports);
+      setCreditFactorRestore(null);
+      setCreditLockMinimums({});
+      creditLockSnapshotExpiresAtRef.current = 0;
       try {
-        await AsyncStorage.setItem(
+        await AsyncStorage.multiRemove([
           STORAGE_KEYS.creditFactorRestore,
-          JSON.stringify(nextRestore)
-        );
-        await AsyncStorage.setItem(
           STORAGE_KEYS.creditLockMinimums,
-          JSON.stringify({
-            expiresAt: creditLockExpiresAtValue,
-            bySport: strictBySport,
-          })
-        );
+        ]);
       } catch (error) {
-        console.warn("Failed to persist credit lock minimums", error);
+        console.warn("Failed to clear credit factor restore", error);
       }
     };
-    persistOrClear();
-  }, [
-    creditLockExpiresAtValue,
-    creditFactorRestore,
-    creditLockMinimums,
-    difficultyLockActive,
-    hasLoaded,
-    sports,
-  ]);
+    restore();
+  }, [creditFactorRestore, hasLoaded, sports]);
   const [screenTimeEntries, setScreenTimeEntries] = useState([]);
   const refreshScreenTimeEntriesRef = useRef(null);
   const screenTimeSyncedEntryIdsRef = useRef(new Set());
@@ -6496,6 +6423,10 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
           Number.isFinite(state.creditLockExpiresAt)
             ? state.creditLockExpiresAt
             : 0,
+        creditsToday: Number(state.creditsToday) || 0,
+        creditHistory: Array.isArray(state.creditHistory)
+          ? state.creditHistory
+          : [],
       });
     }
   };
@@ -6764,6 +6695,22 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       : DEFAULT_SETTINGS.sickModeDailyMinutes;
     InstaControl.setSickModeLimitMinutes(nextLimit);
   }, [settings.sickModeDailyMinutes]);
+
+  useEffect(() => {
+    if (!hasLoaded || !InstaControl?.setCreditSettings) {
+      return;
+    }
+    InstaControl.setCreditSettings(
+      creditSettings.enabled,
+      creditSettings.minutes,
+      creditSettings.maxPerDay
+    );
+  }, [
+    creditSettings.enabled,
+    creditSettings.minutes,
+    creditSettings.maxPerDay,
+    hasLoaded,
+  ]);
 
   useEffect(() => {
     if (!hasLoaded || !InstaControl?.setDailyFreeMinutes) {
@@ -7639,6 +7586,59 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
     });
     setIsDailyFreeSettingsOpen(false);
   };
+
+  const updateCreditSettings = (patch) =>
+    saveSettings({ ...settings, ...patch });
+
+  const adjustFactorsForCredit = async () => {
+    const multiplier = 1 + creditFactorAdjustPercent / 100;
+    const nextSports = sports.map((sport) =>
+      isFactorRelevantSport(sport)
+        ? {
+            ...sport,
+            difficultyLevel: clampDifficultyLevel(
+              difficultyLevelForSport(sport) * multiplier
+            ),
+          }
+        : sport
+    );
+    await saveSports(nextSports);
+    await saveSettings({ ...settings, creditFactorAdjustedAt: Date.now() });
+  };
+
+  const lowerCreditLimit = async () => {
+    if (creditSettings.maxPerDay > 1) {
+      await updateCreditSettings({ creditMaxPerDay: creditSettings.maxPerDay - 1 });
+      return;
+    }
+    const index = CREDIT_MINUTES_OPTIONS.indexOf(creditSettings.minutes);
+    if (index > 0) {
+      await updateCreditSettings({ creditMinutes: CREDIT_MINUTES_OPTIONS[index - 1] });
+    }
+  };
+  const canLowerCreditLimit =
+    creditSettings.maxPerDay > 1 ||
+    CREDIT_MINUTES_OPTIONS.indexOf(creditSettings.minutes) > 0;
+
+  const renderStepper = (value, onDecrease, onIncrease, canDecrease, canIncrease) => (
+    <View style={styles.creditStepper}>
+      <Pressable
+        style={[styles.creditStepperButton, !canDecrease && styles.tipsButtonDisabled]}
+        onPress={onDecrease}
+        disabled={!canDecrease}
+      >
+        <Text style={styles.creditStepperButtonText}>-</Text>
+      </Pressable>
+      <Text style={styles.creditStepperValue}>{value}</Text>
+      <Pressable
+        style={[styles.creditStepperButton, !canIncrease && styles.tipsButtonDisabled]}
+        onPress={onIncrease}
+        disabled={!canIncrease}
+      >
+        <Text style={styles.creditStepperButtonText}>+</Text>
+      </Pressable>
+    </View>
+  );
 
   const openSetTargetSettings = () => {
     const custom = Number(settings.setTargetSeconds);
@@ -11016,6 +11016,70 @@ const getSpeechLocale = () => {
   const hasProgressInsights =
     progressInsights.improvements.length > 0 ||
     progressInsights.factorHints.length > 0;
+  const creditStats = useMemo(() => {
+    const now = Date.now();
+    const since = now - CREDIT_STATS_WINDOW_MS;
+    let sportSeconds = 0;
+    sports.forEach((sport) => {
+      if (!sport || sport.system) {
+        return;
+      }
+      flattenSportEntries(logs, sport.id).forEach((entry) => {
+        if (!entry || (entry.ts || 0) < since || (entry.ts || 0) > now) {
+          return;
+        }
+        sportSeconds += Number.isFinite(entry.screenSeconds)
+          ? entry.screenSeconds
+          : screenSecondsForEntry(sport, entry);
+      });
+    });
+    let creditSeconds = 0;
+    let creditCount = 0;
+    (usageState.creditHistory || []).forEach((record) => {
+      const ts = Number(record?.ts) || 0;
+      if (ts >= since && ts <= now) {
+        creditSeconds += (Number(record.minutes) || 0) * 60;
+        creditCount += 1;
+      }
+    });
+    const totalSeconds = sportSeconds + creditSeconds;
+    return {
+      sportSeconds,
+      creditSeconds,
+      creditCount,
+      creditShare: totalSeconds > 0 ? creditSeconds / totalSeconds : 0,
+    };
+  }, [logs, sports, usageState.creditHistory]);
+  const showCreditStatsCard =
+    isAndroid && !missingPermissions && creditStats.creditCount > 0;
+  const creditNeedsAttention = creditStats.creditShare >= CREDIT_SHARE_WARNING;
+  const creditFactorAdjustPercent =
+    creditStats.sportSeconds > 0
+      ? Math.round(
+          (Math.min(
+            CREDIT_FACTOR_ADJUST_MAX,
+            (creditStats.sportSeconds + creditStats.creditSeconds) /
+              creditStats.sportSeconds
+          ) -
+            1) *
+            100
+        )
+      : 0;
+  const canAdjustFactorsForCredit =
+    creditFactorAdjustPercent > 0 &&
+    Date.now() - (Number(settings.creditFactorAdjustedAt) || 0) >
+      CREDIT_FACTOR_ADJUST_COOLDOWN_MS;
+  const creditSetsToReplace = Math.max(
+    1,
+    Math.ceil(
+      creditStats.creditSeconds /
+        Math.max(
+          60,
+          resolveSetTargetSeconds(settings.setTargetSeconds, setScreenReference)
+        )
+    )
+  );
+
   const showTipsCard =
     !missingPermissions &&
     (hasProgressInsights || (showMotivationBlock && !!activeAction));
@@ -14421,6 +14485,104 @@ const getSpeechLocale = () => {
               </View>
             </>
           ) : null}
+          {isAndroid ? (
+            <>
+              <View style={styles.settingsDivider} />
+              <Text style={styles.settingsSectionTitle}>
+                {t("label.creditSettingsTitle")}
+              </Text>
+              <View style={styles.infoCard}>
+                <View style={styles.settingsSwitchRow}>
+                  <Text style={styles.settingsSwitchLabel}>
+                    {t("label.creditEnabled")}
+                  </Text>
+                  <Switch
+                    value={creditSettings.enabled}
+                    onValueChange={(value) =>
+                      updateCreditSettings({ creditEnabled: value })
+                    }
+                    trackColor={{
+                      true: "rgba(245, 158, 11, 0.4)",
+                      false: "rgba(148, 163, 184, 0.2)",
+                    }}
+                    thumbColor={creditSettings.enabled ? COLORS.ember : "#f4f3f4"}
+                  />
+                </View>
+                {creditSettings.enabled ? (
+                  <>
+                    <View style={styles.creditSettingRow}>
+                      <Text style={styles.settingsSwitchLabel}>
+                        {t("label.creditMinutesPerCredit")}
+                      </Text>
+                      {renderStepper(
+                        `${creditSettings.minutes} min`,
+                        () =>
+                          updateCreditSettings({
+                            creditMinutes: CREDIT_MINUTES_OPTIONS[CREDIT_MINUTES_OPTIONS.indexOf(creditSettings.minutes) - 1],
+                          }),
+                        () =>
+                          updateCreditSettings({
+                            creditMinutes: CREDIT_MINUTES_OPTIONS[CREDIT_MINUTES_OPTIONS.indexOf(creditSettings.minutes) + 1],
+                          }),
+                        CREDIT_MINUTES_OPTIONS.indexOf(creditSettings.minutes) > 0,
+                        CREDIT_MINUTES_OPTIONS.indexOf(creditSettings.minutes) < CREDIT_MINUTES_OPTIONS.length - 1
+                      )}
+                    </View>
+                    <View style={styles.creditSettingRow}>
+                      <Text style={styles.settingsSwitchLabel}>
+                        {t("label.creditMaxPerDay")}
+                      </Text>
+                      {renderStepper(
+                        `${creditSettings.maxPerDay}×`,
+                        () =>
+                          updateCreditSettings({
+                            creditMaxPerDay: creditSettings.maxPerDay - 1,
+                          }),
+                        () =>
+                          updateCreditSettings({
+                            creditMaxPerDay: creditSettings.maxPerDay + 1,
+                          }),
+                        creditSettings.maxPerDay > 1,
+                        creditSettings.maxPerDay < CREDIT_MAX_PER_DAY_MAX
+                      )}
+                    </View>
+                  </>
+                ) : null}
+                <Text style={styles.helperText}>
+                  {t("label.creditUsageSummary", {
+                    count: creditStats.creditCount,
+                    minutes: Math.round(creditStats.creditSeconds / 60),
+                  })}
+                </Text>
+                <Text style={[styles.settingsSwitchLabel, styles.creditGoalTitle]}>
+                  {t("label.creditGoalTitle")}
+                </Text>
+                {CREDIT_GOALS.map((goal) => {
+                  const active = creditSettings.goal === goal;
+                  return (
+                    <Pressable
+                      key={goal}
+                      style={[styles.creditGoalOption, active && styles.creditGoalOptionActive]}
+                      onPress={() => updateCreditSettings({ creditGoal: goal })}
+                    >
+                      <Text
+                        style={[
+                          styles.creditGoalOptionTitle,
+                          active && styles.creditGoalOptionTitleActive,
+                        ]}
+                      >
+                        {active ? "\u25CF " : "\u25CB "}
+                        {t(`label.creditGoal_${goal}`)}
+                      </Text>
+                      <Text style={styles.creditGoalOptionText}>
+                        {t(`label.creditGoal_${goal}_hint`)}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </>
+          ) : null}
           {screenTimeFeaturesEnabled ? (
             <>
               <View style={styles.settingsDivider} />
@@ -14860,6 +15022,69 @@ const getSpeechLocale = () => {
                   ) : null}
                 </View>
               </View>
+            ) : null}
+          </View>
+        ) : null}
+        {showCreditStatsCard ? (
+          <View style={styles.creditStatsCard}>
+            <Text style={styles.tipsEyebrow}>{t("label.creditStatsTitle")}</Text>
+            <View style={styles.creditStatsBar}>
+              <View
+                style={[
+                  styles.creditStatsBarSport,
+                  { flex: Math.max(0.0001, creditStats.sportSeconds) },
+                ]}
+              />
+              <View
+                style={[
+                  styles.creditStatsBarCredit,
+                  { flex: Math.max(0.0001, creditStats.creditSeconds) },
+                ]}
+              />
+            </View>
+            <View style={styles.creditStatsLegend}>
+              <Text style={styles.creditStatsSport}>
+                {t("label.creditStatsSport", {
+                  time: formatScreenTime(creditStats.sportSeconds),
+                })}
+              </Text>
+              <Text style={styles.creditStatsCredit}>
+                {t("label.creditStatsCredit", {
+                  time: formatScreenTime(creditStats.creditSeconds),
+                  count: creditStats.creditCount,
+                })}
+              </Text>
+            </View>
+            <Text style={styles.tipsText}>
+              {!creditNeedsAttention
+                ? t("label.creditStatsGood", {
+                    percent: Math.round((1 - creditStats.creditShare) * 100),
+                  })
+                : creditSettings.goal === "adjustFactors" && canAdjustFactorsForCredit
+                ? t("label.creditStatsAdjust", { percent: creditFactorAdjustPercent })
+                : creditSettings.goal === "lessScreenTime"
+                ? t("label.creditStatsLess")
+                : t("label.creditStatsMoreSport", { sets: creditSetsToReplace })}
+            </Text>
+            {creditNeedsAttention &&
+            creditSettings.goal === "adjustFactors" &&
+            canAdjustFactorsForCredit ? (
+              <Pressable style={styles.tipsPrimaryButton} onPress={adjustFactorsForCredit}>
+                <Text style={styles.tipsPrimaryButtonText}>
+                  {t("label.creditStatsAdjustAction", {
+                    percent: creditFactorAdjustPercent,
+                  })}
+                </Text>
+              </Pressable>
+            ) : null}
+            {creditNeedsAttention &&
+            creditSettings.goal === "lessScreenTime" &&
+            canLowerCreditLimit ? (
+              <Pressable style={styles.tipsPrimaryButton} onPress={lowerCreditLimit}>
+                <Text style={styles.tipsPrimaryButtonText}>
+                  {t("label.creditStatsLessAction")}
+                </Text>
+              </Pressable>
             ) : null}
           </View>
         ) : null}
@@ -17224,6 +17449,102 @@ const styles = StyleSheet.create({
     color: COLORS.muted,
     fontSize: 14,
     lineHeight: 20,
+  },
+  creditStatsCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.cardAlt,
+    padding: 14,
+    marginBottom: 12,
+    gap: 8,
+  },
+  creditStatsBar: {
+    flexDirection: "row",
+    height: 10,
+    borderRadius: 5,
+    overflow: "hidden",
+    backgroundColor: COLORS.cardAlt,
+  },
+  creditStatsBarSport: {
+    backgroundColor: "#4ade80",
+  },
+  creditStatsBarCredit: {
+    backgroundColor: COLORS.accent,
+  },
+  creditStatsLegend: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+    gap: 6,
+  },
+  creditStatsSport: {
+    color: "#4ade80",
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  creditStatsCredit: {
+    color: COLORS.accent,
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  creditSettingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+    marginTop: 8,
+  },
+  creditStepper: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  creditStepperButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: COLORS.cardAlt,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  creditStepperButtonText: {
+    color: COLORS.text,
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  creditStepperValue: {
+    color: COLORS.text,
+    fontWeight: "700",
+    minWidth: 52,
+    textAlign: "center",
+  },
+  creditGoalTitle: {
+    marginTop: 10,
+    marginBottom: 4,
+  },
+  creditGoalOption: {
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.cardAlt,
+    padding: 10,
+    marginTop: 6,
+    gap: 2,
+  },
+  creditGoalOptionActive: {
+    borderColor: COLORS.accent,
+    backgroundColor: "rgba(245, 158, 11, 0.12)",
+  },
+  creditGoalOptionTitle: {
+    color: COLORS.text,
+    fontWeight: "700",
+  },
+  creditGoalOptionTitleActive: {
+    color: COLORS.accent,
+  },
+  creditGoalOptionText: {
+    color: COLORS.muted,
+    fontSize: 12,
   },
   tipsSection: {
     gap: 8,

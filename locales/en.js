@@ -503,6 +503,48 @@ const en = {
       "{{sport}} got easier",
     "label.progressFactorHintBody":
       "You now earn {{earned}} per set on average instead of about {{target}}. Make the user factor stricter ({{current}} → {{factor}})?",
+    "label.creditSettingsTitle":
+      "Credit",
+    "label.creditEnabled":
+      "Allow credits",
+    "label.creditMinutesPerCredit":
+      "Minutes per credit",
+    "label.creditMaxPerDay":
+      "Credits per day",
+    "label.creditUsageSummary":
+      "Last 7 days: {{count}} credits ({{minutes}} min). Credits don't change your user factors, they only show up in your statistics.",
+    "label.creditGoalTitle":
+      "If you need credit too often",
+    "label.creditGoal_moreSport":
+      "Do more sport",
+    "label.creditGoal_moreSport_hint":
+      "The app shows how many sets would replace the borrowed time.",
+    "label.creditGoal_adjustFactors":
+      "Adjust user factors",
+    "label.creditGoal_adjustFactors_hint":
+      "As an intermediate step: workouts earn a bit more screen time so you need to borrow less.",
+    "label.creditGoal_lessScreenTime":
+      "Less screen time",
+    "label.creditGoal_lessScreenTime_hint":
+      "The app suggests lowering your credit limit step by step.",
+    "label.creditStatsTitle":
+      "Screen time of the last 7 days",
+    "label.creditStatsSport":
+      "Sport: {{time}}",
+    "label.creditStatsCredit":
+      "Credit: {{time}} ({{count}}×)",
+    "label.creditStatsGood":
+      "Great! You earned {{percent}} % of your screen time with sport.",
+    "label.creditStatsMoreSport":
+      "A large part came from credits. About {{sets}} sets would replace that time with sport.",
+    "label.creditStatsAdjust":
+      "You borrow time often. With {{percent}} % higher user factors, workouts earn more – as an intermediate step.",
+    "label.creditStatsAdjustAction":
+      "Raise user factors by {{percent}} %",
+    "label.creditStatsLess":
+      "You borrow time often. Try to get by with a little less screen time.",
+    "label.creditStatsLessAction":
+      "Lower credit limit",
     "label.balanceSuggestTitle": "Adjust factor?",
     "label.balanceSuggestBody": "{{high}} gives ~{{rateHigh}} per unit, {{low}} only ~{{rateLow}}. Increase {{low}}'s user factor to {{factor}}?",
     "label.balanceSuggestApply": "Increase",
