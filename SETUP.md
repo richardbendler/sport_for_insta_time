@@ -19,7 +19,7 @@ npx eas-cli build --platform android --profile production
 ```
 
 Für WSL/Linux braucht es eine eigene, separate Installation (npm-Präfix liegt dort standardmäßig
-woanders) — siehe [WSL/Linux: lokale EAS-Builds einrichten](#wsllinux-lokale-eas-builds-einrichten-einmalig)
+woanders), siehe [WSL/Linux: lokale EAS-Builds einrichten](#wsllinux-lokale-eas-builds-einrichten-einmalig)
 unten.
 
 ## Windows: native Entwicklungsumgebung einrichten (einmalig)
@@ -64,7 +64,7 @@ einem laufenden Android-Emulator oder einem per USB verbundenen Geraet. Einmalig
 
 Nur nötig, falls lokal gebaut werden soll (`eas build --local`, siehe
 [DEVELOPMENT.md](DEVELOPMENT.md#android-lokaler-build-wsl--linux)), statt in der Expo-Cloud.
-`eas-cli` unterstützt lokale Builds **nicht unter nativem Windows** — es braucht Linux oder
+`eas-cli` unterstützt lokale Builds **nicht unter nativem Windows**, es braucht Linux oder
 macOS, z.B. via WSL.
 
 ### Voraussetzungen
@@ -152,13 +152,13 @@ eas login
 ```
 Falls `eas` nicht gefunden wird: `source ~/.bash_profile` oder neues WSL-Terminal.
 
-## Google Play: Service Account & eas submit (Android) — einmalig
+## Google Play: Service Account & eas submit (Android, einmalig)
 
 Damit `eas submit --platform android` Builds automatisch (ohne manuellen Upload über die
 Play-Console-Weboberfläche) hochladen kann, braucht EAS ein **Google-Cloud-Dienstkonto** mit
 Freigabe in der Play Console. Einmalig einrichten:
 
-**Wichtig:** Ein Google-Cloud-Projekt reicht für **alle** eigenen Apps zusammen – die
+**Wichtig:** Ein Google-Cloud-Projekt reicht für **alle** eigenen Apps zusammen: Die
 eigentliche Trennung zwischen Apps passiert in der Play Console (Schritt 3, pro-App-Rolle),
 nicht auf Cloud-Projekt-Ebene. Also nicht pro App ein neues Cloud-Projekt anlegen, sondern
 ein Projekt wiederverwenden.
@@ -167,7 +167,7 @@ ein Projekt wiederverwenden.
 (`play-console-releases@play-console-access-504713.iam.gserviceaccount.com`) für **beide**
 Apps genutzt (Sport for Screen Time **und** The One - Trinkspielbar), im selben Cloud-Projekt
 `play-console-access`. Das ist bewusst so gewählt (weniger Verwaltungsaufwand) und für
-Hobby-/Soloprojekte völlig ausreichend. Theoretisch könnte man das jederzeit auftrennen –
+Hobby-/Soloprojekte völlig ausreichend. Theoretisch könnte man das jederzeit auftrennen,
 also pro App ein eigenes Dienstkonto (z. B. `sport-for-screen-time-releases`) im selben
 Projekt anlegen und in der Play Console nur für die jeweils eine App freischalten. Vorteil
 einer Trennung: Falls der Schlüssel einer App mal kompromittiert wird, ist nur diese eine App
@@ -184,7 +184,7 @@ betroffen, nicht beide. Für den aktuellen Zweck (privater Nebenprojekte) ist da
 1. **IAM & Verwaltung → Dienstkonten → Dienstkonto erstellen**. Name z. B.
    `play-console-releases` (gemeinsam für alle Apps) oder app-spezifisch wie
    `sport-for-screen-time-releases`, falls man später doch auftrennen möchte.
-2. Rollen-Zuweisung im Cloud-Projekt selbst kann übersprungen werden – die eigentliche
+2. Rollen-Zuweisung im Cloud-Projekt selbst kann übersprungen werden, die eigentliche
    Berechtigung kommt aus der Play Console (Schritt 3).
 3. Auf das neu erstellte Dienstkonto klicken → Tab **„Keys"** → **„Add Key" → „Create new
    key"** → Typ **JSON** (vorausgewählt/empfohlen, nicht P12) → **„Erstellen"**. Der Browser
@@ -197,19 +197,19 @@ betroffen, nicht beide. Für den aktuellen Zweck (privater Nebenprojekte) ist da
    Dienstkonto).
 3. Unter **App-Berechtigungen** die betroffene(n) App(s) auswählen (hier: „Sport for Screen
    Time", ggf. zusätzlich weitere Apps, falls das Dienstkonto geteilt wird). Bei mehreren
-   Apps zeigt Google einen kombinierten Berechtigungs-Dialog „Berechtigungen für N Apps" –
+   Apps zeigt Google einen kombinierten Berechtigungs-Dialog „Berechtigungen für N Apps",
    die gewählten Häkchen gelten dann für alle ausgewählten Apps gemeinsam.
 4. Es gibt keine einfache Rollen-Dropdown mehr, sondern einzelne Checkboxen. Für
    `eas submit` (Upload + Release erstellen) genau diese **vier** ankreuzen (die ersten
    beiden sind oft schon vorausgewählt, bitte trotzdem prüfen):
-   - **„App-Informationen ansehen (schreibgeschützt)"** – Basis-Leserecht, ohne das der
+   - **„App-Informationen ansehen (schreibgeschützt)"**: Basis-Leserecht, ohne das der
      Rest nicht richtig funktioniert.
-   - **„Informationen zur App-Qualität ansehen (schreibgeschützt)"** – Leserecht für
+   - **„Informationen zur App-Qualität ansehen (schreibgeschützt)"**: Leserecht für
      Android Vitals/Artefakte/Tracks/Releases.
    - **„Produktionsversionen veröffentlichen, Geräte ausschließen und die Play
-     App-Signatur verwenden"** – nötig, damit später auch Production-Releases hochgeladen
+     App-Signatur verwenden"**: nötig, damit später auch Production-Releases hochgeladen
      werden können.
-   - **„Apps in Test-Tracks veröffentlichen"** – nötig für Uploads in interne/geschlossene/
+   - **„Apps in Test-Tracks veröffentlichen"**: nötig für Uploads in interne/geschlossene/
      offene Test-Tracks (Standard-Track von `eas submit`, wenn in `eas.json` kein `track`
      gesetzt ist).
 
@@ -223,7 +223,7 @@ betroffen, nicht beide. Für den aktuellen Zweck (privater Nebenprojekte) ist da
 
 Hinweis: Falls eine App noch nie manuell über die Play-Console-Weboberfläche hochgeladen
 wurde (kein einziger Entwurf/Release existiert), verlangt Googles Publishing-API, dass der
-allererste Upload manuell passiert – danach funktioniert `eas submit` für alle weiteren
+allererste Upload manuell passiert, danach funktioniert `eas submit` für alle weiteren
 Versionen.
 
 ### 4) JSON-Schlüssel sicher ablegen

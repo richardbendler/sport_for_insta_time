@@ -22,7 +22,7 @@ for app blocking, home-screen widgets and background scheduling.
 
 **Workout tracking**
 - Preset exercises (push-ups, pull-ups, sit-ups, running, …) and fully customizable own exercises
-- Counting by tap, by **voice** (speech recognition) or by **camera** – push-ups are detected
+- Counting by tap, by **voice** (speech recognition) or by **camera**: push-ups are detected
   automatically via on-device pose detection
 - Time-based exercises with a stopwatch
 - Configurable conversion rate per exercise (repetitions or minutes → earned screen time)
@@ -41,7 +41,7 @@ for app blocking, home-screen widgets and background scheduling.
 - Interactive onboarding tutorial with highlighting
 - Available in German, English, Spanish and French
 
-All data is stored locally on the device – no account, no server.
+All data is stored locally on the device: no account, no server.
 
 ## Architecture
 
@@ -61,7 +61,7 @@ React Native (JavaScript)                      Native Android (Kotlin)
 
 The React Native layer handles the user interface and all tracking; the earned time budget is
 synchronized to native storage, where the blocker service and the widgets read it independently
-of the JavaScript runtime – so blocking keeps working even when the app is closed.
+of the JavaScript runtime, so blocking keeps working even when the app is closed.
 
 ## Tech Stack
 
@@ -85,11 +85,11 @@ npx expo run:android
 ```
 
 Further documentation:
-- [DEVELOPMENT.md](DEVELOPMENT.md) – daily workflow, builds, store releases, storage format
-- [SETUP.md](SETUP.md) – one-time setup of the development environment
+- [DEVELOPMENT.md](DEVELOPMENT.md): daily workflow, builds, store releases, storage format
+- [SETUP.md](SETUP.md): one-time setup of the development environment
 
 ## Privacy
 
 The app does not collect or transmit any personal data. Accessibility and usage-access
 permissions are used exclusively to detect blocked apps on the device.
-See the [privacy policy](_Datenschutzerklaerung_movetoServer/Privacy_Policy_sport_for_screen_time.html).
+See the [privacy policy](privacy-policy/Privacy_Policy_sport_for_screen_time.html).

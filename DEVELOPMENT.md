@@ -49,7 +49,7 @@ Expo Dashboard.
 
 ### Android: Lokaler Build (WSL / Linux)
 Nützlich bei Warteschlangen/Limits im kostenlosen EAS-Tier. Braucht Linux oder macOS (auch via
-WSL) — unter nativem Windows funktioniert nur der Cloud-Build oben oder der `expo run:android`-Weg
+WSL). Unter nativem Windows funktioniert nur der Cloud-Build oben oder der `expo run:android`-Weg
 von weiter oben. Einmalige Einrichtung der WSL/Linux-Umgebung (Node, Java, Android SDK, EAS CLI)
 siehe [SETUP.md](SETUP.md#wsllinux-lokale-eas-builds-einrichten-einmalig).
 
@@ -89,7 +89,7 @@ Für automatisierte Uploads ohne manuellen Weg über die Play-Console-Weboberfl�
 ein Google-Cloud-Dienstkonto mit Freigabe in der Play Console. Die einmalige Einrichtung
 (Cloud-Projekt, Dienstkonto, Play-Console-Berechtigungen, JSON-Key ablegen,
 `serviceAccountKeyPath` in `eas.json`) steht in
-[SETUP.md](SETUP.md#google-play-service-account--eas-submit-android--einmalig) — hier nur die
+[SETUP.md](SETUP.md#google-play-service-account--eas-submit-android-einmalig). Hier nur die
 tägliche Nutzung.
 
 **Aktueller Stand:** Es wird ein gemeinsames Dienstkonto
@@ -113,7 +113,7 @@ eas submit --platform android --profile production --latest
 eas submit --platform android --profile production-release --latest
 ```
 **Achtung:** `production-release` macht die neue Version sofort für alle Nutzer live (ggf. mit
-kurzer Google-Prüfzeit dazwischen) — vorher unbedingt mit dem `production`-Profil (Internal
+kurzer Google-Prüfzeit dazwischen), vorher unbedingt mit dem `production`-Profil (Internal
 Track) getestet haben.
 
 `--latest` nimmt in beiden Fällen automatisch den zuletzt erzeugten Build (Cloud oder lokal) -
@@ -129,7 +129,7 @@ eas submit --platform android --path android/app/build/outputs/bundle/release/ap
 
 Hinweis: Falls eine App noch nie manuell über die Play-Console-Weboberfläche hochgeladen wurde
 (kein einziger Entwurf/Release existiert), verlangt Googles Publishing-API, dass der allererste
-Upload manuell passiert – danach funktioniert `eas submit` für alle weiteren Versionen.
+Upload manuell passiert, danach funktioniert `eas submit` für alle weiteren Versionen.
 
 ### iOS (App Store Connect / TestFlight)
 Bei iOS gibt es die Internal/Production-Unterscheidung wie bei Android **nicht** - es gibt
