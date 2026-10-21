@@ -13438,7 +13438,10 @@ const getSpeechLocale = () => {
               <View style={styles.weightHistoryCard}>
                 <Text style={styles.sectionTitle}>{t("label.weightHistory")}</Text>
                 <ScrollView
-                  style={styles.weightHistoryScroll}
+                  style={[
+                    styles.weightHistoryScroll,
+                    { maxHeight: Math.max(260, height * 0.45) },
+                  ]}
                   nestedScrollEnabled
                   showsVerticalScrollIndicator
                 >
@@ -13536,7 +13539,10 @@ const getSpeechLocale = () => {
               <View style={styles.weightHistoryCard}>
                 <Text style={styles.sectionTitle}>{t("label.repsHistory")}</Text>
                 <ScrollView
-                  style={styles.weightHistoryScroll}
+                  style={[
+                    styles.weightHistoryScroll,
+                    { maxHeight: Math.max(260, height * 0.45) },
+                  ]}
                   nestedScrollEnabled
                   showsVerticalScrollIndicator
                 >
@@ -13622,7 +13628,10 @@ const getSpeechLocale = () => {
               <View style={styles.weightHistoryCard}>
                 <Text style={styles.sectionTitle}>{t("label.timeHistory")}</Text>
                 <ScrollView
-                  style={styles.weightHistoryScroll}
+                  style={[
+                    styles.weightHistoryScroll,
+                    { maxHeight: Math.max(260, height * 0.45) },
+                  ]}
                   nestedScrollEnabled
                   showsVerticalScrollIndicator
                 >
