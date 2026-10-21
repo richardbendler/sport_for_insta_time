@@ -545,6 +545,8 @@ const en = {
       "You borrow time often. Try to get by with a little less screen time.",
     "label.creditStatsLessAction":
       "Lower credit limit",
+    "label.dockSportShare": "{{percent}} % from sport (7 days)",
+    "label.dockProgressHint": "per set vs. previous weeks",
     "label.balanceSuggestTitle": "Adjust factor?",
     "label.balanceSuggestBody": "{{high}} gives ~{{rateHigh}} per unit, {{low}} only ~{{rateLow}}. Increase {{low}}'s user factor to {{factor}}?",
     "label.balanceSuggestApply": "Increase",

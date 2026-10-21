@@ -549,6 +549,8 @@ const de = {
       "Du leihst dir oft Zeit. Versuch, mit etwas weniger Bildschirmzeit auszukommen.",
     "label.creditStatsLessAction":
       "Kredit-Limit senken",
+    "label.dockSportShare": "{{percent}} % aus Sport (7 Tage)",
+    "label.dockProgressHint": "pro Set ggü. Vorwochen",
     "label.balanceSuggestTitle": "Faktor anpassen?",
     "label.balanceSuggestBody": "{{high}} ergibt ~{{rateHigh}} pro Einheit, {{low}} nur ~{{rateLow}}. Soll der Userfaktor für {{low}} auf {{factor}} erhöht werden?",
     "label.balanceSuggestApply": "Erhöhen",

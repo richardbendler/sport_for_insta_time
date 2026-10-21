@@ -547,6 +547,8 @@ const es = {
       "Pides tiempo prestado a menudo. Intenta arreglártelas con algo menos de tiempo de pantalla.",
     "label.creditStatsLessAction":
       "Bajar límite de crédito",
+    "label.dockSportShare": "{{percent}} % por deporte (7 días)",
+    "label.dockProgressHint": "por serie vs. semanas anteriores",
     "label.balanceSuggestTitle": "¿Ajustar factor?",
     "label.balanceSuggestBody": "{{high}} da ~{{rateHigh}} por unidad, {{low}} solo ~{{rateLow}}. ¿Aumentar el factor de {{low}} a {{factor}}?",
     "label.balanceSuggestApply": "Aumentar",

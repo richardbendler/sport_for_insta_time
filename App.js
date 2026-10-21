@@ -11013,9 +11013,7 @@ const getSpeechLocale = () => {
     difficultyLockActive,
     screenTimeFeaturesEnabled,
   ]);
-  const hasProgressInsights =
-    progressInsights.improvements.length > 0 ||
-    progressInsights.factorHints.length > 0;
+  const hasProgressInsights = progressInsights.factorHints.length > 0;
   const creditStats = useMemo(() => {
     const now = Date.now();
     const since = now - CREDIT_STATS_WINDOW_MS;
@@ -11050,8 +11048,7 @@ const getSpeechLocale = () => {
       creditShare: totalSeconds > 0 ? creditSeconds / totalSeconds : 0,
     };
   }, [logs, sports, usageState.creditHistory]);
-  const showCreditStatsCard =
-    isAndroid && !missingPermissions && creditStats.creditCount > 0;
+  const showCreditStatsCard = isAndroid && creditStats.creditCount > 0;
   const creditNeedsAttention = creditStats.creditShare >= CREDIT_SHARE_WARNING;
   const creditFactorAdjustPercent =
     creditStats.sportSeconds > 0
@@ -11092,11 +11089,6 @@ const getSpeechLocale = () => {
   const tipsHeaderTitle = progressInsights.factorHints[0]
     ? t("label.progressFactorHintTitle", {
         sport: getSportLabel(progressInsights.factorHints[0].sport),
-      })
-    : progressInsights.improvements[0]
-    ? t("label.progressImprovementTitle", {
-        sport: getSportLabel(progressInsights.improvements[0].sport),
-        percent: Math.round(progressInsights.improvements[0].change * 100),
       })
     : activeActionTitle;
 
@@ -15034,69 +15026,6 @@ const getSpeechLocale = () => {
             ) : null}
           </View>
         ) : null}
-        {showCreditStatsCard ? (
-          <View style={styles.creditStatsCard}>
-            <Text style={styles.tipsEyebrow}>{t("label.creditStatsTitle")}</Text>
-            <View style={styles.creditStatsBar}>
-              <View
-                style={[
-                  styles.creditStatsBarSport,
-                  { flex: Math.max(0.0001, creditStats.sportSeconds) },
-                ]}
-              />
-              <View
-                style={[
-                  styles.creditStatsBarCredit,
-                  { flex: Math.max(0.0001, creditStats.creditSeconds) },
-                ]}
-              />
-            </View>
-            <View style={styles.creditStatsLegend}>
-              <Text style={styles.creditStatsSport}>
-                {t("label.creditStatsSport", {
-                  time: formatScreenTime(creditStats.sportSeconds),
-                })}
-              </Text>
-              <Text style={styles.creditStatsCredit}>
-                {t("label.creditStatsCredit", {
-                  time: formatScreenTime(creditStats.creditSeconds),
-                  count: creditStats.creditCount,
-                })}
-              </Text>
-            </View>
-            <Text style={styles.tipsText}>
-              {!creditNeedsAttention
-                ? t("label.creditStatsGood", {
-                    percent: Math.round((1 - creditStats.creditShare) * 100),
-                  })
-                : creditSettings.goal === "adjustFactors" && canAdjustFactorsForCredit
-                ? t("label.creditStatsAdjust", { percent: creditFactorAdjustPercent })
-                : creditSettings.goal === "lessScreenTime"
-                ? t("label.creditStatsLess")
-                : t("label.creditStatsMoreSport", { sets: creditSetsToReplace })}
-            </Text>
-            {creditNeedsAttention &&
-            creditSettings.goal === "adjustFactors" &&
-            canAdjustFactorsForCredit ? (
-              <Pressable style={styles.tipsPrimaryButton} onPress={adjustFactorsForCredit}>
-                <Text style={styles.tipsPrimaryButtonText}>
-                  {t("label.creditStatsAdjustAction", {
-                    percent: creditFactorAdjustPercent,
-                  })}
-                </Text>
-              </Pressable>
-            ) : null}
-            {creditNeedsAttention &&
-            creditSettings.goal === "lessScreenTime" &&
-            canLowerCreditLimit ? (
-              <Pressable style={styles.tipsPrimaryButton} onPress={lowerCreditLimit}>
-                <Text style={styles.tipsPrimaryButtonText}>
-                  {t("label.creditStatsLessAction")}
-                </Text>
-              </Pressable>
-            ) : null}
-          </View>
-        ) : null}
         {showTipsCard ? (
           <View style={styles.tipsCard}>
             <Pressable
@@ -15127,25 +15056,6 @@ const getSpeechLocale = () => {
             </Pressable>
             {motivationOpen ? (
               <View style={styles.tipsBody}>
-                {progressInsights.improvements.length > 0 ? (
-                  <View style={styles.tipsSection}>
-                    <Text style={styles.tipsSectionTitle}>
-                      {t("label.progressTitle")}
-                    </Text>
-                    {progressInsights.improvements.map(({ sport, change }) => (
-                      <View key={sport.id} style={styles.tipsProgressRow}>
-                        <Text style={styles.tipsProgressLabel} numberOfLines={1}>
-                          {sport.icon || DEFAULT_ICON} {getSportLabel(sport)}
-                        </Text>
-                        <Text style={styles.tipsProgressValue}>
-                          +{Math.round(change * 100)} %{" "}
-                          {t(progressMetricLabelKey(sport))}
-                        </Text>
-                      </View>
-                    ))}
-                    <Text style={styles.tipsHint}>{t("label.progressPeriodHint")}</Text>
-                  </View>
-                ) : null}
                 {progressInsights.factorHints.map(({ sport, suggestion }) => (
                   <View key={`factor-${sport.id}`} style={styles.tipsFact}>
                     <Text style={styles.tipsFactTitle}>
@@ -15802,7 +15712,7 @@ const getSpeechLocale = () => {
           {isAndroid ? (
             <View style={styles.fixedTimers}>
               <Pressable
-                style={[styles.infoCard, styles.infoCardNoAlpha, styles.infoCardMain]}
+                style={styles.dockContent}
                 ref={tutorialScreenTimeRef}
                 onLayout={(event) => setInfoCardWidth(event.nativeEvent.layout.width)}
                 onPress={() => {
@@ -15810,10 +15720,19 @@ const getSpeechLocale = () => {
                   maybeAdvanceTutorial("overviewCard");
                 }}
               >
-                <Text style={styles.sectionTitle}>{t("label.screenTimeTitle")}</Text>
+                <View style={styles.dockHeaderRow}>
+                  <Text style={styles.dockTitle}>{t("label.screenTimeTitle")}</Text>
+                  {showCreditStatsCard ? (
+                    <Text style={styles.dockHeaderMeta}>
+                      {t("label.dockSportShare", {
+                        percent: Math.round((1 - creditStats.creditShare) * 100),
+                      })}
+                    </Text>
+                  ) : null}
+                </View>
                 <View style={styles.infoRow}>
                   <Pressable
-                    style={styles.infoItem}
+                    style={styles.dockStat}
                     onLayout={(event) => {
                       const layout = event.nativeEvent.layout;
                       setInfoAnchors((prev) => ({
@@ -15830,13 +15749,17 @@ const getSpeechLocale = () => {
                     }
                   >
                     <InfoGlyph type="earned" color={COLORS.text} />
-                    <Text style={styles.infoValue}>
-                      {formatScreenTime(rollingEarnedSeconds)}
-                    </Text>
-                    <Text style={styles.infoLabel}>{t("label.earnedTimeToday")}</Text>
+                    <View style={styles.dockStatText}>
+                      <Text style={styles.dockStatValue}>
+                        {formatScreenTime(rollingEarnedSeconds)}
+                      </Text>
+                      <Text style={styles.dockStatLabel} numberOfLines={1}>
+                        {t("label.earnedTimeToday")}
+                      </Text>
+                    </View>
                   </Pressable>
                   <Pressable
-                    style={styles.infoItem}
+                    style={styles.dockStat}
                     onLayout={(event) => {
                       const layout = event.nativeEvent.layout;
                       setInfoAnchors((prev) => ({
@@ -15853,16 +15776,103 @@ const getSpeechLocale = () => {
                     }
                   >
                     <InfoGlyph type="remaining" color={COLORS.text} />
-                    <Text style={styles.infoValue}>
-                      {formatScreenTime(totalRemainingSeconds)}
-                    </Text>
-                    <Text style={styles.infoLabel}>{t("label.remainingTotal")}</Text>
-                    <Text style={styles.infoSubLabel}>
-                      {t("label.carryover")}:{" "}
-                      {formatScreenTime(usageState.carryoverSeconds || 0)}
-                    </Text>
+                    <View style={styles.dockStatText}>
+                      <Text style={styles.dockStatValue}>
+                        {formatScreenTime(totalRemainingSeconds)}
+                      </Text>
+                      <Text style={styles.dockStatLabel} numberOfLines={1}>
+                        {t("label.remainingTotal")} · {t("label.carryover")}{" "}
+                        {formatScreenTime(usageState.carryoverSeconds || 0)}
+                      </Text>
+                    </View>
                   </Pressable>
                 </View>
+                {showCreditStatsCard ? (
+                  <View style={styles.dockSection}>
+                    <View style={styles.creditStatsBar}>
+                      <View
+                        style={[
+                          styles.creditStatsBarSport,
+                          { flex: Math.max(0.0001, creditStats.sportSeconds) },
+                        ]}
+                      />
+                      <View
+                        style={[
+                          styles.creditStatsBarCredit,
+                          { flex: Math.max(0.0001, creditStats.creditSeconds) },
+                        ]}
+                      />
+                    </View>
+                    <View style={styles.creditStatsLegend}>
+                      <Text style={styles.creditStatsSport}>
+                        {t("label.creditStatsSport", {
+                          time: formatScreenTime(creditStats.sportSeconds),
+                        })}
+                      </Text>
+                      <Text style={styles.creditStatsCredit}>
+                        {t("label.creditStatsCredit", {
+                          time: formatScreenTime(creditStats.creditSeconds),
+                          count: creditStats.creditCount,
+                        })}
+                      </Text>
+                    </View>
+                    {creditNeedsAttention ? (
+                      <View style={styles.dockMessageRow}>
+                        <Text style={styles.dockMessage} numberOfLines={2}>
+                          {creditSettings.goal === "adjustFactors" &&
+                          canAdjustFactorsForCredit
+                            ? t("label.creditStatsAdjust", {
+                                percent: creditFactorAdjustPercent,
+                              })
+                            : creditSettings.goal === "lessScreenTime"
+                            ? t("label.creditStatsLess")
+                            : t("label.creditStatsMoreSport", {
+                                sets: creditSetsToReplace,
+                              })}
+                        </Text>
+                        {creditSettings.goal === "adjustFactors" &&
+                        canAdjustFactorsForCredit ? (
+                          <Pressable
+                            style={styles.dockActionButton}
+                            onPress={adjustFactorsForCredit}
+                          >
+                            <Text style={styles.dockActionText}>
+                              +{creditFactorAdjustPercent} %
+                            </Text>
+                          </Pressable>
+                        ) : null}
+                        {creditSettings.goal === "lessScreenTime" &&
+                        canLowerCreditLimit ? (
+                          <Pressable
+                            style={styles.dockActionButton}
+                            onPress={lowerCreditLimit}
+                          >
+                            <Text style={styles.dockActionText}>
+                              {t("label.creditStatsLessAction")}
+                            </Text>
+                          </Pressable>
+                        ) : null}
+                      </View>
+                    ) : null}
+                  </View>
+                ) : null}
+                {progressInsights.improvements.length > 0 ? (
+                  <View style={styles.dockProgressRow}>
+                    <Text style={styles.dockProgressIcon}>{"\u{1F4C8}"}</Text>
+                    <Text style={styles.dockProgressText} numberOfLines={2}>
+                      {progressInsights.improvements
+                        .slice(0, 2)
+                        .map(
+                          ({ sport, change }) =>
+                            `${getSportLabel(sport)} +${Math.round(change * 100)} %`
+                        )
+                        .join(" · ")}{" "}
+                      <Text style={styles.dockProgressHint}>
+                        {t("label.dockProgressHint")}
+                      </Text>
+                    </Text>
+                  </View>
+                ) : null}
                 {infoHint ? (
                   <Pressable
                     style={[
@@ -15934,7 +15944,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 16,
     paddingTop: 68,
-    paddingBottom: 220,
+    paddingBottom: 250,
   },
   sportDetailScrollContent: {
     paddingTop: 6,
@@ -17464,19 +17474,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
-  creditStatsCard: {
-    backgroundColor: COLORS.card,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: COLORS.cardAlt,
-    padding: 14,
-    marginBottom: 12,
-    gap: 8,
-  },
+
   creditStatsBar: {
     flexDirection: "row",
-    height: 10,
-    borderRadius: 5,
+    height: 6,
+    borderRadius: 3,
     overflow: "hidden",
     backgroundColor: COLORS.cardAlt,
   },
@@ -17494,12 +17496,12 @@ const styles = StyleSheet.create({
   },
   creditStatsSport: {
     color: "#4ade80",
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: "700",
   },
   creditStatsCredit: {
     color: COLORS.accent,
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: "700",
   },
   creditSettingRow: {
@@ -18772,13 +18774,108 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 14,
     zIndex: 10,
-    backgroundColor: COLORS.surface,
+    backgroundColor: "#172036",
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
     borderTopWidth: 1,
-    borderTopColor: COLORS.cardAlt,
+    borderTopColor: "rgba(245, 158, 11, 0.45)",
+    shadowColor: "#000",
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: -4 },
+    elevation: 16,
+  },
+  dockContent: {
+    position: "relative",
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 12,
+    gap: 8,
+  },
+  dockHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  dockTitle: {
+    color: COLORS.accent,
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
+  },
+  dockHeaderMeta: {
+    color: "#4ade80",
+    fontSize: 11,
+    fontWeight: "700",
+  },
+  dockStat: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "rgba(148, 163, 184, 0.12)",
+    borderRadius: 12,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+  },
+  dockStatText: {
+    flex: 1,
+  },
+  dockStatValue: {
+    color: COLORS.text,
+    fontSize: 17,
+    fontWeight: "800",
+  },
+  dockStatLabel: {
+    color: COLORS.muted,
+    fontSize: 10,
+    fontWeight: "600",
+  },
+  dockSection: {
+    gap: 5,
+  },
+  dockMessageRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  dockMessage: {
+    flex: 1,
+    color: COLORS.muted,
+    fontSize: 11,
+    lineHeight: 15,
+  },
+  dockActionButton: {
+    backgroundColor: COLORS.accent,
+    borderRadius: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+  },
+  dockActionText: {
+    color: COLORS.background,
+    fontSize: 11,
+    fontWeight: "800",
+  },
+  dockProgressRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  dockProgressIcon: {
+    fontSize: 13,
+  },
+  dockProgressText: {
+    flex: 1,
+    color: "#4ade80",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  dockProgressHint: {
+    color: COLORS.muted,
+    fontSize: 10,
+    fontWeight: "600",
   },
   infoRow: {
     flexDirection: "row",

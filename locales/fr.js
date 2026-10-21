@@ -547,6 +547,8 @@ const fr = {
       "Tu empruntes souvent du temps. Essaie de t’en sortir avec un peu moins de temps d’écran.",
     "label.creditStatsLessAction":
       "Baisser la limite de crédit",
+    "label.dockSportShare": "{{percent}} % grâce au sport (7 jours)",
+    "label.dockProgressHint": "par série vs semaines précédentes",
     "label.balanceSuggestTitle": "Ajuster le facteur ?",
     "label.balanceSuggestBody": "{{high}} donne ~{{rateHigh}} par unité, {{low}} seulement ~{{rateLow}}. Augmenter le facteur de {{low}} à {{factor}} ?",
     "label.balanceSuggestApply": "Augmenter",
