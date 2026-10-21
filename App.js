@@ -12982,9 +12982,6 @@ const getSpeechLocale = () => {
       }));
       setWeightEntryReps("");
     };
-    const sportDetailScrollEnabled = isSimpleReps
-      ? keyboardVisible
-      : keyboardVisible || sportDetailContentHeight > sportDetailScrollHeight;
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
@@ -13026,7 +13023,6 @@ const getSpeechLocale = () => {
             ref={sportDetailScrollRef}
             contentContainerStyle={styles.sportDetailScrollContent}
             keyboardShouldPersistTaps="handled"
-            scrollEnabled={sportDetailScrollEnabled}
             onLayout={(event) =>
               setSportDetailScrollHeight(event.nativeEvent.layout.height)
             }
@@ -13034,17 +13030,39 @@ const getSpeechLocale = () => {
               setSportDetailContentHeight(height)
             }
           >
-            <Pressable
-              style={styles.editSportButton}
-              onPress={() => setStatsSportId(selectedSport.id)}
-            >
-              <View style={styles.editSportButtonContent}>
-                <ActionGlyph type="stats" color={COLORS.text} />
-                <Text style={styles.editSportButtonText}>
-                  {t("menu.stats")}
-                </Text>
-              </View>
-            </Pressable>
+            <View style={styles.detailTopRow}>
+              <Pressable
+                style={styles.editSportButton}
+                onPress={() => setStatsSportId(selectedSport.id)}
+              >
+                <View style={styles.editSportButtonContent}>
+                  <ActionGlyph type="stats" color={COLORS.text} />
+                  <Text style={styles.editSportButtonText}>
+                    {t("menu.stats")}
+                  </Text>
+                </View>
+              </Pressable>
+              {screenTimeFeaturesEnabled ? (
+                <Pressable
+                  style={styles.formulaBadge}
+                  onPress={() => setIsFormulaModalOpen(true)}
+                  accessibilityRole="button"
+                  accessibilityLabel={t("label.formulaTitle")}
+                >
+                  <Text style={styles.formulaBadgeTitle}>
+                    {t("label.formulaBadge")} ›
+                  </Text>
+                  <Text
+                    style={styles.formulaBadgeValue}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.7}
+                  >
+                    {formulaBadgeValue}
+                  </Text>
+                </Pressable>
+              ) : null}
+            </View>
             {isSimpleReps ? (
               <View
                 style={styles.trackingArea}
@@ -13393,24 +13411,6 @@ const getSpeechLocale = () => {
               </View>
             )}
             {renderManualTimeModal()}
-            {screenTimeFeaturesEnabled ? (
-              <View style={styles.formulaBadgeWrap} pointerEvents="box-none">
-                <Pressable
-                  style={styles.formulaBadge}
-                  onPress={() => setIsFormulaModalOpen(true)}
-                  accessibilityRole="button"
-                  accessibilityLabel={t("label.formulaTitle")}
-                >
-                  <View style={styles.formulaBadgeHeader}>
-                    <Text style={styles.formulaBadgeTitle}>
-                      {t("label.formulaBadge")}
-                    </Text>
-                    <Text style={styles.formulaBadgeChevron}>›</Text>
-                  </View>
-                  <Text style={styles.formulaBadgeValue}>{formulaBadgeValue}</Text>
-                </Pressable>
-              </View>
-            ) : null}
             {screenTimeFeaturesEnabled &&
             (screenTimePerRepSeconds != null || screenTimePerMinuteSeconds != null) ? (
               <View style={styles.formulaRateRow}>
@@ -16566,15 +16566,15 @@ const styles = StyleSheet.create({
   },
   trackingArea: {
     flex: 1,
-    marginTop: 12,
-    marginBottom: 16,
+    marginTop: 8,
+    marginBottom: 10,
     borderRadius: 18,
     backgroundColor: COLORS.card,
     borderWidth: 1,
     borderColor: "rgba(148, 163, 184, 0.2)",
     alignItems: "center",
     justifyContent: "center",
-    padding: 24,
+    padding: 14,
   },
   tapTrackingArea: {
     width: "100%",
@@ -16583,9 +16583,9 @@ const styles = StyleSheet.create({
   },
   timeSessionHighlight: {
     width: "100%",
-    marginBottom: 18,
+    marginBottom: 10,
     borderRadius: 18,
-    paddingVertical: 16,
+    paddingVertical: 10,
     paddingHorizontal: 16,
     alignItems: "center",
     borderWidth: 1,
@@ -16628,21 +16628,21 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   weightEntryArea: {
-    marginTop: 12,
-    marginBottom: 16,
+    marginTop: 8,
+    marginBottom: 10,
     borderRadius: 18,
     backgroundColor: COLORS.card,
     borderWidth: 1,
     borderColor: "rgba(148, 163, 184, 0.2)",
-    padding: 18,
+    padding: 14,
     alignItems: "stretch",
   },
   weightTopCounter: {
     alignItems: "center",
-    marginBottom: 14,
+    marginBottom: 8,
   },
   weightTopHelper: {
-    marginTop: 6,
+    marginTop: 2,
   },
   weightFieldsRow: {
     flexDirection: "row",
@@ -16689,7 +16689,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   weightHistoryCard: {
-    marginTop: 16,
+    marginTop: 10,
     padding: 14,
     borderRadius: 14,
     backgroundColor: COLORS.cardAlt,
@@ -16768,16 +16768,17 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   counterValue: {
-    fontSize: 54,
+    fontSize: 44,
     color: COLORS.text,
     fontWeight: "700",
     textAlign: "center",
     letterSpacing: 0.4,
   },
   plusSign: {
-    fontSize: 72,
+    fontSize: 54,
+    lineHeight: 60,
     color: COLORS.accent,
-    marginTop: 12,
+    marginTop: 0,
   },
   helperText: {
     marginTop: 12,
@@ -16843,12 +16844,12 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   manualEntryContainer: {
-    marginTop: 18,
+    marginTop: 10,
     width: "100%",
     alignItems: "stretch",
     backgroundColor: "rgba(15, 23, 42, 0.55)",
     borderRadius: 14,
-    padding: 12,
+    padding: 10,
     borderWidth: 1,
     borderColor: "rgba(148, 163, 184, 0.2)",
   },
@@ -16918,7 +16919,7 @@ const styles = StyleSheet.create({
   },
   timerRow: {
     flexDirection: "row",
-    marginTop: 24,
+    marginTop: 14,
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
@@ -17890,8 +17891,7 @@ const styles = StyleSheet.create({
   },
   editSportButton: {
     alignSelf: "center",
-    marginTop: 8,
-    paddingVertical: 8,
+    paddingVertical: 7,
     paddingHorizontal: 14,
     borderRadius: 999,
     backgroundColor: "rgba(30, 41, 59, 0.85)",
@@ -18661,54 +18661,39 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     marginBottom: 8,
   },
-  formulaBadgeWrap: {
+  detailTopRow: {
+    position: "relative",
     alignItems: "center",
-    marginTop: 16,
-    marginBottom: 12,
+    justifyContent: "center",
+    minHeight: 36,
+    marginTop: 4,
   },
   formulaBadge: {
-    backgroundColor: "rgba(15, 23, 42, 0.9)",
-    borderRadius: 12,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderWidth: 1,
-    borderColor: COLORS.cardAlt,
-    minWidth: 220,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  formulaBadgeHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
+    position: "absolute",
+    right: 0,
+    top: 0,
+    bottom: 0,
+    maxWidth: "30%",
+    justifyContent: "center",
+    alignItems: "flex-end",
   },
   formulaBadgeTitle: {
     color: COLORS.muted,
-    fontSize: 11,
+    fontSize: 9,
     fontWeight: "700",
     textTransform: "uppercase",
-    letterSpacing: 0.6,
-  },
-  formulaBadgeChevron: {
-    color: COLORS.accent,
-    fontSize: 16,
-    fontWeight: "700",
+    letterSpacing: 0.5,
   },
   formulaBadgeValue: {
-    color: COLORS.text,
-    fontSize: 12,
+    color: COLORS.muted,
+    fontSize: 10,
     fontWeight: "600",
-    marginTop: 2,
   },
   formulaRateRow: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "center",
-    marginBottom: 12,
+    marginBottom: 4,
   },
   formulaRateText: {
     color: COLORS.muted,
