@@ -165,7 +165,7 @@ ein Projekt wiederverwenden.
 
 **Aktueller Stand hier:** Es wird aktuell **ein gemeinsames Dienstkonto**
 (`play-console-releases@play-console-access-504713.iam.gserviceaccount.com`) für **beide**
-Apps genutzt (Sport for Screen Time **und** The One - Trinkspielbar), im selben Cloud-Projekt
+Apps genutzt (Sport for Screen Time **und** The One), im selben Cloud-Projekt
 `play-console-access`. Das ist bewusst so gewählt (weniger Verwaltungsaufwand) und für
 Hobby-/Soloprojekte völlig ausreichend. Theoretisch könnte man das jederzeit auftrennen,
 also pro App ein eigenes Dienstkonto (z. B. `sport-for-screen-time-releases`) im selben

@@ -94,7 +94,7 @@ tägliche Nutzung.
 
 **Aktueller Stand:** Es wird ein gemeinsames Dienstkonto
 (`play-console-releases@play-console-access-504713.iam.gserviceaccount.com`) für **beide** Apps
-genutzt (Sport for Screen Time **und** The One - Trinkspielbar), im selben Cloud-Projekt
+genutzt (Sport for Screen Time **und** The One), im selben Cloud-Projekt
 `play-console-access`.
 
 ### Android (Google Play)
