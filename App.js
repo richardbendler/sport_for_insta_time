@@ -13488,7 +13488,16 @@ const getSpeechLocale = () => {
                               <Text style={styles.weightHistorySet}>
                                 {formatWeightValue(entry.weight)}{" "}
                                 {t("label.weightUnit")} × {entry.reps}{" "}
-                                {repsShort}
+                                {repsShort}{" "}
+                              <Text style={styles.weightHistorySetTotal}>
+                                = {formatWeightValue(
+                                  Math.round(
+                                    (Number(entry.weight) || 0) *
+                                      (Number(entry.reps) || 0)
+                                  )
+                                )}{" "}
+                                {t("label.weightUnit")}
+                              </Text>
                               </Text>
                               <ScreenTimeBadge seconds={entry.screenSeconds} />
                             </View>
@@ -16726,6 +16735,11 @@ const styles = StyleSheet.create({
   },
   weightHistoryTime: {
     color: COLORS.muted,
+    fontSize: 12,
+  },
+  weightHistorySetTotal: {
+    color: COLORS.accent,
+    fontWeight: "700",
     fontSize: 12,
   },
   weightHistorySet: {
