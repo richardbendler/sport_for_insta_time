@@ -1,5 +1,6 @@
 ﻿
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   SafeAreaView,
   View,
@@ -3767,6 +3768,7 @@ const pickElbowAngle = (landmarks, side, minConfidence) => {
 
 function AppContent() {
   const { width, height } = useWindowDimensions();
+  const safeAreaInsets = useSafeAreaInsets();
   const { t } = useTranslation();
   const [sports, setSports] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -15712,7 +15714,10 @@ const getSpeechLocale = () => {
           {isAndroid ? (
             <View style={styles.fixedTimers}>
               <Pressable
-                style={styles.dockContent}
+                style={[
+                  styles.dockContent,
+                  { paddingBottom: 12 + (safeAreaInsets.bottom || 0) },
+                ]}
                 ref={tutorialScreenTimeRef}
                 onLayout={(event) => setInfoCardWidth(event.nativeEvent.layout.width)}
                 onPress={() => {
@@ -15949,7 +15954,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 16,
     paddingTop: 68,
-    paddingBottom: 250,
+    paddingBottom: 280,
   },
   sportDetailScrollContent: {
     paddingTop: 6,
@@ -19621,8 +19626,10 @@ class AppErrorBoundary extends React.Component {
 
 export default function App() {
   return (
-    <AppErrorBoundary>
-      <AppContent />
-    </AppErrorBoundary>
+    <SafeAreaProvider>
+      <AppErrorBoundary>
+        <AppContent />
+      </AppErrorBoundary>
+    </SafeAreaProvider>
   );
 }
