@@ -15781,9 +15781,14 @@ const getSpeechLocale = () => {
                         {formatScreenTime(totalRemainingSeconds)}
                       </Text>
                       <Text style={styles.dockStatLabel} numberOfLines={1}>
-                        {t("label.remainingTotal")} · {t("label.carryover")}{" "}
-                        {formatScreenTime(usageState.carryoverSeconds || 0)}
+                        {t("label.remainingTotal")}
                       </Text>
+                      {(usageState.carryoverSeconds || 0) > 0 ? (
+                        <Text style={styles.dockStatSub} numberOfLines={1}>
+                          {t("label.carryover")}:{" "}
+                          {formatScreenTime(usageState.carryoverSeconds)}
+                        </Text>
+                      ) : null}
                     </View>
                   </Pressable>
                 </View>
@@ -18817,6 +18822,10 @@ const styles = StyleSheet.create({
     color: COLORS.muted,
     fontSize: 10,
     fontWeight: "600",
+  },
+  dockStatSub: {
+    color: COLORS.muted,
+    fontSize: 9,
   },
   dockSection: {
     gap: 5,
