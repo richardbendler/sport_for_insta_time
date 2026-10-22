@@ -14422,7 +14422,7 @@ const getSpeechLocale = () => {
               </Pressable>
             </View>
           </View>
-          {isAndroid ? (
+          {isAndroid || iosScreenTimeEnabled ? (
             <>
               <View style={styles.settingsDivider} />
               <Text style={styles.settingsSectionTitle}>{t("label.apps")}</Text>
@@ -14436,25 +14436,29 @@ const getSpeechLocale = () => {
                     {t("label.openApps")}
                   </Text>
                 </Pressable>
-                <View style={styles.settingsSwitchRow}>
-                  <Text style={styles.settingsSwitchLabel}>
-                    {t("label.grayscaleRestrictedApps")}
-                  </Text>
-                  <Switch
-                    value={!!settings.grayscaleRestrictedApps}
-                    onValueChange={toggleGrayscaleRestrictedApps}
-                    trackColor={{
-                      true: "rgba(245, 158, 11, 0.4)",
-                      false: "rgba(148, 163, 184, 0.2)",
-                    }}
-                    thumbColor={
-                      settings.grayscaleRestrictedApps ? COLORS.ember : "#f4f3f4"
-                    }
-                  />
-                </View>
-                <Text style={styles.helperText}>
-                  {t("label.grayscaleRestrictedAppsHint")}
-                </Text>
+                {isAndroid ? (
+                  <>
+                    <View style={styles.settingsSwitchRow}>
+                      <Text style={styles.settingsSwitchLabel}>
+                        {t("label.grayscaleRestrictedApps")}
+                      </Text>
+                      <Switch
+                        value={!!settings.grayscaleRestrictedApps}
+                        onValueChange={toggleGrayscaleRestrictedApps}
+                        trackColor={{
+                          true: "rgba(245, 158, 11, 0.4)",
+                          false: "rgba(148, 163, 184, 0.2)",
+                        }}
+                        thumbColor={
+                          settings.grayscaleRestrictedApps ? COLORS.ember : "#f4f3f4"
+                        }
+                      />
+                    </View>
+                    <Text style={styles.helperText}>
+                      {t("label.grayscaleRestrictedAppsHint")}
+                    </Text>
+                  </>
+                ) : null}
               </View>
             </>
           ) : null}
