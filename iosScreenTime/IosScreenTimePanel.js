@@ -5,6 +5,11 @@ import iosScreenTime, { AppSelectionSheet } from "./index";
 
 const AUTH_APPROVED = 2;
 const AUTH_DENIED = 1;
+// The native picker stores the selection debounced (~0.1 s) after "Done".
+// Unmounting it or reading the selection right away loses that write.
+const PICKER_SAVE_DELAY_MS = 700;
+
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const readStatus = () => ({
   authorization: iosScreenTime.getAuthorizationStatus(),
@@ -50,7 +55,13 @@ const IosScreenTimePanel = ({ t, colors, remainingSeconds, onChanged }) => {
   };
 
   const closePicker = async () => {
+    await wait(PICKER_SAVE_DELAY_MS);
     setPickerVisible(false);
+    await refresh();
+  };
+
+  const handleSelectionChange = async () => {
+    await wait(PICKER_SAVE_DELAY_MS);
     await refresh();
   };
 
@@ -122,6 +133,8 @@ const IosScreenTimePanel = ({ t, colors, remainingSeconds, onChanged }) => {
         <AppSelectionSheet
           style={styles.sheetAnchor}
           familyActivitySelectionId={iosScreenTime.SELECTION_ID}
+          includeEntireCategory
+          onSelectionChange={handleSelectionChange}
           headerText={t("label.iosScreenTimePickerHeader")}
           footerText={t("label.iosScreenTimePickerFooter")}
           onDismissRequest={closePicker}
