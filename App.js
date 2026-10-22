@@ -7117,7 +7117,7 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
   };
 
   const openScreenTimeDetails = () => {
-    if (!isAndroid) {
+    if (!screenTimeFeaturesEnabled) {
       return;
     }
     setIsSettingsOpen(false);
@@ -10924,9 +10924,11 @@ const getSpeechLocale = () => {
   const batteryOptimizationMissing =
     isAndroid && batteryOptimizationIgnored !== true;
   const serviceIssue = isAndroid ? getServiceIssue(serviceHealth) : null;
+  // iOS has no accessibility/usage permissions; its Screen Time setup is
+  // handled by the iOS Screen Time panel.
   const missingPermissions = isAndroid
     ? accessibilityMissing || usageAccessMissing
-    : !(permissionsPrompted && usagePermissionsPrompted && accessibilityDisclosureAccepted);
+    : false;
   const showPermissionPrompt =
     showGettingStartedSection && missingPermissions;
   const completedGettingStarted =
@@ -13807,7 +13809,7 @@ const getSpeechLocale = () => {
     );
   }
 
-  if (isAndroid && isScreenTimeDetailsOpen) {
+  if (screenTimeFeaturesEnabled && isScreenTimeDetailsOpen) {
     const statusLabelMap = {
       full: t("label.remainingStatusFull"),
       partial: t("label.remainingStatusPartial"),
@@ -14065,27 +14067,32 @@ const getSpeechLocale = () => {
               ))
             )}
           </View>
-          <Text style={styles.sectionTitle}>{t("label.usageBreakdown")}</Text>
-          <View style={styles.infoCard}>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>{t("label.used")}</Text>
-              <Text style={styles.detailValue}>
-                {formatScreenTime(rollingUsedSeconds24h)}
-              </Text>
+          {/* iOS does not report per-app usage */}
+          {isAndroid ? (
+            <>
+            <Text style={styles.sectionTitle}>{t("label.usageBreakdown")}</Text>
+            <View style={styles.infoCard}>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>{t("label.used")}</Text>
+                <Text style={styles.detailValue}>
+                  {formatScreenTime(rollingUsedSeconds24h)}
+                </Text>
+              </View>
+              {usageByAppList.length === 0 ? (
+                <Text style={styles.helperText}>{t("label.noUsageData")}</Text>
+              ) : (
+                usageByAppList.map((entry) => (
+                  <View key={entry.key} style={styles.detailListItem}>
+                    <Text style={styles.detailListLabel}>{entry.label}</Text>
+                    <Text style={styles.detailListValue}>
+                      {formatScreenTime(entry.seconds)}
+                    </Text>
+                  </View>
+                ))
+              )}
             </View>
-            {usageByAppList.length === 0 ? (
-              <Text style={styles.helperText}>{t("label.noUsageData")}</Text>
-            ) : (
-              usageByAppList.map((entry) => (
-                <View key={entry.key} style={styles.detailListItem}>
-                  <Text style={styles.detailListLabel}>{entry.label}</Text>
-                  <Text style={styles.detailListValue}>
-                    {formatScreenTime(entry.seconds)}
-                  </Text>
-                </View>
-              ))
-            )}
-          </View>
+            </>
+          ) : null}
         </ScrollView>
       </SafeAreaView>
     );
@@ -15720,7 +15727,7 @@ const getSpeechLocale = () => {
           </Text>
         </Pressable>
     </ScrollView>
-          {isAndroid ? (
+          {screenTimeFeaturesEnabled ? (
             <View style={styles.fixedTimers}>
               <Pressable
                 style={[
