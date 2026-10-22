@@ -130,9 +130,11 @@ class InstaPrefaceActivity : AppCompatActivity() {
   }
 
   private fun formatTime(seconds: Int): String {
-    val minutes = (seconds / 60).toString().padStart(2, '0')
-    val secs = (seconds % 60).toString().padStart(2, '0')
-    return "$minutes:$secs"
+    val safe = seconds.coerceAtLeast(0)
+    val hours = safe / 3600
+    val minutes = ((safe % 3600) / 60).toString().padStart(2, '0')
+    val secs = (safe % 60).toString().padStart(2, '0')
+    return if (hours > 0) "$hours:$minutes:$secs" else "$minutes:$secs"
   }
 
   private fun applyLocaleFromPrefs() {

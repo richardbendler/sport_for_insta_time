@@ -79,9 +79,11 @@ class OverallWidgetProvider : AppWidgetProvider() {
     }
 
     private fun formatDuration(totalSeconds: Int): String {
-      val minutes = (totalSeconds / 60).toString().padStart(2, '0')
-      val seconds = (totalSeconds % 60).toString().padStart(2, '0')
-      return "$minutes:$seconds"
+      val safe = totalSeconds.coerceAtLeast(0)
+      val hours = safe / 3600
+      val minutes = ((safe % 3600) / 60).toString().padStart(2, '0')
+      val seconds = (safe % 60).toString().padStart(2, '0')
+      return if (hours > 0) "$hours:$minutes:$seconds" else "$minutes:$seconds"
     }
 
     private fun getAppLanguage(context: Context): String? {

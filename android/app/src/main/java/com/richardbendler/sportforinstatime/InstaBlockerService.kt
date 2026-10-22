@@ -177,8 +177,12 @@ class InstaBlockerService : AccessibilityService() {
         syncGrayscaleState(false)
         return
       }
+      val leftControlledApp = currentPackage?.let { controlled.contains(it) } == true
       currentPackage = pkg
       lastForegroundWasHome = false
+      if (leftControlledApp) {
+        refreshWidgetsNow()
+      }
       updateCountdownOverlay(0, false)
       updateCountdownNotification(0, false, null)
       syncGrayscaleState(false)
@@ -357,7 +361,11 @@ class InstaBlockerService : AccessibilityService() {
 
   private fun clearForegroundApp(fromHome: Boolean) {
     cancelForegroundClear()
+    val leftPackage = currentPackage
     currentPackage = null
+    if (leftPackage != null && getControlledApps().contains(leftPackage)) {
+      refreshWidgetsNow()
+    }
     if (fromHome) {
       lastForegroundWasHome = true
     }
@@ -493,9 +501,10 @@ class InstaBlockerService : AccessibilityService() {
       view.visibility = View.GONE
       return
     }
-    val minutes = (remainingSeconds / 60).toString().padStart(2, '0')
+    val hours = remainingSeconds / 3600
+    val minutes = ((remainingSeconds % 3600) / 60).toString().padStart(2, '0')
     val seconds = (remainingSeconds % 60).toString().padStart(2, '0')
-    overlayText?.text = "$minutes:$seconds"
+    overlayText?.text = if (hours > 0) "$hours:$minutes:$seconds" else "$minutes:$seconds"
     view.visibility = View.VISIBLE
   }
 
@@ -675,6 +684,16 @@ class InstaBlockerService : AccessibilityService() {
     lastWidgetUpdateAt = now
     SportWidgetProvider.refreshAll(applicationContext)
     OverallWidgetProvider.refreshAll(applicationContext)
+  }
+
+  // Leaving a restricted app shows the home screen right away, so the widget
+  // must show the exact remaining time instead of waiting for the next tick.
+  private fun refreshWidgetsNow() {
+    lastWidgetUpdateAt = System.currentTimeMillis()
+    runSafely("refreshWidgets") {
+      SportWidgetProvider.refreshAll(applicationContext)
+      OverallWidgetProvider.refreshAll(applicationContext)
+    }
   }
 
   private fun scheduleForegroundClear() {
