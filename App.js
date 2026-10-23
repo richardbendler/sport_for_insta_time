@@ -2699,6 +2699,17 @@ const getDayTotalTrend = (groups, index, metricKey) => {
   return current > previous ? "up" : "down";
 };
 
+// Percent change of a day's total against the previous (older) day.
+const getDayTotalChangeLabel = (groups, index, metricKey) => {
+  const current = Number(groups[index]?.[metricKey]) || 0;
+  const previous = Number(groups[index + 1]?.[metricKey]) || 0;
+  if (!groups[index + 1] || previous <= 0) {
+    return "";
+  }
+  const percent = Math.round((current / previous - 1) * 100);
+  return ` (${percent > 0 ? "+" : ""}${percent} %)`;
+};
+
 const sumSportEntryMetric = (sport, entries) => {
   if (!sport || !entries || entries.length === 0) {
     return 0;
@@ -13456,6 +13467,11 @@ const getSpeechLocale = () => {
                       groupIndex,
                       "totalWeight"
                     );
+                    const dayChange = getDayTotalChangeLabel(
+                      recentWeightEntryGroups,
+                      groupIndex,
+                      "totalWeight"
+                    );
                     return (
                     <View key={group.dayKey} style={styles.weightHistoryDayGroup}>
                       <View style={styles.weightHistoryDayHeader}>
@@ -13471,6 +13487,7 @@ const getSpeechLocale = () => {
                         >
                           {t("label.dayTotal")}: {formatWeightValue(Math.round(group.totalWeight))}{" "}
                           {t("label.weightUnit")}
+                          {dayChange}
                         </Text>
                       </View>
                       {group.entries.map((entry, index) => (
@@ -13557,6 +13574,11 @@ const getSpeechLocale = () => {
                       groupIndex,
                       "totalReps"
                     );
+                    const dayChange = getDayTotalChangeLabel(
+                      recentRepsEntryGroups,
+                      groupIndex,
+                      "totalReps"
+                    );
                     return (
                     <View key={group.dayKey} style={styles.weightHistoryDayGroup}>
                       <View style={styles.weightHistoryDayHeader}>
@@ -13571,6 +13593,7 @@ const getSpeechLocale = () => {
                           ]}
                         >
                           {t("label.dayTotal")}: {group.totalReps} {repsShort}
+                          {dayChange}
                         </Text>
                       </View>
                       {group.entries.map((entry, index) => (
@@ -13646,6 +13669,11 @@ const getSpeechLocale = () => {
                       groupIndex,
                       "totalSeconds"
                     );
+                    const dayChange = getDayTotalChangeLabel(
+                      recentTimeEntryGroups,
+                      groupIndex,
+                      "totalSeconds"
+                    );
                     return (
                     <View key={group.dayKey} style={styles.weightHistoryDayGroup}>
                       <View style={styles.weightHistoryDayHeader}>
@@ -13663,6 +13691,7 @@ const getSpeechLocale = () => {
                           {group.totalKm > 0
                             ? ` · ${formatDistanceValue(group.totalKm)} ${t("label.distanceKm")}`
                             : ""}
+                          {dayChange}
                         </Text>
                       </View>
                       {group.entries.map((entry, index) => (
