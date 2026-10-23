@@ -70,6 +70,7 @@ import {
 import { isAndroid, isIos } from "./platform";
 import iosScreenTime from "./iosScreenTime";
 import IosScreenTimePanel from "./iosScreenTime/IosScreenTimePanel";
+import { ensureIosNotificationPermission } from "./iosScreenTime/notifications";
 
 const iosScreenTimeEnabled = isIos && !!iosScreenTime?.isSupported();
 // On iOS the Screen Time controller provides the screen-time part of the
@@ -9409,9 +9410,21 @@ const getSpeechLocale = () => {
     }
   }, []);
 
-  const openIosNotificationSettings = useCallback(() => {
-    openAppSettingsFallback();
+  const openIosNotificationSettings = useCallback(async () => {
+    // iOS only lists apps under notification settings after they asked once.
+    const granted = await ensureIosNotificationPermission();
+    if (!granted) {
+      openAppSettingsFallback();
+    }
   }, [openAppSettingsFallback]);
+
+  useEffect(() => {
+    if (!hasLoaded || !iosScreenTimeEnabled || iosScreenTimeSetupNeeded) {
+      return;
+    }
+    // Screen Time is set up: make sure the extension notifications can show.
+    ensureIosNotificationPermission();
+  }, [hasLoaded, iosScreenTimeSetupNeeded]);
 
   const maybePromptNotifications = async () => {
     if (notificationsPromptedRef.current) {
@@ -10736,15 +10749,19 @@ const getSpeechLocale = () => {
         actionLabelKey: "label.motivationActionCreateCategory",
         action: () => setCategoriesModalOpen(true),
       },
-      {
-        id: "widget",
-        icon: "Widget",
-        titleKey: "label.motivationWidgetTitle",
-        bodyKey: "label.motivationWidgetBody",
-        actionLabelKey: "label.motivationActionWidget",
-        action: () =>
-          requestWidgetPin("overall", t("label.todayScreenTime")),
-      },
+      ...(isAndroid
+        ? [
+          {
+            id: "widget",
+            icon: "Widget",
+            titleKey: "label.motivationWidgetTitle",
+            bodyKey: "label.motivationWidgetBody",
+            actionLabelKey: "label.motivationActionWidget",
+            action: () =>
+              requestWidgetPin("overall", t("label.todayScreenTime")),
+          },
+          ]
+        : []),
       {
         id: "notifications",
         icon: "Notif",
@@ -14494,31 +14511,32 @@ const getSpeechLocale = () => {
               </View>
             </>
           ) : null}
-          <View style={styles.settingsDivider} />
-          <Text style={styles.settingsSectionTitle}>
-            {t("label.widgets")}
-          </Text>
-          <View style={styles.infoCard}>
-            <Text style={styles.helperText}>{t("label.widgetOverall")}</Text>
-            {isIos ? (
-              <Text style={styles.helperText}>{t("label.iosWidgetHint")}</Text>
-            ) : null}
-            <Pressable
-              style={[styles.secondaryButton, styles.widgetButton]}
-              onPress={() =>
-                requestWidgetPin("overall", t("label.todayScreenTime"))
-              }
-            >
-              <View style={styles.widgetButtonContent}>
-                <WidgetGlyph color={COLORS.text} />
-                <Text
-                  style={[styles.secondaryButtonText, styles.widgetButtonText]}
-                >
-                  {t("label.widgetOverall")}
-                </Text>
-              </View>
-            </Pressable>
-          </View>
+          {isAndroid ? (
+            <>
+            <View style={styles.settingsDivider} />
+            <Text style={styles.settingsSectionTitle}>
+              {t("label.widgets")}
+            </Text>
+            <View style={styles.infoCard}>
+              <Text style={styles.helperText}>{t("label.widgetOverall")}</Text>
+              <Pressable
+                style={[styles.secondaryButton, styles.widgetButton]}
+                onPress={() =>
+                  requestWidgetPin("overall", t("label.todayScreenTime"))
+                }
+              >
+                <View style={styles.widgetButtonContent}>
+                  <WidgetGlyph color={COLORS.text} />
+                  <Text
+                    style={[styles.secondaryButtonText, styles.widgetButtonText]}
+                  >
+                    {t("label.widgetOverall")}
+                  </Text>
+                </View>
+              </Pressable>
+            </View>
+            </>
+          ) : null}
           {screenTimeFeaturesEnabled && InstaControl?.setDailyFreeMinutes ? (
             <>
               <View style={styles.settingsDivider} />
@@ -15484,6 +15502,7 @@ const getSpeechLocale = () => {
                     <View style={styles.sportGridContent}>
                       <View style={styles.sportGridRow}>
                         <View style={styles.sportGridColumnLeft}>
+                          {isAndroid ? (
                           <Pressable
                             style={[styles.secondaryButton, styles.widgetButton]}
                             onPress={() => requestWidgetPin(sport.id, sportLabel)}
@@ -15500,6 +15519,7 @@ const getSpeechLocale = () => {
                               </Text>
                             </View>
                           </Pressable>
+                          ) : null}
                         </View>
                         <View style={styles.sportGridColumnCenter}>
                           <View style={styles.sportCounterCenter}>
@@ -15638,6 +15658,7 @@ const getSpeechLocale = () => {
                         <View style={styles.sportGridContent}>
                         <View style={styles.sportGridRow}>
                           <View style={styles.sportGridColumnLeft}>
+                      {isAndroid ? (
                       <Pressable
                         style={[styles.secondaryButton, styles.widgetButton]}
                         onPress={() => requestWidgetPin(sport.id, sportLabel)}
@@ -15654,6 +15675,7 @@ const getSpeechLocale = () => {
                           </Text>
                         </View>
                       </Pressable>
+                      ) : null}
                           </View>
                           <View style={styles.sportGridColumnCenter}>
                             <View style={styles.sportCounterCenter}>

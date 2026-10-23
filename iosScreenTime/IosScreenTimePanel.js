@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, AppState, Linking, Pressable, StyleSheet, Text, View } from "react-native";
 
 import iosScreenTime, { AppSelectionSheet } from "./index";
+import { ensureIosNotificationPermission } from "./notifications";
 
 const AUTH_APPROVED = 2;
 const AUTH_DENIED = 1;
@@ -46,6 +47,7 @@ const IosScreenTimePanel = ({ t, colors, remainingSeconds, onChanged }) => {
     setError(null);
     try {
       await iosScreenTime.requestAuthorization();
+      await ensureIosNotificationPermission();
     } catch (requestError) {
       setError(t("label.iosScreenTimeAuthError"));
     } finally {

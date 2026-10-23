@@ -307,7 +307,7 @@ const es = {
     "label.iosScreenTimeSetupBody": "Permite el acceso a Tiempo de uso y elige las apps que quieres ganarte con deporte.",
     "label.iosScreenTimeSetupButton": "Configurar ahora",
     "label.iosShieldTitle": "Hora de hacer deporte",
-    "label.iosShieldSubtitle": "Se agotó tu tiempo de pantalla. Haz un poco de deporte para ganar más.",
+    "label.iosShieldSubtitle": "Tu tiempo de pantalla se ha agotado. Toca «Empezar deporte»: la notificación te lleva directamente a la app.",
     "label.iosShieldPrimary": "Empezar deporte",
     "label.iosShieldSecondary": "Cerrar",
     "label.iosShieldNotificationTitle": "¡Hora de hacer deporte!",

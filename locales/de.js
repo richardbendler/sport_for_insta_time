@@ -308,7 +308,7 @@ const de = {
     "label.iosScreenTimeSetupBody": "Erlaube den Bildschirmzeit-Zugriff und wähle die Apps aus, die du dir mit Sport verdienen willst.",
     "label.iosScreenTimeSetupButton": "Jetzt einrichten",
     "label.iosShieldTitle": "Zeit für Sport",
-    "label.iosShieldSubtitle": "Deine Bildschirmzeit ist aufgebraucht. Mach eine Runde Sport und verdiene dir neue Zeit.",
+    "label.iosShieldSubtitle": "Deine Bildschirmzeit ist aufgebraucht. Tippe auf „Sport starten“ – die Mitteilung bringt dich direkt in die App.",
     "label.iosShieldPrimary": "Sport starten",
     "label.iosShieldSecondary": "Schließen",
     "label.iosShieldNotificationTitle": "Zeit für Sport!",

@@ -307,7 +307,7 @@ const en = {
     "label.iosScreenTimeSetupBody": "Allow Screen Time access and choose the apps you want to earn with exercise.",
     "label.iosScreenTimeSetupButton": "Set up now",
     "label.iosShieldTitle": "Time to work out",
-    "label.iosShieldSubtitle": "Your screen time is used up. Do a quick workout to earn more.",
+    "label.iosShieldSubtitle": "Your screen time is used up. Tap “Start workout” – the notification takes you straight to the app.",
     "label.iosShieldPrimary": "Start workout",
     "label.iosShieldSecondary": "Close",
     "label.iosShieldNotificationTitle": "Time to work out!",

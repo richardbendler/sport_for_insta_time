@@ -307,7 +307,7 @@ const fr = {
     "label.iosScreenTimeSetupBody": "Autorise l’accès à Temps d’écran et choisis les apps que tu veux gagner grâce au sport.",
     "label.iosScreenTimeSetupButton": "Configurer maintenant",
     "label.iosShieldTitle": "C’est l’heure du sport",
-    "label.iosShieldSubtitle": "Ton temps d’écran est épuisé. Fais un peu de sport pour en gagner davantage.",
+    "label.iosShieldSubtitle": "Ton temps d’écran est épuisé. Appuie sur « Commencer le sport » – la notification t’amène directement dans l’app.",
     "label.iosShieldPrimary": "Commencer le sport",
     "label.iosShieldSecondary": "Fermer",
     "label.iosShieldNotificationTitle": "C’est l’heure du sport !",
