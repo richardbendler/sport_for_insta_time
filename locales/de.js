@@ -315,6 +315,8 @@ const de = {
     "label.iosShieldNotificationBody": "Tippe hier, um ein Workout zu starten und Bildschirmzeit zu verdienen.",
     "label.iosScreenTimeUsedUpTitle": "Bildschirmzeit aufgebraucht",
     "label.iosScreenTimeUsedUpBody": "Deine Apps sind wieder gesperrt. Mach Sport, um neue Zeit zu verdienen.",
+    "label.iosScreenTimeCountingTitle": "Bildschirmzeit läuft",
+    "label.iosScreenTimeCountingBody": "Diese App kostet jetzt deine verdiente Zeit – noch {{minutes}} Min.",
     "label.iosScreenTimeWarningTitle": "Noch 5 Minuten",
     "label.iosScreenTimeWarningBody": "Deine verdiente Bildschirmzeit ist gleich aufgebraucht.",
     "label.iosWidgetHint":

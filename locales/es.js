@@ -314,6 +314,8 @@ const es = {
     "label.iosShieldNotificationBody": "Toca aquí para empezar un entrenamiento y ganar tiempo de pantalla.",
     "label.iosScreenTimeUsedUpTitle": "Tiempo de pantalla agotado",
     "label.iosScreenTimeUsedUpBody": "Tus apps están bloqueadas de nuevo. Haz deporte para ganar más tiempo.",
+    "label.iosScreenTimeCountingTitle": "El tiempo de pantalla corre",
+    "label.iosScreenTimeCountingBody": "Esta app ya consume tu tiempo ganado: quedan {{minutes}} min.",
     "label.iosScreenTimeWarningTitle": "Quedan 5 minutos",
     "label.iosScreenTimeWarningBody": "Tu tiempo de pantalla ganado está a punto de agotarse.",
     "label.iosWidgetHint":

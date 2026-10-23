@@ -285,6 +285,28 @@ const createController = ({ deviceActivity, storage, platformVersion, now = () =
       actions: blockActions,
     });
     const warningMinute = budgetMinutes - plan.WARNING_BEFORE_MINUTES;
+    // iOS reports usage only in whole minutes and allows no overlay, so the
+    // first booked minute tells the user that the time is now counting.
+    if (budgetMinutes > 1 && warningMinute !== 1 && shieldTexts?.countingTitle) {
+      deviceActivity.configureActions({
+        activityName,
+        callbackName: "eventDidReachThreshold",
+        eventName: "1",
+        actions: [
+          {
+            type: "sendNotification",
+            payload: {
+              title: shieldTexts.countingTitle,
+              body: String(shieldTexts.countingBody || "").replace(
+                "{{minutes}}",
+                String(budgetMinutes - 1)
+              ),
+              sound: "default",
+            },
+          },
+        ],
+      });
+    }
     if (warningMinute >= 1 && shieldTexts?.warningTitle) {
       deviceActivity.configureActions({
         activityName,

@@ -314,6 +314,8 @@ const en = {
     "label.iosShieldNotificationBody": "Tap here to start a workout and earn screen time.",
     "label.iosScreenTimeUsedUpTitle": "Screen time used up",
     "label.iosScreenTimeUsedUpBody": "Your apps are blocked again. Work out to earn more time.",
+    "label.iosScreenTimeCountingTitle": "Screen time is running",
+    "label.iosScreenTimeCountingBody": "This app is now using your earned time – {{minutes}} min left.",
     "label.iosScreenTimeWarningTitle": "5 minutes left",
     "label.iosScreenTimeWarningBody": "Your earned screen time is almost used up.",
     "label.iosWidgetHint":

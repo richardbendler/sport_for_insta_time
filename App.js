@@ -6684,6 +6684,9 @@ const canDeleteSport = (sport) => !sport.nonDeletable;
       usedUpBody: t("label.iosScreenTimeUsedUpBody"),
       warningTitle: t("label.iosScreenTimeWarningTitle"),
       warningBody: t("label.iosScreenTimeWarningBody"),
+      countingTitle: t("label.iosScreenTimeCountingTitle"),
+      // filled in per monitor with the remaining minutes
+      countingBody: t("label.iosScreenTimeCountingBody", { minutes: "{{minutes}}" }),
     });
     refreshIosScreenTimeSetup();
   }, [language, t]);

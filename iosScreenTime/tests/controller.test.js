@@ -18,6 +18,8 @@ const TEXTS = {
   usedUpTitle: "Bildschirmzeit aufgebraucht",
   usedUpBody: "Mach Sport",
   warningTitle: "Noch 5 Minuten",
+  countingTitle: "Bildschirmzeit läuft",
+  countingBody: "Noch {{minutes}} Min.",
   warningBody: "Bald gesperrt",
 };
 
@@ -112,6 +114,16 @@ test("usage is booked from thresholds and the monitor keeps running", async () =
   assert.equal(state.usedSeconds, 4 * 60);
   assert.deepEqual([...da.monitors.keys()], [name]);
   assert.equal(da.isBlocked(), false);
+});
+
+test("the first used minute sends a notification with the minutes left", async () => {
+  const { da, controller, now, advance } = setup();
+  await earn(controller, "w1", 10 * 60, now());
+  advance(MIN);
+  da.useApps(1);
+  const notification = da.notifications.at(-1);
+  assert.equal(notification.title, TEXTS.countingTitle);
+  assert.equal(notification.body, "Noch 9 Min.");
 });
 
 test("the extension re-shields when the budget is used up, with a warning first", async () => {
